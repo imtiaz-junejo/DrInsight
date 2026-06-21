@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Doctor Dashboard — MedAuthority</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+:root{
+  --blue:#1a56a0;--blue-dark:#0f3d7a;--blue-light:#e8f0fb;--blue-mid:#4a90d9;
+  --teal:#0891b2;--green:#059669;--red:#dc2626;--amber:#f59e0b;--purple:#7c3aed;
+  --white:#fff;--gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;
+  --gray-400:#94a3b8;--gray-500:#64748b;--gray-600:#475569;--gray-800:#1e293b;--gray-900:#0f172a;
+  --font-display:'Playfair Display',Georgia,serif;
+  --font-body:'DM Sans',system-ui,sans-serif;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.08);--shadow-md:0 4px 16px rgba(0,0,0,.10);
+  --shadow-lg:0 8px 32px rgba(26,86,160,.14);--shadow-xl:0 20px 60px rgba(15,23,42,.18);
+  --radius:12px;--radius-lg:20px;--transition:all .22s cubic-bezier(.4,0,.2,1);
+}
+body{font-family:var(--font-body);color:var(--gray-900);background:var(--gray-50);line-height:1.6;font-size:16px;display:flex;flex-direction:column;min-height:100vh}
+a{color:inherit;text-decoration:none}
+ul{list-style:none}
+.topbar{background:var(--blue-dark);padding:8px 0;font-size:.8rem}
+.topbar-inner{max-width:1240px;margin:auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.topbar-emergency{display:flex;align-items:center;gap:7px;color:#fca5a5;font-weight:600}
+.topbar-emergency svg{width:14px;height:14px;flex-shrink:0}
+.topbar-right a{color:#93c5fd;margin-left:20px;transition:var(--transition)}
+.topbar-right a:hover{color:#fff}
+nav{background:var(--white);border-bottom:1px solid var(--gray-200);position:sticky;top:0;z-index:200;box-shadow:var(--shadow-sm)}
+.nav-inner{max-width:1240px;margin:auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:70px}
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-size:1.5rem;font-weight:700;color:var(--blue-dark)}
+.logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--blue),var(--teal));border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.25rem;flex-shrink:0}
+.nav-links{display:flex;align-items:center;gap:4px}
+.nav-links a{padding:8px 14px;border-radius:8px;font-size:.9rem;font-weight:500;color:var(--gray-600);transition:var(--transition)}
+.nav-links a:hover,.nav-links a.active{background:var(--blue-light);color:var(--blue)}
+.nav-links .btn-book{background:var(--blue);color:#fff!important;padding:8px 20px;border-radius:8px;font-weight:600!important}
+.nav-links .btn-book:hover{background:var(--blue-dark)!important;transform:translateY(-1px)}
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:4px;flex-direction:column;gap:5px}
+.hamburger span{display:block;width:24px;height:2px;background:var(--gray-600);border-radius:2px;transition:var(--transition)}
+.mobile-menu{display:none;flex-direction:column;gap:4px;padding:16px 24px;background:var(--white);border-top:1px solid var(--gray-200)}
+.mobile-menu a{padding:10px 12px;border-radius:8px;font-size:.92rem;font-weight:500;color:var(--gray-600);transition:var(--transition)}
+.mobile-menu a:hover{background:var(--blue-light);color:var(--blue)}
+.mobile-menu.open{display:flex}
+.demo-bar{background:linear-gradient(90deg,#fffbeb,#fff8e1);border-bottom:2px solid #fde68a;padding:10px 24px}
+.demo-bar-inner{max-width:1240px;margin:auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.demo-bar strong{font-weight:700;color:#78350f}
+.demo-switch-btn{padding:5px 16px;border-radius:50px;border:1.5px solid #f59e0b;background:#fff;font-size:.78rem;font-weight:700;cursor:pointer;transition:var(--transition);font-family:var(--font-body);color:#92400e}
+.demo-switch-btn.active,.demo-switch-btn:hover{background:#f59e0b;border-color:#f59e0b;color:#fff}
+.dash-header{background:linear-gradient(135deg,var(--blue-dark) 0%,var(--blue) 55%,var(--teal) 100%);position:relative;overflow:hidden;padding:32px 24px}
+.dash-header::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+.dash-header-inner{max-width:1240px;margin:auto;position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px}
+.dash-welcome{color:#fff}
+.dash-welcome-sub{font-size:.75rem;color:#93c5fd;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.dash-welcome h1{font-family:var(--font-display);font-size:clamp(1.4rem,3vw,1.95rem);font-weight:700;margin-bottom:4px}
+.dash-welcome p{font-size:.86rem;opacity:.78;margin-top:4px}
+.dash-header-right{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.dash-avatar{width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,.18);border:2.5px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:1.35rem;font-weight:700;color:#fff;flex-shrink:0;position:relative}
+.dash-online-dot{position:absolute;bottom:2px;right:2px;width:14px;height:14px;background:var(--green);border-radius:50%;border:2.5px solid var(--white)}
+.dash-role-badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:50px;padding:5px 15px;font-size:.75rem;font-weight:700;color:#fff;backdrop-filter:blur(4px)}
+.dash-btn{background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.3);border-radius:9px;padding:8px 16px;font-size:.82rem;font-weight:600;color:#fff;cursor:pointer;transition:var(--transition);font-family:var(--font-body);display:inline-flex;align-items:center;gap:6px}
+.dash-btn:hover{background:rgba(255,255,255,.26)}
+.dash-btn.solid{background:#fff;color:var(--blue-dark)}
+.dash-btn.solid:hover{background:var(--blue-light)}
+.dash-body{flex:1;max-width:1240px;margin:28px auto;padding:0 24px;width:100%}
+.dash-grid{display:grid;grid-template-columns:282px 1fr;gap:28px;align-items:start}
+.sidebar{background:var(--white);border-radius:var(--radius-lg);border:1.5px solid var(--gray-200);overflow:hidden;position:sticky;top:88px;box-shadow:var(--shadow-sm)}
+.sidebar-profile{background:linear-gradient(160deg,var(--blue-dark) 0%,var(--blue) 60%,var(--teal) 100%);padding:26px 20px 20px;text-align:center;color:#fff;position:relative;overflow:hidden}
+.sidebar-profile::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+.sidebar-avatar-ring{width:82px;height:82px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;border:3px solid rgba(255,255,255,.38);position:relative;z-index:1}
+.sidebar-avatar{width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:1.6rem;font-weight:700;color:#fff}
+.sidebar-online{position:absolute;bottom:4px;right:4px;width:16px;height:16px;background:var(--green);border-radius:50%;border:3px solid var(--white);z-index:2}
+.sidebar-name{font-family:var(--font-display);font-size:1.05rem;font-weight:700;margin-bottom:3px;position:relative;z-index:1}
+.sidebar-role{font-size:.72rem;background:rgba(255,255,255,.18);border-radius:50px;padding:3px 12px;display:inline-block;font-weight:700;margin-bottom:3px;position:relative;z-index:1}
+.sidebar-spec{font-size:.72rem;opacity:.8;position:relative;z-index:1}
+.hs-panel{padding:14px 16px;border-bottom:1px solid var(--gray-200);background:linear-gradient(135deg,#f0fdf4,#f8fafc)}
+.hs-label{font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gray-400);margin-bottom:8px}
+.hs-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.hs-circle{width:52px;height:52px;border-radius:50%;background:conic-gradient(var(--green) 0% 78%,var(--gray-200) 78%);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hs-inner{width:40px;height:40px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.hs-num{font-family:var(--font-display);font-size:.98rem;font-weight:700;color:var(--gray-900);line-height:1}
+.hs-sub{font-size:.5rem;color:var(--gray-400)}
+.hs-status{font-size:.82rem;font-weight:700;color:var(--green)}
+.hs-desc{font-size:.72rem;color:var(--gray-500)}
+.mb-rows{display:flex;flex-direction:column;gap:5px;margin-top:8px}
+.mb-row{display:flex;align-items:center;gap:7px;font-size:.7rem}
+.mb-lbl{width:70px;color:var(--gray-600);flex-shrink:0}
+.mb-bar{flex:1;height:4px;background:var(--gray-200);border-radius:2px;overflow:hidden}
+.mb-fill{height:100%;border-radius:2px}
+.mb-v{width:22px;text-align:right;font-size:.68rem;color:var(--gray-400)}
+.dr-stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--gray-200)}
+.dstat{background:var(--white);padding:12px 8px;text-align:center}
+.dstat-n{font-family:var(--font-display);font-size:1.3rem;font-weight:700;color:var(--blue);line-height:1}
+.dstat-l{font-size:.64rem;color:var(--gray-600);margin-top:3px}
+.snav{padding:10px}
+.snav-label{font-size:.63rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gray-400);padding:0 10px;margin:14px 0 5px}
+.snav-label:first-child{margin-top:5px}
+.snav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:.85rem;font-weight:500;color:var(--gray-600);cursor:pointer;transition:var(--transition);margin-bottom:1px}
+.snav-item:hover{background:var(--gray-100);color:var(--gray-900)}
+.snav-item.active{background:var(--blue-light);color:var(--blue);font-weight:600}
+.snav-ico{font-size:.93rem;width:20px;text-align:center;flex-shrink:0}
+.snav-badge{margin-left:auto;font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:50px;min-width:20px;text-align:center}
+.sb-r{background:var(--red);color:#fff}.sb-g{background:var(--green);color:#fff}.sb-a{background:var(--amber);color:#fff}
+.avail-row{padding:12px 14px;border-top:1px solid var(--gray-200)}
+.avail-btns{display:flex;gap:5px;margin-top:7px}
+.avail-btn{flex:1;padding:5px 0;border-radius:50px;border:1.5px solid var(--gray-200);font-size:.68rem;font-weight:600;cursor:pointer;background:var(--white);color:var(--gray-500);transition:var(--transition);text-align:center;font-family:var(--font-body)}
+.avail-btn.ag{background:#f0fdf4;border-color:#86efac;color:var(--green)}
+.avail-btn.aa{background:#fffbeb;border-color:#fde68a;color:#d97706}
+.avail-btn.ao{background:var(--gray-100);border-color:var(--gray-300);color:var(--gray-500)}
+.sidebar-footer{padding:12px 14px;border-top:1px solid var(--gray-200)}
+.sidebar-footer a{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:10px;font-size:.84rem;color:var(--gray-600);transition:var(--transition)}
+.sidebar-footer a:hover{background:#fef2f2;color:var(--red)}
+.dash-main{display:flex;flex-direction:column;gap:20px}
+.dash-hd{background:linear-gradient(135deg,var(--blue-dark) 0%,var(--blue) 55%,var(--teal) 100%);border-radius:var(--radius-lg);padding:28px 30px;color:#fff;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;position:relative;overflow:hidden}
+.dash-hd::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+.dash-hd-l{position:relative;z-index:1}
+.dash-hd-l p{font-size:.8rem;opacity:.85;margin-bottom:5px;color:#93c5fd;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.dash-hd-l h1{font-family:var(--font-display);font-size:clamp(1.35rem,2.5vw,1.85rem);font-weight:700;margin-bottom:4px}
+.dash-hd-l span{font-size:.8rem;opacity:.72}
+.dash-hd-r{display:flex;gap:10px;flex-wrap:wrap;position:relative;z-index:1}
+.btn-w{background:#fff;color:var(--blue-dark);border:none;padding:10px 20px;border-radius:10px;font-family:var(--font-body);font-size:.84rem;font-weight:700;cursor:pointer;transition:var(--transition);display:inline-flex;align-items:center;gap:7px}
+.btn-w:hover{background:var(--blue-light);transform:translateY(-1px)}
+.btn-wo{background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.45);padding:10px 20px;border-radius:10px;font-family:var(--font-body);font-size:.84rem;font-weight:600;cursor:pointer;transition:var(--transition);display:inline-flex;align-items:center;gap:7px;backdrop-filter:blur(4px)}
+.btn-wo:hover{background:rgba(255,255,255,.26)}
+.alert-banner{background:linear-gradient(135deg,#eff6ff,#f0f7ff);border:1.5px solid #bfdbfe;border-radius:var(--radius-lg);padding:14px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.ab-ico{font-size:1.5rem;flex-shrink:0}
+.ab-text strong{display:block;font-size:.88rem;font-weight:700;color:var(--blue-dark);margin-bottom:2px}
+.ab-text span{font-size:.78rem;color:var(--gray-600)}
+.ab-btn{margin-left:auto;padding:8px 16px;background:var(--blue);color:#fff;border:none;border-radius:9px;font-size:.78rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:var(--transition);font-family:var(--font-body)}
+.ab-btn:hover{background:var(--blue-dark)}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.stat-c{background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:20px;position:relative;overflow:hidden;transition:var(--transition)}
+.stat-c:hover{border-color:var(--blue-mid);box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.stat-ic{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:12px}
+.ic1{background:var(--blue-light)}.ic2{background:#f0fdf4}.ic3{background:#fffbeb}.ic4{background:#f0fdff}.ic5{background:#f5f3ff}
+.stat-c strong{display:block;font-family:var(--font-display);font-size:1.9rem;font-weight:700;color:var(--gray-900);line-height:1;margin-bottom:3px}
+.stat-c>span{font-size:.76rem;color:var(--gray-600)}
+.stat-tag{position:absolute;top:14px;right:14px;font-size:.68rem;font-weight:700;padding:3px 8px;border-radius:50px}
+.tt-b{background:var(--blue-light);color:var(--blue)}.tt-g{background:#f0fdf4;color:var(--green)}.tt-a{background:#fffbeb;color:#d97706}.tt-r{background:#fef2f2;color:var(--red)}.tt-t{background:#f0fdff;color:var(--teal)}
+.stat-bg{position:absolute;bottom:-10px;right:-10px;font-size:3.5rem;opacity:.05}
+.card{background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);overflow:hidden;transition:var(--transition)}
+.card-hd{padding:16px 22px;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.card-hd h3{font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--gray-900)}
+.card-hd a,.card-action{font-size:.78rem;color:var(--blue);font-weight:600;cursor:pointer;transition:var(--transition);padding:4px 10px;border:1.5px solid var(--blue-light);border-radius:7px}
+.card-hd a:hover,.card-action:hover{background:var(--blue-light)}
+.card-bd{padding:20px 22px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}
+.g21{display:grid;grid-template-columns:1fr 340px;gap:20px}
+.g21-dr{display:grid;grid-template-columns:1fr 360px;gap:20px}
+.g13{display:grid;grid-template-columns:1.8fr 1fr;gap:20px}
+.cons-list{display:flex;flex-direction:column;gap:14px}
+.cons-card{border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:16px;transition:var(--transition)}
+.cons-card:hover{box-shadow:var(--shadow-md)}
+.cons-card.upcoming{border-left:4px solid var(--blue)}
+.cons-card.completed{border-left:4px solid var(--green)}
+.cons-card.cancelled{border-left:4px solid var(--gray-400)}
+.cons-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.dr-av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.9rem;font-weight:700;flex-shrink:0}
+.cons-dr-name{font-size:.9rem;font-weight:700;color:var(--gray-900)}
+.cons-dr-spec{font-size:.74rem;color:var(--blue);font-weight:600}
+.cons-chip{font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:50px}
+.cc-up{background:var(--blue-light);color:var(--blue)}.cc-live{background:#fef2f2;color:var(--red);animation:blink 2s infinite}.cc-done{background:#f0fdf4;color:var(--green)}.cc-cancel{background:var(--gray-100);color:var(--gray-600)}
+.cons-details{display:flex;gap:14px;flex-wrap:wrap;font-size:.75rem;color:var(--gray-600);padding:9px 12px;background:var(--gray-50);border-radius:9px;margin-bottom:10px}
+.cons-note{font-size:.79rem;color:var(--gray-700);line-height:1.6;padding:10px 13px;background:var(--blue-light);border-radius:9px;border-left:3px solid var(--blue);margin-bottom:10px}
+.cons-note.green{background:#f0fdf4;border-left-color:var(--green)}
+.cons-actions{display:flex;gap:7px;flex-wrap:wrap}
+.ca-btn{padding:7px 13px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:.74rem;font-weight:600;cursor:pointer;background:var(--white);color:var(--gray-600);transition:var(--transition);font-family:var(--font-body)}
+.ca-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.ca-btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.ca-btn.primary:hover{background:var(--blue-dark)}
+.ca-btn.danger{background:#fef2f2;color:var(--red);border-color:#fecaca}
+.vitals-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.vital{background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:13px;text-align:center;transition:var(--transition)}
+.vital:hover{border-color:var(--blue-mid);background:var(--blue-light)}
+.v-val{font-family:var(--font-display);font-size:1.15rem;font-weight:700;color:var(--gray-900)}
+.v-unit{font-size:.62rem;color:var(--gray-400);margin:2px 0}
+.v-label{font-size:.72rem;color:var(--gray-600)}
+.v-badge{font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:50px;margin-top:5px;display:inline-block}
+.vb-n{background:#f0fdf4;color:var(--green)}.vb-h{background:#fef2f2;color:var(--red)}.vb-l{background:#fffbeb;color:#d97706}
+.med-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--gray-100)}
+.med-item:last-child{border-bottom:none}
+.med-ic{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.med-info{flex:1}
+.med-n{font-size:.86rem;font-weight:700;color:var(--gray-900)}
+.med-d{font-size:.74rem;color:var(--gray-600);margin-top:1px}
+.med-next{font-size:.7rem;font-weight:600;margin-top:2px}
+.ms-active{font-size:.68rem;font-weight:700;padding:3px 8px;border-radius:50px;background:#f0fdf4;color:var(--green)}
+.ms-refill{font-size:.68rem;font-weight:700;padding:3px 8px;border-radius:50px;background:#fffbeb;color:#d97706}
+.tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.tool-card{background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:var(--transition)}
+.tool-card:hover{border-color:var(--blue);background:var(--blue-light)}
+.tc-ico{font-size:1.2rem;flex-shrink:0}
+.tc-text strong{display:block;font-size:.78rem;font-weight:700;color:var(--gray-800)}
+.tc-text span{font-size:.68rem;color:var(--gray-400)}
+.reply-item{padding:14px 0;border-bottom:1px solid var(--gray-100)}
+.reply-item:last-child{border-bottom:none;padding-bottom:0}
+.reply-meta{display:flex;align-items:center;gap:9px;margin-bottom:8px}
+.reply-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.6rem;font-weight:700;flex-shrink:0}
+.reply-name{font-size:.82rem;font-weight:700;color:var(--gray-900);flex:1}
+.reply-time{font-size:.7rem;color:var(--gray-400)}
+.reply-q{font-size:.8rem;color:var(--gray-600);margin-bottom:6px;font-style:italic}
+.reply-a{font-size:.8rem;color:var(--gray-700);line-height:1.6;padding:10px 13px;background:var(--blue-light);border-radius:9px;border-left:3px solid var(--blue)}
+.art-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--gray-100)}
+.art-item:last-child{border-bottom:none;padding-bottom:0}
+.art-thumb{width:48px;height:48px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+.art-info{flex:1;min-width:0}
+.art-cat{font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--blue);margin-bottom:3px}
+.art-title{font-size:.84rem;font-weight:600;color:var(--gray-900);line-height:1.35;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.art-meta{font-size:.72rem;color:var(--gray-400)}
+.art-bar{height:3px;background:var(--gray-200);border-radius:2px;margin-top:6px;overflow:hidden}
+.art-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--teal));border-radius:2px}
+.art-status{font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:50px;white-space:nowrap;flex-shrink:0;align-self:flex-start}
+.as-live{background:#f0fdf4;color:var(--green)}.as-draft{background:#fffbeb;color:#d97706}.as-review{background:var(--blue-light);color:var(--blue)}
+.act-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--gray-100)}
+.act-item:last-child{border-bottom:none}
+.act-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.82rem;flex-shrink:0}
+.ad-b{background:var(--blue-light)}.ad-g{background:#f0fdf4}.ad-a{background:#fffbeb}.ad-r{background:#fef2f2}
+.act-text p{font-size:.82rem;color:var(--gray-700);line-height:1.5;margin-bottom:2px}
+.act-text span{font-size:.7rem;color:var(--gray-400)}
+.sch-item{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--gray-100)}
+.sch-item:last-child{border-bottom:none;padding-bottom:0}
+.sch-time{width:55px;text-align:center;background:var(--blue-light);color:var(--blue);border-radius:8px;padding:5px 0;font-size:.74rem;font-weight:700;flex-shrink:0}
+.sch-av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.78rem;font-weight:700;flex-shrink:0}
+.sch-info{flex:1;min-width:0}
+.sch-name{font-size:.86rem;font-weight:700;color:var(--gray-900)}
+.sch-sub{font-size:.72rem;color:var(--gray-600);margin-top:1px}
+.sch-chip{font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:50px;white-space:nowrap;flex-shrink:0}
+.sc-live{background:#fef2f2;color:var(--red);animation:blink 2s infinite}.sc-up{background:var(--blue-light);color:var(--blue)}.sc-done{background:#f0fdf4;color:var(--green)}.sc-pend{background:#fffbeb;color:#d97706}
+.sch-btn{padding:5px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:.72rem;font-weight:600;cursor:pointer;background:var(--white);color:var(--gray-600);transition:var(--transition);flex-shrink:0;font-family:var(--font-body)}
+.sch-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.sch-btn.go{background:var(--green);color:#fff;border-color:var(--green)}
+.search-bar{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.search-ico-w{position:relative;flex:1;min-width:180px}
+.search-ico-w::before{content:'🔍';position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:.8rem;pointer-events:none}
+.search-inp{width:100%;padding:9px 14px 9px 36px;border:1.5px solid var(--gray-200);border-radius:10px;font-family:var(--font-body);font-size:.85rem;color:var(--gray-800);outline:none;transition:var(--transition);background:var(--white)}
+.search-inp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,160,.08)}
+.flt-pills{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.flt{padding:6px 14px;border-radius:50px;border:1.5px solid var(--gray-200);font-size:.74rem;font-weight:600;cursor:pointer;background:var(--white);color:var(--gray-600);transition:var(--transition)}
+.flt.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.flt:hover:not(.on){border-color:var(--blue-mid);color:var(--blue)}
+.pt-table{width:100%;border-collapse:collapse}
+.pt-table th{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray-400);padding:10px 14px;text-align:left;background:var(--gray-50);border-bottom:1px solid var(--gray-200)}
+.pt-table td{padding:13px 14px;border-bottom:1px solid var(--gray-100);font-size:.84rem;vertical-align:middle}
+.pt-table tr:last-child td{border-bottom:none}
+.pt-table tr:hover td{background:#fafbff}
+.pt-name-cell{display:flex;align-items:center;gap:10px}
+.pt-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.74rem;font-weight:700;flex-shrink:0}
+.pt-n{font-weight:700;color:var(--gray-900);font-size:.85rem}
+.pt-id{font-size:.68rem;color:var(--gray-400)}
+.st-chip{font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:50px}
+.st-active{background:#f0fdf4;color:var(--green)}.st-critical{background:#fef2f2;color:var(--red)}.st-followup{background:#fffbeb;color:#d97706}.st-new{background:var(--blue-light);color:var(--blue)}
+.tbl-btn{padding:4px 10px;border:1.5px solid var(--gray-200);border-radius:7px;font-size:.7rem;font-weight:600;cursor:pointer;background:var(--white);color:var(--gray-600);transition:var(--transition);margin-right:4px;font-family:var(--font-body)}
+.tbl-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.tbl-btn.view{background:var(--blue);color:#fff;border-color:var(--blue)}
+.tbl-btn.view:hover{background:var(--blue-dark)}
+.table-pager{display:flex;align-items:center;justify-content:space-between;margin-top:14px;flex-wrap:wrap;gap:10px}
+.table-pager span{font-size:.78rem;color:var(--gray-400)}
+.qa-item{padding:14px 0;border-bottom:1px solid var(--gray-100)}
+.qa-item:last-child{border-bottom:none;padding-bottom:0}
+.qa-top{display:flex;align-items:flex-start;gap:11px;margin-bottom:10px}
+.qa-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.66rem;font-weight:700;flex-shrink:0}
+.qa-meta{flex:1}
+.qa-pname{font-size:.84rem;font-weight:700;color:var(--gray-900)}
+.qa-spec{font-size:.72rem;color:var(--blue);font-weight:600}
+.qa-urgent{font-size:.64rem;font-weight:700;padding:2px 7px;border-radius:50px;background:#fef2f2;color:var(--red);border:1px solid #fecaca;margin-left:6px}
+.qa-q{font-size:.83rem;color:var(--gray-700);line-height:1.6;padding:10px 13px;background:var(--gray-50);border-radius:10px;border-left:3px solid var(--blue-mid);margin-bottom:10px}
+.qa-actions{display:flex;gap:8px;flex-wrap:wrap}
+.qa-btn{padding:7px 13px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:.74rem;font-weight:600;cursor:pointer;background:var(--white);color:var(--gray-600);transition:var(--transition);font-family:var(--font-body)}
+.qa-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.qa-btn.reply{background:var(--blue);color:#fff;border-color:var(--blue)}
+.qa-btn.reply:hover{background:var(--blue-dark)}
+.earn-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.earn-box{background:var(--gray-50);border-radius:var(--radius);padding:14px;text-align:center;border:1px solid var(--gray-200)}
+.earn-n{font-family:var(--font-display);font-size:1.3rem;font-weight:700;color:var(--gray-900)}
+.earn-l{font-size:.7rem;color:var(--gray-600);margin-top:2px}
+.earn-s{font-size:.68rem;font-weight:600;margin-top:3px}
+.chart-bars{display:flex;align-items:flex-end;gap:5px;height:52px;margin-top:10px}
+.cb-wrap{display:flex;flex-direction:column;align-items:center;flex:1}
+.cb-bar{width:100%;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--blue-mid),var(--blue));transition:var(--transition)}
+.cb-bar:hover{opacity:.75}
+.cb-label{font-size:.62rem;color:var(--gray-400);margin-top:4px}
+.rev-summary{display:flex;align-items:center;gap:16px;padding:12px 0 16px;border-bottom:1px solid var(--gray-100);margin-bottom:12px}
+.rev-big{font-family:var(--font-display);font-size:2.4rem;font-weight:700;color:var(--gray-900)}
+.stars-row{color:var(--amber);font-size:.95rem;margin-bottom:3px}
+.rev-item{padding:11px 0;border-bottom:1px solid var(--gray-100)}
+.rev-item:last-child{border-bottom:none}
+.rev-hd{display:flex;align-items:center;gap:9px;margin-bottom:5px}
+.rev-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.6rem;font-weight:700}
+.rev-name{font-size:.82rem;font-weight:700;flex:1}
+.rev-stars{color:var(--amber);font-size:.76rem}
+.rev-text{font-size:.79rem;color:var(--gray-600);line-height:1.6;font-style:italic}
+.rev-date{font-size:.68rem;color:var(--gray-400);margin-top:3px}
+.art-form{display:flex;flex-direction:column;gap:14px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group label{font-size:.8rem;font-weight:600;color:var(--gray-700)}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 14px;border:1.5px solid var(--gray-200);border-radius:10px;font-family:var(--font-body);font-size:.86rem;color:var(--gray-800);outline:none;transition:var(--transition);background:var(--white)}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,160,.08)}
+.form-group textarea{resize:vertical;min-height:110px;line-height:1.6}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.art-submit-btn{background:var(--blue);color:#fff;border:none;padding:12px 20px;border-radius:10px;font-family:var(--font-body);font-size:.9rem;font-weight:700;cursor:pointer;transition:var(--transition);display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
+.art-submit-btn:hover{background:var(--blue-dark);transform:translateY(-1px)}
+.art-submit-btn.draft{background:var(--white);color:var(--blue);border:1.5px solid var(--blue)}
+.art-submit-btn.draft:hover{background:var(--blue-light)}
+.art-btn-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.submit-success{display:none;text-align:center;padding:24px 0}
+.submit-success.show{display:block}
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+.modal-ov.show{display:flex}
+.modal{background:var(--white);border-radius:var(--radius-lg);width:90%;max-width:700px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(15,23,42,.18)}
+.modal-hd{padding:24px 28px 18px;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#f0f7ff,#fff)}
+.modal-av{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.3rem;font-weight:700;flex-shrink:0}
+.m-av{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.1rem;font-weight:700;flex-shrink:0}
+.modal-close{margin-left:auto;width:34px;height:34px;border-radius:50%;border:1.5px solid var(--gray-200);background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:var(--transition);font-family:var(--font-body)}
+.modal-close:hover{background:var(--gray-100)}
+.modal-bd{padding:24px 28px}
+.msec{margin-bottom:22px}
+.msec h4{font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-400);margin-bottom:13px;padding-bottom:8px;border-bottom:1px solid var(--gray-100)}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ii label{font-size:.72rem;font-weight:600;color:var(--gray-600);display:block;margin-bottom:2px}
+.ii span{font-size:.85rem;color:var(--gray-900);font-weight:500}
+.vitals-grid-m{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.vital-box{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:13px;text-align:center}
+.med-list{display:flex;flex-direction:column;gap:7px}
+.med-row{display:flex;align-items:center;justify-content:space-between;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:10px;padding:10px 13px}
+.hist-list{display:flex;flex-direction:column;gap:0}
+.hist-item{display:flex;gap:13px;padding-bottom:14px;position:relative}
+.hist-item:not(:last-child)::after{content:'';position:absolute;left:14px;top:30px;width:2px;height:calc(100% - 14px);background:var(--gray-200)}
+.hist-dot{width:28px;height:28px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:.72rem;flex-shrink:0;z-index:1}
+.hist-t{font-size:.84rem;font-weight:700;color:var(--gray-900);margin-bottom:2px}
+.hist-s{font-size:.74rem;color:var(--gray-500)}
+.modal-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.btn-blue-m{background:var(--blue);color:#fff;border:none;padding:11px 18px;border-radius:10px;font-family:var(--font-body);font-size:.85rem;font-weight:700;cursor:pointer;flex:1;transition:var(--transition)}
+.btn-blue-m:hover{background:var(--blue-dark)}
+.btn-out-m{background:var(--white);color:var(--blue);border:1.5px solid var(--blue);padding:11px 18px;border-radius:10px;font-family:var(--font-body);font-size:.85rem;font-weight:600;cursor:pointer;flex:1;transition:var(--transition)}
+.btn-out-m:hover{background:var(--blue-light)}
+.btn-bm{background:var(--blue);color:#fff;border:none;padding:11px 18px;border-radius:10px;font-family:var(--font-body);font-size:.85rem;font-weight:700;cursor:pointer;transition:var(--transition)}
+.btn-bm:hover{background:var(--blue-dark)}
+.btn-om{background:var(--white);color:var(--blue);border:1.5px solid var(--blue);padding:11px 18px;border-radius:10px;font-family:var(--font-body);font-size:.85rem;font-weight:600;cursor:pointer;transition:var(--transition)}
+.btn-om:hover{background:var(--blue-light)}
+.tl-list{display:flex;flex-direction:column;gap:0}
+.tl-item{display:flex;gap:13px;padding-bottom:14px;position:relative}
+.tl-item:not(:last-child)::after{content:'';position:absolute;left:14px;top:28px;width:2px;height:calc(100% - 10px);background:var(--gray-200)}
+.tl-dot{width:28px;height:28px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:.72rem;flex-shrink:0;z-index:1}
+.tl-t{font-size:.84rem;font-weight:700;color:var(--gray-900);margin-bottom:2px}
+.tl-s{font-size:.74rem;color:var(--gray-500)}
+.tl-note{font-size:.76rem;color:var(--gray-600);margin-top:4px;padding:6px 10px;background:var(--gray-50);border-radius:7px;border-left:2px solid var(--blue-mid)}
+.star-row{display:flex;gap:8px;margin-bottom:10px}
+.star-row span{font-size:2rem;color:var(--gray-200);cursor:pointer;transition:var(--transition)}
+.star-row span.on{color:var(--amber)}
+.review-ta{width:100%;padding:10px 14px;border:1.5px solid var(--gray-200);border-radius:10px;font-family:var(--font-body);font-size:.86rem;resize:vertical;min-height:90px;outline:none;transition:var(--transition)}
+.review-ta:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,160,.08)}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--gray-900);color:#fff;padding:13px 22px;border-radius:12px;font-size:.85rem;font-weight:500;z-index:999;opacity:0;transform:translateY(10px);transition:all .3s ease;pointer-events:none;max-width:320px}
+.toast.show{opacity:1;transform:translateY(0)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
+footer{background:var(--gray-900);color:#94a3b8;font-size:.85rem;margin-top:auto}
+.footer-main{max-width:1240px;margin:auto;padding:64px 24px 0}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1.5fr 1.5fr;gap:48px;padding-bottom:48px}
+.footer-brand p{line-height:1.7;margin-bottom:18px;font-size:.84rem}
+.footer-badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.footer-badge{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:5px 12px;font-size:.75rem;color:#93c5fd}
+.footer-social{display:flex;gap:10px;flex-wrap:wrap}
+.social-btn{width:36px;height:36px;background:#1e293b;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#94a3b8;transition:var(--transition);font-size:.9rem}
+.social-btn:hover{background:var(--blue);color:#fff}
+.footer-col h4{color:#fff;font-size:.9rem;font-weight:700;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid #1e293b}
+.footer-col ul li{margin-bottom:8px}
+.footer-col ul li a{color:#94a3b8;transition:var(--transition);font-size:.83rem}
+.footer-col ul li a:hover{color:#93c5fd}
+.footer-contact-item{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;font-size:.82rem}
+.footer-contact-item svg{width:16px;height:16px;color:var(--blue-mid);flex-shrink:0;margin-top:2px}
+.footer-subscribe input{width:100%;padding:10px 14px;background:#1e293b;border:1px solid #334155;border-radius:8px;color:#fff;font-family:var(--font-body);font-size:.85rem;margin-bottom:10px;outline:none}
+.footer-subscribe input::placeholder{color:#64748b}
+.footer-subscribe button{width:100%;background:var(--blue);color:#fff;border:none;padding:10px;border-radius:8px;font-family:var(--font-body);font-weight:600;cursor:pointer;transition:var(--transition)}
+.footer-subscribe button:hover{background:var(--blue-mid)}
+.footer-bottom{border-top:1px solid #1e293b;max-width:1240px;margin:0 auto;padding:22px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.footer-bottom p{font-size:.78rem}
+.footer-bottom-links{display:flex;gap:16px;flex-wrap:wrap}
+.footer-bottom-links a{font-size:.78rem;color:#64748b;transition:var(--transition)}
+.footer-bottom-links a:hover{color:#93c5fd}
+@media(max-width:1060px){.dash-grid{grid-template-columns:1fr}.sidebar{position:static}.stats-row{grid-template-columns:repeat(2,1fr)}.footer-grid{grid-template-columns:1fr 1fr;gap:32px}}
+@media(max-width:900px){.g21,.g21-dr,.g13,.g2{grid-template-columns:1fr}}
+@media(max-width:640px){.nav-links{display:none}.hamburger{display:flex}.mobile-menu.open{display:flex}.stats-row{grid-template-columns:1fr 1fr}.footer-grid{grid-template-columns:1fr}.footer-bottom{flex-direction:column;align-items:flex-start}.form-row{grid-template-columns:1fr}.dash-body{padding:0 16px;margin:20px auto}.topbar-inner{flex-direction:column;align-items:flex-start}.g3{grid-template-columns:1fr}}
+/* Rich Text Editor */
+.rte-wrap{border:1.5px solid var(--gray-200);border-radius:var(--radius);overflow:hidden;transition:var(--transition)}
+.rte-wrap:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,160,.08)}
+.rte-toolbar{display:flex;flex-wrap:wrap;gap:3px;padding:8px 10px;background:var(--gray-50);border-bottom:1px solid var(--gray-200)}
+.rte-tb-group{display:flex;align-items:center;gap:2px;padding-right:8px;border-right:1px solid var(--gray-200);margin-right:3px}
+.rte-tb-group:last-child{border-right:none;padding-right:0;margin-right:0}
+.rte-btn{background:var(--white);border:1.5px solid var(--gray-200);border-radius:6px;padding:4px 9px;font-size:.74rem;font-family:var(--font-body);cursor:pointer;color:var(--gray-700);transition:var(--transition);white-space:nowrap;line-height:1.4}
+.rte-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.rte-select{padding:4px 8px;border:1.5px solid var(--gray-200);border-radius:6px;font-size:.74rem;font-family:var(--font-body);color:var(--gray-700);background:var(--white);cursor:pointer;outline:none}
+.rte-color{width:28px;height:28px;padding:2px;border:1.5px solid var(--gray-200);border-radius:6px;cursor:pointer;background:var(--white)}
+.rte-wordcount-wrap{margin-left:auto;border-right:none}
+.rte-wc-label{font-size:.74rem;color:var(--gray-500);white-space:nowrap}
+.rte-editor{min-height:320px;padding:18px 20px;font-family:var(--font-body);font-size:.88rem;color:var(--gray-800);line-height:1.75;outline:none;background:var(--white)}
+.rte-editor:empty::before{content:attr(placeholder);color:var(--gray-400);pointer-events:none}
+.rte-editor h2{font-family:var(--font-display);font-size:1.2rem;font-weight:700;color:var(--gray-900);margin:18px 0 8px;border-bottom:2px solid var(--blue-light);padding-bottom:5px}
+.rte-editor h3{font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--gray-800);margin:14px 0 6px}
+.rte-editor h4{font-size:.9rem;font-weight:700;color:var(--gray-700);margin:12px 0 4px}
+.rte-editor p{margin-bottom:10px}
+.rte-editor ul,.rte-editor ol{padding-left:22px;margin-bottom:10px}
+.rte-editor li{margin-bottom:4px}
+.rte-editor blockquote{border-left:3px solid var(--blue);padding:10px 16px;background:var(--blue-light);border-radius:0 8px 8px 0;margin:12px 0;font-style:italic;color:var(--gray-700)}
+.rte-editor table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.82rem}
+.rte-editor th{background:var(--blue-light);color:var(--blue-dark);font-weight:700;padding:8px 12px;border:1px solid var(--gray-200);text-align:left}
+.rte-editor td{padding:8px 12px;border:1px solid var(--gray-200)}
+.rte-editor a{color:var(--blue);text-decoration:underline}
+.rte-editor hr{border:none;border-top:2px solid var(--gray-200);margin:16px 0}
+.rte-footer{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:var(--gray-50);border-top:1px solid var(--gray-200)}
+/* Featured Image Upload */
+.feat-img-box{border:2px dashed var(--gray-200);border-radius:var(--radius);padding:28px 20px;text-align:center;cursor:pointer;transition:var(--transition);background:var(--gray-50)}
+.feat-img-box:hover,.feat-img-box.drag-over{border-color:var(--blue);background:var(--blue-light)}
+</style>
+</head>
+<body>
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-emergency">
+      <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+      Emergency: <strong>911</strong> &nbsp;|&nbsp; Medical Helpline: <strong>+1 (800) MED-HELP</strong>
+    </div>
+    <div class="topbar-right">
+      <a href="about.html">About</a><a href="contact.html">Contact</a><a href="login.html">Portal Login</a>
+    </div>
+  </div>
+</div>
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="logo"><div class="logo-icon">✚</div>MedAuthority</a>
+    <div class="nav-links">
+      <a href="index.html">Home</a><a href="about.html">About Us</a><a href="health-tools.html">Health Tools</a>
+      <a href="ask-doctor.html">Ask the Doctor</a><a href="blog.html">Blog</a><a href="contact.html">Contact</a>
+      <a href="book-consultation.html" class="btn-book">Book Consultation</a>
+    </div>
+    <button class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">Home</a><a href="about.html">About Us</a><a href="health-tools.html">Health Tools</a>
+    <a href="ask-doctor.html">Ask the Doctor</a><a href="blog.html">Blog</a><a href="contact.html">Contact</a>
+    <a href="book-consultation.html">Book Consultation</a>
+  </div>
+</nav>
+<!-- SWITCH BAR -->
+<div class="demo-bar">
+  <div class="demo-bar-inner">
+    <strong>🩺 Physician Dashboard</strong>
+    <span style="color:#92400e;opacity:.7;font-size:.8rem">|</span>
+    <a href="patient-dashboard.html"><button class="demo-switch-btn">🏥 Switch to Patient View</button></a>
+  </div>
+</div>
+<!-- DASH HEADER -->
+<div class="dash-header">
+  <div class="dash-header-inner">
+    <div class="dash-welcome">
+      <div class="dash-welcome-sub" id="dashSubtitle">Patient Dashboard</div>
+      <h1 id="dashGreeting">Welcome back, Sarah Johnson 👋</h1>
+      <p id="dashDate">Saturday, 6 June 2026 &nbsp;·&nbsp; Last login: 2 days ago</p>
+    </div>
+    <div class="dash-header-right">
+      <div class="dash-avatar" id="dashAvatar">SJ<div class="dash-online-dot"></div></div>
+      <div>
+        <div class="dash-role-badge" id="dashRoleBadge">🏥 Patient Account</div>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+          <button class="dash-btn solid" id="dashPrimaryBtn" onclick="showToast('Opening...')">📅 Book Consultation</button>
+          <button class="dash-btn" onclick="window.location.href='login.html'">← Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- MAIN BODY -->
+<div class="dash-body">
+  <div class="dash-grid">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-profile">
+        <div class="sidebar-avatar-ring">
+          <div class="sidebar-avatar" id="sideAvatar">SJ</div>
+          <div class="sidebar-online"></div>
+        </div>
+        <div class="sidebar-name" id="sideName">Sarah Johnson</div>
+        <div class="sidebar-role" id="sideRole">Patient</div>
+        <div class="sidebar-spec" id="sideSpec">Member since Jan 2025</div>
+      </div>
+      <!-- Health Score (Patient) -->
+      <div class="hs-panel" id="hsPanelWrap">
+        <div class="hs-label">Overall Health Score</div>
+        <div class="hs-row">
+          <div class="hs-circle"><div class="hs-inner"><div class="hs-num">78</div><div class="hs-sub">/ 100</div></div></div>
+          <div><div class="hs-status">Good 🟢</div><div class="hs-desc">3 metrics need attention</div></div>
+        </div>
+        <div class="mb-rows">
+          <div class="mb-row"><span class="mb-lbl">Heart</span><div class="mb-bar"><div class="mb-fill" style="width:88%;background:var(--green)"></div></div><span class="mb-v">88</span></div>
+          <div class="mb-row"><span class="mb-lbl">Metabolic</span><div class="mb-bar"><div class="mb-fill" style="width:65%;background:var(--amber)"></div></div><span class="mb-v">65</span></div>
+          <div class="mb-row"><span class="mb-lbl">Sleep</span><div class="mb-bar"><div class="mb-fill" style="width:70%;background:var(--amber)"></div></div><span class="mb-v">70</span></div>
+          <div class="mb-row"><span class="mb-lbl">Activity</span><div class="mb-bar"><div class="mb-fill" style="width:82%;background:var(--green)"></div></div><span class="mb-v">82</span></div>
+        </div>
+      </div>
+      <!-- Doctor mini stats -->
+      <div class="dr-stats" id="drStatWrap" style="display:none">
+        <div class="dstat"><div class="dstat-n">142</div><div class="dstat-l">Patients</div></div>
+        <div class="dstat"><div class="dstat-n">6</div><div class="dstat-l">Today</div></div>
+        <div class="dstat"><div class="dstat-n">47</div><div class="dstat-l">Articles</div></div>
+        <div class="dstat"><div class="dstat-n">4.9★</div><div class="dstat-l">Rating</div></div>
+      </div>
+      <nav class="snav" id="sidebarNav"></nav>
+      <!-- Doctor availability -->
+      <div class="avail-row" id="availRow" style="display:none">
+        <div style="font-size:.72rem;font-weight:600;color:var(--gray-600)">Set Availability</div>
+        <div class="avail-btns">
+          <button class="avail-btn ag" onclick="setAvail('online',this)">🟢 Online</button>
+          <button class="avail-btn" onclick="setAvail('busy',this)">🟡 Busy</button>
+          <button class="avail-btn" onclick="setAvail('off',this)">⚫ Off</button>
+        </div>
+      </div>
+      <div class="sidebar-footer"><a href="login.html">🚪 Sign Out</a></div>
+    </aside>
+    <main class="dash-main" id="dashMain"></main>
+  </div>
+</div>
+<!-- FOOTER -->
+<footer>
+  <div class="footer-main">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo" style="color:#fff;margin-bottom:14px"><div class="logo-icon">✚</div>MedAuthority</div>
+        <p>Your trusted platform for evidence-based medical information, expert doctor consultations, and health tools — reviewed and approved by licensed physicians.</p>
+        <div class="footer-badges"><span class="footer-badge">🛡️ HIPAA Compliant</span><span class="footer-badge">🇪🇺 GDPR Compliant</span></div>
+        <div class="footer-social">
+          <a href="#" class="social-btn">𝕏</a><a href="#" class="social-btn">f</a><a href="#" class="social-btn">in</a><a href="#" class="social-btn">▶</a><a href="#" class="social-btn">📸</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li><li><a href="about.html">About Us</a></li><li><a href="health-tools.html">Health Tools</a></li>
+          <li><a href="ask-doctor.html">Ask the Doctor</a></li><li><a href="blog.html">Blog</a></li><li><a href="book-consultation.html">Book Consultation</a></li>
+          <li><a href="contact.html">Contact Us</a></li><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms &amp; Conditions</a></li><li><a href="#">Disclaimer</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Medical Categories</h4>
+        <ul>
+          <li><a href="#">Clinical Specialties</a></li><li><a href="#">Surgical Specialties</a></li><li><a href="#">Diagnostic Specialties</a></li>
+          <li><a href="#">Preventive Health</a></li><li><a href="#">Mental Health</a></li><li><a href="#">Women's Health</a></li>
+          <li><a href="#">Men's Health</a></li><li><a href="#">Pediatrics</a></li><li><a href="#">Nutrition</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contact Information</h4>
+        <div class="footer-contact-item"><svg fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>+1 (800) MED-HELP (633-4357)</div>
+        <div class="footer-contact-item"><svg fill="currentColor" viewBox="0 0 20 20"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>contact@medauthority.com</div>
+        <div class="footer-contact-item"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>123 Medical Plaza, Suite 400, New York, NY 10001</div>
+        <div class="footer-contact-item"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>Mon–Fri: 8AM–8PM | Sat: 9AM–5PM</div>
+        <div class="footer-contact-item" style="color:#25d366">📱 WhatsApp: +1 (800) 633-4357</div>
+      </div>
+      <div class="footer-col">
+        <h4>Expert Health Insights</h4>
+        <p style="font-size:.82rem;margin-bottom:14px;line-height:1.6">Get the latest medical news and health tips delivered weekly to your inbox.</p>
+        <div class="footer-subscribe">
+          <input type="email" placeholder="your@email.com">
+          <button>Subscribe Free →</button>
+          <p style="font-size:.72rem;color:#475569;margin-top:8px">🔒 No spam. Unsubscribe at any time. GDPR &amp; HIPAA compliant.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>
+      <p>© 2026 MedAuthority. All rights reserved.</p>
+      <p style="margin-top:4px;font-size:.75rem;color:#475569">⚕️ The content on MedAuthority is for informational purposes only and is not a substitute for professional medical advice, diagnosis, or treatment.</p>
+    </div>
+    <div class="footer-bottom-links">
+      <a href="#">Privacy Policy</a><a href="#">Terms of Service</a><a href="#">Medical Disclaimer</a><a href="#">Cookie Policy</a><a href="#">Sitemap</a>
+    </div>
+  </div>
+</footer>
+<!-- PATIENT CONSULTATION MODAL -->
+<div class="modal-ov" id="consModal" onclick="closeModal('consModal',event)">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="m-av" style="background:linear-gradient(135deg,#059669,#10b981)">PS</div>
+      <div><div style="font-family:var(--font-display);font-size:1.05rem;font-weight:700;color:var(--gray-900)">Consultation Summary</div><div style="font-size:.76rem;color:var(--blue);font-weight:600">Dr. Priya Sharma — Endocrinology</div><div style="font-size:.7rem;color:var(--gray-400)">May 28, 2026 · Chat · 25 minutes</div></div>
+      <button class="modal-close" onclick="document.getElementById('consModal').classList.remove('show')">✕</button>
+    </div>
+    <div class="modal-bd">
+      <div class="msec"><h4>📋 Consultation Details</h4><div class="info-grid"><div class="ii"><label>Reason for Visit</label><span>HbA1c review — Pre-diabetes monitoring</span></div><div class="ii"><label>Duration</label><span>25 minutes</span></div><div class="ii"><label>Type</label><span>💬 Chat Consultation</span></div><div class="ii"><label>Status</label><span style="color:var(--green);font-weight:700">✓ Completed</span></div></div></div>
+      <div class="msec"><h4>📝 Doctor's Notes &amp; Findings</h4><div style="background:var(--gray-50);border-radius:10px;padding:14px;border:1px solid var(--gray-200);font-size:.84rem;color:var(--gray-800);line-height:1.75"><p><strong>Chief Complaint:</strong> Patient reports increased fatigue and occasional blurred vision. HbA1c results reviewed — 6.2% (pre-diabetic range).</p><br><p><strong>Assessment:</strong> Pre-diabetes (IFG). No overt Type 2 Diabetes at this stage.</p><br><p><strong>Plan:</strong> Continue lifestyle interventions. Increase physical activity to 150 min/week. Recheck HbA1c in 3 months. Metformin 500mg BD initiated as preventive measure.</p></div></div>
+      <div class="msec"><h4>💊 Prescription Issued</h4><div style="background:#f0fdf4;border-radius:10px;padding:12px 14px;border:1px solid #bbf7d0;font-size:.84rem"><div style="font-weight:700;margin-bottom:3px">Metformin 500mg</div><div style="font-size:.76rem;color:var(--gray-500)">Twice daily with meals · 3-month supply · Refill as needed</div></div></div>
+      <div class="msec"><h4>📅 Consultation History</h4><div class="tl-list"><div class="tl-item"><div class="tl-dot">💬</div><div><div class="tl-t">Chat Consultation — Pre-diabetes review</div><div class="tl-s">May 28, 2026 · Dr. Priya Sharma · 25 min</div><div class="tl-note">HbA1c 6.2% — pre-diabetic. Metformin initiated.</div></div></div><div class="tl-item"><div class="tl-dot">📹</div><div><div class="tl-t">Video Consultation — Initial endocrine assessment</div><div class="tl-s">March 10, 2026 · Dr. Priya Sharma · 40 min</div><div class="tl-note">Fatigue and weight changes investigated. Full blood panel ordered.</div></div></div></div></div>
+      <div class="modal-actions"><button class="btn-bm" onclick="showToast('Follow-up booking opened')">🔄 Book Follow-up</button><button class="btn-om" onclick="showToast('Prescription opened')">💊 Prescription</button><button class="btn-om" onclick="showToast('PDF downloading...')">📄 Download PDF</button></div>
+    </div>
+  </div>
+</div>
+<!-- REVIEW MODAL -->
+<div class="modal-ov" id="reviewModal" onclick="closeModal('reviewModal',event)">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-hd">
+      <div class="m-av" style="background:linear-gradient(135deg,#059669,#10b981)">PS</div>
+      <div><div style="font-family:var(--font-display);font-size:1.05rem;font-weight:700;color:var(--gray-900)">Leave a Review</div><div style="font-size:.76rem;color:var(--gray-400)">Dr. Priya Sharma · Consultation May 28, 2026</div></div>
+      <button class="modal-close" onclick="document.getElementById('reviewModal').classList.remove('show')">✕</button>
+    </div>
+    <div class="modal-bd">
+      <div class="msec"><h4>⭐ Rate Your Experience</h4><div class="star-row" id="stars" onclick="rateStar(event)"><span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span></div><p id="ratingLbl" style="font-size:.78rem;color:var(--gray-400)">Click a star to rate</p></div>
+      <div class="msec"><h4>💬 Your Feedback</h4><textarea class="review-ta" placeholder="Share your experience with Dr. Sharma..."></textarea></div>
+      <div style="display:flex;gap:10px"><button class="btn-bm" onclick="submitReview()">✓ Submit Review</button><button class="btn-om" onclick="document.getElementById('reviewModal').classList.remove('show')">Cancel</button></div>
+    </div>
+  </div>
+</div>
+<!-- PATIENT DETAIL MODAL (Doctor) -->
+<div class="modal-ov" id="patientModal" onclick="closeModal('patientModal',event)">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-av" id="mAv" style="background:linear-gradient(135deg,#e11d48,#f43f5e)">FK</div>
+      <div><div style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;color:var(--gray-900)" id="mName">Fatima Khan</div><div style="font-size:.76rem;color:var(--blue);font-weight:600" id="mDiag">Heart Failure Stage III</div><div style="font-size:.7rem;color:var(--gray-400)">#PT-2891 · Patient since March 2024</div></div>
+      <button class="modal-close" onclick="document.getElementById('patientModal').classList.remove('show')">✕</button>
+    </div>
+    <div class="modal-bd">
+      <div class="msec"><h4>📊 Latest Vitals</h4><div class="vitals-grid-m"><div class="vital-box"><div class="v-val">148/92</div><div class="v-unit">mmHg</div><div class="v-label">Blood Pressure</div><div class="v-badge vb-h">High</div></div><div class="vital-box"><div class="v-val">78</div><div class="v-unit">bpm</div><div class="v-label">Heart Rate</div><div class="v-badge vb-n">Normal</div></div><div class="vital-box"><div class="v-val">96%</div><div class="v-unit">SpO₂</div><div class="v-label">Oxygen Sat.</div><div class="v-badge vb-l">Borderline</div></div><div class="vital-box"><div class="v-val">36.8</div><div class="v-unit">°C</div><div class="v-label">Temperature</div><div class="v-badge vb-n">Normal</div></div><div class="vital-box"><div class="v-val">68</div><div class="v-unit">kg</div><div class="v-label">Weight</div><div class="v-badge vb-n">Stable</div></div><div class="vital-box"><div class="v-val">27.1</div><div class="v-unit">kg/m²</div><div class="v-label">BMI</div><div class="v-badge vb-n">Normal</div></div></div></div>
+      <div class="msec"><h4>👤 Patient Information</h4><div class="info-grid"><div class="ii"><label>Full Name</label><span id="miName">Fatima Khan</span></div><div class="ii"><label>Age / Gender</label><span id="miAge">52 / Female</span></div><div class="ii"><label>Diagnosis</label><span id="miDiag">Heart Failure Stage III</span></div><div class="ii"><label>Status</label><span id="miSt" style="color:var(--red);font-weight:700">🔴 Critical</span></div><div class="ii"><label>Blood Group</label><span>A+</span></div><div class="ii"><label>Allergies</label><span>Penicillin, Sulfa drugs</span></div><div class="ii"><label>Contact</label><span>+92 300 1234567</span></div><div class="ii"><label>Emergency Contact</label><span>Husband: +92 321 9876543</span></div></div></div>
+      <div class="msec"><h4>💊 Current Medications</h4><div class="med-list"><div class="med-row"><div><div class="med-n">Furosemide 40mg</div><div class="med-d">Once daily — Morning</div></div><span class="st-chip st-active">Active</span></div><div class="med-row"><div><div class="med-n">Carvedilol 6.25mg</div><div class="med-d">Twice daily — With meals</div></div><span class="st-chip st-active">Active</span></div><div class="med-row"><div><div class="med-n">Lisinopril 5mg</div><div class="med-d">Once daily — Evening</div></div><span class="st-chip st-active">Active</span></div></div></div>
+      <div class="msec"><h4>📋 Consultation History</h4><div class="hist-list"><div class="hist-item"><div class="hist-dot">📹</div><div><div class="hist-t">Video Consultation — Heart Failure Follow-up</div><div class="hist-s">June 1, 2026 · Dr. Javed Kumbhar · 45 min</div></div></div><div class="hist-item"><div class="hist-dot">📞</div><div><div class="hist-t">Phone — Medication adjustment: Furosemide dose increased</div><div class="hist-s">May 15, 2026 · Dr. Javed Kumbhar · 20 min</div></div></div><div class="hist-item"><div class="hist-dot">📹</div><div><div class="hist-t">Video — Echocardiogram review: EF 35%</div><div class="hist-s">April 28, 2026 · Dr. Javed Kumbhar · 60 min</div></div></div><div class="hist-item" style="padding-bottom:0"><div class="hist-dot">🩺</div><div><div class="hist-t">Initial Consultation — Diagnosed CHF Stage III</div><div class="hist-s">March 14, 2024 · Dr. Javed Kumbhar · 90 min</div></div></div></div></div>
+      <div class="modal-actions"><button class="btn-blue-m" onclick="showToast('Opening video call...')">📹 Start Consultation</button><button class="btn-out-m" onclick="showToast('Note editor opened')">📝 Add Note</button><button class="btn-out-m" onclick="showToast('Prescription pad opened')">💊 Prescribe</button><button style="background:#fef2f2;color:var(--red);border:1.5px solid #fecaca;padding:11px 18px;border-radius:10px;font-family:var(--font-body);font-size:.85rem;font-weight:600;cursor:pointer;flex:1" onclick="showToast('Patient flagged as critical')">🚨 Flag Critical</button></div>
+    </div>
+  </div>
+</div>
+<div id="btnPatient" style="display:none"></div><div id="btnDoctor" style="display:none"></div>
+<div class="toast" id="toast"></div>
+<script>
+const ROLES={
+  patient:{name:'Sarah Johnson',initials:'SJ',subtitle:'Patient Dashboard',greeting:'Welcome back, Sarah Johnson 👋',roleBadge:'🏥 Patient Account',roleLabel:'Patient',spec:'Member since Jan 2025',primaryBtn:'📅 Book Consultation',
+    nav:[{group:'My Health'},{id:'overview',icon:'📊',label:'Overview'},{id:'consultations',icon:'📅',label:'My Consultations',badge:2,bc:'sb-r'},{id:'health',icon:'❤️',label:'Health Metrics'},{group:'Ask & Book'},{id:'questions',icon:'💬',label:'My Questions',badge:1,bc:'sb-a'},{id:'articles',icon:'🔖',label:'Saved Articles'},{group:'Account'},{id:'profile',icon:'👤',label:'My Profile'},{id:'settings',icon:'⚙️',label:'Settings'}]},
+  doctor:{name:'Dr. Javed Kumbhar',initials:'JK',subtitle:'Physician Dashboard',greeting:'Good morning, Dr. Kumbhar 👨‍⚕️',roleBadge:'🩺 Physician Account',roleLabel:'Cardiologist',spec:'Cardiology · PMC Verified ✓',primaryBtn:'📹 Start Consultation',
+    nav:[{group:'Physician Panel'},{id:'overview',icon:'📊',label:'Overview'},{id:'patients',icon:'👥',label:'My Patients',badge:142,bc:'sb-g'},{id:'appointments',icon:'📅',label:'Consultations',badge:6,bc:'sb-a'},{id:'questions',icon:'💬',label:'Patient Q&A',badge:12,bc:'sb-r'},{id:'prescriptions',icon:'💊',label:'Prescriptions'},{group:'Content'},{id:'submit-article',icon:'✍️',label:'Submit Article'},{id:'articles',icon:'📰',label:'My Articles',badge:47,bc:'sb-g'},{group:'Practice'},{id:'earnings',icon:'💰',label:'Earnings'},{id:'reviews',icon:'⭐',label:'Reviews & Ratings'},{group:'Account'},{id:'profile',icon:'👤',label:'My Profile'},{id:'settings',icon:'⚙️',label:'Settings'}]}
+};
+let currentRole='patient',_ct='overview';
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+function toggleMenu(){document.getElementById('mobileMenu').classList.toggle('open');}
+function closeModal(id,e){if(e.target===document.getElementById(id))document.getElementById(id).classList.remove('show');}
+function setRole(role){
+  currentRole=role;_ct='overview';
+  document.getElementById('btnPatient').classList.toggle('active',role==='patient');
+  document.getElementById('btnDoctor').classList.toggle('active',role==='doctor');
+  const R=ROLES[role];
+  document.getElementById('dashSubtitle').textContent=R.subtitle;
+  document.getElementById('dashGreeting').textContent=R.greeting;
+  const av=document.getElementById('dashAvatar');av.childNodes[0].textContent=R.initials;
+  document.getElementById('dashRoleBadge').textContent=R.roleBadge;
+  document.getElementById('dashPrimaryBtn').textContent=R.primaryBtn;
+  document.getElementById('sideAvatar').textContent=R.initials;
+  document.getElementById('sideName').textContent=R.name;
+  document.getElementById('sideRole').textContent=R.roleLabel;
+  document.getElementById('sideSpec').textContent=R.spec;
+  document.getElementById('hsPanelWrap').style.display=role==='patient'?'':'none';
+  document.getElementById('drStatWrap').style.display=role==='doctor'?'':'none';
+  document.getElementById('availRow').style.display=role==='doctor'?'':'none';
+  buildNav(role);buildMain(role,'overview');
+}
+function buildNav(role){
+  const nav=ROLES[role].nav;
+  document.getElementById('sidebarNav').innerHTML=nav.map(i=>i.group?`<div class="snav-label">${i.group}</div>`:`<div class="snav-item${i.id===_ct?' active':''}" onclick="switchTab('${i.id}')"><span class="snav-ico">${i.icon}</span>${i.label}${i.badge?`<span class="snav-badge ${i.bc||''}">${i.badge}</span>`:''}</div>`).join('');
+}
+function switchTab(id){_ct=id;buildNav(currentRole);buildMain(currentRole,id);window.scrollTo({top:0,behavior:'smooth'});}
+function buildMain(role,tab){
+  const c=document.getElementById('dashMain');
+  if(role==='patient'){const m={overview:patientOverview,consultations:patientConsultations,health:patientHealth,questions:patientQuestions,articles:patientArticles,profile:patientProfile,settings:()=>settingsPanel('patient')};c.innerHTML=(m[tab]||patientOverview)();}
+  else{const m={overview:doctorOverview,patients:doctorPatients,appointments:doctorAppointments,questions:doctorQA,prescriptions:doctorPrescriptions,'submit-article':doctorArticleForm,articles:doctorArticles,earnings:doctorEarnings,reviews:doctorReviews,profile:doctorProfile,settings:()=>settingsPanel('doctor')};c.innerHTML=(m[tab]||doctorOverview)();}
+}
+const today=()=>new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+function hd(sub,title,dateStr,btns=''){return`<div class="dash-hd"><div class="dash-hd-l"><p>${sub}</p><h1>${title}</h1><span>${dateStr}</span></div><div class="dash-hd-r">${btns}</div></div>`;}
+function patientOverview(){return hd('🏥 Patient Dashboard',`Good morning, Sarah 👋`,today(),`<button class="btn-wo" onclick="showToast('Opening Ask Doctor...')">❓ Ask a Doctor</button><button class="btn-w" onclick="showToast('Opening booking...')">📅 Book Consultation</button>`)+`
+<div class="alert-banner"><div class="ab-ico">📅</div><div class="ab-text"><strong>Consultation Tomorrow — Dr. James Okafor (Neurology)</strong><span>Video call at 3:00 PM EST. Make sure your camera and microphone are working.</span></div><button class="ab-btn" onclick="showToast('Preparing...')">Prepare Now →</button></div>
+<div class="stats-row">
+  <div class="stat-c"><div class="stat-ic ic1">📅</div><strong>8</strong><span>Total Consultations</span><div class="stat-tag tt-b">2 upcoming</div><div class="stat-bg">📅</div></div>
+  <div class="stat-c"><div class="stat-ic ic2">💬</div><strong>5</strong><span>Doctor Replies</span><div class="stat-tag tt-g">2 new</div><div class="stat-bg">💬</div></div>
+  <div class="stat-c"><div class="stat-ic ic3">🔖</div><strong>12</strong><span>Saved Articles</span><div class="stat-tag tt-a">3 updated</div><div class="stat-bg">📚</div></div>
+  <div class="stat-c"><div class="stat-ic ic4">🔧</div><strong>8</strong><span>Health Tools Used</span><div class="stat-tag tt-t">Score: 78</div><div class="stat-bg">⚕️</div></div>
+</div>
+<div class="g21">
+  <div class="card"><div class="card-hd"><h3>📅 Upcoming Consultations</h3><a href="#" onclick="switchTab('consultations');return false">View All →</a></div><div class="card-bd"><div class="cons-list">
+    <div class="cons-card upcoming"><div class="cons-top"><div class="dr-av" style="background:linear-gradient(135deg,var(--blue-dark),var(--blue))">JO</div><div><div class="cons-dr-name">Dr. James Okafor</div><div class="cons-dr-spec">🧠 Neurology · Board Certified</div></div><span class="cons-chip cc-up">📅 Upcoming</span></div><div class="cons-details"><span>📹 Video Call</span><span>📅 Tomorrow, June 6</span><span>⏰ 3:00 PM EST</span><span>⏱️ 30 min</span></div><div class="cons-note">📋 <strong>Reason:</strong> Follow-up on recurring migraines. Bring your headache diary.</div><div class="cons-actions"><button class="ca-btn primary" onclick="showToast('Joining video call...')">📹 Join Call</button><button class="ca-btn" onclick="document.getElementById('consModal').classList.add('show')">📋 Details</button><button class="ca-btn" onclick="showToast('Notes saved')">📝 Notes</button><button class="ca-btn danger" onclick="showToast('Cancelled')">✕ Cancel</button></div></div>
+    <div class="cons-card upcoming"><div class="cons-top"><div class="dr-av" style="background:linear-gradient(135deg,var(--teal),#06b6d4)">SM</div><div><div class="cons-dr-name">Dr. Sarah Mitchell</div><div class="cons-dr-spec">❤️ Cardiology · Board Certified</div></div><span class="cons-chip cc-up">📅 Upcoming</span></div><div class="cons-details"><span>📞 Phone Call</span><span>📅 June 10, 2026</span><span>⏰ 11:00 AM EST</span><span>⏱️ 20 min</span></div><div class="cons-note">📋 <strong>Reason:</strong> ECG results review. Bring any recent lab reports.</div><div class="cons-actions"><button class="ca-btn primary" onclick="document.getElementById('consModal').classList.add('show')">📋 Details</button><button class="ca-btn" onclick="showToast('Notes saved')">📝 Notes</button><button class="ca-btn danger" onclick="showToast('Cancelled')">✕ Cancel</button></div></div>
+  </div></div></div>
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div class="card"><div class="card-hd"><h3>📊 My Latest Vitals</h3><a href="#" onclick="switchTab('health');return false">Update →</a></div><div class="card-bd"><div style="font-size:.72rem;color:var(--gray-400);margin-bottom:12px">Last recorded: May 28, 2026</div><div class="vitals-grid"><div class="vital"><div class="v-val">122/80</div><div class="v-unit">mmHg</div><div class="v-label">Blood Pressure</div><div class="v-badge vb-n">Normal</div></div><div class="vital"><div class="v-val">72</div><div class="v-unit">bpm</div><div class="v-label">Heart Rate</div><div class="v-badge vb-n">Normal</div></div><div class="vital"><div class="v-val">98%</div><div class="v-unit">SpO₂</div><div class="v-label">Oxygen Sat.</div><div class="v-badge vb-n">Normal</div></div><div class="vital"><div class="v-val">23.4</div><div class="v-unit">kg/m²</div><div class="v-label">BMI</div><div class="v-badge vb-n">Normal</div></div><div class="vital"><div class="v-val">6.2%</div><div class="v-unit">HbA1c</div><div class="v-label">Blood Sugar</div><div class="v-badge vb-l">Borderline</div></div><div class="vital"><div class="v-val">36.6</div><div class="v-unit">°C</div><div class="v-label">Temp.</div><div class="v-badge vb-n">Normal</div></div></div></div></div>
+    <div class="card"><div class="card-hd"><h3>💊 Current Medications</h3><a href="#">Manage →</a></div><div class="card-bd">
+      <div class="med-item"><div class="med-ic" style="background:#eff6ff">💊</div><div class="med-info"><div class="med-n">Sumatriptan 50mg</div><div class="med-d">As needed — Migraine attacks</div><div class="med-next" style="color:var(--blue)">Prescribed by Dr. Okafor</div></div><span class="ms-active">Active</span></div>
+      <div class="med-item"><div class="med-ic" style="background:#f0fdf4">💊</div><div class="med-info"><div class="med-n">Vitamin D3 1000IU</div><div class="med-d">Once daily — Morning with food</div><div class="med-next" style="color:var(--green)">Next dose: Tomorrow AM</div></div><span class="ms-active">Active</span></div>
+      <div class="med-item"><div class="med-ic" style="background:#fffbeb">💊</div><div class="med-info"><div class="med-n">Metformin 500mg</div><div class="med-d">Twice daily — With meals</div><div class="med-next" style="color:var(--red)">⚠️ Refill needed in 3 days</div></div><span class="ms-refill">Refill Soon</span></div>
+    </div></div>
+  </div>
+</div>
+<div class="g3">
+  <div class="card"><div class="card-hd"><h3>💬 Doctor Replies</h3><span style="font-size:.7rem;background:var(--green);color:#fff;padding:2px 9px;border-radius:50px;font-weight:700">2 new</span></div><div class="card-bd">
+    <div class="reply-item"><div class="reply-meta"><div class="reply-av" style="background:linear-gradient(135deg,var(--blue-dark),var(--blue))">SM</div><span class="reply-name">Dr. Sarah Mitchell</span><span class="reply-time">2 hours ago</span></div><div class="reply-q">"I have been having occasional palpitations, especially after coffee."</div><div class="reply-a">This is likely due to caffeine sensitivity. Reduce coffee intake to 1 cup/day and monitor. If palpitations persist with shortness of breath, seek immediate care.</div></div>
+    <div class="reply-item"><div class="reply-meta"><div class="reply-av" style="background:linear-gradient(135deg,#059669,#10b981)">PS</div><span class="reply-name">Dr. Priya Sharma</span><span class="reply-time">Yesterday</span></div><div class="reply-q">"Is my Metformin dose sufficient for my HbA1c of 6.2%?"</div><div class="reply-a">500mg BD is appropriate for your current borderline HbA1c. Continue lifestyle modifications — results in 3 months will guide any dose changes.</div></div>
+  </div></div>
+  <div class="card"><div class="card-hd"><h3>🔖 Saved Articles</h3><a href="#" onclick="switchTab('articles');return false">All →</a></div><div class="card-bd">
+    <div class="art-item"><div class="art-thumb" style="background:linear-gradient(135deg,#fce7f3,#fbcfe8)">🧠</div><div class="art-info"><div class="art-cat">Neurology</div><div class="art-title">Migraine vs Tension Headache: How to Tell the Difference</div><div class="art-meta">Dr. Okafor · 7 min read</div><div class="art-bar"><div class="art-fill" style="width:65%"></div></div></div></div>
+    <div class="art-item"><div class="art-thumb" style="background:linear-gradient(135deg,#fef3c7,#fde68a)">❤️</div><div class="art-info"><div class="art-cat">Cardiology</div><div class="art-title">Understanding Your ECG Results: A Patient's Guide</div><div class="art-meta">Dr. Mitchell · 10 min read</div><div class="art-bar"><div class="art-fill" style="width:40%"></div></div></div></div>
+    <div class="art-item"><div class="art-thumb" style="background:linear-gradient(135deg,#dbeafe,#bfdbfe)">🧠</div><div class="art-info"><div class="art-cat">Psychiatry</div><div class="art-title">Anxiety Disorders: Causes, Types & Treatments</div><div class="art-meta">Dr. Chen · 9 min read</div><div class="art-bar"><div class="art-fill" style="width:0%"></div></div></div></div>
+  </div></div>
+  <div class="card"><div class="card-hd"><h3>⚡ Recent Activity</h3><a href="#">All →</a></div><div class="card-bd">
+    <div class="act-item"><div class="act-dot ad-g">💬</div><div class="act-text"><p><strong>Dr. Mitchell</strong> replied to your palpitations question</p><span>2 hours ago</span></div></div>
+    <div class="act-item"><div class="act-dot ad-b">📅</div><div class="act-text"><p>Consultation with <strong>Dr. Okafor</strong> confirmed for tomorrow at 3 PM</p><span>5 hours ago</span></div></div>
+    <div class="act-item"><div class="act-dot ad-b">🔖</div><div class="act-text"><p>You saved <strong>"Migraine vs Headache"</strong> — 65% read</p><span>Yesterday</span></div></div>
+    <div class="act-item"><div class="act-dot ad-a">🔧</div><div class="act-text"><p>Completed <strong>Heart Risk Calculator</strong> — Result: Low risk</p><span>2 days ago</span></div></div>
+    <div class="act-item"><div class="act-dot ad-g">✅</div><div class="act-text"><p>Consultation with <strong>Dr. Priya Sharma</strong> completed</p><span>May 28, 2026</span></div></div>
+    <div class="act-item"><div class="act-dot ad-r">⚠️</div><div class="act-text"><p><strong>Metformin</strong> refill due in 3 days — Contact pharmacy</p><span>May 28, 2026</span></div></div>
+  </div></div>
+</div>
+<div class="card"><div class="card-hd"><h3>🔧 Health Tools</h3><a href="health-tools.html">All tools →</a></div><div class="card-bd"><div class="tools-grid">
+  <div class="tool-card" onclick="showToast('Opening BMI Calculator...')"><div class="tc-ico">⚖️</div><div class="tc-text"><strong>BMI Calculator</strong><span>Score: 23.4 ✓</span></div></div>
+  <div class="tool-card" onclick="showToast('Opening Heart Risk...')"><div class="tc-ico">❤️</div><div class="tc-text"><strong>Heart Risk</strong><span>Result: Low</span></div></div>
+  <div class="tool-card" onclick="showToast('Opening Diabetes Risk...')"><div class="tc-ico">🩸</div><div class="tc-text"><strong>Diabetes Risk</strong><span>Result: Moderate</span></div></div>
+  <div class="tool-card" onclick="showToast('Opening Lung Age...')"><div class="tc-ico">🫁</div><div class="tc-text"><strong>Lung Age</strong><span>Not taken yet</span></div></div>
+  <div class="tool-card" onclick="showToast('Opening Mental Health...')"><div class="tc-ico">🧠</div><div class="tc-text"><strong>Mental Health</strong><span>Not taken yet</span></div></div>
+  <div class="tool-card" onclick="showToast('Opening Symptom Checker...')"><div class="tc-ico">🔎</div><div class="tc-text"><strong>Symptom Checker</strong><span>Try it now</span></div></div>
+</div></div></div>`;}
+function patientConsultations(){return hd('🏥 Patient Dashboard','My Consultations',today(),`<button class="btn-w" onclick="showToast('Opening booking...')">+ Book New</button>`)+`
+<div class="card"><div class="card-hd"><h3>📅 Upcoming Consultations</h3></div><div class="card-bd"><div class="cons-list">
+  <div class="cons-card upcoming"><div class="cons-top"><div class="dr-av" style="background:linear-gradient(135deg,var(--blue-dark),var(--blue))">JO</div><div><div class="cons-dr-name">Dr. James Okafor</div><div class="cons-dr-spec">🧠 Neurology · Board Certified</div></div><span class="cons-chip cc-up">📅 Upcoming</span></div><div class="cons-details"><span>📹 Video Call</span><span>📅 Tomorrow, June 6</span><span>⏰ 3:00 PM EST</span><span>⏱️ 30 min</span></div><div class="cons-note">📋 <strong>Reason for visit:</strong> Follow-up on recurring migraines. Bring your headache diary.</div><div class="cons-actions"><button class="ca-btn primary" onclick="showToast('Joining video call...')">📹 Join Call</button><button class="ca-btn" onclick="document.getElementById('consModal').classList.add('show')">📋 View Details</button><button class="ca-btn" onclick="showToast('Notes saved')">📝 Add Notes</button><button class="ca-btn danger" onclick="showToast('Cancelled')">✕ Cancel</button></div></div>
+  <div class="cons-card upcoming"><div class="cons-top"><div class="dr-av" style="background:linear-gradient(135deg,var(--teal),#06b6d4)">SM</div><div><div class="cons-dr-name">Dr. Sarah Mitchell</div><div class="cons-dr-spec">❤️ Cardiology · Board Certified</div></div><span class="cons-chip cc-up">📅 Upcoming</span></div><div class="cons-details"><span>📞 Phone Call</span><span>📅 June 10, 2026</span><span>⏰ 11:00 AM EST</span><span>⏱️ 20 min</span></div><div class="cons-note">📋 <strong>Reason for visit:</strong> ECG results review. Bring any recent lab reports.</div><div class="cons-actions"><button class="ca-btn primary" onclick="document.getElementById('consModal').classList.add('show')">📋 View Details</button><button class="ca-btn" onclick="showToast('Notes saved')">📝 Add Notes</button><button class="ca-btn danger" onclick="showToast('Cancelled')">✕ Cancel</button></div></div>
+</div></div></div>
+<div class="card"><div class="card-hd"><h3>✅ Past Consultations</h3></div><div class="card-bd"><div class="cons-list">
+  <div class="cons-card completed"><div class="cons-top"><div class="dr-av" style="background:linear-gradient(135deg,#059669,#10b981)">PS</div><div><div class="cons-dr-name">Dr. Priya Sharma</div><div class="cons-dr-spec">🦋 Endocrinology · FCPS</div></div><span class="cons-chip cc-done">✓ Completed</span></div><div class="cons-details"><span>💬 Chat</span><span>📅 May 28, 2026</span><span>⏱️ 25 min</span><span>⭐ Rated 5/5</span></div><div class="cons-note green">📝 <strong>Doctor's Note:</strong> HbA1c slightly elevated at 6.2%. Continue current diet plan. Recheck in 3 months. Metformin 500mg BD initiated.</div><div class="cons-actions"><button class="ca-btn" onclick="document.getElementById('consModal').classList.add('show')">📋 Full Summary</button><button class="ca-btn" onclick="showToast('Opening prescription...')">💊 Prescription</button><button class="ca-btn" onclick="document.getElementById('reviewModal').classList.add('show')">⭐ Review</button><button class="ca-btn primary" onclick="showToast('Follow-up booking opened')">🔄 Follow-up</button></div></div>
+  <div class="cons-card completed"><div class="cons-top"><div class="dr-av" style="background:linear-gradient(135deg,var(--blue-dark),var(--blue))">JO</div><div><div class="cons-dr-name">Dr. James Okafor</div><div class="cons-dr-spec">🧠 Neurology · Board Certified</div></div><span class="cons-chip cc-done">✓ Completed</span></div><div class="cons-details"><span>📹 Video Call</span><span>📅 May 14, 2026</span><span>⏱️ 40 min</span></div><div class="cons-note green">📝 <strong>Doctor's Note:</strong> Migraines likely tension-type. Prescribed Sumatriptan 50mg PRN. Avoid known triggers.</div><div class="cons-actions"><button class="ca-btn" onclick="document.getElementById('consModal').classList.add('show')">📋 Full Summary</button><button class="ca-btn" onclick="showToast('Opening prescription...')">💊 Prescription</button><button class="ca-btn primary" onclick="showToast('Follow-up booking opened')">🔄 Follow-up</button></div></div>
+</div></div></div>`;}
+function patientHealth(){return hd('🏥 Patient Dashboard','Health Metrics',today(),`<button class="btn-w" onclick="showToast('Opening log form...')">+ Log Reading</button>`)+`
+<div class="card"><div class="card-hd"><h3>❤️ Current Vitals</h3><span style="font-size:.76rem;color:var(--gray-400)">Last recorded: May 28, 2026</span></div><div class="card-bd"><div class="vitals-grid" style="grid-template-columns:repeat(3,1fr)">
+  <div class="vital"><div class="v-val">122/80</div><div class="v-unit">mmHg</div><div class="v-label">Blood Pressure</div><div class="v-badge vb-n">Normal</div></div>
+  <div class="vital"><div class="v-val">72</div><div class="v-unit">bpm</div><div class="v-label">Heart Rate</div><div class="v-badge vb-n">Normal</div></div>
+  <div class="vital"><div class="v-val">98%</div><div class="v-unit">SpO₂</div><div class="v-label">Oxygen Sat.</div><div class="v-badge vb-n">Normal</div></div>
+  <div class="vital"><div class="v-val">23.4</div><div class="v-unit">kg/m²</div><div class="v-label">BMI</div><div class="v-badge vb-n">Normal</div></div>
+  <div class="vital"><div class="v-val">6.2%</div><div class="v-unit">HbA1c</div><div class="v-label">Blood Sugar</div><div class="v-badge vb-l">Borderline</div></div>
+  <div class="vital"><div class="v-val">36.6</div><div class="v-unit">°C</div><div class="v-label">Temperature</div><div class="v-badge vb-n">Normal</div></div>
+  <div class="vital"><div class="v-val">145</div><div class="v-unit">mg/dL</div><div class="v-label">LDL Cholesterol</div><div class="v-badge vb-l">Borderline</div></div>
+  <div class="vital"><div class="v-val">98%</div><div class="v-unit">SpO₂</div><div class="v-label">O₂ Saturation</div><div class="v-badge vb-n">Normal</div></div>
+  <div class="vital"><div class="v-val">7,240</div><div class="v-unit">steps</div><div class="v-label">Daily Average</div><div class="v-badge vb-n">Good</div></div>
+</div></div></div>
+<div class="card"><div class="card-hd"><h3>📋 Health Tool History</h3><a href="health-tools.html">Run New Tool →</a></div><div class="card-bd" style="overflow-x:auto">
+  <table class="pt-table"><thead><tr><th>Tool</th><th>Result</th><th>Date</th><th>Notes</th></tr></thead><tbody>
+    <tr><td>⚖️ BMI Calculator</td><td><span class="st-chip st-active">23.4 — Normal</span></td><td>Jun 1, 2026</td><td>Healthy range</td></tr>
+    <tr><td>❤️ Heart Risk Calculator</td><td><span class="st-chip st-followup">8% — Moderate</span></td><td>May 28, 2026</td><td>Consult recommended</td></tr>
+    <tr><td>🩸 Diabetes Risk</td><td><span class="st-chip st-followup">Borderline</span></td><td>May 20, 2026</td><td>HbA1c elevated</td></tr>
+    <tr><td>🧠 Mental Health (PHQ-9)</td><td><span class="st-chip st-active">Score 4 — Minimal</span></td><td>May 10, 2026</td><td>Follow up in 3 months</td></tr>
+  </tbody></table>
+</div></div>`;}
+function patientQuestions(){return hd('🏥 Patient Dashboard','My Questions',today(),`<button class="btn-w" onclick="showToast('Opening question form...')">+ Ask New Question</button>`)+`
+<div class="card"><div class="card-hd"><h3>💬 All Questions</h3></div><div class="card-bd">
+  ${[{q:'Is it safe to take metformin with ibuprofen?',a:'Dr. Ahmed Raza answered: Generally, short-term use is acceptable, but prolonged NSAID use with metformin requires careful monitoring of renal function.',date:'Jun 2, 2026',s:'completed'},{q:'What are early signs of vitamin D deficiency?',a:'Awaiting response from a specialist. Typical response time is 24–48 hours.',date:'Jun 4, 2026',s:'pending'},{q:'How often should I check my blood pressure at home?',a:'Dr. Priya Sharma answered: For patients with borderline hypertension, twice daily readings are recommended for the first few weeks...',date:'May 18, 2026',s:'completed'},{q:'Can stress cause chest tightness without cardiac issues?',a:'Dr. Ahmed Raza answered: Yes — musculoskeletal pain, anxiety, and GERD are common non-cardiac causes. An ECG is still advisable...',date:'Apr 30, 2026',s:'completed'}].map(i=>`<div style="padding:16px 0;border-bottom:1px solid var(--gray-100)"><div style="font-weight:600;font-size:.86rem;color:var(--gray-900);margin-bottom:8px;display:flex;gap:8px;align-items:flex-start"><span style="color:var(--blue);flex-shrink:0">❓</span>${i.q}</div><div style="font-size:.82rem;color:var(--gray-500);line-height:1.6;padding-left:20px;border-left:2px solid var(--blue-light);margin-bottom:6px">${i.a}</div><div style="font-size:.72rem;color:var(--gray-400)">${i.date} &nbsp;·&nbsp; <span style="font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:50px;background:${i.s==='completed'?'var(--blue-light)':'#fffbeb'};color:${i.s==='completed'?'var(--blue)':'#d97706'}">${i.s}</span></div></div>`).join('')}
+</div></div>`;}
+function patientArticles(){return hd('🏥 Patient Dashboard','Saved Articles',today(),`<a href="blog.html"><button class="btn-w">Browse More →</button></a>`)+`
+<div class="card"><div class="card-hd"><h3>🔖 Reading List</h3><span style="font-size:.76rem;color:var(--gray-400)">12 articles saved</span></div><div class="card-bd">
+  ${[{e:'🧠',bg:'#fce7f3,#fbcfe8',cat:'Neurology',title:'Migraine vs Tension Headache: How to Tell the Difference',by:'Dr. Okafor',date:'Jun 1, 2026',rt:'7 min',pct:65},{e:'❤️',bg:'#fef3c7,#fde68a',cat:'Cardiology',title:'Understanding Your ECG Results: A Patient\'s Guide',by:'Dr. Mitchell',date:'May 22, 2026',rt:'10 min',pct:40},{e:'🧠',bg:'#dbeafe,#bfdbfe',cat:'Psychiatry',title:'Anxiety Disorders: Causes, Types & Treatments',by:'Dr. Chen',date:'May 15, 2026',rt:'9 min',pct:0},{e:'🩸',bg:'#f0fdf4,#dcfce7',cat:'Endocrinology',title:'Pre-Diabetes: What It Means and How to Reverse It',by:'Dr. Sharma',date:'May 10, 2026',rt:'12 min',pct:100}].map(a=>`<div class="art-item"><div class="art-thumb" style="background:linear-gradient(135deg,${a.bg})">${a.e}</div><div class="art-info"><div class="art-cat">${a.cat}</div><div class="art-title">${a.title}</div><div class="art-meta">By ${a.by} · ${a.date} · ${a.rt} read</div><div class="art-bar"><div class="art-fill" style="width:${a.pct}%"></div></div></div><div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0"><button class="ca-btn primary" onclick="showToast('Opening article...')">Read →</button><button class="ca-btn danger" onclick="showToast('Article removed')">Remove</button></div></div>`).join('')}
+</div></div>`;}
+function patientProfile(){return hd('🏥 Patient Dashboard','My Profile',today(),`<button class="btn-w" onclick="showToast('Edit mode enabled')">✏️ Edit Profile</button>`)+`
+<div class="g2">
+  <div class="card"><div class="card-hd"><h3>👤 Personal Information</h3></div><div class="card-bd">${[['Full Name','Sarah Johnson'],['Email Address','sarah.johnson@email.com'],['Phone Number','+1 (555) 234-5678'],['Date of Birth','March 15, 1992'],['Gender','Female'],['Blood Group','A+'],['Country','United States'],['City','New York, NY'],['Member Since','January 2025'],['Account Status','✅ Active']].map(([l,v])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--gray-100)"><span style="font-size:.8rem;color:var(--gray-500);font-weight:600">${l}</span><span style="font-size:.86rem;font-weight:600;color:var(--gray-900)">${v}</span></div>`).join('')}</div></div>
+  <div class="card"><div class="card-hd"><h3>🏥 Medical Information</h3></div><div class="card-bd">${[['Allergies','Penicillin, Sulfa'],['Chronic Conditions','Pre-diabetes, Migraines'],['Current Medications','3 active'],['Last Check-up','May 28, 2026'],['Primary Doctor','Dr. James Okafor'],['Insurance','BlueCross BlueShield'],['Insurance ID','BCB-77823441'],['Emergency Contact','John Johnson (Spouse)']].map(([l,v])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--gray-100)"><span style="font-size:.8rem;color:var(--gray-500);font-weight:600">${l}</span><span style="font-size:.86rem;font-weight:600;color:var(--gray-900)">${v}</span></div>`).join('')}</div></div>
+</div>`;}
+function doctorOverview(){return hd('👨‍⚕️ Physician Dashboard','Good morning, Dr. Kumbhar 👨‍⚕️',today(),`<button class="btn-wo" onclick="showToast('Opening video call...')">📹 Start Consultation</button><button class="btn-w" onclick="switchTab('submit-article')">✍️ Submit Article</button>`)+`
+<div class="stats-row">
+  <div class="stat-c"><div class="stat-ic ic1">👥</div><strong>142</strong><span>Total Patients</span><div class="stat-tag tt-b">+8 this month</div><div class="stat-bg">👥</div></div>
+  <div class="stat-c"><div class="stat-ic ic2">📅</div><strong>6</strong><span>Today's Consultations</span><div class="stat-tag tt-g">3 remaining</div><div class="stat-bg">📅</div></div>
+  <div class="stat-c"><div class="stat-ic ic3">💬</div><strong>12</strong><span>Pending Q&A Replies</span><div class="stat-tag tt-r">Needs attention</div><div class="stat-bg">💬</div></div>
+  <div class="stat-c"><div class="stat-ic ic2">💰</div><strong>$3,240</strong><span>This Month's Earnings</span><div class="stat-tag tt-g">↑ 18% vs last</div><div class="stat-bg">💰</div></div>
+</div>
+<div class="g21-dr">
+  <div class="card"><div class="card-hd"><h3>📅 Today's Schedule — ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</h3><a href="#">Full calendar →</a></div><div class="card-bd">
+    <div class="sch-item"><div class="sch-time">09:00</div><div class="sch-av" style="background:linear-gradient(135deg,#e11d48,#f43f5e)">SM</div><div class="sch-info"><div class="sch-name">Sara Malik</div><div class="sch-sub">📹 Video · Follow-up — Hypertension</div></div><span class="sch-chip sc-done">✓ Done</span></div>
+    <div class="sch-item"><div class="sch-time">10:30</div><div class="sch-av" style="background:linear-gradient(135deg,#7c3aed,#8b5cf6)">AR</div><div class="sch-info"><div class="sch-name">Ahmed Raza</div><div class="sch-sub">📹 Video · New — Chest palpitations</div></div><span class="sch-chip sc-live">🔴 Live</span><button class="sch-btn go" onclick="showToast('Joining video call...')">Join →</button></div>
+    <div class="sch-item"><div class="sch-time">12:00</div><div class="sch-av" style="background:linear-gradient(135deg,#059669,#10b981)">FK</div><div class="sch-info"><div class="sch-name">Fatima Khan</div><div class="sch-sub">📞 Phone · Follow-up — Heart Failure</div></div><span class="sch-chip sc-up">Upcoming</span><button class="sch-btn" onclick="openPatient('FK','Fatima Khan','52','F','Heart Failure Stage III','Critical')">Prep</button></div>
+    <div class="sch-item"><div class="sch-time">14:30</div><div class="sch-av" style="background:linear-gradient(135deg,#0891b2,#06b6d4)">MH</div><div class="sch-info"><div class="sch-name">Muhammad Hassan</div><div class="sch-sub">💬 Chat · New — Shortness of breath</div></div><span class="sch-chip sc-up">Upcoming</span><button class="sch-btn" onclick="openPatient('MH','Muhammad Hassan','61','M','Coronary Artery Disease','Active')">Prep</button></div>
+    <div class="sch-item"><div class="sch-time">16:00</div><div class="sch-av" style="background:linear-gradient(135deg,#d97706,#f59e0b)">ZA</div><div class="sch-info"><div class="sch-name">Zara Ahmed</div><div class="sch-sub">📹 Video · Follow-up — Arrhythmia SVT</div></div><span class="sch-chip sc-up">Upcoming</span><button class="sch-btn">Prep</button></div>
+    <div class="sch-item"><div class="sch-time">17:30</div><div class="sch-av" style="background:linear-gradient(135deg,#be185d,#ec4899)">NB</div><div class="sch-info"><div class="sch-name">Nadia Baig</div><div class="sch-sub">📞 Phone · New — ECG review</div></div><span class="sch-chip sc-pend">Pending</span><button class="sch-btn" onclick="showToast('Consultation confirmed!')">Confirm</button></div>
+  </div></div>
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div class="card"><div class="card-hd"><h3>💰 Earnings Overview</h3><a href="#" onclick="switchTab('earnings');return false">Details →</a></div><div class="card-bd">
+      <div class="earn-grid"><div class="earn-box"><div class="earn-n">$3,240</div><div class="earn-l">This Month</div><div class="earn-s" style="color:var(--green)">↑ 18%</div></div><div class="earn-box"><div class="earn-n">$38,120</div><div class="earn-l">This Year</div><div class="earn-s" style="color:var(--blue)">On track</div></div><div class="earn-box"><div class="earn-n">$840</div><div class="earn-l">Pending</div><div class="earn-s" style="color:var(--amber)">Processing</div></div></div>
+      <div style="font-size:.74rem;color:var(--gray-400);margin-bottom:6px">Monthly earnings (last 6 months)</div>
+      <div class="chart-bars"><div class="cb-wrap"><div class="cb-bar" style="height:55%"></div><div class="cb-label">Jan</div></div><div class="cb-wrap"><div class="cb-bar" style="height:68%"></div><div class="cb-label">Feb</div></div><div class="cb-wrap"><div class="cb-bar" style="height:60%"></div><div class="cb-label">Mar</div></div><div class="cb-wrap"><div class="cb-bar" style="height:80%"></div><div class="cb-label">Apr</div></div><div class="cb-wrap"><div class="cb-bar" style="height:74%"></div><div class="cb-label">May</div></div><div class="cb-wrap"><div class="cb-bar" style="height:92%;background:linear-gradient(180deg,var(--teal),var(--blue))"></div><div class="cb-label">Jun</div></div></div>
+    </div></div>
+    <div class="card"><div class="card-hd"><h3>⭐ Patient Reviews</h3><a href="#" onclick="switchTab('reviews');return false">All →</a></div><div class="card-bd">
+      <div class="rev-summary"><div class="rev-big">4.9</div><div><div class="stars-row">★★★★★</div><div style="font-size:.74rem;color:var(--gray-400)">Based on 312 reviews</div></div></div>
+      <div class="rev-item"><div class="rev-hd"><div class="rev-av" style="background:linear-gradient(135deg,#e11d48,#f43f5e)">SM</div><span class="rev-name">Sara Malik</span><span class="rev-stars">★★★★★</span></div><div class="rev-text">"Explained my condition in terms I could actually understand. Excellent doctor."</div><div class="rev-date">June 3, 2026 · Video Consultation</div></div>
+      <div class="rev-item"><div class="rev-hd"><div class="rev-av" style="background:linear-gradient(135deg,#059669,#10b981)">FK</div><span class="rev-name">Fatima Khan</span><span class="rev-stars">★★★★★</span></div><div class="rev-text">"Very thorough and patient. Best cardiology consultation I have had."</div><div class="rev-date">June 1, 2026 · Phone Consultation</div></div>
+    </div></div>
+  </div>
+</div>
+<div class="g13">
+  <div class="card"><div class="card-hd"><h3>💬 Patient Questions — Awaiting Reply <span style="font-size:.72rem;background:var(--red);color:#fff;padding:2px 8px;border-radius:50px;margin-left:4px">12</span></h3><a href="#" onclick="switchTab('questions');return false">View all →</a></div><div class="card-bd">
+    <div class="qa-item"><div class="qa-top"><div class="qa-av" style="background:linear-gradient(135deg,var(--blue-dark),var(--blue))">AR</div><div class="qa-meta"><div class="qa-pname">Ahmed Raza <span class="qa-urgent">⚡ Urgent</span></div><div class="qa-spec">Cardiology · 10 min ago</div></div></div><div class="qa-q">"Doctor, I am experiencing chest pain that radiates to my left arm when I climb stairs. Should I go to the ER or wait for my appointment tomorrow?"</div><div class="qa-actions"><button class="qa-btn reply" onclick="showToast('Reply editor opened')">✏️ Reply Now</button><button class="qa-btn" onclick="openPatient('AR','Ahmed Raza','38','M','Chest Palpitations','Active')">📋 Patient File</button><button class="qa-btn" onclick="showToast('Calling patient...')">📞 Call</button></div></div>
+    <div class="qa-item"><div class="qa-top"><div class="qa-av" style="background:linear-gradient(135deg,#be185d,#ec4899)">NB</div><div class="qa-meta"><div class="qa-pname">Nadia Baig</div><div class="qa-spec">Cardiology · 2 hours ago</div></div></div><div class="qa-q">"My heart sometimes skips a beat, especially at night. My Holter monitor says 'rare PVCs'. Is this dangerous?"</div><div class="qa-actions"><button class="qa-btn reply" onclick="showToast('Reply editor opened')">✏️ Reply</button><button class="qa-btn">📋 Patient File</button></div></div>
+    <div class="qa-item"><div class="qa-top"><div class="qa-av" style="background:linear-gradient(135deg,#0891b2,#06b6d4)">MH</div><div class="qa-meta"><div class="qa-pname">Muhammad Hassan</div><div class="qa-spec">Cardiology · 4 hours ago</div></div></div><div class="qa-q">"Can I take Aspirin 75mg daily with my Clopidogrel? I am worried about bleeding risk."</div><div class="qa-actions"><button class="qa-btn reply" onclick="showToast('Reply editor opened')">✏️ Reply</button><button class="qa-btn">📋 Patient File</button></div></div>
+  </div></div>
+  <div class="card"><div class="card-hd"><h3>📰 My Articles</h3><a href="#" onclick="switchTab('articles');return false">All 47 →</a></div><div class="card-bd">
+    <div class="art-item"><div class="art-thumb" style="background:linear-gradient(135deg,#fce7f3,#fbcfe8)">❤️</div><div class="art-info"><div class="art-title">Hypertension Management Guidelines 2025</div><div class="art-meta">14.2K views · 4.9 ★ · Jun 1, 2026</div></div><span class="art-status as-live">Live</span></div>
+    <div class="art-item"><div class="art-thumb" style="background:linear-gradient(135deg,#dbeafe,#bfdbfe)">💊</div><div class="art-info"><div class="art-title">Beta Blockers: Complete Clinical Guide</div><div class="art-meta">8.7K views · 4.8 ★ · May 20, 2026</div></div><span class="art-status as-live">Live</span></div>
+    <div class="art-item"><div class="art-thumb" style="background:linear-gradient(135deg,#fef3c7,#fde68a)">🔬</div><div class="art-info"><div class="art-title">ECG Interpretation for Beginners</div><div class="art-meta">Draft · Last edited today</div></div><span class="art-status as-draft">Draft</span></div>
+    <div class="art-item"><div class="art-thumb" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe)">📋</div><div class="art-info"><div class="art-title">Heart Failure: A Patient's Guide</div><div class="art-meta">Under Review · Submitted Jun 3</div></div><span class="art-status as-review">Review</span></div>
+  </div></div>
+</div>`;}
+function doctorPatients(){return hd('👨‍⚕️ Physician Dashboard','My Patients',today(),`<button class="btn-w" onclick="showToast('Exporting...')">📤 Export</button>`)+`
+<div class="card"><div class="card-hd"><h3>👥 Patient Records</h3><span style="font-size:.76rem;color:var(--gray-400)">142 patients</span></div><div class="card-bd">
+  <div class="search-bar"><div class="search-ico-w"><input class="search-inp" placeholder="Search by name, ID, or condition..." oninput="filterPt(this.value)"></div></div>
+  <div class="flt-pills"><div class="flt on" onclick="setFlt(this,'all')">All (142)</div><div class="flt" onclick="setFlt(this,'critical')">🔴 Critical (4)</div><div class="flt" onclick="setFlt(this,'followup')">🟡 Follow-up (28)</div><div class="flt" onclick="setFlt(this,'active')">🟢 Active (98)</div><div class="flt" onclick="setFlt(this,'new')">🔵 New (12)</div></div>
+  <div style="overflow-x:auto"><table class="pt-table" id="ptTable"><thead><tr><th>Patient</th><th>Age/Gender</th><th>Condition</th><th>Last Visit</th><th>Next Appt.</th><th>Status</th><th>Actions</th></tr></thead><tbody id="ptBody">
+    <tr data-s="critical"><td><div class="pt-name-cell"><div class="pt-av" style="background:linear-gradient(135deg,#e11d48,#f43f5e)">FK</div><div><div class="pt-n">Fatima Khan</div><div class="pt-id">#PT-2891</div></div></div></td><td>52/F</td><td>Heart Failure (Stage III)</td><td>Jun 1, 2026</td><td>Jun 12, 2026</td><td><span class="st-chip st-critical">🔴 Critical</span></td><td><button class="tbl-btn view" onclick="openPatient('FK','Fatima Khan','52','F','Heart Failure Stage III','Critical')">View</button><button class="tbl-btn">Message</button></td></tr>
+    <tr data-s="active"><td><div class="pt-name-cell"><div class="pt-av" style="background:linear-gradient(135deg,#7c3aed,#8b5cf6)">AR</div><div><div class="pt-n">Ahmed Raza</div><div class="pt-id">#PT-3047</div></div></div></td><td>38/M</td><td>Chest Palpitations</td><td>Today</td><td>Jun 19, 2026</td><td><span class="st-chip st-active">🟢 Active</span></td><td><button class="tbl-btn view" onclick="openPatient('AR','Ahmed Raza','38','M','Chest Palpitations','Active')">View</button><button class="tbl-btn">Message</button></td></tr>
+    <tr data-s="followup"><td><div class="pt-name-cell"><div class="pt-av" style="background:linear-gradient(135deg,#e11d48,#f43f5e)">SM</div><div><div class="pt-n">Sara Malik</div><div class="pt-id">#PT-2103</div></div></div></td><td>45/F</td><td>Hypertension (Grade II)</td><td>Jun 5, 2026</td><td>Jul 3, 2026</td><td><span class="st-chip st-followup">🟡 Follow-up</span></td><td><button class="tbl-btn view" onclick="openPatient('SM','Sara Malik','45','F','Hypertension Grade II','Follow-up')">View</button><button class="tbl-btn">Message</button></td></tr>
+    <tr data-s="active"><td><div class="pt-name-cell"><div class="pt-av" style="background:linear-gradient(135deg,#0891b2,#06b6d4)">MH</div><div><div class="pt-n">Muhammad Hassan</div><div class="pt-id">#PT-3102</div></div></div></td><td>61/M</td><td>Coronary Artery Disease</td><td>May 28, 2026</td><td>Jun 14, 2026</td><td><span class="st-chip st-active">🟢 Active</span></td><td><button class="tbl-btn view" onclick="openPatient('MH','Muhammad Hassan','61','M','Coronary Artery Disease','Active')">View</button><button class="tbl-btn">Message</button></td></tr>
+    <tr data-s="new"><td><div class="pt-name-cell"><div class="pt-av" style="background:linear-gradient(135deg,#059669,#10b981)">ZA</div><div><div class="pt-n">Zara Ahmed</div><div class="pt-id">#PT-3198</div></div></div></td><td>29/F</td><td>Arrhythmia (SVT)</td><td>Jun 2, 2026</td><td>Jun 16, 2026</td><td><span class="st-chip st-new">🔵 New</span></td><td><button class="tbl-btn view" onclick="openPatient('ZA','Zara Ahmed','29','F','Arrhythmia SVT','New')">View</button><button class="tbl-btn">Message</button></td></tr>
+    <tr data-s="critical"><td><div class="pt-name-cell"><div class="pt-av" style="background:linear-gradient(135deg,#d97706,#f59e0b)">IA</div><div><div class="pt-n">Imran Ali</div><div class="pt-id">#PT-1876</div></div></div></td><td>67/M</td><td>Acute MI (Post-op)</td><td>Jun 4, 2026</td><td>Jun 7, 2026</td><td><span class="st-chip st-critical">🔴 Critical</span></td><td><button class="tbl-btn view" onclick="openPatient('IA','Imran Ali','67','M','Acute MI Post-op','Critical')">View</button><button class="tbl-btn">Message</button></td></tr>
+    <tr data-s="followup"><td><div class="pt-name-cell"><div class="pt-av" style="background:linear-gradient(135deg,#be185d,#ec4899)">NB</div><div><div class="pt-n">Nadia Baig</div><div class="pt-id">#PT-2754</div></div></div></td><td>41/F</td><td>Mitral Valve Prolapse</td><td>May 20, 2026</td><td>Jun 17, 2026</td><td><span class="st-chip st-followup">🟡 Follow-up</span></td><td><button class="tbl-btn view" onclick="openPatient('NB','Nadia Baig','41','F','Mitral Valve Prolapse','Follow-up')">View</button><button class="tbl-btn">Message</button></td></tr>
+    <tr data-s="active"><td><div class="pt-name-cell"><div class="pt-av" style="background:linear-gradient(135deg,#1a56a0,#0891b2)">KS</div><div><div class="pt-n">Kamran Sheikh</div><div class="pt-id">#PT-3041</div></div></div></td><td>55/M</td><td>Hypertensive Heart Disease</td><td>May 30, 2026</td><td>Jun 20, 2026</td><td><span class="st-chip st-active">🟢 Active</span></td><td><button class="tbl-btn view" onclick="openPatient('KS','Kamran Sheikh','55','M','Hypertensive Heart Disease','Active')">View</button><button class="tbl-btn">Message</button></td></tr>
+  </tbody></table></div>
+  <div class="table-pager"><span>Showing 8 of 142 patients</span><div style="display:flex;gap:6px"><button class="tbl-btn">← Prev</button><button class="tbl-btn" style="border-color:var(--blue);color:var(--blue)">1</button><button class="tbl-btn">2</button><button class="tbl-btn">3</button><button class="tbl-btn">Next →</button></div></div>
+</div></div>`;}
+function doctorAppointments(){return hd('👨‍⚕️ Physician Dashboard','Consultations',today())+`
+<div class="card"><div class="card-hd"><h3>📅 Today's Appointments</h3><a href="#">Full Calendar →</a></div><div class="card-bd">
+  ${[{t:'09:00',av:'SM',bg:'#e11d48,#f43f5e',n:'Sara Malik',s:'📹 Video · Follow-up — Hypertension',chip:'sc-done',cl:'✓ Done'},{t:'10:30',av:'AR',bg:'#7c3aed,#8b5cf6',n:'Ahmed Raza',s:'📹 Video · New — Chest palpitations',chip:'sc-live',cl:'🔴 Live'},{t:'12:00',av:'FK',bg:'#059669,#10b981',n:'Fatima Khan',s:'📞 Phone · Follow-up — Heart Failure',chip:'sc-up',cl:'Upcoming'},{t:'14:30',av:'MH',bg:'#0891b2,#06b6d4',n:'Muhammad Hassan',s:'💬 Chat · New — Shortness of breath',chip:'sc-up',cl:'Upcoming'},{t:'16:00',av:'ZA',bg:'#d97706,#f59e0b',n:'Zara Ahmed',s:'📹 Video · Follow-up — Arrhythmia',chip:'sc-up',cl:'Upcoming'},{t:'17:30',av:'NB',bg:'#be185d,#ec4899',n:'Nadia Baig',s:'📞 Phone · New — ECG review',chip:'sc-pend',cl:'Pending'}].map(x=>`<div class="sch-item"><div class="sch-time">${x.t}</div><div class="sch-av" style="background:linear-gradient(135deg,${x.bg})">${x.av}</div><div class="sch-info"><div class="sch-name">${x.n}</div><div class="sch-sub">${x.s}</div></div><span class="sch-chip ${x.chip}">${x.cl}</span><button class="sch-btn${x.chip==='sc-live'?' go':''}" onclick="showToast('${x.chip==='sc-live'?'Joining call...':'Preparing...'}')">${x.chip==='sc-live'?'Join →':'Prep'}</button></div>`).join('')}
+</div></div>
+<div class="card"><div class="card-hd"><h3>✅ Past Consultations</h3></div><div class="card-bd" style="overflow-x:auto"><table class="pt-table"><thead><tr><th>Patient</th><th>Type</th><th>Date</th><th>Duration</th><th>Status</th><th>Notes</th></tr></thead><tbody>
+  <tr><td><strong>Sara Malik</strong></td><td><span class="cons-chip cc-up">📹 Video</span></td><td>May 10, 2026</td><td>30 min</td><td><span class="st-chip st-active">✓ Completed</span></td><td style="font-size:.78rem;color:var(--gray-500)">BP controlled, continue meds</td></tr>
+  <tr><td><strong>Muhammad Hassan</strong></td><td><span class="cons-chip cc-up">📞 Phone</span></td><td>Apr 28, 2026</td><td>20 min</td><td><span class="st-chip st-active">✓ Completed</span></td><td style="font-size:.78rem;color:var(--gray-500)">Echo results reviewed</td></tr>
+  <tr><td><strong>Fatima Khan</strong></td><td><span class="cons-chip" style="background:#f3e8ff;color:#7c3aed">🏥 In-Person</span></td><td>Mar 30, 2026</td><td>45 min</td><td><span class="st-chip st-active">✓ Completed</span></td><td style="font-size:.78rem;color:var(--gray-500)">HbA1c follow-up, adjusted Metformin</td></tr>
+  <tr><td><strong>Imran Ali</strong></td><td><span class="cons-chip cc-up">📹 Video</span></td><td>Mar 12, 2026</td><td>30 min</td><td><span class="st-chip st-active">✓ Completed</span></td><td style="font-size:.78rem;color:var(--gray-500)">Diuretic dose increased</td></tr>
+</tbody></table></div></div>`;}
+function doctorQA(){return hd('👨‍⚕️ Physician Dashboard','Patient Questions',today())+`
+<div class="card"><div class="card-hd"><h3>💬 Pending Your Reply <span style="font-size:.72rem;background:var(--red);color:#fff;padding:2px 8px;border-radius:50px;margin-left:4px">12</span></h3></div><div class="card-bd">
+  ${[{av:'AR',bg:'var(--blue-dark),var(--blue)',n:'Ahmed Raza',sp:'Cardiology · 10 min ago',urg:true,q:'Doctor, I am experiencing chest pain that radiates to my left arm when I climb stairs. Should I go to the ER or wait for my appointment tomorrow?'},{av:'NB',bg:'#be185d,#ec4899',n:'Nadia Baig',sp:'Cardiology · 2 hours ago',urg:false,q:'My heart sometimes skips a beat, especially at night. My Holter monitor says "rare PVCs". Is this dangerous?'},{av:'MH',bg:'#0891b2,#06b6d4',n:'Muhammad Hassan',sp:'Cardiology · 4 hours ago',urg:false,q:'Can I take Aspirin 75mg daily with my Clopidogrel? I am worried about bleeding risk.'},{av:'LP',bg:'#d97706,#f59e0b',n:'Linda Patel',sp:'Endocrinology · Jun 2',urg:false,q:'What is the ideal HbA1c target for a 55-year-old diabetic patient with no complications?'},{av:'AM',bg:'#7c3aed,#8b5cf6',n:'Aisha Mirza',sp:'Cardiology · May 30',urg:false,q:'Are palpitations always a sign of a serious heart problem, or can they be harmless?'}].map(q=>`<div class="qa-item"><div class="qa-top"><div class="qa-av" style="background:linear-gradient(135deg,${q.bg})">${q.av}</div><div class="qa-meta"><div class="qa-pname">${q.n}${q.urg?'<span class="qa-urgent">⚡ Urgent</span>':''}</div><div class="qa-spec">${q.sp}</div></div></div><div class="qa-q">"${q.q}"</div><div class="qa-actions"><button class="qa-btn reply" onclick="showToast('Reply editor opened')">✏️ Reply Now</button><button class="qa-btn" onclick="showToast('Opening patient file...')">📋 Patient File</button><button class="qa-btn" onclick="showToast('Calling patient...')">📞 Call</button></div></div>`).join('')}
+</div></div>
+<div class="card"><div class="card-hd"><h3>✅ Recently Answered</h3></div><div class="card-bd">
+  ${[{n:'Michael C.',q:'What does an ejection fraction of 45% mean?',a:'An ejection fraction of 45% falls in the mildly reduced range. Normal is above 55%. This warrants further workup including echocardiography and lifestyle modification.',d:'May 28, 2026'},{n:'David T.',q:'Is it safe to fly with atrial fibrillation?',a:'Most patients with well-controlled AF can fly safely. Ensure anticoagulation is therapeutic and avoid dehydration during the flight.',d:'May 25, 2026'}].map(i=>`<div style="padding:16px 0;border-bottom:1px solid var(--gray-100)"><div style="font-weight:600;font-size:.84rem;margin-bottom:8px;display:flex;gap:7px"><span>✅</span><span><strong>${i.n}:</strong> ${i.q}</span></div><div style="font-size:.82rem;color:var(--gray-500);line-height:1.6;padding-left:20px;border-left:2px solid var(--blue-light);margin-bottom:6px">${i.a}</div><div style="font-size:.72rem;color:var(--gray-400)">${i.d} · <span style="font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:50px;background:var(--blue-light);color:var(--blue)">answered</span></div></div>`).join('')}
+</div></div>`;}
+function doctorPrescriptions(){return hd('👨‍⚕️ Physician Dashboard','Prescriptions',today(),`<button class="btn-w" onclick="showToast('Opening prescription pad...')">💊 New Prescription</button>`)+`
+<div class="card"><div class="card-hd"><h3>💊 Recent Prescriptions Issued</h3></div><div class="card-bd" style="overflow-x:auto"><table class="pt-table"><thead><tr><th>Patient</th><th>Medication</th><th>Dosage</th><th>Issued</th><th>Refills</th><th>Status</th></tr></thead><tbody>
+  <tr><td><strong>Fatima Khan</strong></td><td>Furosemide</td><td>40mg — Once daily</td><td>Jun 1, 2026</td><td>3 remaining</td><td><span class="st-chip st-active">Active</span></td></tr>
+  <tr><td><strong>Ahmed Raza</strong></td><td>Bisoprolol</td><td>5mg — Once daily</td><td>Today</td><td>2 remaining</td><td><span class="st-chip st-new">Pending</span></td></tr>
+  <tr><td><strong>Sara Malik</strong></td><td>Amlodipine</td><td>10mg — Once daily</td><td>May 20, 2026</td><td>1 remaining</td><td><span class="st-chip st-followup">Refill needed</span></td></tr>
+  <tr><td><strong>Imran Ali</strong></td><td>Clopidogrel</td><td>75mg — Once daily</td><td>May 10, 2026</td><td>0 remaining</td><td><span class="st-chip st-critical">Expired</span></td></tr>
+</tbody></table></div></div>`;}
+function doctorArticleForm(){return hd('👨‍⚕️ Physician Dashboard','Submit an Article',today())+`
+<div class="card"><div class="card-hd"><h3>✍️ New Article Submission</h3><span style="font-size:.76rem;color:var(--gray-400)">All submissions reviewed within 48 hours</span></div><div class="card-bd">
+  <div class="submit-success" id="submitSuccess"><div style="font-size:3.5rem;margin-bottom:14px">✅</div><h3 style="font-family:var(--font-display);font-size:1.3rem;color:var(--gray-900);margin-bottom:8px">Article Submitted Successfully!</h3><p style="font-size:.88rem;color:var(--gray-600);margin-bottom:20px">Your article has been sent to our editorial team. You'll receive a notification within 24–48 hours.</p><button class="art-submit-btn" style="width:auto;padding:10px 24px" onclick="resetForm()">✍️ Submit Another Article</button></div>
+  <div class="art-form" id="artForm">
+    <div class="form-row"><div class="form-group"><label>Article Title *</label><input type="text" id="artTitle" placeholder="e.g. Understanding Atrial Fibrillation in 2026"></div><div class="form-group"><label>Medical Specialty *</label><select id="artSpec"><option value="">Select specialty...</option><option>Cardiology</option><option>Neurology</option><option>Endocrinology</option><option>Gastroenterology</option><option>Nephrology</option><option>Pulmonology</option><option>Psychiatry</option><option>Pediatrics</option><option>Oncology</option><option>Dermatology</option><option>Internal Medicine</option><option>Family Medicine</option><option>Emergency Medicine</option><option>Other</option></select></div></div>
+    <div class="form-row"><div class="form-group"><label>Target Audience *</label><select id="artAudience"><option value="">Select audience...</option><option>General Public / Patients</option><option>Healthcare Professionals</option><option>Medical Students</option><option>Both (Patient + Professional)</option></select></div><div class="form-group"><label>Article Type *</label><select id="artType"><option value="">Select type...</option><option>Clinical Overview</option><option>Drug / Medication Guide</option><option>Symptom Guide</option><option>Research Update</option><option>Patient Education</option><option>Procedure Guide</option><option>Clinical Reference</option></select></div></div>
+    <div class="form-group"><label>Article Abstract / Summary * <span style="font-weight:400;color:var(--gray-400)">(200–400 words)</span></label><textarea id="artAbstract" rows="5" placeholder="Provide a concise summary of your article — key points, clinical relevance, and target readers."></textarea></div>
+    <!-- FEATURED IMAGE UPLOAD -->
+    <div class="form-group">
+      <label>📸 Featured Image <span style="font-weight:400;color:var(--gray-400)">(Upload a cover image for your article)</span></label>
+      <div class="feat-img-box" id="featImgBox" onclick="document.getElementById('featImgInput').click()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleImgDrop(event)">
+        <div id="featImgPlaceholder">
+          <div style="font-size:2.8rem;margin-bottom:10px">🖼️</div>
+          <div style="font-weight:700;color:var(--gray-700);margin-bottom:4px;font-size:.9rem">Upload Featured Image</div>
+          <div style="font-size:.77rem;color:var(--gray-400)">Click to browse or drag &amp; drop · JPG, PNG, WebP · Max 5MB</div>
+          <div style="font-size:.72rem;color:var(--gray-400);margin-top:4px">Recommended: 1200 × 630px (16:9 ratio)</div>
+        </div>
+        <img id="featImgPreview" style="display:none;width:100%;max-height:220px;object-fit:cover;border-radius:8px" alt="Featured Image Preview">
+        <div id="featImgActions" style="display:none;margin-top:10px;display:none;justify-content:center;gap:8px">
+          <button class="art-submit-btn draft" style="width:auto;padding:7px 16px;font-size:.76rem" onclick="event.stopPropagation();document.getElementById('featImgInput').click()">🔄 Change</button>
+          <button class="art-submit-btn draft" style="width:auto;padding:7px 16px;font-size:.76rem;color:var(--red);border-color:var(--red)" onclick="event.stopPropagation();clearFeatImg()">✕ Remove</button>
+        </div>
+      </div>
+      <input type="file" id="featImgInput" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="handleImgSelect(event)">
+    </div>
+    <!-- RICH TEXT EDITOR -->
+    <div class="form-group">
+      <label>📝 Article Content <span style="font-weight:400;color:var(--gray-400)">(Full article body — required)</span></label>
+      <div class="rte-wrap">
+        <div class="rte-toolbar">
+          <div class="rte-tb-group">
+            <select class="rte-select" onchange="execFmt('formatBlock',this.value);this.value=''" title="Heading">
+              <option value="">Paragraph</option>
+              <option value="h2">Heading 2</option>
+              <option value="h3">Heading 3</option>
+              <option value="h4">Heading 4</option>
+            </select>
+          </div>
+          <div class="rte-tb-group">
+            <button class="rte-btn" onclick="execFmt('bold')" title="Bold"><strong>B</strong></button>
+            <button class="rte-btn" onclick="execFmt('italic')" title="Italic"><em>I</em></button>
+            <button class="rte-btn" onclick="execFmt('underline')" title="Underline"><u>U</u></button>
+            <button class="rte-btn" onclick="execFmt('strikeThrough')" title="Strikethrough"><s>S</s></button>
+          </div>
+          <div class="rte-tb-group">
+            <button class="rte-btn" onclick="execFmt('justifyLeft')" title="Align Left">≡L</button>
+            <button class="rte-btn" onclick="execFmt('justifyCenter')" title="Center">≡C</button>
+            <button class="rte-btn" onclick="execFmt('justifyRight')" title="Align Right">≡R</button>
+          </div>
+          <div class="rte-tb-group">
+            <button class="rte-btn" onclick="execFmt('insertUnorderedList')" title="Bullet List">• List</button>
+            <button class="rte-btn" onclick="execFmt('insertOrderedList')" title="Numbered List">1. List</button>
+            <button class="rte-btn" onclick="execFmt('indent')" title="Indent">→ In</button>
+            <button class="rte-btn" onclick="execFmt('outdent')" title="Outdent">← Out</button>
+          </div>
+          <div class="rte-tb-group">
+            <input type="color" class="rte-color" id="rteFontColor" title="Font Color" onchange="execFmt('foreColor',this.value)">
+            <button class="rte-btn" onclick="execFmt('removeFormat')" title="Clear Formatting">✕ Clear</button>
+          </div>
+          <div class="rte-tb-group">
+            <button class="rte-btn" onclick="insertRteLink()" title="Insert Link">🔗 Link</button>
+            <button class="rte-btn" onclick="insertRteTable()" title="Insert Table">⊞ Table</button>
+            <button class="rte-btn" onclick="insertRteQuote()" title="Blockquote">❝ Quote</button>
+            <button class="rte-btn" onclick="insertRteHR()" title="Divider">─ HR</button>
+          </div>
+          <div class="rte-tb-group">
+            <button class="rte-btn" onclick="document.execCommand('undo')" title="Undo">↩ Undo</button>
+            <button class="rte-btn" onclick="document.execCommand('redo')" title="Redo">↪ Redo</button>
+          </div>
+          <div class="rte-tb-group rte-wordcount-wrap">
+            <span class="rte-wc-label">Words: <strong id="rteWordCount">0</strong></span>
+          </div>
+        </div>
+        <div class="rte-editor" id="rteEditor" contenteditable="true" oninput="updateWordCount()" onkeydown="handleRteKey(event)" placeholder="Start writing your full article here. Use the toolbar above to format headings, bold text, bullet lists, and more..."></div>
+        <div class="rte-footer">
+          <span style="font-size:.72rem;color:var(--gray-400)">💡 Tip: Use Heading 2 for main sections, Heading 3 for subsections. Add clinical bullet points and references inline.</span>
+          <span id="rteCharCount" style="font-size:.72rem;color:var(--gray-400)">0 characters</span>
+        </div>
+      </div>
+    </div>
+    <div class="form-group"><label>Key Clinical Points <span style="font-weight:400;color:var(--gray-400)">(one per line)</span></label><textarea id="artPoints" rows="4" placeholder="• Point 1&#10;• Point 2&#10;• Point 3"></textarea></div>
+    <div class="form-row"><div class="form-group"><label>Primary Reference (PubMed / DOI) *</label><input type="url" id="artRef" placeholder="https://pubmed.ncbi.nlm.nih.gov/..."></div><div class="form-group"><label>Estimated Word Count</label><select id="artWords"><option>1,000–1,500 words</option><option>1,500–2,500 words</option><option>2,500–4,000 words</option><option>4,000+ words</option></select></div></div>
+    <div class="form-group"><label>Conflict of Interest Disclosure *</label><select id="artCOI"><option value="">Select...</option><option>None — I have no conflicts of interest related to this article</option><option>Pharmaceutical — I have received funding / honoraria from a pharma company</option><option>Research — I received research funding related to this topic</option><option>Advisory — I serve on an advisory board related to this topic</option><option>Other — I will describe in the notes below</option></select></div>
+    <div style="background:#fffbeb;border-left:4px solid var(--amber);border-radius:6px;padding:12px 16px;font-size:.8rem;color:#92400e;line-height:1.6">⚠️ <strong>Editorial Notice:</strong> All submitted articles undergo a multi-stage review process. By submitting, you confirm this is original work and you hold valid medical licensure. View our <a href="#" style="color:var(--blue);font-weight:600">Editorial Policy →</a></div>
+    <div class="art-btn-row"><button class="art-submit-btn draft" onclick="showToast('Saved as draft ✓')">💾 Save as Draft</button><button class="art-submit-btn" onclick="submitArticle()">📤 Submit for Review</button></div>
+  </div>
+</div></div>`;}
+function doctorArticles(){return hd('👨‍⚕️ Physician Dashboard','My Articles',today(),`<button class="btn-w" onclick="switchTab('submit-article')">+ Write New Article</button>`)+`
+<div class="card"><div class="card-hd"><h3>📰 Published & Draft Articles</h3><span style="font-size:.76rem;color:var(--gray-400)">47 total</span></div><div class="card-bd" style="overflow-x:auto"><table class="pt-table"><thead><tr><th>Title</th><th>Category</th><th>Published</th><th>Views</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+  ${[['Hypertension Management Guidelines 2025','Cardiology','Jun 1, 2026','14,200','as-live','Live'],['Beta Blockers: Complete Clinical Guide','Cardiology','May 20, 2026','8,720','as-live','Live'],['ECG Interpretation for Beginners','Cardiology','—','—','as-draft','Draft'],["Heart Failure: A Patient's Guide",'Cardiology','—','—','as-review','Review'],['Understanding Heart Failure: Signs, Stages & Treatment','Cardiology','Jan 15, 2026','12,450','as-live','Live'],['Chest Pain Differential: A Practical Guide','Cardiology','May 2, 2026','4,110','as-live','Live']].map(a=>`<tr><td style="font-weight:600;font-size:.84rem;max-width:220px">${a[0]}</td><td><span style="font-size:.68rem;font-weight:700;padding:2px 9px;border-radius:50px;background:var(--blue-light);color:var(--blue)">${a[1]}</span></td><td>${a[2]}</td><td>${a[3]!=='—'?'<strong>'+a[3]+'</strong>':a[3]}</td><td><span class="art-status ${a[4]}">${a[5]}</span></td><td><button class="tbl-btn" onclick="showToast('Opening editor...')">Edit</button><button class="tbl-btn view" onclick="showToast('Opening article...')">View</button></td></tr>`).join('')}
+</tbody></table></div></div>`;}
+function doctorEarnings(){return hd('👨‍⚕️ Physician Dashboard','Earnings',today())+`
+<div class="stats-row"><div class="stat-c"><div class="stat-ic ic2">💰</div><strong>$3,240</strong><span>This Month</span><div class="stat-tag tt-g">↑ 18%</div><div class="stat-bg">💰</div></div><div class="stat-c"><div class="stat-ic ic1">📈</div><strong>$38,120</strong><span>This Year</span><div class="stat-tag tt-b">On track</div><div class="stat-bg">📈</div></div><div class="stat-c"><div class="stat-ic ic3">⏳</div><strong>$840</strong><span>Pending</span><div class="stat-tag tt-a">Processing</div><div class="stat-bg">⏳</div></div><div class="stat-c"><div class="stat-ic ic2">📅</div><strong>142</strong><span>Total Consultations</span><div class="stat-tag tt-g">This year</div><div class="stat-bg">📅</div></div></div>
+<div class="card"><div class="card-hd"><h3>💰 Monthly Earnings (2026)</h3></div><div class="card-bd"><div class="chart-bars" style="height:120px">${[['Jan',55],['Feb',68],['Mar',60],['Apr',80],['May',74],['Jun',92]].map(([m,h])=>`<div class="cb-wrap"><div class="cb-bar" style="height:${h}%;${m==='Jun'?'background:linear-gradient(180deg,var(--teal),var(--blue))':''}"></div><div class="cb-label">${m}</div></div>`).join('')}</div></div></div>`;}
+function doctorReviews(){return hd('👨‍⚕️ Physician Dashboard','Reviews & Ratings',today())+`
+<div class="g2">
+  <div class="card"><div class="card-hd"><h3>⭐ Patient Reviews</h3></div><div class="card-bd"><div class="rev-summary"><div class="rev-big">4.9</div><div><div class="stars-row">★★★★★</div><div style="font-size:.74rem;color:var(--gray-400)">Based on 312 reviews</div></div></div>${[['Sara Malik','SM','#e11d48,#f43f5e','Explained my condition in terms I could actually understand. Excellent doctor.','June 3, 2026 · Video'],['Fatima Khan','FK','#059669,#10b981','Very thorough and patient. Best cardiology consultation I have had.','June 1, 2026 · Phone'],['Ahmed Raza','AR','#7c3aed,#8b5cf6','Fast response to my urgent query. Felt genuinely cared for.','May 28, 2026 · Chat']].map(([n,i,bg,t,d])=>`<div class="rev-item"><div class="rev-hd"><div class="rev-av" style="background:linear-gradient(135deg,${bg})">${i}</div><span class="rev-name">${n}</span><span class="rev-stars">★★★★★</span></div><div class="rev-text">"${t}"</div><div class="rev-date">${d}</div></div>`).join('')}</div></div>
+  <div class="card"><div class="card-hd"><h3>📊 Rating Breakdown</h3></div><div class="card-bd">${[[5,87],[4,9],[3,3],[2,1],[1,0]].map(([s,p])=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><span style="font-size:.78rem;width:15px">${s}★</span><div style="flex:1;height:8px;background:var(--gray-200);border-radius:4px;overflow:hidden"><div style="height:100%;width:${p}%;background:var(--amber);border-radius:4px"></div></div><span style="font-size:.74rem;color:var(--gray-400);width:30px">${p}%</span></div>`).join('')}</div></div>
+</div>`;}
+function doctorProfile(){return hd('👨‍⚕️ Physician Dashboard','Physician Profile',today(),`<button class="btn-w" onclick="showToast('Edit mode enabled')">✏️ Edit Profile</button>`)+`
+<div class="g2">
+  <div class="card"><div class="card-hd"><h3>👨‍⚕️ Personal Information</h3></div><div class="card-bd">${[['Full Name','Dr. Javed Kumbhar'],['Email Address','dr.kumbhar@medauthority.com'],['Phone Number','+1 (555) 987-6543'],['Date of Birth','September 5, 1978'],['Country','United States'],['Account Type','Specialist Doctor'],['Primary Specialty','Cardiology'],['Medical License','MD-77823441'],['Regulatory Body','American Medical Association (AMA)'],['Current Institution','New York Cardiac Center'],['City of Practice','New York, NY'],['Member Since','October 2024']].map(([l,v])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--gray-100)"><span style="font-size:.8rem;color:var(--gray-500);font-weight:600">${l}</span><span style="font-size:.86rem;font-weight:600;color:var(--gray-900)">${v}</span></div>`).join('')}</div></div>
+  <div class="card"><div class="card-hd"><h3>📊 Contribution Stats</h3></div><div class="card-bd"><div class="g2" style="gap:12px">${[['✍️','47','Articles published','ic1'],['💬','312','Questions answered','ic2'],['👁️','58.2K','Total article views','ic3'],['⭐','4.9','Average rating','ic4']].map(([ico,n,l,ic])=>`<div style="background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:18px;text-align:center"><div class="stat-ic ${ic}" style="margin:0 auto 10px">${ico}</div><div style="font-family:var(--font-display);font-size:1.6rem;font-weight:700;color:var(--gray-900)">${n}</div><div style="font-size:.76rem;color:var(--gray-500);margin-top:3px">${l}</div></div>`).join('')}</div></div></div>
+</div>`;}
+function settingsPanel(role){return hd(`${role==='patient'?'🏥 Patient':'👨‍⚕️ Physician'} Dashboard`,'Settings',today())+`
+<div class="card"><div class="card-hd"><h3>⚙️ Account Settings</h3></div><div class="card-bd">${[['🔒','Change Password','Update your account password','Change',''],['📧','Email Notifications','Manage which emails you receive','Manage',''],['🔔','Push Notifications','Control in-app alert preferences','Configure',''],['🛡️','Two-Factor Authentication','Add an extra layer of account security','Enable',''],['🌍','Language & Region','Set your preferred language and timezone','Update',''],['🗑️','Delete Account','Permanently delete your account and all data','Delete','danger']].map(([ico,t,d,a,ty])=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 0;border-bottom:1px solid var(--gray-100)"><div style="display:flex;align-items:center;gap:12px"><span style="font-size:1.3rem">${ico}</span><div><div style="font-weight:600;font-size:.9rem">${t}</div><div style="font-size:.78rem;color:var(--gray-400)">${d}</div></div></div><button class="ca-btn${ty==='danger'?' danger':''}" onclick="showToast('Opening ${t.toLowerCase()}...')">${a}</button></div>`).join('')}</div></div>`;}
+function openPatient(init,name,age,gender,diag,status){
+  document.getElementById('mAv').textContent=init;
+  document.getElementById('mName').textContent=name;
+  document.getElementById('mDiag').textContent=diag;
+  document.getElementById('miName').textContent=name;
+  document.getElementById('miAge').textContent=age+' / '+(gender==='M'?'Male':'Female');
+  document.getElementById('miDiag').textContent=diag;
+  const st=document.getElementById('miSt');
+  const map={Critical:['🔴 Critical','var(--red)'],Active:['🟢 Active','var(--green)'],'Follow-up':['🟡 Follow-up','#d97706'],New:['🔵 New','var(--blue)']};
+  const [label,color]=map[status]||['Unknown','var(--gray-600)'];
+  st.textContent=label;st.style.color=color;
+  document.getElementById('patientModal').classList.add('show');
+}
+function setFlt(el,f){document.querySelectorAll('.flt').forEach(x=>x.classList.remove('on'));el.classList.add('on');const rows=document.querySelectorAll('#ptBody tr');if(rows.length)rows.forEach(r=>{r.style.display=(f==='all'||r.dataset.s===f)?'':'none';});}
+function filterPt(q){const rows=document.querySelectorAll('#ptBody tr');if(rows.length)rows.forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';});}
+function setAvail(type,btn){document.querySelectorAll('.avail-btn').forEach(b=>b.className='avail-btn');btn.classList.add(type==='online'?'ag':type==='busy'?'aa':'ao');showToast('Status set to '+(type==='online'?'Available':type==='busy'?'Busy':'Offline'));}
+function submitArticle(){
+  const t=document.getElementById('artTitle')?.value.trim(),s=document.getElementById('artSpec')?.value,a=document.getElementById('artAudience')?.value,ty=document.getElementById('artType')?.value,ab=document.getElementById('artAbstract')?.value.trim(),ref=document.getElementById('artRef')?.value.trim(),coi=document.getElementById('artCOI')?.value;
+  if(!t||!s||!a||!ty||!ab||!ref||!coi){showToast('⚠️ Please fill in all required fields');return;}
+  document.getElementById('artForm').style.display='none';document.getElementById('submitSuccess').classList.add('show');
+}
+function resetForm(){document.getElementById('artForm').style.display='flex';document.getElementById('submitSuccess').classList.remove('show');}
+let rating=0;
+function rateStar(e){const v=parseInt(e.target.dataset.v);if(!v)return;rating=v;const lbls=['','Poor','Fair','Good','Very Good','Excellent!'];const lbl=document.getElementById('ratingLbl');lbl.textContent=lbls[v]+' ('+v+'/5)';lbl.style.color=v>=4?'var(--green)':v===3?'var(--amber)':'var(--red)';document.querySelectorAll('#stars span').forEach((s,i)=>{s.className=i<v?'on':'';});}
+function submitReview(){if(!rating){showToast('⚠️ Please select a star rating');return;}document.getElementById('reviewModal').classList.remove('show');showToast('✓ Review submitted — thank you!');rating=0;}
+setRole('doctor');
+// RTE Functions
+function execFmt(cmd,val){document.getElementById('rteEditor').focus();document.execCommand(cmd,false,val||null);updateWordCount();}
+function updateWordCount(){const e=document.getElementById('rteEditor');const txt=e.innerText||'';const words=txt.trim().split(/\s+/).filter(w=>w.length>0).length;const chars=txt.length;document.getElementById('rteWordCount').textContent=words;const cc=document.getElementById('rteCharCount');if(cc)cc.textContent=chars+' characters';}
+function insertRteLink(){const url=prompt('Enter URL:','https://');if(url)execFmt('createLink',url);}
+function insertRteTable(){const rows=parseInt(prompt('Number of rows:','3')||'3');const cols=parseInt(prompt('Number of columns:','3')||'3');if(!rows||!cols)return;let html='<table><thead><tr>';for(let c=0;c<cols;c++)html+=`<th>Column ${c+1}</th>`;html+='</tr></thead><tbody>';for(let r=0;r<rows-1;r++){html+='<tr>';for(let c=0;c<cols;c++)html+='<td>Cell</td>';html+='</tr>';}html+='</tbody></table><p></p>';document.getElementById('rteEditor').focus();document.execCommand('insertHTML',false,html);updateWordCount();}
+function insertRteQuote(){document.getElementById('rteEditor').focus();document.execCommand('insertHTML',false,'<blockquote>Your clinical quote or key finding here</blockquote><p></p>');updateWordCount();}
+function insertRteHR(){document.getElementById('rteEditor').focus();document.execCommand('insertHTML',false,'<hr><p></p>');updateWordCount();}
+function handleRteKey(e){if(e.key==='Tab'){e.preventDefault();execFmt('indent');}}
+// Featured Image Functions
+function handleImgSelect(evt){const file=evt.target.files[0];if(file)loadFeatImg(file);}
+function handleImgDrop(evt){evt.preventDefault();document.getElementById('featImgBox').classList.remove('drag-over');const file=evt.dataTransfer.files[0];if(file&&file.type.startsWith('image/'))loadFeatImg(file);}
+function loadFeatImg(file){if(file.size>5*1024*1024){showToast('⚠️ Image too large. Max 5MB.');return;}const reader=new FileReader();reader.onload=e=>{const prev=document.getElementById('featImgPreview');const ph=document.getElementById('featImgPlaceholder');const act=document.getElementById('featImgActions');prev.src=e.target.result;prev.style.display='block';ph.style.display='none';act.style.display='flex';showToast('✓ Image uploaded successfully');};reader.readAsDataURL(file);}
+function clearFeatImg(){document.getElementById('featImgPreview').style.display='none';document.getElementById('featImgPlaceholder').style.display='block';document.getElementById('featImgActions').style.display='none';document.getElementById('featImgInput').value='';}
+</script>
+</body>
+</html>

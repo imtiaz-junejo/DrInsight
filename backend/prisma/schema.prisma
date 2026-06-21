@@ -1,0 +1,378 @@
+// Prisma schema for DrInsight healthcare platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  DOCTOR
+  PATIENT
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING
+}
+
+enum DoctorAvailability {
+  AVAILABLE
+  BUSY
+  OFFLINE
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum ConsultationType {
+  VIDEO
+  AUDIO
+  CHAT
+  IN_PERSON
+}
+
+enum BlogStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  FILE
+  SYSTEM
+}
+
+enum NotificationType {
+  APPOINTMENT
+  MESSAGE
+  SYSTEM
+  REVIEW
+  PRESCRIPTION
+}
+
+enum VideoProvider {
+  WEBRTC
+  AGORA
+  TWILIO
+  DAILY
+}
+
+enum QuestionStatus {
+  PENDING
+  ANSWERED
+  REJECTED
+}
+
+model User {
+  id            String     @id @default(cuid())
+  email         String     @unique
+  passwordHash  String
+  firstName     String
+  lastName      String
+  role          UserRole   @default(PATIENT)
+  status        UserStatus @default(PENDING)
+  avatarUrl     String?
+  phone         String?
+  emailVerified Boolean    @default(false)
+  lastSeenAt    DateTime?
+  isOnline      Boolean    @default(false)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  doctorProfile   DoctorProfile?
+  patientProfile  PatientProfile?
+  refreshTokens   RefreshToken[]
+  blogPosts       BlogPost[]
+  sentMessages    Message[]       @relation("SentMessages")
+  notifications   Notification[]
+  answeredQuestions AskDoctorQuestion[] @relation("AnsweredBy")
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  revoked   Boolean  @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
+}
+
+model DoctorProfile {
+  id               String             @id @default(cuid())
+  userId           String             @unique
+  specialty        String
+  subSpecialty     String?
+  licenseNumber    String             @unique
+  bio              String?            @db.Text
+  experienceYears  Int                @default(0)
+  consultationFee  Decimal            @default(0) @db.Decimal(10, 2)
+  rating           Float              @default(0)
+  reviewCount      Int                @default(0)
+  availability     DoctorAvailability @default(OFFLINE)
+  languages        String[]           @default([])
+  education        String?            @db.Text
+  hospital         String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointments  Appointment[]  @relation("DoctorAppointments")
+  reviews       Review[]
+  conversations Conversation[] @relation("DoctorConversations")
+  prescriptions Prescription[] @relation("DoctorPrescriptions")
+
+  @@index([specialty])
+  @@index([availability])
+  @@map("doctor_profiles")
+}
+
+model PatientProfile {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  dateOfBirth      DateTime?
+  gender           String?
+  bloodGroup       String?
+  allergies        String[] @default([])
+  medicalHistory   String?  @db.Text
+  emergencyContact String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointments  Appointment[]  @relation("PatientAppointments")
+  reviews       Review[]
+  conversations Conversation[] @relation("PatientConversations")
+  prescriptions Prescription[] @relation("PatientPrescriptions")
+
+  @@map("patient_profiles")
+}
+
+model Appointment {
+  id               String            @id @default(cuid())
+  patientId        String
+  doctorId         String
+  scheduledAt      DateTime
+  durationMinutes  Int               @default(30)
+  status           AppointmentStatus @default(PENDING)
+  consultationType ConsultationType  @default(VIDEO)
+  reason           String?           @db.Text
+  notes            String?           @db.Text
+  meetingRoomId    String?
+  videoProvider    VideoProvider?
+  cancelledAt      DateTime?
+  cancelReason     String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  patient       PatientProfile @relation("PatientAppointments", fields: [patientId], references: [id])
+  doctor        DoctorProfile  @relation("DoctorAppointments", fields: [doctorId], references: [id])
+  conversation  Conversation?
+  review        Review?
+  prescription  Prescription?
+
+  @@index([patientId])
+  @@index([doctorId])
+  @@index([scheduledAt])
+  @@index([status])
+  @@map("appointments")
+}
+
+model BlogCategory {
+  id          String     @id @default(cuid())
+  name        String
+  slug        String     @unique
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  posts BlogPost[]
+
+  @@map("blog_categories")
+}
+
+model BlogPost {
+  id              String     @id @default(cuid())
+  title           String
+  slug            String     @unique
+  excerpt         String     @db.Text
+  content         String     @db.Text
+  coverImageUrl   String?
+  categoryId      String
+  authorId        String
+  status          BlogStatus @default(DRAFT)
+  readTimeMinutes Int        @default(5)
+  viewCount       Int        @default(0)
+  tags            String[]   @default([])
+  publishedAt     DateTime?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  category BlogCategory @relation(fields: [categoryId], references: [id])
+  author   User         @relation(fields: [authorId], references: [id])
+
+  @@index([categoryId])
+  @@index([authorId])
+  @@index([status])
+  @@index([publishedAt])
+  @@map("blog_posts")
+}
+
+model Conversation {
+  id            String    @id @default(cuid())
+  patientId     String
+  doctorId      String
+  appointmentId String?   @unique
+  lastMessageAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  patient     PatientProfile @relation("PatientConversations", fields: [patientId], references: [id])
+  doctor      DoctorProfile  @relation("DoctorConversations", fields: [doctorId], references: [id])
+  appointment Appointment?   @relation(fields: [appointmentId], references: [id])
+  messages    Message[]
+
+  @@unique([patientId, doctorId])
+  @@index([patientId])
+  @@index([doctorId])
+  @@map("conversations")
+}
+
+model Message {
+  id             String      @id @default(cuid())
+  conversationId String
+  senderId       String
+  content        String      @db.Text
+  type           MessageType @default(TEXT)
+  attachmentUrl  String?
+  readAt         DateTime?
+  createdAt      DateTime    @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation("SentMessages", fields: [senderId], references: [id])
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([createdAt])
+  @@map("messages")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  body      String           @db.Text
+  data      Json?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([readAt])
+  @@map("notifications")
+}
+
+model Review {
+  id            String   @id @default(cuid())
+  doctorId      String
+  patientId     String
+  appointmentId String?  @unique
+  rating        Int
+  comment       String?  @db.Text
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  doctor      DoctorProfile  @relation(fields: [doctorId], references: [id])
+  patient     PatientProfile @relation(fields: [patientId], references: [id])
+  appointment Appointment?   @relation(fields: [appointmentId], references: [id])
+
+  @@index([doctorId])
+  @@index([patientId])
+  @@map("reviews")
+}
+
+model Prescription {
+  id            String   @id @default(cuid())
+  appointmentId String   @unique
+  doctorId      String
+  patientId     String
+  diagnosis     String?
+  items         Json
+  notes         String?  @db.Text
+  pdfUrl        String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  appointment Appointment    @relation(fields: [appointmentId], references: [id])
+  doctor      DoctorProfile  @relation("DoctorPrescriptions", fields: [doctorId], references: [id])
+  patient     PatientProfile @relation("PatientPrescriptions", fields: [patientId], references: [id])
+
+  @@index([doctorId])
+  @@index([patientId])
+  @@map("prescriptions")
+}
+
+model AskDoctorQuestion {
+  id           String         @id @default(cuid())
+  category     String
+  question     String         @db.Text
+  answer       String?        @db.Text
+  answeredById String?
+  submitterName String?
+  isAnonymous  Boolean        @default(false)
+  status       QuestionStatus @default(PENDING)
+  createdAt    DateTime       @default(now())
+  answeredAt   DateTime?
+
+  answeredBy User? @relation("AnsweredBy", fields: [answeredById], references: [id])
+
+  @@index([category])
+  @@index([status])
+  @@map("ask_doctor_questions")
+}
+
+model ContactSubmission {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String?
+  message   String   @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("contact_submissions")
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@map("newsletter_subscribers")
+}
