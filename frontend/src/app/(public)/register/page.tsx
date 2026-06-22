@@ -3,12 +3,15 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
 import { AuthLeftPanel } from "@/components/auth/AuthLeftPanel";
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
 import { Logo } from "@/components/layout/Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { useAuthStore, type AuthUser } from "@/store/auth.store";
 
 const loginFeatures = [
   { icon: "🔖", title: "Save Articles & Guides", desc: "Bookmark any article for quick access anytime" },
@@ -23,6 +26,31 @@ export default function RegisterPage() {
   const [accountType, setAccountType] = useState<"patient" | "physician" | "">("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const setAuth = useAuthStore((state) => state.setAuth);
+  const registerMutation = useMutation({
+    mutationFn: async (payload: {
+      email: string;
+      password: string;
+      firstName: string;
+      lastName: string;
+      role: "PATIENT" | "DOCTOR";
+      specialty?: string;
+      licenseNumber?: string;
+    }) => {
+      const { data } = await api.post<{
+        accessToken: string;
+        refreshToken: string;
+        user: AuthUser;
+      }>("/auth/register", payload);
+      return data;
+    },
+    onSuccess: (data) => {
+      setAuth(data.user, data.accessToken, data.refreshToken);
+      setSuccess(true);
+      router.replace(data.user.role === "DOCTOR" ? "/doctor" : "/patient");
+    },
+    onError: () => setError("Unable to create account. Check your details and try again."),
+  });
 
   const leftContent =
     accountType === "physician" ? (
@@ -58,7 +86,7 @@ export default function RegisterPage() {
       </div>
     );
 
-  function handleRegister(e: React.FormEvent) {
+  function handleRegister(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
     if (step < 2) {
@@ -69,8 +97,24 @@ export default function RegisterPage() {
       setStep(2);
       return;
     }
-    setSuccess(true);
-    setTimeout(() => router.push("/patient"), 2000);
+    const fd = new FormData(e.currentTarget);
+    const firstName = String(fd.get("firstName") || "").trim();
+    const lastName = String(fd.get("lastName") || "").trim();
+    const email = String(fd.get("email") || "").trim();
+    const password = String(fd.get("password") || "");
+    if (!firstName || !lastName || !email || password.length < 8) {
+      setError("Please complete all required fields.");
+      return;
+    }
+    registerMutation.mutate({
+      firstName,
+      lastName,
+      email,
+      password,
+      role: accountType === "physician" ? "DOCTOR" : "PATIENT",
+      specialty: accountType === "physician" ? "General Medicine" : undefined,
+      licenseNumber: accountType === "physician" ? `PENDING-${Date.now()}` : undefined,
+    });
   }
 
   return (
@@ -192,20 +236,20 @@ export default function RegisterPage() {
                       <div className="grid gap-4 sm:grid-cols-2">
                         <div>
                           <label className="mb-1.5 block text-[.84rem] font-semibold text-gray-700">First Name</label>
-                          <Input required placeholder="John" />
+                          <Input required name="firstName" placeholder="John" />
                         </div>
                         <div>
                           <label className="mb-1.5 block text-[.84rem] font-semibold text-gray-700">Last Name</label>
-                          <Input required placeholder="Smith" />
+                          <Input required name="lastName" placeholder="Smith" />
                         </div>
                       </div>
                       <div>
                         <label className="mb-1.5 block text-[.84rem] font-semibold text-gray-700">Email Address</label>
-                        <Input required type="email" placeholder="john@example.com" />
+                        <Input required name="email" type="email" placeholder="john@example.com" />
                       </div>
                       <div>
                         <label className="mb-1.5 block text-[.84rem] font-semibold text-gray-700">Password</label>
-                        <Input required type="password" placeholder="Create a strong password" minLength={8} />
+                        <Input required name="password" type="password" placeholder="Create a strong password" minLength={8} />
                       </div>
                       <label className="flex items-start gap-2 text-[.82rem] text-gray-600">
                         <input type="checkbox" required className="mt-1 accent-blue" />
@@ -222,8 +266,8 @@ export default function RegisterPage() {
                         <Button type="button" variant="ghost" onClick={() => setStep(1)}>
                           ← Back
                         </Button>
-                        <Button type="submit" size="full">
-                          🎉 Create My Free Account
+                        <Button type="submit" size="full" disabled={registerMutation.isPending}>
+                          {registerMutation.isPending ? "Creating account..." : "🎉 Create My Free Account"}
                         </Button>
                       </div>
                     </>

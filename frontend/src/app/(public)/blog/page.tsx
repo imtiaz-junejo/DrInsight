@@ -5,31 +5,20 @@ import Link from "next/link";
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { blogPosts } from "@/lib/blog-data";
 import { cn } from "@/lib/utils";
-
-const filters = [
-  { key: "all", label: "All" },
-  { key: "cardiology", label: "❤️ Cardiology" },
-  { key: "neurology", label: "🧠 Neurology" },
-  { key: "diabetes", label: "🩸 Diabetes" },
-  { key: "mental", label: "🧘 Mental Health" },
-  { key: "womens", label: "🤰 Women's Health" },
-  { key: "pediatrics", label: "👶 Pediatrics" },
-  { key: "nutrition", label: "🍎 Nutrition" },
-];
+import { useBlogCategories, useBlogPosts } from "@/services/api-hooks";
 
 export default function BlogPage() {
   const [activeFilter, setActiveFilter] = useState("all");
   const [search, setSearch] = useState("");
-
-  const filtered = blogPosts.filter((post) => {
-    const matchCat = activeFilter === "all" || post.categoryKey === activeFilter;
-    const q = search.toLowerCase();
-    const matchSearch =
-      !q || post.title.toLowerCase().includes(q) || post.excerpt.toLowerCase().includes(q);
-    return matchCat && matchSearch;
+  const postsQuery = useBlogPosts({
+    search,
+    category: activeFilter === "all" ? undefined : activeFilter,
+    limit: 12,
   });
+  const categoriesQuery = useBlogCategories();
+  const posts = postsQuery.data?.data ?? [];
+  const featuredPost = posts[0];
 
   return (
     <>
@@ -75,7 +64,7 @@ export default function BlogPage() {
             </div>
           </div>
           <Link
-            href="/blog/heart-disease-warning-signs"
+            href={featuredPost ? `/blog/${featuredPost.slug}` : "/blog"}
             className="overflow-hidden rounded-[20px] border border-white/20 bg-white/10 backdrop-blur-md transition hover:-translate-y-1"
           >
             <div className="relative flex h-[180px] items-center justify-center bg-gradient-to-br from-blue-light/30 to-teal/30 text-6xl">
@@ -87,9 +76,14 @@ export default function BlogPage() {
             <div className="p-5">
               <div className="mb-2 text-[.72rem] font-semibold text-[#93c5fd]">Cardiology · Editor&apos;s Pick</div>
               <h3 className="font-display text-[1.05rem] font-semibold leading-snug">
-                The Silent Heart Attack: 8 Warning Signs Most People Miss
+                {featuredPost?.title || "Latest Medical Insight"}
               </h3>
-              <div className="mt-2 text-[.78rem] opacity-80">Dr. Sarah Mitchell · 8 min read · May 30, 2026</div>
+              <div className="mt-2 text-[.78rem] opacity-80">
+                {featuredPost?.author
+                  ? `Dr. ${featuredPost.author.firstName} ${featuredPost.author.lastName}`
+                  : "DrInsight Editorial Team"}{" "}
+                · {featuredPost?.readTimeMinutes || 5} min read
+              </div>
             </div>
           </Link>
         </div>
@@ -103,50 +97,66 @@ export default function BlogPage() {
             <h2 className="font-display mb-6 text-2xl font-bold text-gray-900">Recent Medical Insights</h2>
 
             <div className="mb-6 flex flex-wrap gap-2">
-              {filters.map((f) => (
+              <button
+                onClick={() => setActiveFilter("all")}
+                className={cn(
+                  "rounded-full border px-3.5 py-1.5 text-[.78rem] font-semibold transition",
+                  activeFilter === "all"
+                    ? "border-blue bg-blue text-white"
+                    : "border-gray-200 bg-white text-gray-600 hover:border-blue hover:text-blue",
+                )}
+              >
+                All
+              </button>
+              {(categoriesQuery.data ?? []).map((f) => (
                 <button
-                  key={f.key}
-                  onClick={() => setActiveFilter(f.key)}
+                  key={f.slug}
+                  onClick={() => setActiveFilter(f.slug)}
                   className={cn(
                     "rounded-full border px-3.5 py-1.5 text-[.78rem] font-semibold transition",
-                    activeFilter === f.key
+                    activeFilter === f.slug
                       ? "border-blue bg-blue text-white"
                       : "border-gray-200 bg-white text-gray-600 hover:border-blue hover:text-blue",
                   )}
                 >
-                  {f.label}
+                  {f.name}
                 </button>
               ))}
             </div>
 
-            {filtered.length === 0 ? (
+            {postsQuery.isLoading ? (
+              <div className="py-16 text-center text-gray-400">
+                <p className="text-[.9rem]">Loading articles...</p>
+              </div>
+            ) : postsQuery.isError ? (
+              <div className="py-16 text-center text-red">
+                <p className="text-[.9rem]">Unable to load articles. Please try again.</p>
+              </div>
+            ) : posts.length === 0 ? (
               <div className="py-16 text-center text-gray-400">
                 <div className="mb-3 text-4xl">🔍</div>
                 <p className="text-[.9rem]">No articles match your search or filter.</p>
               </div>
             ) : (
               <div className="grid gap-6 sm:grid-cols-2">
-                {filtered.map((post) => (
+                {posts.map((post) => (
                   <Link
                     key={post.slug}
                     href={`/blog/${post.slug}`}
                     className="overflow-hidden rounded-[20px] border border-gray-200 bg-white transition hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]"
                   >
-                    <div
-                      className="relative flex h-[160px] items-center justify-center text-5xl"
-                      style={{ background: post.bg }}
-                    >
-                      {post.emoji}
+                    <div className="relative flex h-[160px] items-center justify-center bg-gradient-to-br from-blue-light to-[#dbeafe] text-5xl">
+                      🩺
                       <div
                         className="absolute bottom-3 left-3 rounded-full px-3 py-1 text-[.68rem] font-bold tracking-wide text-white"
-                        style={{ background: post.badgeColor }}
+                        style={{ background: "#1a56a0" }}
                       >
-                        {post.category.toUpperCase()}
+                        {(post.category?.name || "Medical").toUpperCase()}
                       </div>
                     </div>
                     <div className="p-5">
-                      <div className="mb-1 text-[.72rem] font-bold uppercase" style={{ color: post.labelColor }}>
-                        {post.category}
+                      <div className="mb-1 text-[.72rem] font-bold uppercase text-blue">
+                        {post.category?.name || "Medical"}
                       </div>
                       <h3 className="font-display mb-2 text-[1rem] font-semibold leading-snug text-gray-900">
                         {post.title}
@@ -158,11 +168,13 @@ export default function BlogPage() {
                             className="flex h-7 w-7 items-center justify-center rounded-full text-[.6rem] font-bold text-white"
                             style={{ background: "linear-gradient(135deg,#1a56a0,#0891b2)" }}
                           >
-                            {post.authorInitials}
+                            {(post.author?.firstName?.[0] || "D") + (post.author?.lastName?.[0] || "I")}
                           </div>
-                          <span>{post.author}</span>
+                          <span>
+                            {post.author ? `Dr. ${post.author.firstName} ${post.author.lastName}` : "DrInsight"}
+                          </span>
                         </div>
-                        <span>⏱ {post.readTime}</span>
+                        <span>⏱ {post.readTimeMinutes} min</span>
                       </div>
                     </div>
                   </Link>

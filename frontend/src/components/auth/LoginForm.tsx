@@ -3,14 +3,45 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/layout/Logo";
+import { api } from "@/lib/api";
+import { useAuthStore, type AuthUser } from "@/store/auth.store";
+
+function dashboardForRole(role: AuthUser["role"]) {
+  if (role === "DOCTOR") return "/doctor";
+  if (role === "ADMIN") return "/admin";
+  return "/patient";
+}
+
 export function LoginForm() {
   const router = useRouter();
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const setAuth = useAuthStore((state) => state.setAuth);
+  const loginMutation = useMutation({
+    mutationFn: async (payload: { email: string; password: string }) => {
+      const { data } = await api.post<{
+        accessToken: string;
+        refreshToken: string;
+        user: AuthUser;
+      }>("/auth/login", payload);
+      return data;
+    },
+    onSuccess: (data) => {
+      setAuth(data.user, data.accessToken, data.refreshToken);
+      setError("");
+      setSuccess("Login successful! Redirecting...");
+      router.replace(dashboardForRole(data.user.role));
+    },
+    onError: () => {
+      setSuccess("");
+      setError("Invalid email/password or inactive account.");
+    },
+  });
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -35,8 +66,7 @@ export function LoginForm() {
     }
 
     setError("");
-    setSuccess("Login successful! Redirecting…");
-    setTimeout(() => router.push("/patient"), 1500);
+    loginMutation.mutate({ email, password });
   }
 
   return (
@@ -116,8 +146,8 @@ export function LoginForm() {
           Keep me signed in for 30 days
         </label>
 
-        <Button type="submit" size="full">
-          Sign In to My Account →
+        <Button type="submit" size="full" disabled={loginMutation.isPending}>
+          {loginMutation.isPending ? "Signing in..." : "Sign In to My Account →"}
         </Button>
       </form>
 

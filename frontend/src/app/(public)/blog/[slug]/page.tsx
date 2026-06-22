@@ -1,35 +1,39 @@
+"use client";
+
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { useParams } from "next/navigation";
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { blogPosts, getPostBySlug } from "@/lib/blog-data";
+import { useBlogPost, useBlogPosts } from "@/services/api-hooks";
 
-export function generateStaticParams() {
-  return blogPosts.map((post) => ({ slug: post.slug }));
-}
+export default function BlogArticlePage() {
+  const params = useParams<{ slug: string }>();
+  const postQuery = useBlogPost(params.slug);
+  const relatedQuery = useBlogPosts({ limit: 3 });
+  const post = postQuery.data;
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const post = getPostBySlug(slug);
-  if (!post) return { title: "Article Not Found — DrInsight" };
-  return { title: `${post.title} — DrInsight`, description: post.excerpt };
-}
+  if (postQuery.isLoading) {
+    return <div className="px-6 py-20 text-center text-gray-500">Loading article...</div>;
+  }
 
-export default async function BlogArticlePage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const post = getPostBySlug(slug);
-  if (!post) notFound();
+  if (postQuery.isError || !post) {
+    return <div className="px-6 py-20 text-center text-red">Article not found.</div>;
+  }
 
-  const related = blogPosts.filter((p) => p.slug !== slug).slice(0, 3);
+  const authorName = post.author
+    ? `Dr. ${post.author.firstName} ${post.author.lastName}`
+    : "DrInsight Editorial Team";
+  const authorInitials = post.author
+    ? `${post.author.firstName?.[0] || "D"}${post.author.lastName?.[0] || "I"}`
+    : "DI";
 
   return (
     <>
-      <Breadcrumb items={[{ label: "Blog", href: "/blog" }, { label: post.category }]} />
+      <Breadcrumb items={[{ label: "Blog", href: "/blog" }, { label: post.category?.name || "Article" }]} />
 
       <article className="mx-auto max-w-[820px] px-6 py-12">
-        <div className="mb-4 text-[.72rem] font-bold uppercase tracking-widest" style={{ color: post.labelColor }}>
-          {post.category}
+        <div className="mb-4 text-[.72rem] font-bold uppercase tracking-widest text-blue">
+          {post.category?.name || "Medical Article"}
         </div>
         <h1 className="font-display mb-4 text-[clamp(1.8rem,4vw,2.6rem)] font-bold leading-tight text-gray-900">
           {post.title}
@@ -40,45 +44,26 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
               className="flex h-9 w-9 items-center justify-center rounded-full text-[.7rem] font-bold text-white"
               style={{ background: "linear-gradient(135deg,#1a56a0,#0891b2)" }}
             >
-              {post.authorInitials}
+              {authorInitials}
             </div>
-            <span className="font-semibold text-gray-800">{post.author}</span>
+            <span className="font-semibold text-gray-800">{authorName}</span>
           </div>
           <span>·</span>
-          <span>{post.readTime} read</span>
+          <span>{post.readTimeMinutes} min read</span>
           <span>·</span>
-          <span>{post.date}</span>
+          <span>{post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : "Published"}</span>
           <span className="rounded-full bg-[#ecfdf5] px-2.5 py-0.5 text-[.72rem] font-semibold text-green">
             ✓ Medically Reviewed
           </span>
         </div>
 
-        <div
-          className="mb-10 flex h-[280px] items-center justify-center rounded-[20px] text-7xl"
-          style={{ background: post.bg }}
-        >
-          {post.emoji}
+        <div className="mb-10 flex h-[280px] items-center justify-center rounded-[20px] bg-gradient-to-br from-blue-light to-[#dbeafe] text-7xl">
+          🩺
         </div>
 
         <div className="prose prose-gray max-w-none space-y-5 text-[.95rem] leading-relaxed text-gray-700">
           <p className="text-lg font-medium text-gray-800">{post.excerpt}</p>
-          <p>
-            Medical information on DrInsight is written and reviewed by board-certified physicians to ensure
-            accuracy, clarity, and evidence-based guidance. This article provides general health information and
-            should not replace personalised medical advice from your healthcare provider.
-          </p>
-          <h2 className="font-display text-xl font-bold text-gray-900">Key Takeaways</h2>
-          <ul className="list-disc space-y-2 pl-6">
-            <li>Early recognition of symptoms can significantly improve health outcomes.</li>
-            <li>Lifestyle modifications remain a cornerstone of preventive care.</li>
-            <li>Consult a qualified specialist if you experience persistent or worsening symptoms.</li>
-            <li>Regular screening and monitoring are essential for at-risk populations.</li>
-          </ul>
-          <h2 className="font-display text-xl font-bold text-gray-900">When to See a Doctor</h2>
-          <p>
-            If you experience new, severe, or persistent symptoms related to this condition, schedule an appointment
-            with your primary care physician or a relevant specialist. For emergencies, call 911 immediately.
-          </p>
+          <div dangerouslySetInnerHTML={{ __html: post.content || "" }} />
           <div className="rounded-xl border-l-4 border-amber bg-[#fffbeb] p-4 text-[.85rem] text-[#92400e]">
             ⚠️ This article is for informational purposes only and does not constitute medical advice, diagnosis, or
             treatment. Always consult a qualified healthcare provider for medical decisions.
@@ -99,24 +84,17 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
         <div className="mx-auto max-w-[1240px]">
           <h2 className="font-display mb-6 text-xl font-bold text-gray-900">Related Articles</h2>
           <div className="grid gap-5 sm:grid-cols-3">
-            {related.map((r) => (
-              <Link key={r.slug} href={`/blog/${r.slug}`}>
-                <Card className="h-full transition hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]">
-                  <div
-                    className="flex h-[120px] items-center justify-center text-4xl"
-                    style={{ background: r.bg }}
-                  >
-                    {r.emoji}
+            {(relatedQuery.data?.data ?? [])
+              .filter((item) => item.slug !== post.slug)
+              .map((item) => (
+                <Link key={item.slug} href={`/blog/${item.slug}`} className="rounded-[20px] border border-gray-200 bg-white p-5 transition hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]">
+                  <div className="mb-3 text-4xl">🩺</div>
+                  <div className="mb-1 text-[.68rem] font-bold uppercase text-blue">
+                    {item.category?.name || "Medical"}
                   </div>
-                  <CardContent className="pt-4">
-                    <div className="mb-1 text-[.68rem] font-bold uppercase" style={{ color: r.labelColor }}>
-                      {r.category}
-                    </div>
-                    <h3 className="font-display text-[.9rem] font-semibold leading-snug text-gray-900">{r.title}</h3>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+                  <h3 className="font-display text-[.9rem] font-semibold leading-snug text-gray-900">{item.title}</h3>
+                </Link>
+              ))}
           </div>
         </div>
       </section>

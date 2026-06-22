@@ -1,24 +1,62 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Logo } from "./Logo";
+import { useAuthStore } from "@/store/auth.store";
 
-const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/about", label: "About Us" },
-  { href: "/health-tools", label: "Health Tools" },
-  { href: "/doctors", label: "Our Doctors" },
-  { href: "/ask-doctor", label: "Ask the Doctor" },
-  { href: "/blog", label: "Blog" },
-  { href: "/contact", label: "Contact" },
-];
+type NavLink = { href: string; label: string; cta?: boolean };
+
+function linksForRole(role?: string): NavLink[] {
+  const publicLinks = [
+    { href: "/", label: "Home" },
+    { href: "/about", label: "About Us" },
+    { href: "/health-tools", label: "Health Tools" },
+    { href: "/doctors", label: "Our Doctors" },
+    { href: "/ask-doctor", label: "Ask the Doctor" },
+    { href: "/blog", label: "Blog" },
+    { href: "/contact", label: "Contact" },
+  ];
+
+  if (role === "PATIENT") {
+    return [
+      { href: "/patient", label: "Patient Dashboard" },
+      { href: "/book-consultation", label: "Book Consultation", cta: true },
+      { href: "/doctors", label: "Doctors" },
+      { href: "/blog", label: "Blog" },
+    ];
+  }
+
+  if (role === "DOCTOR") {
+    return [
+      { href: "/doctor", label: "Doctor Dashboard" },
+      { href: "/doctor#schedule", label: "Schedule" },
+      { href: "/doctor#patients", label: "Patients" },
+      { href: "/blog", label: "Articles" },
+    ];
+  }
+
+  if (role === "ADMIN") {
+    return [
+      { href: "/admin", label: "Admin Dashboard" },
+      { href: "/admin#users", label: "Users" },
+      { href: "/admin#content", label: "Content" },
+      { href: "/admin#analytics", label: "Analytics" },
+    ];
+  }
+
+  return [...publicLinks, { href: "/book-consultation", label: "Book Consultation", cta: true }];
+}
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const user = useAuthStore((state) => state.user);
+  const clearAuth = useAuthStore((state) => state.clearAuth);
+  const navLinks = linksForRole(user?.role);
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -37,19 +75,33 @@ export function Navbar() {
               href={link.href}
               className={cn(
                 "rounded-lg px-3.5 py-2 text-[.9rem] font-medium text-gray-600 transition-all duration-[.22s]",
-                isActive(link.href) && "bg-blue-light font-semibold text-blue",
-                !isActive(link.href) && "hover:bg-blue-light hover:text-blue",
+                link.cta && "bg-blue px-5 font-semibold text-white hover:bg-blue-dark hover:text-white",
+                isActive(link.href) && !link.cta && "bg-blue-light font-semibold text-blue",
+                !isActive(link.href) && !link.cta && "hover:bg-blue-light hover:text-blue",
               )}
             >
               {link.label}
             </Link>
           ))}
-          <Link
-            href="/book-consultation"
-            className="rounded-lg bg-blue px-5 py-2 text-[.9rem] font-semibold text-white transition hover:-translate-y-px hover:bg-blue-dark"
-          >
-            Book Consultation
-          </Link>
+          {user ? (
+            <button
+              type="button"
+              onClick={() => {
+                clearAuth();
+                router.push("/");
+              }}
+              className="rounded-lg border border-gray-200 px-4 py-2 text-[.9rem] font-semibold text-gray-600 transition hover:bg-blue-light hover:text-blue"
+            >
+              Logout
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className="rounded-lg border border-gray-200 px-4 py-2 text-[.9rem] font-semibold text-gray-600 transition hover:bg-blue-light hover:text-blue"
+            >
+              Login
+            </Link>
+          )}
         </div>
 
         <button
@@ -75,13 +127,27 @@ export function Navbar() {
               {link.label}
             </Link>
           ))}
-          <Link
-            href="/book-consultation"
-            onClick={() => setMobileOpen(false)}
-            className="rounded-lg px-3 py-2.5 text-[.92rem] font-medium text-blue"
-          >
-            📅 Book Consultation
-          </Link>
+          {user ? (
+            <button
+              type="button"
+              onClick={() => {
+                clearAuth();
+                setMobileOpen(false);
+                router.push("/");
+              }}
+              className="rounded-lg px-3 py-2.5 text-left text-[.92rem] font-medium text-red"
+            >
+              Logout
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              onClick={() => setMobileOpen(false)}
+              className="rounded-lg px-3 py-2.5 text-[.92rem] font-medium text-blue"
+            >
+              Login
+            </Link>
+          )}
         </div>
       )}
     </nav>

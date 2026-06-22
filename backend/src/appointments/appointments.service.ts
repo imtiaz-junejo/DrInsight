@@ -17,39 +17,9 @@ export class AppointmentsService {
     consultationType: ConsultationType;
     reason?: string;
   }) {
-    const patient = await this.prisma.patientProfile.findUnique({ where: { userId: patientUserId } });
-    if (!patient) throw new BadRequestException('Patient profile required');
-
-    const doctor = await this.prisma.doctorProfile.findUnique({
-      where: { id: data.doctorId },
-      include: { user: true },
-    });
-    if (!doctor) throw new NotFoundException('Doctor not found');
-
-    const appointment = await this.prisma.appointment.create({
-      data: {
-        patientId: patient.id,
-        doctorId: data.doctorId,
-        scheduledAt: new Date(data.scheduledAt),
-        durationMinutes: data.durationMinutes || 30,
-        consultationType: data.consultationType,
-        reason: data.reason,
-        meetingRoomId: `room_${Date.now()}`,
-      },
-      include: {
-        doctor: { include: { user: true } },
-        patient: { include: { user: true } },
-      },
-    });
-
-    await this.notifications.create(doctor.userId, {
-      type: 'APPOINTMENT',
-      title: 'New Appointment Request',
-      body: `New ${data.consultationType} consultation request`,
-      data: { appointmentId: appointment.id },
-    });
-
-    return appointment;
+    throw new BadRequestException(
+      'Appointments are created only after confirmed payment. Use /payments/booking-drafts and /payments/intents.',
+    );
   }
 
   async findForUser(userId: string, role: UserRole, query: { page?: number; limit?: number; status?: AppointmentStatus }) {
@@ -100,6 +70,9 @@ export class AppointmentsService {
     if (role === UserRole.DOCTOR) {
       const doctor = await this.prisma.doctorProfile.findUnique({ where: { userId } });
       if (doctor?.id !== appointment.doctorId) throw new ForbiddenException();
+    } else if (role === UserRole.PATIENT) {
+      const patient = await this.prisma.patientProfile.findUnique({ where: { userId } });
+      if (patient?.id !== appointment.patientId) throw new ForbiddenException();
     }
 
     const updated = await this.prisma.appointment.update({

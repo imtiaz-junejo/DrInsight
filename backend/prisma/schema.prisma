@@ -77,6 +77,23 @@ enum QuestionStatus {
   REJECTED
 }
 
+enum BookingDraftStatus {
+  DRAFT
+  PAYMENT_PENDING
+  CONFIRMED
+  EXPIRED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  REQUIRES_PAYMENT_METHOD
+  REQUIRES_CONFIRMATION
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+}
+
 model User {
   id            String     @id @default(cuid())
   email         String     @unique
@@ -141,6 +158,7 @@ model DoctorProfile {
 
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   appointments  Appointment[]  @relation("DoctorAppointments")
+  bookingDrafts BookingDraft[]
   reviews       Review[]
   conversations Conversation[] @relation("DoctorConversations")
   prescriptions Prescription[] @relation("DoctorPrescriptions")
@@ -164,6 +182,7 @@ model PatientProfile {
 
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   appointments  Appointment[]  @relation("PatientAppointments")
+  bookingDrafts BookingDraft[]
   reviews       Review[]
   conversations Conversation[] @relation("PatientConversations")
   prescriptions Prescription[] @relation("PatientPrescriptions")
@@ -190,6 +209,7 @@ model Appointment {
 
   patient       PatientProfile @relation("PatientAppointments", fields: [patientId], references: [id])
   doctor        DoctorProfile  @relation("DoctorAppointments", fields: [doctorId], references: [id])
+  payment       Payment?
   conversation  Conversation?
   review        Review?
   prescription  Prescription?
@@ -199,6 +219,54 @@ model Appointment {
   @@index([scheduledAt])
   @@index([status])
   @@map("appointments")
+}
+
+model BookingDraft {
+  id               String             @id @default(cuid())
+  patientId        String
+  doctorId         String
+  scheduledAt      DateTime
+  durationMinutes  Int                @default(30)
+  consultationType ConsultationType   @default(VIDEO)
+  reason           String?            @db.Text
+  amountCents      Int
+  currency         String             @default("usd")
+  status           BookingDraftStatus @default(DRAFT)
+  expiresAt        DateTime
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  patient PatientProfile @relation(fields: [patientId], references: [id])
+  doctor  DoctorProfile  @relation(fields: [doctorId], references: [id])
+  payment Payment?
+
+  @@index([patientId])
+  @@index([doctorId])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("booking_drafts")
+}
+
+model Payment {
+  id               String        @id @default(cuid())
+  bookingDraftId   String        @unique
+  appointmentId    String?       @unique
+  provider         String        @default("stripe")
+  providerIntentId String        @unique
+  clientSecret     String
+  amountCents      Int
+  currency         String        @default("usd")
+  status           PaymentStatus @default(REQUIRES_PAYMENT_METHOD)
+  metadata         Json?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  confirmedAt      DateTime?
+
+  bookingDraft BookingDraft @relation(fields: [bookingDraftId], references: [id])
+  appointment  Appointment? @relation(fields: [appointmentId], references: [id])
+
+  @@index([status])
+  @@map("payments")
 }
 
 model BlogCategory {

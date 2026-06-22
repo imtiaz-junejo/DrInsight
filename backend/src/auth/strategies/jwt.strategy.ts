@@ -38,7 +38,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         emailVerified: true,
       },
     });
-    if (!user || user.status === 'SUSPENDED') {
+    if (!user || user.status !== 'ACTIVE') {
       return null;
     }
     return user;

@@ -2,6 +2,14 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
 
+function setCookie(name: string, value: string, maxAgeSeconds: number) {
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAgeSeconds}; SameSite=Lax`;
+}
+
+function deleteCookie(name: string) {
+  document.cookie = `${name}=; path=/; max-age=0; SameSite=Lax`;
+}
+
 export const api = axios.create({
   baseURL: API_URL,
   headers: { "Content-Type": "application/json" },
@@ -34,11 +42,15 @@ api.interceptors.response.use(
           const { data } = await axios.post(`${API_URL}/auth/refresh`, { refreshToken });
           localStorage.setItem("accessToken", data.accessToken);
           localStorage.setItem("refreshToken", data.refreshToken);
+          setCookie("drinsight_access", data.accessToken, 60 * 15);
+          setCookie("drinsight_role", data.user.role, 60 * 60 * 24 * 7);
           original.headers.Authorization = `Bearer ${data.accessToken}`;
           return api(original);
         } catch {
           localStorage.removeItem("accessToken");
           localStorage.removeItem("refreshToken");
+          deleteCookie("drinsight_access");
+          deleteCookie("drinsight_role");
           if (typeof window !== "undefined") window.location.href = "/login";
         }
       }

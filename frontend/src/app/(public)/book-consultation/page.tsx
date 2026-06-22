@@ -1,12 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import {
+  useConfirmDevPayment,
+  useCreateBookingDraft,
+  useCreatePaymentIntent,
+  useDoctors,
+} from "@/services/api-hooks";
 
 const steps = ["Choose Doctor", "Select Time", "Your Details", "Confirm"];
 const consultTypes = [
@@ -18,7 +24,42 @@ const consultTypes = [
 export default function BookConsultationPage() {
   const [step, setStep] = useState(0);
   const [consultType, setConsultType] = useState("video");
+  const [doctorId, setDoctorId] = useState("");
+  const [scheduledAt, setScheduledAt] = useState("");
+  const [reason, setReason] = useState("");
+  const [paymentIntentId, setPaymentIntentId] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const doctorsQuery = useDoctors({ limit: 24 });
+  const createDraft = useCreateBookingDraft();
+  const createIntent = useCreatePaymentIntent();
+  const confirmPayment = useConfirmDevPayment();
+  const selectedDoctor = doctorsQuery.data?.data.find((doctor) => doctor.id === doctorId);
+
+  useEffect(() => {
+    const doctorIdFromUrl = new URLSearchParams(window.location.search).get("doctorId");
+    if (doctorIdFromUrl) setDoctorId(doctorIdFromUrl);
+  }, []);
+
+  const submitDraft = async () => {
+    if (!doctorId || !scheduledAt) return;
+    const draft = await createDraft.mutateAsync({
+      doctorId,
+      scheduledAt,
+      consultationType:
+        consultType === "video" ? "VIDEO" : consultType === "phone" ? "AUDIO" : "CHAT",
+      reason,
+      durationMinutes: 30,
+    });
+    const intent = await createIntent.mutateAsync(draft.id);
+    setPaymentIntentId(intent.providerIntentId);
+    setStep(3);
+  };
+
+  const confirmBooking = async () => {
+    if (!paymentIntentId) return;
+    await confirmPayment.mutateAsync(paymentIntentId);
+    setSubmitted(true);
+  };
 
   if (submitted) {
     return (
@@ -87,6 +128,21 @@ export default function BookConsultationPage() {
           <CardContent>
             {step === 0 && (
               <div className="space-y-4">
+                <p className="text-[.88rem] text-gray-600">Select a doctor:</p>
+                {doctorsQuery.isLoading && <p className="text-[.85rem] text-gray-500">Loading doctors...</p>}
+                {doctorsQuery.isError && <p className="text-[.85rem] text-red">Unable to load doctors.</p>}
+                <select
+                  value={doctorId}
+                  onChange={(event) => setDoctorId(event.target.value)}
+                  className="h-11 w-full rounded-lg border-[1.5px] border-gray-200 px-3 text-sm focus:border-blue focus:outline-none"
+                >
+                  <option value="">Choose a doctor...</option>
+                  {(doctorsQuery.data?.data ?? []).map((doctor) => (
+                    <option key={doctor.id} value={doctor.id}>
+                      Dr. {doctor.user?.firstName} {doctor.user?.lastName} — {doctor.specialty} (${Number(doctor.consultationFee || 0).toFixed(2)})
+                    </option>
+                  ))}
+                </select>
                 <p className="text-[.88rem] text-gray-600">Select your preferred consultation type:</p>
                 <div className="grid gap-3 sm:grid-cols-3">
                   {consultTypes.map(([key, icon, title, desc]) => (
@@ -105,29 +161,23 @@ export default function BookConsultationPage() {
                     </button>
                   ))}
                 </div>
-                <Button onClick={() => setStep(1)}>Continue →</Button>
+                <Button onClick={() => doctorId && setStep(1)} disabled={!doctorId}>Continue →</Button>
               </div>
             )}
 
             {step === 1 && (
               <div className="space-y-4">
                 <p className="text-[.88rem] text-gray-600">Choose an available time slot:</p>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  {["Today 2:00 PM", "Today 4:30 PM", "Tomorrow 10:00 AM", "Tomorrow 3:00 PM"].map((slot) => (
-                    <button
-                      key={slot}
-                      type="button"
-                      className="rounded-lg border border-gray-200 px-3 py-2.5 text-[.82rem] font-semibold transition hover:border-blue hover:bg-blue-light hover:text-blue"
-                    >
-                      {slot}
-                    </button>
-                  ))}
-                </div>
+                <Input
+                  type="datetime-local"
+                  value={scheduledAt}
+                  onChange={(event) => setScheduledAt(event.target.value)}
+                />
                 <div className="flex gap-3">
                   <Button variant="ghost" onClick={() => setStep(0)}>
                     ← Back
                   </Button>
-                  <Button onClick={() => setStep(2)}>Continue →</Button>
+                  <Button onClick={() => scheduledAt && setStep(2)} disabled={!scheduledAt}>Continue →</Button>
                 </div>
               </div>
             )}
@@ -154,6 +204,8 @@ export default function BookConsultationPage() {
                   <label className="mb-1.5 block text-[.82rem] font-semibold text-gray-700">Reason for Visit</label>
                   <textarea
                     required
+                    value={reason}
+                    onChange={(event) => setReason(event.target.value)}
                     className="min-h-[100px] w-full rounded-lg border-[1.5px] border-gray-200 px-3.5 py-2.5 text-sm focus:border-blue focus:outline-none focus:ring-[3px] focus:ring-blue/10"
                     placeholder="Briefly describe your symptoms or health concern..."
                   />
@@ -162,7 +214,7 @@ export default function BookConsultationPage() {
                   <Button type="button" variant="ghost" onClick={() => setStep(1)}>
                     ← Back
                   </Button>
-                  <Button type="submit">Continue →</Button>
+                  <Button type="submit">Review & Create Payment →</Button>
                 </div>
               </form>
             )}
@@ -172,21 +224,34 @@ export default function BookConsultationPage() {
                 <div className="rounded-xl bg-blue-light p-5 text-[.88rem]">
                   <h4 className="mb-3 font-bold text-gray-900">Booking Summary</h4>
                   <div className="space-y-1 text-gray-700">
-                    <p>👨‍⚕️ Dr. Sarah Mitchell — Cardiology</p>
-                    <p>📅 Today, 2:00 PM (30 min)</p>
+                    <p>
+                      👨‍⚕️ Dr. {selectedDoctor?.user?.firstName} {selectedDoctor?.user?.lastName} — {selectedDoctor?.specialty}
+                    </p>
+                    <p>📅 {scheduledAt ? new Date(scheduledAt).toLocaleString() : "Time pending"} (30 min)</p>
                     <p>
                       {consultType === "video" && "📹 Video Consultation"}
                       {consultType === "phone" && "📞 Phone Consultation"}
                       {consultType === "chat" && "💬 Chat Consultation"}
                     </p>
-                    <p className="font-bold text-blue">Fee: $49.00</p>
+                    <p className="font-bold text-blue">Fee: ${Number(selectedDoctor?.consultationFee || 0).toFixed(2)}</p>
                   </div>
                 </div>
                 <div className="flex gap-3">
                   <Button variant="ghost" onClick={() => setStep(2)}>
                     ← Back
                   </Button>
-                  <Button onClick={() => setSubmitted(true)}>Confirm Booking →</Button>
+                  {!paymentIntentId ? (
+                    <Button
+                      onClick={submitDraft}
+                      disabled={createDraft.isPending || createIntent.isPending}
+                    >
+                      {createDraft.isPending || createIntent.isPending ? "Creating payment..." : "Create Payment Intent →"}
+                    </Button>
+                  ) : (
+                    <Button onClick={confirmBooking} disabled={confirmPayment.isPending}>
+                      {confirmPayment.isPending ? "Confirming..." : "Confirm Paid Booking →"}
+                    </Button>
+                  )}
                 </div>
               </div>
             )}

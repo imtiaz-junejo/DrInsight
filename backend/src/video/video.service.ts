@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { VideoProvider } from '@prisma/client';
 import { randomBytes } from 'crypto';
+import { PrismaService } from '../prisma/prisma.service';
 
 export interface VideoTokenResult {
   provider: VideoProvider;
@@ -15,11 +16,16 @@ export interface VideoTokenResult {
 export class VideoService {
   private provider: VideoProvider;
 
-  constructor(private config: ConfigService) {
+  constructor(
+    private config: ConfigService,
+    private prisma: PrismaService,
+  ) {
     this.provider = (this.config.get('VIDEO_PROVIDER') as VideoProvider) || VideoProvider.WEBRTC;
   }
 
   async generateToken(roomId: string, userId: string, role: 'host' | 'guest' = 'guest'): Promise<VideoTokenResult> {
+    await this.assertRoomAccess(roomId, userId);
+
     switch (this.provider) {
       case VideoProvider.AGORA:
         return this.generateAgoraToken(roomId, userId);
@@ -100,5 +106,20 @@ export class VideoService {
         roomName: roomId,
       },
     };
+  }
+
+  private async assertRoomAccess(roomId: string, userId: string) {
+    const appointment = await this.prisma.appointment.findFirst({
+      where: {
+        meetingRoomId: roomId,
+        status: { in: ['CONFIRMED', 'IN_PROGRESS'] },
+      },
+      include: { patient: true, doctor: true },
+    });
+    if (!appointment) throw new NotFoundException('Active appointment room not found');
+
+    if (appointment.patient.userId !== userId && appointment.doctor.userId !== userId) {
+      throw new ForbiddenException('You are not allowed to join this appointment room');
+    }
   }
 }

@@ -19,6 +19,12 @@ export class ReviewsController {
   }
 
   @Public()
+  @Get('recent')
+  findRecent(@Query('limit') limit?: number) {
+    return this.reviewsService.findRecent(+limit! || 6);
+  }
+
+  @Public()
   @Get('doctor/:doctorId')
   findByDoctor(@Param('doctorId') doctorId: string, @Query('page') page?: number, @Query('limit') limit?: number) {
     return this.reviewsService.findByDoctor(doctorId, +page! || 1, +limit! || 10);

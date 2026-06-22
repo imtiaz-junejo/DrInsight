@@ -1,50 +1,26 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { doctors } from "@/lib/doctors-data";
 import { cn } from "@/lib/utils";
-
-const specialtyFilters = [
-  { key: "all", label: "All Specialties" },
-  { key: "cardiology", label: "❤️ Cardiology" },
-  { key: "neurology", label: "🧠 Neurology" },
-  { key: "endocrinology", label: "🦋 Endocrinology" },
-  { key: "psychiatry", label: "🧠 Psychiatry" },
-  { key: "pediatrics", label: "🧒 Pediatrics" },
-  { key: "orthopedics", label: "🦴 Orthopedics" },
-  { key: "internal medicine", label: "🩺 Internal Medicine" },
-];
+import { useDoctors, useDoctorSpecialties } from "@/services/api-hooks";
 
 export default function DoctorsPage() {
   const [search, setSearch] = useState("");
   const [specialty, setSpecialty] = useState("all");
   const [sort, setSort] = useState("rating");
-
-  const filtered = useMemo(() => {
-    let list = doctors.filter((d) => {
-      const matchSpec = specialty === "all" || d.specialtyKey === specialty;
-      const q = search.toLowerCase();
-      const matchSearch =
-        !q ||
-        d.name.toLowerCase().includes(q) ||
-        d.specialty.toLowerCase().includes(q);
-      return matchSpec && matchSearch;
-    });
-
-    list = [...list].sort((a, b) => {
-      if (sort === "rating") return b.rating - a.rating;
-      if (sort === "experience") return b.experience - a.experience;
-      if (sort === "reviews") return b.reviews - a.reviews;
-      return a.name.localeCompare(b.name);
-    });
-
-    return list;
-  }, [search, specialty, sort]);
+  const doctorsQuery = useDoctors({
+    search,
+    specialty: specialty === "all" ? undefined : specialty,
+    limit: 24,
+  });
+  const specialtiesQuery = useDoctorSpecialties();
+  const doctors = doctorsQuery.data?.data ?? [];
+  const total = doctorsQuery.data?.meta.total ?? 0;
 
   return (
     <>
@@ -97,22 +73,33 @@ export default function DoctorsPage() {
               <option value="name">Sort: Name (A–Z)</option>
             </select>
             <span className="text-[.82rem] text-gray-500">
-              Showing <strong>{filtered.length}</strong> of <strong>{doctors.length}</strong> doctors
+              Showing <strong>{doctors.length}</strong> of <strong>{total}</strong> doctors
             </span>
           </div>
           <div className="flex flex-wrap gap-2">
-            {specialtyFilters.map((f) => (
+            <button
+              onClick={() => setSpecialty("all")}
+              className={cn(
+                "rounded-full border px-3 py-1.5 text-[.75rem] font-semibold transition",
+                specialty === "all"
+                  ? "border-blue bg-blue text-white"
+                  : "border-gray-200 text-gray-600 hover:border-blue hover:text-blue",
+              )}
+            >
+              All Specialties
+            </button>
+            {(specialtiesQuery.data ?? []).map((f) => (
               <button
-                key={f.key}
-                onClick={() => setSpecialty(f.key)}
+                key={f.name}
+                onClick={() => setSpecialty(f.name)}
                 className={cn(
                   "rounded-full border px-3 py-1.5 text-[.75rem] font-semibold transition",
-                  specialty === f.key
+                  specialty === f.name
                     ? "border-blue bg-blue text-white"
                     : "border-gray-200 text-gray-600 hover:border-blue hover:text-blue",
                 )}
               >
-                {f.label}
+                {f.name} ({f.count})
               </button>
             ))}
           </div>
@@ -121,27 +108,46 @@ export default function DoctorsPage() {
 
       <div className="mx-auto max-w-[1240px] px-6 py-12">
         <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-          {filtered.map((doc) => (
+          {doctorsQuery.isLoading && (
+            <div className="col-span-full rounded-xl border border-gray-200 bg-white p-8 text-center text-gray-500">
+              Loading doctors...
+            </div>
+          )}
+          {doctorsQuery.isError && (
+            <div className="col-span-full rounded-xl border border-[#fecaca] bg-[#fef2f2] p-8 text-center text-red">
+              Unable to load doctors. Please try again.
+            </div>
+          )}
+          {!doctorsQuery.isLoading && !doctorsQuery.isError && doctors.length === 0 && (
+            <div className="col-span-full rounded-xl border border-gray-200 bg-white p-8 text-center text-gray-500">
+              No doctors match your search.
+            </div>
+          )}
+          {doctors.map((doc) => {
+            const fullName = `Dr. ${doc.user?.firstName ?? ""} ${doc.user?.lastName ?? ""}`.trim();
+            const initials = `${doc.user?.firstName?.[0] ?? "D"}${doc.user?.lastName?.[0] ?? "R"}`;
+
+            return (
             <Card key={doc.id} className="overflow-hidden transition hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]">
               <CardContent className="p-0">
                 <div className="border-b border-gray-100 p-5">
                   <div className="flex items-start gap-4">
                     <div
                       className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-lg font-bold text-white"
-                      style={{ background: doc.gradient }}
+                      style={{ background: "linear-gradient(135deg,#1a56a0,#0891b2)" }}
                     >
-                      {doc.initials}
+                      {initials}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="font-display text-[1.05rem] font-bold text-gray-900">{doc.name}</h3>
+                      <h3 className="font-display text-[1.05rem] font-bold text-gray-900">{fullName}</h3>
                       <p className="text-[.82rem] font-semibold text-blue">{doc.specialty}</p>
                       <div className="mt-1 flex flex-wrap items-center gap-2 text-[.75rem] text-gray-500">
                         <span className="text-amber">★ {doc.rating}</span>
-                        <span>({doc.reviews} reviews)</span>
-                        <span>· {doc.experience} yrs</span>
+                        <span>({doc.reviewCount} reviews)</span>
+                        <span>· {doc.experienceYears} yrs</span>
                       </div>
                     </div>
-                    {doc.online && (
+                    {doc.user?.isOnline && (
                       <span className="rounded-full bg-[#ecfdf5] px-2 py-0.5 text-[.68rem] font-bold text-green">
                         🟢 Online
                       </span>
@@ -149,13 +155,13 @@ export default function DoctorsPage() {
                   </div>
                 </div>
                 <div className="space-y-2 p-5 text-[.78rem] text-gray-600">
-                  <div>🌍 {doc.country}</div>
-                  <div>🗣️ {doc.languages.join(", ")}</div>
-                  <div>📅 Next: {doc.nextAvailable}</div>
+                  <div>🏥 {doc.hospital || "DrInsight Virtual Clinic"}</div>
+                  <div>🗣️ {doc.languages?.join(", ") || "English"}</div>
+                  <div>💳 Fee: ${Number(doc.consultationFee || 0).toFixed(2)}</div>
                 </div>
                 <div className="flex gap-2 border-t border-gray-100 p-4">
                   <Button asChild size="sm" className="flex-1">
-                    <Link href="/book-consultation">Book Now</Link>
+                    <Link href={`/book-consultation?doctorId=${doc.id}`}>Book Now</Link>
                   </Button>
                   <Button asChild variant="secondary" size="sm" className="flex-1">
                     <Link href="/ask-doctor">Ask Question</Link>
@@ -163,7 +169,8 @@ export default function DoctorsPage() {
                 </div>
               </CardContent>
             </Card>
-          ))}
+          );
+          })}
         </div>
       </div>
     </>

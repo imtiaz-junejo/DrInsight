@@ -65,6 +65,11 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
       });
 
       const userId = payload.sub;
+      const user = await this.usersService.findById(userId);
+      if (user.status !== 'ACTIVE') {
+        client.disconnect();
+        return;
+      }
       client.data.userId = userId;
 
       if (!this.userSockets.has(userId)) {
@@ -97,8 +102,9 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
   }
 
   @SubscribeMessage('join_conversation')
-  handleJoinConversation(@ConnectedSocket() client: Socket, @MessageBody() data: { conversationId: string }) {
-    client.join(`conversation:${data.conversationId}`);
+  async handleJoinConversation(@ConnectedSocket() client: Socket, @MessageBody() data: { conversationId: string }) {
+    await this.chatService.assertConversationAccess(data.conversationId, client.data.userId);
+    await client.join(`conversation:${data.conversationId}`);
     return { success: true };
   }
 
@@ -124,12 +130,12 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
   }
 
   @SubscribeMessage('typing_start')
-  handleTypingStart(@ConnectedSocket() client: Socket, @MessageBody() data: { conversationId: string }) {
+  async handleTypingStart(@ConnectedSocket() client: Socket, @MessageBody() data: { conversationId: string }) {
     return this.chatService.setTyping(data.conversationId, client.data.userId, true);
   }
 
   @SubscribeMessage('typing_stop')
-  handleTypingStop(@ConnectedSocket() client: Socket, @MessageBody() data: { conversationId: string }) {
+  async handleTypingStop(@ConnectedSocket() client: Socket, @MessageBody() data: { conversationId: string }) {
     return this.chatService.setTyping(data.conversationId, client.data.userId, false);
   }
 }

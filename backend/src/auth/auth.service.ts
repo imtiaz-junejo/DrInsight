@@ -59,6 +59,21 @@ export class AuthService {
       await this.prisma.patientProfile.create({ data: { userId: user.id } });
     }
 
+    if (user.status !== UserStatus.ACTIVE) {
+      return {
+        requiresApproval: true,
+        message: 'Doctor accounts require admin approval before login.',
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+          status: user.status,
+        },
+      };
+    }
+
     return this.generateTokens(user.id, user.email, user.role);
   }
 
@@ -69,8 +84,8 @@ export class AuthService {
     const valid = await bcrypt.compare(dto.password, user.passwordHash);
     if (!valid) throw new UnauthorizedException('Invalid credentials');
 
-    if (user.status === UserStatus.SUSPENDED) {
-      throw new UnauthorizedException('Account suspended');
+    if (user.status !== UserStatus.ACTIVE) {
+      throw new UnauthorizedException('Account is not active');
     }
 
     return this.generateTokens(user.id, user.email, user.role);
@@ -82,7 +97,12 @@ export class AuthService {
       include: { user: true },
     });
 
-    if (!stored || stored.revoked || stored.expiresAt < new Date()) {
+    if (
+      !stored ||
+      stored.revoked ||
+      stored.expiresAt < new Date() ||
+      stored.user.status !== UserStatus.ACTIVE
+    ) {
       throw new UnauthorizedException('Invalid refresh token');
     }
 

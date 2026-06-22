@@ -40,6 +40,26 @@ export class ReviewsService {
     return review;
   }
 
+  async findRecent(limit = 6) {
+    return this.prisma.review.findMany({
+      where: { comment: { not: null } },
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        patient: {
+          include: {
+            user: { select: { firstName: true, lastName: true } },
+          },
+        },
+        doctor: {
+          include: {
+            user: { select: { firstName: true, lastName: true, specialty: true } },
+          },
+        },
+      },
+    });
+  }
+
   async findByDoctor(doctorId: string, page = 1, limit = 10) {
     const skip = (page - 1) * limit;
     const [data, total] = await Promise.all([
