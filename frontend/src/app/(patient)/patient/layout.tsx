@@ -1,0 +1,17 @@
+import type { Metadata } from "next";
+import { DashboardAuthGuard } from "@/components/auth/DashboardAuthGuard";
+import { PatientShell } from "@/components/patient/shell/PatientShell";
+import "@/styles/patient-dashboard.css";
+
+export const metadata: Metadata = {
+  title: "Patient Dashboard — MedAuthority",
+  robots: { index: false, follow: false },
+};
+
+export default function PatientLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <DashboardAuthGuard>
+      <PatientShell>{children}</PatientShell>
+    </DashboardAuthGuard>
+  );
+}

@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/layout/Logo";
+import { isAxiosError } from "axios";
 import { api } from "@/lib/api";
 import { useAuthStore, type AuthUser } from "@/store/auth.store";
 
@@ -16,8 +17,26 @@ function dashboardForRole(role: AuthUser["role"]) {
   return "/patient";
 }
 
+function requiredRoleForPath(path: string): AuthUser["role"] | null {
+  if (path.startsWith("/admin")) return "ADMIN";
+  if (path.startsWith("/doctor")) return "DOCTOR";
+  if (path.startsWith("/patient")) return "PATIENT";
+  return null;
+}
+
+function resolvePostLoginPath(role: AuthUser["role"], redirect: string | null): string {
+  if (!redirect || !redirect.startsWith("/") || redirect.startsWith("//")) {
+    return dashboardForRole(role);
+  }
+  const neededRole = requiredRoleForPath(redirect);
+  if (neededRole && neededRole !== role) {
+    return dashboardForRole(role);
+  }
+  return redirect;
+}
+
 export function LoginForm() {
-  const router = useRouter();
+  const searchParams = useSearchParams();
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -35,10 +54,27 @@ export function LoginForm() {
       setAuth(data.user, data.accessToken, data.refreshToken);
       setError("");
       setSuccess("Login successful! Redirecting...");
-      router.replace(dashboardForRole(data.user.role));
+      const destination = resolvePostLoginPath(data.user.role, searchParams.get("redirect"));
+      // Full navigation ensures middleware receives the freshly-set auth cookie
+      window.location.assign(destination);
     },
-    onError: () => {
+    onError: (err) => {
       setSuccess("");
+      if (isAxiosError(err)) {
+        const message = err.response?.data?.message;
+        if (Array.isArray(message)) {
+          setError(message.join(", "));
+          return;
+        }
+        if (typeof message === "string" && message) {
+          setError(message);
+          return;
+        }
+        if (!err.response) {
+          setError("Cannot reach the server. Make sure the backend is running on port 4000.");
+          return;
+        }
+      }
       setError("Invalid email/password or inactive account.");
     },
   });
@@ -46,7 +82,7 @@ export function LoginForm() {
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const email = (fd.get("email") as string).trim();
+    const email = (fd.get("email") as string).trim().toLowerCase();
     const password = fd.get("password") as string;
 
     if (!email || !password) {
@@ -59,8 +95,8 @@ export function LoginForm() {
       setSuccess("");
       return;
     }
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.");
       setSuccess("");
       return;
     }

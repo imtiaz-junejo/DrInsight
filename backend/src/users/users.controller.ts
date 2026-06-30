@@ -1,9 +1,9 @@
 import { Controller, Get, Patch, Body, Param } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { UserRole, UserStatus } from '@prisma/client';
 import { UsersService } from './users.service';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/auth.decorators';
-import { UserRole } from '@prisma/client';
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -22,6 +22,18 @@ export class UsersController {
     @Body() body: { firstName?: string; lastName?: string; phone?: string; avatarUrl?: string },
   ) {
     return this.usersService.updateProfile(userId, body);
+  }
+
+  @Get('pending')
+  @Roles(UserRole.ADMIN)
+  findPending() {
+    return this.usersService.findPending();
+  }
+
+  @Patch(':id/status')
+  @Roles(UserRole.ADMIN)
+  updateStatus(@Param('id') id: string, @Body('status') status: UserStatus) {
+    return this.usersService.setUserStatus(id, status);
   }
 
   @Get(':id')

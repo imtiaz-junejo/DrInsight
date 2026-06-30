@@ -27,10 +27,20 @@ function base64UrlToBytes(input: string) {
   return Uint8Array.from(binary, (char) => char.charCodeAt(0));
 }
 
+function resolveJwtSecret(): string | undefined {
+  return (
+    process.env.JWT_ACCESS_SECRET ||
+    process.env.NEXT_SERVER_JWT_ACCESS_SECRET ||
+    (process.env.NODE_ENV === "development"
+      ? "change-me-access-secret-min-32-chars-long"
+      : undefined)
+  );
+}
+
 async function verifyJwt(token?: string): Promise<JwtPayload | null> {
   if (!token) return null;
 
-  const secret = process.env.JWT_ACCESS_SECRET || process.env.NEXT_SERVER_JWT_ACCESS_SECRET;
+  const secret = resolveJwtSecret();
   if (!secret) return null;
 
   const [header, payload, signature] = token.split(".");

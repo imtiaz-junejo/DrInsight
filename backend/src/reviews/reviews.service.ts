@@ -52,8 +52,9 @@ export class ReviewsService {
           },
         },
         doctor: {
-          include: {
-            user: { select: { firstName: true, lastName: true, specialty: true } },
+          select: {
+            specialty: true,
+            user: { select: { firstName: true, lastName: true } },
           },
         },
       },

@@ -1,96 +1,141 @@
 import 'dotenv/config';
-import { UserRole, BlogStatus } from '@prisma/client';
+import { UserRole, UserStatus } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { createPrismaClient } from '../src/prisma/create-prisma-client';
 
 const prisma = createPrismaClient();
 
+const DEMO_PASSWORD = 'Password123!';
+const BCRYPT_ROUNDS = 12;
+
+const DEMO_USERS = {
+  admin: {
+    email: 'admin@drinsight.com',
+    firstName: 'Admin',
+    lastName: 'User',
+    role: UserRole.ADMIN,
+  },
+  doctor: {
+    email: 'doctor@drinsight.com',
+    firstName: 'Sarah',
+    lastName: 'Mitchell',
+    role: UserRole.DOCTOR,
+    profile: {
+      specialty: 'Cardiology',
+      licenseNumber: 'MD-123456',
+      bio: 'Board-certified cardiologist with 15 years of experience.',
+      experienceYears: 15,
+      consultationFee: 150,
+      rating: 4.9,
+      reviewCount: 128,
+      availability: 'AVAILABLE' as const,
+      languages: ['English', 'Spanish'],
+      hospital: 'New York Medical Center',
+    },
+  },
+  patient: {
+    email: 'patient@drinsight.com',
+    firstName: 'John',
+    lastName: 'Doe',
+    role: UserRole.PATIENT,
+  },
+} as const;
+
+function assertDevelopmentEnvironment() {
+  const nodeEnv = process.env.NODE_ENV?.toLowerCase();
+  if (nodeEnv === 'production') {
+    console.error('Refusing to seed: NODE_ENV is production. Demo seed is for development only.');
+    process.exit(1);
+  }
+}
+
+async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, BCRYPT_ROUNDS);
+}
+
+async function seedDemoUser(
+  email: string,
+  firstName: string,
+  lastName: string,
+  role: UserRole,
+  passwordHash: string,
+) {
+  return prisma.user.upsert({
+    where: { email },
+    update: {
+      passwordHash,
+      firstName,
+      lastName,
+      role,
+      status: UserStatus.ACTIVE,
+      emailVerified: true,
+    },
+    create: {
+      email,
+      passwordHash,
+      firstName,
+      lastName,
+      role,
+      status: UserStatus.ACTIVE,
+      emailVerified: true,
+    },
+  });
+}
+
 async function main() {
-  const passwordHash = await bcrypt.hash('Password123!', 12);
+  assertDevelopmentEnvironment();
 
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@drinsight.com' },
-    update: {},
+  const passwordHash = await hashPassword(DEMO_PASSWORD);
+
+  const admin = await seedDemoUser(
+    DEMO_USERS.admin.email,
+    DEMO_USERS.admin.firstName,
+    DEMO_USERS.admin.lastName,
+    DEMO_USERS.admin.role,
+    passwordHash,
+  );
+
+  const doctorUser = await seedDemoUser(
+    DEMO_USERS.doctor.email,
+    DEMO_USERS.doctor.firstName,
+    DEMO_USERS.doctor.lastName,
+    DEMO_USERS.doctor.role,
+    passwordHash,
+  );
+
+  await prisma.doctorProfile.upsert({
+    where: { userId: doctorUser.id },
+    update: DEMO_USERS.doctor.profile,
     create: {
-      email: 'admin@drinsight.com',
-      passwordHash,
-      firstName: 'Admin',
-      lastName: 'User',
-      role: UserRole.ADMIN,
-      status: 'ACTIVE',
-      emailVerified: true,
+      userId: doctorUser.id,
+      ...DEMO_USERS.doctor.profile,
     },
   });
 
-  const doctorUser = await prisma.user.upsert({
-    where: { email: 'doctor@drinsight.com' },
+  const patientUser = await seedDemoUser(
+    DEMO_USERS.patient.email,
+    DEMO_USERS.patient.firstName,
+    DEMO_USERS.patient.lastName,
+    DEMO_USERS.patient.role,
+    passwordHash,
+  );
+
+  await prisma.patientProfile.upsert({
+    where: { userId: patientUser.id },
     update: {},
-    create: {
-      email: 'doctor@drinsight.com',
-      passwordHash,
-      firstName: 'Sarah',
-      lastName: 'Mitchell',
-      role: UserRole.DOCTOR,
-      status: 'ACTIVE',
-      emailVerified: true,
-      doctorProfile: {
-        create: {
-          specialty: 'Cardiology',
-          licenseNumber: 'MD-123456',
-          bio: 'Board-certified cardiologist with 15 years of experience.',
-          experienceYears: 15,
-          consultationFee: 150,
-          rating: 4.9,
-          reviewCount: 128,
-          availability: 'AVAILABLE',
-          languages: ['English', 'Spanish'],
-          hospital: 'New York Medical Center',
-        },
-      },
-    },
+    create: { userId: patientUser.id },
   });
 
-  const patientUser = await prisma.user.upsert({
-    where: { email: 'patient@drinsight.com' },
-    update: {},
-    create: {
-      email: 'patient@drinsight.com',
-      passwordHash,
-      firstName: 'John',
-      lastName: 'Doe',
-      role: UserRole.PATIENT,
-      status: 'ACTIVE',
-      emailVerified: true,
-      patientProfile: { create: {} },
-    },
+  console.log('Demo seed completed:', {
+    admin: admin.email,
+    doctor: doctorUser.email,
+    patient: patientUser.email,
   });
-
-  const cardiology = await prisma.blogCategory.upsert({
-    where: { slug: 'cardiology' },
-    update: {},
-    create: { name: 'Cardiology', slug: 'cardiology', description: 'Heart health articles' },
-  });
-
-  await prisma.blogPost.upsert({
-    where: { slug: '10-warning-signs-heart-disease' },
-    update: {},
-    create: {
-      title: '10 Warning Signs of Heart Disease You Should Never Ignore',
-      slug: '10-warning-signs-heart-disease',
-      excerpt: 'Cardiologists reveal the subtle symptoms that often go unnoticed until it\'s too late.',
-      content: '<p>Heart disease remains the leading cause of death worldwide...</p>',
-      categoryId: cardiology.id,
-      authorId: doctorUser.id,
-      status: BlogStatus.PUBLISHED,
-      readTimeMinutes: 5,
-      tags: ['cardiology', 'heart-health'],
-      publishedAt: new Date(),
-    },
-  });
-
-  console.log('Seed completed:', { admin: admin.email, doctor: doctorUser.email, patient: patientUser.email });
 }
 
 main()
-  .catch(console.error)
+  .catch((error) => {
+    console.error('Seed failed:', error);
+    process.exit(1);
+  })
   .finally(() => prisma.$disconnect());

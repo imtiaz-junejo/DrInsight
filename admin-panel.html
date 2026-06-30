@@ -190,6 +190,9 @@ tr:hover td{background:#fafbff}
 <script>
 var nav = [
  {lbl:'Overview', items:[{id:'dashboard', ico:'📊', name:'Dashboard'}]},
+ {lbl:'Security & Compliance', items:[
+   {id:'audit-log', ico:'🛡️', name:'Audit & Activity Log', badge:'1'}
+ ]},
  {lbl:'User Management', items:[
    {id:'users', ico:'👥', name:'Users'},
    {id:'doctors', ico:'👨‍⚕️', name:'Doctors'},
@@ -249,6 +252,7 @@ function buildNav(){
 
 var pageMeta = {
   'dashboard':['Dashboard Overview','Welcome back — here\'s what\'s happening today'],
+  'audit-log':['Audit & Activity Log','Every sensitive action on the platform — who did what, when, and from where'],
   'users':['Users','Manage all platform users — patients, doctors, and admins'],
   'doctors':['Doctors','Manage doctor accounts, verification, and specialties'],
   'patients':['Patients','View and manage patient accounts and health profiles'],
@@ -316,6 +320,7 @@ function setFlt(el){
 function renderPage(id){
   switch(id){
     case 'dashboard': return pgDashboard();
+    case 'audit-log': return pgAuditLog();
     case 'users': return pgUsers();
     case 'doctors': return pgDoctors();
     case 'patients': return pgPatients();
@@ -375,6 +380,33 @@ function pgDashboard(){
       ['<div class="cell-user">'+avatar('NB',colors[3])+'<div><div class="cell-name">Nadia Baig</div><div class="cell-sub">nadia.b@email.com</div></div></div>','<span class="chip ch-b">Patient</span>','Yesterday']
     ]);
   return stats + chart + '<div class="grid2">'+queue+recentUsers+'</div>';
+}
+
+function pgAuditLog(){
+  var stats=statCards([
+    {ic:'ic1',icon:'📜',num:'1,842',label:'Events Logged (24h)',tag:'All categories',tagClass:'tt-b'},
+    {ic:'ic2',icon:'🛠️',num:'47',label:'Admin Actions (24h)',tag:'+6 vs yesterday',tagClass:'tt-b'},
+    {ic:'ic3',icon:'🔓',num:'9',label:'Failed Logins (24h)',tag:'Review',tagClass:'tt-a'},
+    {ic:'ic4',icon:'🚨',num:'1',label:'Open Security Alert',tag:'Action needed',tagClass:'tt-r'}
+  ]);
+  var alert='<div class="panel" style="border-color:#fecaca"><div class="panel-hd" style="background:#fef2f2"><h3 style="color:var(--red)">🚨 Open Security Alert</h3><button class="btn danger" onclick="showToast(\'Alert acknowledged\')">Acknowledge</button></div><div class="panel-bd"><div class="tpl-item"><div class="tpl-ic" style="background:#fef2f2">🔐</div><div class="tpl-info"><strong>5 failed login attempts on admin@medauthority.com in 10 minutes</strong><span>From IP 91.214.45.118 · Unrecognized location · Account temporarily locked · 38 minutes ago</span></div><button class="btn" onclick="showToast(\'Opening full event trail for this alert...\')">Investigate</button></div></div></div>';
+  var filters=filterRow(['All Events','Admin Actions','Auth & Security','Data Access','Payments & Payouts','Errors']);
+  var table=panelTable('Activity & Audit Log',
+    '<button class="btn" onclick="showToast(\'Exporting filtered log as CSV...\')">⬇ Export</button><button class="btn" onclick="showToast(\'Opening alert rule settings...\')">⚙️ Alert Rules</button>',
+    ['Time','Actor','Action','Target','IP Address','Result','Severity','Details'],
+    [
+      ['2 min ago','<div class="cell-user">'+avatar('SA',colors[4])+'<div><div class="cell-name">Sana Aslam</div><div class="cell-sub">Super Admin</div></div></div>','Suspended user','Fatima Khan <span class="cell-sub">#PT-2891</span>','203.101.84.12','<span class="chip ch-g">Success</span>','<span class="chip ch-gray">Info</span>','<button class="btn" onclick="showToast(\'Opening event detail — before/after state\')">View</button>'],
+      ['14 min ago','<div class="cell-user">'+avatar('SA',colors[4])+'<div><div class="cell-name">Sana Aslam</div><div class="cell-sub">Super Admin</div></div></div>','Verified doctor','Dr. Lisa Wong <span class="cell-sub">#USR-4102</span>','203.101.84.12','<span class="chip ch-g">Success</span>','<span class="chip ch-gray">Info</span>','<button class="btn" onclick="showToast(\'Opening event detail — before/after state\')">View</button>'],
+      ['38 min ago','<div class="cell-user">'+avatar('SA',colors[4])+'<div><div class="cell-name">Sana Aslam</div><div class="cell-sub">Super Admin</div></div></div>','Updated role permission','Editorial Admin → Manage Payments: enabled','203.101.84.12','<span class="chip ch-g">Success</span>','<span class="chip ch-a">Sensitive</span>','<button class="btn" onclick="showToast(\'Opening event detail — before/after state\')">View</button>'],
+      ['1 hour ago','<div class="cell-user">'+avatar('SY',colors[2])+'<div><div class="cell-name">System</div><div class="cell-sub">Automated payout job</div></div></div>','Processed payout','$3,240 → Dr. Javed Kumbhar','—','<span class="chip ch-g">Success</span>','<span class="chip ch-a">Sensitive</span>','<button class="btn" onclick="showToast(\'Opening event detail — before/after state\')">View</button>'],
+      ['1 hour ago','<div class="cell-user">'+avatar('??',colors[3])+'<div><div class="cell-name">Unknown</div><div class="cell-sub">admin@medauthority.com</div></div></div>','Failed login attempt','Admin login form','91.214.45.118','<span class="chip ch-r">Failed</span>','<span class="chip ch-a">Warning</span>','<button class="btn" onclick="showToast(\'Opening event detail — before/after state\')">View</button>'],
+      ['38 min ago','<div class="cell-user">'+avatar('??',colors[3])+'<div><div class="cell-name">Unknown</div><div class="cell-sub">admin@medauthority.com</div></div></div>','Account locked (5 failed attempts)','Admin login form','91.214.45.118','<span class="chip ch-r">Blocked</span>','<span class="chip ch-r">Critical</span>','<button class="btn" onclick="showToast(\'Opening event detail — before/after state\')">View</button>'],
+      ['5 hours ago','<div class="cell-user">'+avatar('SM',colors[3])+'<div><div class="cell-name">Dr. Sarah Mitchell</div><div class="cell-sub">Doctor</div></div></div>','Submitted article for review','"Understanding Atrial Fibrillation"','41.223.18.4','<span class="chip ch-g">Success</span>','<span class="chip ch-gray">Info</span>','<button class="btn" onclick="showToast(\'Opening event detail — before/after state\')">View</button>'],
+      ['Yesterday, 4:12 PM','<div class="cell-user">'+avatar('SA',colors[4])+'<div><div class="cell-name">Sana Aslam</div><div class="cell-sub">Super Admin</div></div></div>','Rejected article','"SSRI Withdrawal Effects" — revisions needed','203.101.84.12','<span class="chip ch-g">Success</span>','<span class="chip ch-gray">Info</span>','<button class="btn" onclick="showToast(\'Opening event detail — before/after state\')">View</button>'],
+      ['Yesterday, 11:05 AM','<div class="cell-user">'+avatar('AR',colors[1])+'<div><div class="cell-name">Ahmed Raza</div><div class="cell-sub">Patient</div></div></div>','Viewed own health profile','#PT-3047','118.103.22.9','<span class="chip ch-g">Success</span>','<span class="chip ch-gray">Info</span>','<button class="btn" onclick="showToast(\'Opening event detail — before/after state\')">View</button>'],
+      ['2 days ago','<div class="cell-user">'+avatar('SA',colors[4])+'<div><div class="cell-name">Sana Aslam</div><div class="cell-sub">Super Admin</div></div></div>','Exported patient data (CSV)','All Patients — 3,892 records','203.101.84.12','<span class="chip ch-g">Success</span>','<span class="chip ch-p">Sensitive</span>','<button class="btn" onclick="showToast(\'Opening event detail — before/after state\')">View</button>']
+    ],'Showing 10 of 1,842 events');
+  return stats+alert+filters+table;
 }
 
 function pgUsers(){

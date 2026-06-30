@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { AuthLeftPanel } from "@/components/auth/AuthLeftPanel";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
@@ -30,7 +31,9 @@ export default function LoginPage() {
           pills={["🛡️ HIPAA Compliant", "🔒 256-bit SSL", "🇪🇺 GDPR Compliant"]}
         />
         <div className="flex items-center justify-center bg-gray-50 px-6 py-10">
-          <LoginForm />
+          <Suspense fallback={<div className="text-[.9rem] text-gray-500">Loading...</div>}>
+            <LoginForm />
+          </Suspense>
         </div>
       </div>
     </>

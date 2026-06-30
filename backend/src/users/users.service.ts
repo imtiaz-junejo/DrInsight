@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { UserStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -40,6 +41,38 @@ export class UsersService {
         avatarUrl: true,
         phone: true,
       },
+    });
+  }
+
+  async setUserStatus(userId: string, status: UserStatus) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { status },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        status: true,
+      },
+    });
+  }
+
+  async findPending() {
+    return this.prisma.user.findMany({
+      where: { status: 'PENDING' },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        status: true,
+        createdAt: true,
+        doctorProfile: { select: { specialty: true, licenseNumber: true } },
+      },
+      orderBy: { createdAt: 'desc' },
     });
   }
 

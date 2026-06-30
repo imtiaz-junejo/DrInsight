@@ -49,7 +49,7 @@ export const useAuthStore = create<AuthState>()(
           setCookie("drinsight_access", accessToken, 60 * 15);
           setCookie("drinsight_role", user.role, 60 * 60 * 24 * 7);
         }
-        set({ user, accessToken, refreshToken, isAuthenticated: true });
+        set({ user, accessToken, refreshToken, isAuthenticated: true, isBootstrapped: true });
       },
       clearAuth: () => {
         if (typeof window !== "undefined") {

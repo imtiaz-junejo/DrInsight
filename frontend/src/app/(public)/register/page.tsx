@@ -9,9 +9,14 @@ import { Breadcrumb } from "@/components/layout/Breadcrumb";
 import { Logo } from "@/components/layout/Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { isAxiosError } from "axios";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { useAuthStore, type AuthUser } from "@/store/auth.store";
+
+type RegisterResponse =
+  | { accessToken: string; refreshToken: string; user: AuthUser }
+  | { requiresApproval: true; message: string; user: AuthUser };
 
 const loginFeatures = [
   { icon: "🔖", title: "Save Articles & Guides", desc: "Bookmark any article for quick access anytime" },
@@ -37,19 +42,41 @@ export default function RegisterPage() {
       specialty?: string;
       licenseNumber?: string;
     }) => {
-      const { data } = await api.post<{
-        accessToken: string;
-        refreshToken: string;
-        user: AuthUser;
-      }>("/auth/register", payload);
+      const { data } = await api.post<RegisterResponse>("/auth/register", payload);
       return data;
     },
     onSuccess: (data) => {
+      if ("requiresApproval" in data && data.requiresApproval) {
+        setSuccess(true);
+        setError("");
+        return;
+      }
+      if (!("accessToken" in data) || !data.accessToken) {
+        setError("Account created but sign-in failed. Please try logging in.");
+        return;
+      }
       setAuth(data.user, data.accessToken, data.refreshToken);
       setSuccess(true);
       router.replace(data.user.role === "DOCTOR" ? "/doctor" : "/patient");
     },
-    onError: () => setError("Unable to create account. Check your details and try again."),
+    onError: (err) => {
+      if (isAxiosError(err)) {
+        const message = err.response?.data?.message;
+        if (Array.isArray(message)) {
+          setError(message.join(", "));
+          return;
+        }
+        if (typeof message === "string" && message) {
+          setError(message);
+          return;
+        }
+        if (!err.response) {
+          setError("Cannot reach the server. Make sure the backend is running on port 4000.");
+          return;
+        }
+      }
+      setError("Unable to create account. Check your details and try again.");
+    },
   });
 
   const leftContent =
@@ -286,10 +313,14 @@ export default function RegisterPage() {
                 <div className="mb-4 text-5xl">✅</div>
                 <h3 className="font-display mb-3 text-[1.5rem] font-bold">Account Created Successfully!</h3>
                 <p className="mb-6 text-[.9rem] text-gray-500">
-                  Welcome to DrInsight! We&apos;ve sent a verification email to your inbox.
+                  {accountType === "physician"
+                    ? "Your physician account was submitted. An admin will review and approve it before you can sign in."
+                    : "Welcome to DrInsight! You can now sign in and access your dashboard."}
                 </p>
                 <Button asChild>
-                  <Link href="/patient">Go to My Dashboard →</Link>
+                  <Link href={accountType === "physician" ? "/login" : "/patient"}>
+                    {accountType === "physician" ? "Go to Sign In →" : "Go to My Dashboard →"}
+                  </Link>
                 </Button>
               </div>
             )}
