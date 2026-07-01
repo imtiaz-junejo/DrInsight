@@ -55,7 +55,7 @@ export function LoginForm() {
       setError("");
       setSuccess("Login successful! Redirecting...");
       const destination = resolvePostLoginPath(data.user.role, searchParams.get("redirect"));
-      // Full navigation ensures middleware receives the freshly-set auth cookie
+      // Full navigation ensures proxy receives the freshly-set auth cookie
       window.location.assign(destination);
     },
     onError: (err) => {

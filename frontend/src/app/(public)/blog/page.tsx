@@ -1,240 +1,609 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { Breadcrumb } from "@/components/layout/Breadcrumb";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
-import { useBlogCategories, useBlogPosts } from "@/services/api-hooks";
+import { useRef, useState } from "react";
+import "@/styles/blog-page.css";
+
+const FILTER_PILLS = [
+  { id: "all", label: "All" },
+  { id: "cardiology", label: "❤️ Cardiology" },
+  { id: "neurology", label: "🧠 Neurology" },
+  { id: "diabetes", label: "🩸 Diabetes" },
+  { id: "mental", label: "🧘 Mental Health" },
+  { id: "womens", label: "🤰 Women's Health" },
+  { id: "pediatrics", label: "👶 Pediatrics" },
+  { id: "nutrition", label: "🍎 Nutrition" },
+  { id: "skin", label: "🦷 Dermatology" },
+];
+
+const BLOG_POSTS = [
+  {
+    cat: "cardiology",
+    emoji: "❤️",
+    thumbBg: "#fef2f2",
+    badgeBg: "#dc2626",
+    badge: "CARDIOLOGY",
+    catLabel: "Cardiology",
+    catColor: "#dc2626",
+    title: "10 Early Warning Signs of Heart Disease You Should Never Ignore",
+    excerpt:
+      "Cardiologists reveal subtle symptoms often dismissed — from jaw pain to ankle swelling — that could signal serious cardiac risk.",
+    authorInitials: "SM",
+    authorGradient: "linear-gradient(135deg,#1a56a0,#0891b2)",
+    author: "Dr. S. Mitchell",
+    readTime: "6 min",
+  },
+  {
+    cat: "diabetes",
+    emoji: "🩸",
+    thumbBg: "#fffbeb",
+    badgeBg: "#d97706",
+    badge: "DIABETES",
+    catLabel: "Diabetes & Endocrinology",
+    catColor: "#d97706",
+    title: "How to Reverse Pre-Diabetes Naturally: A Clinician's Evidence-Based Guide",
+    excerpt:
+      "The landmark DPP trial showed lifestyle changes cut diabetes risk by 58%. Here's exactly what to do, based on the evidence.",
+    authorInitials: "PS",
+    authorGradient: "linear-gradient(135deg,#059669,#0891b2)",
+    author: "Dr. P. Sharma",
+    readTime: "9 min",
+  },
+  {
+    cat: "neurology",
+    emoji: "🧠",
+    thumbBg: "#f3f0ff",
+    badgeBg: "#7c3aed",
+    badge: "NEUROLOGY",
+    catLabel: "Neurology",
+    catColor: "#7c3aed",
+    title: "Migraine vs Headache: How to Tell the Difference and When to See a Doctor",
+    excerpt:
+      "Not all head pain is the same. A neurologist explains the key distinctions and what each type means for your health.",
+    authorInitials: "JO",
+    authorGradient: "linear-gradient(135deg,#7c3aed,#4a90d9)",
+    author: "Dr. J. Okafor",
+    readTime: "7 min",
+  },
+  {
+    cat: "mental",
+    emoji: "🧘",
+    thumbBg: "#eef2ff",
+    badgeBg: "#4f46e5",
+    badge: "MENTAL HEALTH",
+    catLabel: "Mental Health & Psychiatry",
+    catColor: "#4f46e5",
+    title: "Understanding Anxiety Disorders: Types, Triggers, and the Most Effective Treatments",
+    excerpt:
+      "A psychiatrist's comprehensive guide to the anxiety spectrum — from GAD to panic disorder — and what actually works.",
+    authorInitials: "EC",
+    authorGradient: "linear-gradient(135deg,#7c3aed,#ec4899)",
+    author: "Dr. E. Chen",
+    readTime: "11 min",
+  },
+  {
+    cat: "womens",
+    emoji: "🤰",
+    thumbBg: "#fdf2f8",
+    badgeBg: "#db2777",
+    badge: "WOMEN'S HEALTH",
+    catLabel: "Women's Health",
+    catColor: "#db2777",
+    title: "PCOS Explained: Symptoms, Diagnosis, and a Complete Management Plan",
+    excerpt:
+      "Affecting 1 in 10 women, PCOS is often misunderstood. A gynaecologist explains the full picture from hormones to fertility.",
+    authorInitials: "EC",
+    authorGradient: "linear-gradient(135deg,#db2777,#f59e0b)",
+    author: "Dr. E. Chen",
+    readTime: "10 min",
+  },
+  {
+    cat: "nutrition",
+    emoji: "🍎",
+    thumbBg: "#ecfdf5",
+    badgeBg: "#059669",
+    badge: "NUTRITION",
+    catLabel: "Nutrition & Lifestyle",
+    catColor: "#059669",
+    title: "The Anti-Inflammatory Diet: A Physician's Guide to Eating for Long-Term Health",
+    excerpt:
+      "Chronic inflammation drives heart disease, cancer, and diabetes. Here's exactly what to eat — and avoid — according to the evidence.",
+    authorInitials: "PS",
+    authorGradient: "linear-gradient(135deg,#059669,#0891b2)",
+    author: "Dr. P. Sharma",
+    readTime: "8 min",
+  },
+  {
+    cat: "pediatrics",
+    emoji: "👶",
+    thumbBg: "#f0fdf4",
+    badgeBg: "#16a34a",
+    badge: "PEDIATRICS",
+    catLabel: "Pediatrics",
+    catColor: "#16a34a",
+    title: "Childhood Vaccine Schedule 2026: What Every Parent Needs to Know",
+    excerpt:
+      "A paediatrician breaks down the full immunisation schedule — what each vaccine does, when to give it, and common myths debunked.",
+    authorInitials: "CR",
+    authorGradient: "linear-gradient(135deg,#f59e0b,#059669)",
+    author: "Dr. C. Rivera",
+    readTime: "12 min",
+  },
+  {
+    cat: "skin",
+    emoji: "🦷",
+    thumbBg: "#fff7ed",
+    badgeBg: "#ea580c",
+    badge: "DERMATOLOGY",
+    catLabel: "Dermatology",
+    catColor: "#ea580c",
+    title: "Eczema, Psoriasis, or Rosacea? How to Tell Them Apart and Treat Each Correctly",
+    excerpt:
+      "Three of the most commonly confused skin conditions — a dermatologist explains the differences and the latest treatment approaches.",
+    authorInitials: "AH",
+    authorGradient: "linear-gradient(135deg,#ea580c,#d97706)",
+    author: "Dr. A. Hassan",
+    readTime: "8 min",
+  },
+  {
+    cat: "cardiology",
+    emoji: "🫀",
+    thumbBg: "#e0f7fa",
+    badgeBg: "#0891b2",
+    badge: "CARDIOLOGY",
+    catLabel: "Cardiology",
+    catColor: "#0891b2",
+    title: "High Blood Pressure: The Silent Killer and How to Control It Without Side Effects",
+    excerpt:
+      "Hypertension affects 1 in 3 adults. A cardiologist explains medication, lifestyle changes, and the latest evidence on control.",
+    authorInitials: "SM",
+    authorGradient: "linear-gradient(135deg,#1a56a0,#0891b2)",
+    author: "Dr. S. Mitchell",
+    readTime: "7 min",
+  },
+];
+
+const TRENDING = [
+  {
+    title: "Can You Reverse Type 2 Diabetes? The Science Behind Remission",
+    meta: "Diabetes · Dr. Priya Sharma · 14.2k views",
+  },
+  {
+    title: "The Omega-3 Debate: What the Latest Research Really Says",
+    meta: "Nutrition · Dr. Javed Kumbhar · 11.8k views",
+  },
+  {
+    title: "Stroke Warning Signs: Act FAST — Every Second Counts",
+    meta: "Neurology · Dr. James Okafor · 9.6k views",
+  },
+  {
+    title: "Sleep and Mental Health: The Bidirectional Relationship Explained",
+    meta: "Mental Health · Dr. Emily Chen · 8.3k views",
+  },
+  {
+    title: "When Should You Get a Colonoscopy? New Guidelines Explained",
+    meta: "Gastroenterology · Dr. Ahmed Hassan · 7.1k views",
+  },
+];
+
+const SIDEBAR_DOCS = [
+  {
+    initials: "JK",
+    gradient: "linear-gradient(135deg,#1a56a0,#0891b2)",
+    name: "Dr. Javed Kumbhar",
+    spec: "Founder · Internal Medicine",
+    count: "142 articles published",
+  },
+  {
+    initials: "SM",
+    gradient: "linear-gradient(135deg,#dc2626,#f59e0b)",
+    name: "Dr. Sarah Mitchell",
+    spec: "Cardiologist",
+    count: "89 articles published",
+  },
+  {
+    initials: "PS",
+    gradient: "linear-gradient(135deg,#059669,#0891b2)",
+    name: "Dr. Priya Sharma",
+    spec: "Endocrinologist",
+    count: "76 articles published",
+  },
+  {
+    initials: "JO",
+    gradient: "linear-gradient(135deg,#7c3aed,#4a90d9)",
+    name: "Dr. James Okafor",
+    spec: "Neurologist",
+    count: "64 articles published",
+  },
+  {
+    initials: "EC",
+    gradient: "linear-gradient(135deg,#db2777,#f59e0b)",
+    name: "Dr. Emily Chen",
+    spec: "Psychiatrist / Gynaecologist",
+    count: "58 articles published",
+  },
+];
+
+const SPEC_TAGS = [
+  { label: "Cardiology", type: "clinical" },
+  { label: "Neurology", type: "clinical" },
+  { label: "Psychiatry", type: "clinical" },
+  { label: "Pediatrics", type: "clinical" },
+  { label: "Oncology", type: "clinical" },
+  { label: "Dermatology", type: "clinical" },
+  { label: "Endocrinology", type: "clinical" },
+  { label: "Pulmonology", type: "clinical" },
+  { label: "General Surgery", type: "surgical" },
+  { label: "Orthopedics", type: "surgical" },
+  { label: "OB/GYN", type: "surgical" },
+  { label: "Neurosurgery", type: "surgical" },
+  { label: "Preventive Medicine", type: "other" },
+  { label: "Nutrition", type: "other" },
+  { label: "Sports Medicine", type: "other" },
+  { label: "Sleep Medicine", type: "other" },
+  { label: "Palliative Medicine", type: "other" },
+];
+
+type CatTab = "clinical" | "surgical" | "diagnostic" | "other";
+
+const CATS_DATA: Record<
+  CatTab,
+  { ico: string; bg: string; name: string; count: string }[]
+> = {
+  clinical: [
+    { ico: "❤️", bg: "#fef2f2", name: "Cardiology", count: "124 articles" },
+    { ico: "🧠", bg: "#f3f0ff", name: "Neurology", count: "98 articles" },
+    { ico: "🫁", bg: "#e0f7fa", name: "Pulmonology", count: "76 articles" },
+    { ico: "🔬", bg: "#fff7ed", name: "Gastroenterology", count: "82 articles" },
+    { ico: "🫘", bg: "#f0fdf4", name: "Nephrology", count: "54 articles" },
+    { ico: "🩸", bg: "#fffbeb", name: "Endocrinology", count: "91 articles" },
+    { ico: "🧬", bg: "#fdf4ff", name: "Oncology", count: "67 articles" },
+    { ico: "🦠", bg: "#ecfdf5", name: "Infectious Disease", count: "88 articles" },
+    { ico: "🧘", bg: "#eef2ff", name: "Psychiatry", count: "112 articles" },
+    { ico: "👶", bg: "#f0fdf4", name: "Pediatrics", count: "95 articles" },
+    { ico: "👴", bg: "#fffbeb", name: "Geriatrics", count: "43 articles" },
+    { ico: "🩺", bg: "#f0f7ff", name: "Internal Medicine", count: "136 articles" },
+    { ico: "🏠", bg: "#f8fafc", name: "Family Medicine", count: "78 articles" },
+    { ico: "🚨", bg: "#fef2f2", name: "Emergency Medicine", count: "52 articles" },
+    { ico: "💊", bg: "#f3f4f6", name: "Rheumatology", count: "61 articles" },
+    { ico: "🦷", bg: "#fff7ed", name: "Dermatology", count: "87 articles" },
+  ],
+  surgical: [
+    { ico: "🔪", bg: "#f0f7ff", name: "General Surgery", count: "48 articles" },
+    { ico: "🧠", bg: "#f3f0ff", name: "Neurosurgery", count: "36 articles" },
+    { ico: "❤️", bg: "#fef2f2", name: "Cardiothoracic Surgery", count: "42 articles" },
+    { ico: "🩻", bg: "#f0fdf4", name: "Orthopedic Surgery", count: "71 articles" },
+    { ico: "🤰", bg: "#fdf2f8", name: "OB/GYN", count: "93 articles" },
+    { ico: "👁️", bg: "#e0f7fa", name: "Ophthalmology", count: "55 articles" },
+    { ico: "👂", bg: "#fffbeb", name: "Otolaryngology (ENT)", count: "49 articles" },
+    { ico: "💉", bg: "#ecfdf5", name: "Urology", count: "62 articles" },
+  ],
+  diagnostic: [
+    { ico: "🩻", bg: "#f0f7ff", name: "Diagnostic Radiology", count: "38 articles" },
+    { ico: "⚡", bg: "#fff7ed", name: "Interventional Radiology", count: "24 articles" },
+    { ico: "🔬", bg: "#f3f4f6", name: "Histopathology", count: "19 articles" },
+    { ico: "🩸", bg: "#fef2f2", name: "Hematopathology", count: "22 articles" },
+    { ico: "☢️", bg: "#fffbeb", name: "Nuclear Medicine", count: "16 articles" },
+    { ico: "😴", bg: "#eef2ff", name: "Anesthesiology", count: "31 articles" },
+  ],
+  other: [
+    { ico: "🛡️", bg: "#ecfdf5", name: "Preventive Medicine", count: "104 articles" },
+    { ico: "🌍", bg: "#e0f7fa", name: "Public Health", count: "67 articles" },
+    { ico: "🏃", bg: "#f0fdf4", name: "Sports Medicine", count: "58 articles" },
+    { ico: "😴", bg: "#eef2ff", name: "Sleep Medicine", count: "49 articles" },
+    { ico: "🕊️", bg: "#f8fafc", name: "Palliative Medicine", count: "33 articles" },
+    { ico: "🧬", bg: "#fdf4ff", name: "Medical Genetics", count: "27 articles" },
+    { ico: "🍎", bg: "#ecfdf5", name: "Nutrition & Lifestyle", count: "118 articles" },
+    { ico: "💼", bg: "#fffbeb", name: "Occupational Medicine", count: "41 articles" },
+  ],
+};
+
+const CAT_TABS: { id: CatTab; label: string }[] = [
+  { id: "clinical", label: "Clinical Specialties" },
+  { id: "surgical", label: "Surgical Specialties" },
+  { id: "diagnostic", label: "Diagnostic & Lab" },
+  { id: "other", label: "Other Fields" },
+];
 
 export default function BlogPage() {
   const [activeFilter, setActiveFilter] = useState("all");
-  const [search, setSearch] = useState("");
-  const postsQuery = useBlogPosts({
-    search,
-    category: activeFilter === "all" ? undefined : activeFilter,
-    limit: 12,
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchMode, setIsSearchMode] = useState(false);
+  const [activeCatTab, setActiveCatTab] = useState<CatTab>("clinical");
+  const mainWrapRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const visiblePosts = BLOG_POSTS.filter((post) => {
+    if (isSearchMode && searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      const text = `${post.title} ${post.excerpt}`.toLowerCase();
+      return text.includes(q);
+    }
+    return activeFilter === "all" || post.cat === activeFilter;
   });
-  const categoriesQuery = useBlogCategories();
-  const posts = postsQuery.data?.data ?? [];
-  const featuredPost = posts[0];
+
+  function filterPosts(cat: string) {
+    setIsSearchMode(false);
+    setSearchQuery("");
+    setActiveFilter(cat);
+  }
+
+  function doSearch() {
+    const q = searchInputRef.current?.value ?? "";
+    if (!q.trim()) return;
+    setSearchQuery(q);
+    setIsSearchMode(true);
+    setActiveFilter("all");
+    mainWrapRef.current?.scrollIntoView({ behavior: "smooth" });
+  }
 
   return (
-    <>
-      <Breadcrumb items={[{ label: "Medical Blog" }]} />
-
-      {/* Hero */}
-      <section className="bg-gradient-to-br from-blue-dark via-blue to-teal px-6 py-16 text-white">
-        <div className="mx-auto grid max-w-[1240px] items-center gap-10 lg:grid-cols-2">
-          <div>
-            <div className="mb-2 text-[.72rem] font-bold uppercase tracking-widest text-[#93c5fd]">
-              Evidence-Based Medical Blog
-            </div>
-            <h1 className="font-display text-[clamp(1.8rem,3.5vw,2.6rem)] font-bold leading-tight">
-              Doctor-Written Health Articles You Can Trust
-            </h1>
-            <p className="mt-4 text-[.95rem] opacity-90">
-              1,000+ peer-reviewed articles across every medical specialty — written and reviewed by
-              board-certified physicians.
-            </p>
-            <div className="mt-6 flex gap-2">
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search articles by condition, symptom, or specialty..."
-                className="border-white/20 bg-white/10 text-white placeholder:text-white/60"
-              />
-              <Button variant="white" className="shrink-0">
-                🔍 Search
-              </Button>
-            </div>
-            <div className="mt-8 flex flex-wrap gap-6">
-              {[
-                ["1,000+", "Articles Published"],
-                ["200+", "Doctor Authors"],
-                ["50+", "Specialties Covered"],
-                ["Weekly", "New Content"],
-              ].map(([num, label]) => (
-                <div key={label as string}>
-                  <strong className="font-display block text-xl">{num}</strong>
-                  <span className="text-[.75rem] opacity-80">{label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <Link
-            href={featuredPost ? `/blog/${featuredPost.slug}` : "/blog"}
-            className="overflow-hidden rounded-[20px] border border-white/20 bg-white/10 backdrop-blur-md transition hover:-translate-y-1"
-          >
-            <div className="relative flex h-[180px] items-center justify-center bg-gradient-to-br from-blue-light/30 to-teal/30 text-6xl">
-              ❤️
-              <div className="absolute bottom-3 left-3 rounded-full bg-amber px-3 py-1 text-[.72rem] font-bold text-white">
-                ⭐ FEATURED
-              </div>
-            </div>
-            <div className="p-5">
-              <div className="mb-2 text-[.72rem] font-semibold text-[#93c5fd]">Cardiology · Editor&apos;s Pick</div>
-              <h3 className="font-display text-[1.05rem] font-semibold leading-snug">
-                {featuredPost?.title || "Latest Medical Insight"}
-              </h3>
-              <div className="mt-2 text-[.78rem] opacity-80">
-                {featuredPost?.author
-                  ? `Dr. ${featuredPost.author.firstName} ${featuredPost.author.lastName}`
-                  : "DrInsight Editorial Team"}{" "}
-                · {featuredPost?.readTimeMinutes || 5} min read
-              </div>
-            </div>
-          </Link>
-        </div>
-      </section>
-
-      {/* Main layout */}
-      <div className="mx-auto max-w-[1240px] px-6 py-12">
-        <div className="grid gap-10 lg:grid-cols-[1fr_320px]">
-          <div>
-            <div className="mb-2 text-[.72rem] font-bold uppercase tracking-widest text-blue">Latest Articles</div>
-            <h2 className="font-display mb-6 text-2xl font-bold text-gray-900">Recent Medical Insights</h2>
-
-            <div className="mb-6 flex flex-wrap gap-2">
-              <button
-                onClick={() => setActiveFilter("all")}
-                className={cn(
-                  "rounded-full border px-3.5 py-1.5 text-[.78rem] font-semibold transition",
-                  activeFilter === "all"
-                    ? "border-blue bg-blue text-white"
-                    : "border-gray-200 bg-white text-gray-600 hover:border-blue hover:text-blue",
-                )}
-              >
-                All
-              </button>
-              {(categoriesQuery.data ?? []).map((f) => (
-                <button
-                  key={f.slug}
-                  onClick={() => setActiveFilter(f.slug)}
-                  className={cn(
-                    "rounded-full border px-3.5 py-1.5 text-[.78rem] font-semibold transition",
-                    activeFilter === f.slug
-                      ? "border-blue bg-blue text-white"
-                      : "border-gray-200 bg-white text-gray-600 hover:border-blue hover:text-blue",
-                  )}
-                >
-                  {f.name}
-                </button>
-              ))}
-            </div>
-
-            {postsQuery.isLoading ? (
-              <div className="py-16 text-center text-gray-400">
-                <p className="text-[.9rem]">Loading articles...</p>
-              </div>
-            ) : postsQuery.isError ? (
-              <div className="py-16 text-center text-red">
-                <p className="text-[.9rem]">Unable to load articles. Please try again.</p>
-              </div>
-            ) : posts.length === 0 ? (
-              <div className="py-16 text-center text-gray-400">
-                <div className="mb-3 text-4xl">🔍</div>
-                <p className="text-[.9rem]">No articles match your search or filter.</p>
-              </div>
-            ) : (
-              <div className="grid gap-6 sm:grid-cols-2">
-                {posts.map((post) => (
-                  <Link
-                    key={post.slug}
-                    href={`/blog/${post.slug}`}
-                    className="overflow-hidden rounded-[20px] border border-gray-200 bg-white transition hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]"
-                  >
-                    <div className="relative flex h-[160px] items-center justify-center bg-gradient-to-br from-blue-light to-[#dbeafe] text-5xl">
-                      🩺
-                      <div
-                        className="absolute bottom-3 left-3 rounded-full px-3 py-1 text-[.68rem] font-bold tracking-wide text-white"
-                        style={{ background: "#1a56a0" }}
-                      >
-                        {(post.category?.name || "Medical").toUpperCase()}
-                      </div>
-                    </div>
-                    <div className="p-5">
-                      <div className="mb-1 text-[.72rem] font-bold uppercase text-blue">
-                        {post.category?.name || "Medical"}
-                      </div>
-                      <h3 className="font-display mb-2 text-[1rem] font-semibold leading-snug text-gray-900">
-                        {post.title}
-                      </h3>
-                      <p className="mb-3 text-[.82rem] leading-relaxed text-gray-600">{post.excerpt}</p>
-                      <div className="flex items-center justify-between text-[.75rem] text-gray-400">
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="flex h-7 w-7 items-center justify-center rounded-full text-[.6rem] font-bold text-white"
-                            style={{ background: "linear-gradient(135deg,#1a56a0,#0891b2)" }}
-                          >
-                            {(post.author?.firstName?.[0] || "D") + (post.author?.lastName?.[0] || "I")}
-                          </div>
-                          <span>
-                            {post.author ? `Dr. ${post.author.firstName} ${post.author.lastName}` : "DrInsight"}
-                          </span>
-                        </div>
-                        <span>⏱ {post.readTimeMinutes} min</span>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
-
-            <div className="mt-8 text-center">
-              <Button>Load More Articles ↓</Button>
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <aside className="space-y-5">
-            <div className="rounded-[20px] bg-gradient-to-br from-blue-dark to-blue p-6 text-white">
-              <h4 className="font-display mb-2 text-base font-bold">📬 Weekly Health Digest</h4>
-              <p className="mb-4 text-[.78rem] opacity-90">
-                Get the week&apos;s best medical articles curated by Dr. Javed Kumbhar, delivered every Monday.
-              </p>
-              <Input placeholder="Your email address" className="mb-2 border-white/20 bg-white/10 text-white placeholder:text-white/60" />
-              <Button variant="white" size="full">
-                Subscribe Free →
-              </Button>
-            </div>
-
-            <div className="rounded-[20px] border border-gray-200 bg-white p-5">
-              <h4 className="font-display mb-4 text-base font-bold">Top Author Doctors</h4>
-              {[
-                ["JK", "Dr. Javed Kumbhar", "Founder · Internal Medicine", "142 articles"],
-                ["SM", "Dr. Sarah Mitchell", "Cardiologist", "89 articles"],
-                ["PS", "Dr. Priya Sharma", "Endocrinologist", "76 articles"],
-              ].map(([init, name, spec, count]) => (
-                <div key={name as string} className="mb-3 flex gap-3 border-b border-gray-100 pb-3 last:mb-0 last:border-0 last:pb-0">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue to-teal text-[.7rem] font-bold text-white">
-                    {init}
-                  </div>
-                  <div>
-                    <div className="text-[.82rem] font-bold text-gray-900">{name}</div>
-                    <div className="text-[.72rem] text-blue">{spec}</div>
-                    <div className="text-[.68rem] text-gray-400">{count}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="rounded-[20px] border border-gray-200 bg-gray-50 p-5">
-              <h4 className="font-display mb-3 text-base font-bold">🩺 Need Medical Advice?</h4>
-              <p className="mb-4 text-[.78rem] text-gray-600">
-                Reading articles is a great start — but a doctor consultation gives you personalised guidance.
-              </p>
-              <Button asChild size="full" className="mb-2">
-                <Link href="/book-consultation">📅 Book Consultation</Link>
-              </Button>
-              <Button asChild variant="secondary" size="full">
-                <Link href="/ask-doctor">💬 Ask a Doctor Free</Link>
-              </Button>
-            </div>
-          </aside>
+    <div className="blog-page">
+      <div className="breadcrumb">
+        <div className="breadcrumb-inner">
+          🏠 <Link href="/">Home</Link> › <span>Medical Blog</span>
         </div>
       </div>
-    </>
+
+      <div className="page-hero">
+        <div className="hero-inner">
+          <div className="hero-left">
+            <div className="eyebrow">Evidence-Based Medical Blog</div>
+            <h1>Doctor-Written Health Articles You Can Trust</h1>
+            <p>
+              1,000+ peer-reviewed articles across every medical specialty — written and reviewed by
+              board-certified physicians. No misinformation, ever.
+            </p>
+            <div className="hero-search">
+              <input
+                ref={searchInputRef}
+                type="text"
+                id="hero-search"
+                placeholder="Search articles by condition, symptom, or specialty..."
+                defaultValue=""
+              />
+              <button type="button" onClick={doSearch}>
+                🔍 Search
+              </button>
+            </div>
+            <div className="hero-stats">
+              <div className="h-stat">
+                <strong>1,000+</strong>
+                <span>Articles Published</span>
+              </div>
+              <div className="h-stat">
+                <strong>200+</strong>
+                <span>Doctor Authors</span>
+              </div>
+              <div className="h-stat">
+                <strong>50+</strong>
+                <span>Specialties Covered</span>
+              </div>
+              <div className="h-stat">
+                <strong>Weekly</strong>
+                <span>New Content</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div className="featured-card">
+              <div className="featured-thumb">
+                ❤️
+                <div className="featured-badge">⭐ FEATURED</div>
+              </div>
+              <div className="featured-body">
+                <div className="featured-cat">Cardiology · Editor&apos;s Pick</div>
+                <h3>The Silent Heart Attack: 8 Warning Signs Most People Miss Until It&apos;s Too Late</h3>
+                <div className="featured-meta">
+                  <span>Dr. Sarah Mitchell</span> · <span>8 min read</span> · <span>May 30, 2026</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="main-wrap" ref={mainWrapRef}>
+        <div className="blog-layout">
+          <div>
+            <div className="section-eyebrow">Latest Articles</div>
+            <div className="section-title">Recent Medical Insights</div>
+
+            <div className="filter-bar" id="filter-bar">
+              {FILTER_PILLS.map((pill) => (
+                <div
+                  key={pill.id}
+                  className={`filter-pill${!isSearchMode && activeFilter === pill.id ? " active" : ""}`}
+                  onClick={() => filterPosts(pill.id)}
+                  onKeyDown={(e) => e.key === "Enter" && filterPosts(pill.id)}
+                  role="button"
+                  tabIndex={0}
+                >
+                  {pill.label}
+                </div>
+              ))}
+            </div>
+
+            <div className="blog-grid" id="blog-grid">
+              {visiblePosts.map((post) => (
+                <div key={post.title} className="blog-card" data-cat={post.cat}>
+                  <div className="blog-thumb" style={{ background: post.thumbBg }}>
+                    {post.emoji}
+                    <div className="blog-badge" style={{ background: post.badgeBg }}>
+                      {post.badge}
+                    </div>
+                  </div>
+                  <div className="blog-body">
+                    <div className="blog-cat-label" style={{ color: post.catColor }}>
+                      {post.catLabel}
+                    </div>
+                    <h3>{post.title}</h3>
+                    <p>{post.excerpt}</p>
+                    <div className="blog-footer">
+                      <div className="blog-meta-sm">
+                        <div className="author-dot" style={{ background: post.authorGradient }}>
+                          {post.authorInitials}
+                        </div>
+                        <span>{post.author}</span>
+                      </div>
+                      <div className="read-time">⏱ {post.readTime}</div>
+                      <span className="read-more-link">Read →</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {visiblePosts.length === 0 && (
+                <div className="no-results" id="no-results">
+                  <div className="no-results-icon">🔍</div>
+                  <p>No articles match your search or filter. Try different keywords.</p>
+                </div>
+              )}
+            </div>
+
+            <div className="load-more-wrap">
+              <button type="button" className="load-more-btn">
+                Load More Articles ↓
+              </button>
+            </div>
+
+            <div className="trending-section">
+              <div className="section-eyebrow" style={{ marginTop: 36 }}>
+                Most Read This Week
+              </div>
+              <div className="section-title">Trending Articles</div>
+              <div className="trending-list">
+                {TRENDING.map((item, i) => (
+                  <div key={item.title} className="trending-item">
+                    <div className="trending-num">{i + 1}</div>
+                    <div>
+                      <h4>{item.title}</h4>
+                      <span>{item.meta}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div className="subscribe-card">
+              <h4>📬 Weekly Health Digest</h4>
+              <p>Get the week&apos;s best medical articles curated by Dr. Javed Kumbhar, delivered every Monday.</p>
+              <input type="email" placeholder="Your email address" />
+              <button type="button">Subscribe Free →</button>
+              <p className="subscribe-note">🔒 No spam. Unsubscribe anytime.</p>
+            </div>
+
+            <div className="sidebar-card">
+              <h4>Top Author Doctors</h4>
+              {SIDEBAR_DOCS.map((doc) => (
+                <div key={doc.name} className="sidebar-doc">
+                  <div className="doc-av" style={{ background: doc.gradient }}>
+                    {doc.initials}
+                  </div>
+                  <div>
+                    <div className="doc-name">{doc.name}</div>
+                    <div className="doc-spec">{doc.spec}</div>
+                    <div className="doc-count">{doc.count}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="sidebar-card">
+              <h4>Browse by Specialty</h4>
+              <div className="spec-tag-cloud">
+                {SPEC_TAGS.map((tag) => (
+                  <span key={tag.label} className={`spec-tag ${tag.type}`}>
+                    {tag.label}
+                  </span>
+                ))}
+              </div>
+              <div className="spec-legend">
+                <span className="spec-legend-item" style={{ color: "var(--blue)" }}>
+                  <span className="spec-legend-dot" style={{ background: "var(--blue)" }} />
+                  Clinical
+                </span>
+                <span className="spec-legend-item" style={{ color: "var(--teal)" }}>
+                  <span className="spec-legend-dot" style={{ background: "var(--teal)" }} />
+                  Surgical
+                </span>
+                <span className="spec-legend-item" style={{ color: "var(--purple)" }}>
+                  <span className="spec-legend-dot" style={{ background: "var(--purple)" }} />
+                  Other
+                </span>
+              </div>
+            </div>
+
+            <div className="sidebar-card advice-card">
+              <h4>🩺 Need Medical Advice?</h4>
+              <p>
+                Reading articles is a great start — but a doctor consultation gives you personalised guidance.
+              </p>
+              <Link href="/book-consultation" className="advice-btn-primary">
+                📅 Book Consultation
+              </Link>
+              <Link href="/ask-doctor" className="advice-btn-secondary">
+                💬 Ask a Doctor Free
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="cats-section">
+        <div className="cats-inner">
+          <div className="cats-section-header">
+            <div className="section-eyebrow">All Specialties</div>
+            <h2>Browse by Medical Category</h2>
+            <p>Explore our full library of doctor-written articles across every medical field</p>
+          </div>
+          <div className="cats-tabs">
+            {CAT_TABS.map((tab) => (
+              <div
+                key={tab.id}
+                className={`cats-tab${activeCatTab === tab.id ? " active" : ""}`}
+                onClick={() => setActiveCatTab(tab.id)}
+                onKeyDown={(e) => e.key === "Enter" && setActiveCatTab(tab.id)}
+                role="button"
+                tabIndex={0}
+              >
+                {tab.label}
+              </div>
+            ))}
+          </div>
+          <div className="cats-grid" id="cats-grid">
+            {CATS_DATA[activeCatTab].map((cat) => (
+              <div key={cat.name} className="cat-tile">
+                <div className="cat-tile-ico" style={{ background: cat.bg }}>
+                  {cat.ico}
+                </div>
+                <div>
+                  <h4>{cat.name}</h4>
+                  <span>{cat.count}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="cta-band">
+        <div className="section-eyebrow" style={{ color: "#93c5fd" }}>
+          Never Stop Learning
+        </div>
+        <h2>Stay Informed with Weekly Health Insights</h2>
+        <p>Join 50,000+ readers who get our curated weekly digest of the best new articles from our doctors.</p>
+        <div className="cta-btns">
+          <button type="button" className="btn-white">
+            📬 Subscribe Free
+          </button>
+          <Link href="/book-consultation" className="btn-ghost">
+            📅 Book a Consultation
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 }

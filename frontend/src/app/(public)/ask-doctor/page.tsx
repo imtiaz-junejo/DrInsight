@@ -1,162 +1,385 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { Breadcrumb } from "@/components/layout/Breadcrumb";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
+import { useCallback, useMemo, useRef, useState } from "react";
+import {
+  CAT_FILTERS,
+  FAQ_ITEMS,
+  FORM_CATEGORIES,
+  HERO_PILLS,
+  HERO_STATS,
+  QA_ITEMS,
+  SPECIALTIES,
+  type QAItem,
+} from "./questions";
 
-const sampleQuestions = [
-  {
-    cat: "Cardiology",
-    q: "Is occasional chest tightness after exercise always a sign of heart disease?",
-    a: "Not always — but persistent or worsening chest discomfort warrants evaluation. Dr. Mitchell explains when to seek urgent care.",
-    doctor: "Dr. Sarah Mitchell",
-    answered: "2 days ago",
-  },
-  {
-    cat: "Endocrinology",
-    q: "My fasting glucose is 108 mg/dL — am I pre-diabetic?",
-    a: "A fasting glucose of 100–125 mg/dL falls in the pre-diabetes range. Lifestyle changes can significantly reduce progression risk.",
-    doctor: "Dr. Priya Sharma",
-    answered: "4 days ago",
-  },
-  {
-    cat: "Neurology",
-    q: "How can I tell if my headaches are migraines?",
-    a: "Migraines often involve throbbing pain, nausea, and light sensitivity. Keeping a headache diary helps your neurologist diagnose accurately.",
-    doctor: "Dr. James Okafor",
-    answered: "1 week ago",
-  },
-];
+function QACard({
+  item,
+  helpfulCount,
+  onLike,
+}: {
+  item: QAItem;
+  helpfulCount: number;
+  onLike: () => void;
+}) {
+  const [liked, setLiked] = useState(false);
 
-export default function AskDoctorPage() {
-  const [submitted, setSubmitted] = useState(false);
+  const handleLike = () => {
+    if (!liked) {
+      setLiked(true);
+      onLike();
+    }
+  };
 
   return (
-    <>
-      <Breadcrumb items={[{ label: "Ask the Doctor" }]} />
-
-      <section className="bg-gradient-to-br from-blue-dark via-blue to-teal px-6 py-14 text-white">
-        <div className="mx-auto grid max-w-[1240px] items-center gap-10 md:grid-cols-2">
-          <div>
-            <div className="mb-2 text-[.72rem] font-bold uppercase tracking-widest text-[#93c5fd]">Ask the Doctor</div>
-            <h1 className="font-display text-[clamp(1.8rem,3.5vw,2.5rem)] font-bold leading-tight">
-              Get Expert Medical Answers — Free
-            </h1>
-            <p className="mt-4 text-[.95rem] opacity-90">
-              Submit your health question to our panel of board-certified specialists and receive a medically reviewed
-              answer within 24–48 hours.
-            </p>
-            <div className="mt-6 flex flex-col gap-3">
-              {[
-                "👨‍⚕️ Answers from board-certified specialists",
-                "🔒 Anonymous submissions available",
-                "⚡ Typical response within 24–48 hours",
-                "📚 Browse 5,000+ previously answered questions",
-              ].map((item) => (
-                <div key={item} className="flex items-center gap-2 text-[.88rem] opacity-90">
-                  ✅ {item}
-                </div>
-              ))}
-            </div>
+    <div className="qa-card">
+      <div className="qa-meta">
+        <span className="qa-cat-badge">{item.catLabel}</span>
+        <span className="qa-time">{item.time}</span>
+        {item.anonymous && <span className="qa-anon">🔒 Anonymous</span>}
+        <span className="verified-ans">✓ Verified Answer</span>
+      </div>
+      <div className="qa-question">{item.question}</div>
+      <div className="qa-answer">
+        <div className="qa-answer-header">
+          <div className="doc-avatar-sm" style={{ background: item.doctor.avatarBg }}>
+            {item.doctor.initials}
           </div>
-          <Card className="border-white/20 bg-white/10 text-gray-900 backdrop-blur-md">
-            <CardContent className="p-6">
-              {!submitted ? (
-                <form
-                  className="space-y-4"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    setSubmitted(true);
-                  }}
-                >
-                  <h3 className="font-display text-[1.2rem] font-bold text-white">Ask Your Question</h3>
-                  <div>
-                    <label className="mb-1.5 block text-[.82rem] font-semibold text-white/90">
-                      Your Name (optional)
-                    </label>
-                    <Input placeholder="Leave blank to submit anonymously" className="bg-white" />
-                  </div>
-                  <div>
-                    <label className="mb-1.5 block text-[.82rem] font-semibold text-white/90">Medical Category</label>
-                    <select className="h-11 w-full rounded-lg border-[1.5px] border-gray-200 bg-white px-3.5 text-sm focus:border-blue focus:outline-none">
-                      <option>General Medicine</option>
-                      <option>Cardiology</option>
-                      <option>Neurology</option>
-                      <option>Dermatology</option>
-                      <option>Mental Health</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="mb-1.5 block text-[.82rem] font-semibold text-white/90">Your Question</label>
-                    <textarea
-                      required
-                      className="min-h-[100px] w-full resize-y rounded-lg border-[1.5px] border-gray-200 bg-white px-3.5 py-2.5 text-sm focus:border-blue focus:outline-none"
-                      placeholder="Describe your symptoms or health concern in detail..."
-                    />
-                  </div>
-                  <Button type="submit" size="full">
-                    Submit Question ✉️
-                  </Button>
-                  <div className="rounded border-l-4 border-amber bg-[#fffbeb] p-3 text-[.78rem] text-[#92400e]">
-                    ⚠️ This service is for informational purposes only and does not replace professional medical
-                    advice, diagnosis, or treatment.
-                  </div>
-                </form>
-              ) : (
-                <div className="py-4 text-center text-white">
-                  <div className="mb-3 text-4xl">✅</div>
-                  <h3 className="font-display mb-2 text-xl font-bold">Question Submitted!</h3>
-                  <p className="mb-4 text-[.88rem] opacity-90">
-                    A specialist will review your question and respond within 24–48 hours.
-                  </p>
-                  <Button variant="white" onClick={() => setSubmitted(false)}>
-                    Ask Another Question
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      <div className="mx-auto max-w-[1240px] px-6 py-12">
-        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <div className="mb-1 text-[.72rem] font-bold uppercase tracking-widest text-blue">Previously Answered</div>
-            <h2 className="font-display text-2xl font-bold text-gray-900">Browse Recent Q&A</h2>
+            <div className="doc-name-sm">{item.doctor.name}</div>
+            <div className="doc-spec-sm">{item.doctor.specialty}</div>
           </div>
-          <Input placeholder="Search questions..." className="max-w-xs" />
         </div>
-
-        <div className="space-y-5">
-          {sampleQuestions.map((item) => (
-            <Card key={item.q} className="transition hover:shadow-[var(--shadow-md)]">
-              <CardContent className="p-6">
-                <div className="mb-2 text-[.72rem] font-bold uppercase tracking-wide text-blue">{item.cat}</div>
-                <h3 className="font-display mb-3 text-[1.05rem] font-semibold text-gray-900">{item.q}</h3>
-                <p className="mb-4 rounded-lg border-l-[3px] border-blue bg-blue-light p-4 text-[.88rem] leading-relaxed text-gray-700">
-                  {item.a}
-                </p>
-                <div className="flex flex-wrap items-center justify-between gap-2 text-[.78rem] text-gray-500">
-                  <span>
-                    Answered by <strong className="text-gray-800">{item.doctor}</strong>
-                  </span>
-                  <span>{item.answered}</span>
-                </div>
-              </CardContent>
-            </Card>
+        <div className="qa-answer-text" dangerouslySetInnerHTML={{ __html: item.answerHtml }} />
+      </div>
+      <div className="qa-footer">
+        <div className="qa-helpful">
+          Was this helpful?{" "}
+          <button type="button" className={liked ? "liked" : ""} onClick={handleLike}>
+            👍 Helpful ({helpfulCount})
+          </button>
+        </div>
+        <div className="qa-tags">
+          {item.tags.map((tag) => (
+            <span key={tag} className="qa-tag">
+              {tag}
+            </span>
           ))}
         </div>
+      </div>
+    </div>
+  );
+}
 
-        <div className="mt-10 text-center">
-          <Button asChild variant="secondary">
-            <Link href="/book-consultation">Need personalised advice? Book a Consultation →</Link>
-          </Button>
+export default function AskDoctorPage() {
+  const [search, setSearch] = useState("");
+  const [activeFilter, setActiveFilter] = useState("all");
+  const [helpfulCounts, setHelpfulCounts] = useState<Record<number, number>>(() =>
+    Object.fromEntries(QA_ITEMS.map((item, i) => [i, item.helpfulCount])),
+  );
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [anonymous, setAnonymous] = useState(false);
+  const [category, setCategory] = useState("");
+  const [question, setQuestion] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [openFaq, setOpenFaq] = useState(0);
+
+  const qaFeedRef = useRef<HTMLDivElement>(null);
+
+  const filteredQA = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    return QA_ITEMS.filter((item) => {
+      const catMatch = activeFilter === "all" || item.cat === activeFilter;
+      const text = `${item.searchKeywords} ${item.question}`.toLowerCase();
+      const textMatch = !q || text.includes(q);
+      return catMatch && textMatch;
+    });
+  }, [search, activeFilter]);
+
+  const incrementHelpful = useCallback((index: number) => {
+    setHelpfulCounts((prev) => ({ ...prev, [index]: (prev[index] ?? 0) + 1 }));
+  }, []);
+
+  const toggleAnon = (checked: boolean) => {
+    setAnonymous(checked);
+    if (checked) setName("");
+  };
+
+  const submitQuestion = () => {
+    if (!category) {
+      alert("Please select a medical category.");
+      return;
+    }
+    if (question.trim().length < 20) {
+      alert("Please describe your question in more detail (at least 20 characters).");
+      return;
+    }
+    setSubmitted(true);
+  };
+
+  const resetForm = () => {
+    setSubmitted(false);
+    setName("");
+    setEmail("");
+    setCategory("");
+    setQuestion("");
+    setAnonymous(false);
+  };
+
+  const toggleFAQ = (index: number) => {
+    setOpenFaq((prev) => (prev === index ? -1 : index));
+  };
+
+  const scrollToQA = () => {
+    qaFeedRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  return (
+    <div className="ask-doctor-page">
+      <div className="breadcrumb">
+        <div className="breadcrumb-inner">
+          <Link href="/">🏠 Home</Link>
+          <span>›</span>
+          <span className="current">Ask the Doctor</span>
         </div>
       </div>
-    </>
+
+      <div className="page-hero">
+        <div className="page-hero-inner">
+          <div className="eyebrow">Free Medical Q&A</div>
+          <h1>Ask a Board-Certified Doctor — Free</h1>
+          <p>
+            Submit your health question and receive a personalised, medically reviewed answer from one of our 200+
+            specialist physicians. Trusted by 500,000+ patients worldwide.
+          </p>
+          <div className="hero-stats">
+            {HERO_STATS.map(({ num, label }) => (
+              <div key={label} className="hero-stat">
+                <strong>{num}</strong>
+                <span>{label}</span>
+              </div>
+            ))}
+          </div>
+          <div className="hero-pills">
+            {HERO_PILLS.map((pill) => (
+              <div key={pill} className="hero-pill">
+                {pill}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="main-wrap">
+        <div className="two-col">
+          <div>
+            <div className="section-eyebrow">Browse Questions</div>
+            <div className="section-title">Featured Answered Questions</div>
+            <div className="section-sub">
+              Browse 5,000+ questions answered by our specialist doctors. Use the search and filters to find answers
+              relevant to you.
+            </div>
+
+            <div className="search-bar">
+              <input
+                type="text"
+                placeholder="Search questions by symptom, condition, or keyword..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              <button type="button">🔍 Search</button>
+            </div>
+
+            <div className="cat-filters">
+              {CAT_FILTERS.map(({ val, label }) => (
+                <button
+                  key={val}
+                  type="button"
+                  className={`cat-pill${activeFilter === val ? " active" : ""}`}
+                  onClick={() => setActiveFilter(val)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            <div id="qa-feed" ref={qaFeedRef}>
+              {filteredQA.map((item) => {
+                const originalIndex = QA_ITEMS.indexOf(item);
+                return (
+                  <QACard
+                    key={item.question}
+                    item={item}
+                    helpfulCount={helpfulCounts[originalIndex] ?? item.helpfulCount}
+                    onLike={() => incrementHelpful(originalIndex)}
+                  />
+                );
+              })}
+
+              {filteredQA.length === 0 && (
+                <div className="no-results">
+                  <div className="no-results-icon">🔍</div>
+                  <p>No questions match your search. Try different keywords or browse a category.</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <div className="ask-form-card">
+              <h3>💬 Submit Your Question</h3>
+              <p>
+                Get a free, personalised answer from one of our 200+ board-certified specialist doctors within 24–48
+                hours.
+              </p>
+
+              {!submitted ? (
+                <div id="ask-form">
+                  <div className="form-group">
+                    <label htmlFor="ask-name">Your Name</label>
+                    <input
+                      type="text"
+                      id="ask-name"
+                      placeholder={anonymous ? "Submitted anonymously" : "Leave blank to submit anonymously"}
+                      value={name}
+                      disabled={anonymous}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="ask-email">Email Address</label>
+                    <input
+                      type="email"
+                      id="ask-email"
+                      placeholder="For answer notification (optional)"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </div>
+                  <label className="anon-check">
+                    <input
+                      type="checkbox"
+                      id="ask-anon"
+                      checked={anonymous}
+                      onChange={(e) => toggleAnon(e.target.checked)}
+                    />
+                    🔒 Submit anonymously — your name won&apos;t be displayed
+                  </label>
+                  <div className="form-group">
+                    <label htmlFor="ask-cat">Medical Category</label>
+                    <select id="ask-cat" value={category} onChange={(e) => setCategory(e.target.value)}>
+                      <option value="">Select a specialty...</option>
+                      {FORM_CATEGORIES.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="ask-q">Your Question</label>
+                    <textarea
+                      id="ask-q"
+                      placeholder="Describe your symptoms, health concern, or medical question in as much detail as possible. Include your age, sex, and any relevant medical history..."
+                      value={question}
+                      onChange={(e) => setQuestion(e.target.value)}
+                    />
+                    <div className="char-count">{question.length} / 1000 characters</div>
+                  </div>
+                  <button type="button" className="submit-btn" onClick={submitQuestion}>
+                    ✉️ Submit Question Free
+                  </button>
+                  <div className="disclaimer">
+                    ⚠️ This service is for informational purposes only and does not replace professional medical advice,
+                    diagnosis, or treatment. For emergencies, call 911.
+                  </div>
+                </div>
+              ) : (
+                <div className="success-msg" id="success-msg">
+                  <div style={{ fontSize: "2rem", marginBottom: 8 }}>✅</div>
+                  <h4>Question Submitted Successfully!</h4>
+                  <p>
+                    Our doctors will review your question and respond within 24–48 hours. You&apos;ll receive a
+                    notification at your email address.
+                  </p>
+                  <button type="button" className="success-reset-btn" onClick={resetForm}>
+                    Ask Another Question
+                  </button>
+                </div>
+              )}
+
+              <div className="trust-row">
+                <div className="trust-item">
+                  <div>👨‍⚕️</div>
+                  <span>Board-certified doctors only</span>
+                </div>
+                <div className="trust-item">
+                  <div>🔒</div>
+                  <span>Anonymous option</span>
+                </div>
+                <div className="trust-item">
+                  <div>⚡</div>
+                  <span>24–48h response</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="specialists-strip">
+        <div className="specialists-inner">
+          <h2>Browse by Medical Specialty</h2>
+          <p>Find questions answered by specialists in your area of health concern</p>
+          <div className="spec-grid">
+            {SPECIALTIES.map(({ icon, label }) => (
+              <div key={label} className="spec-item" role="button" tabIndex={0}>
+                <div className="spec-ico">{icon}</div>
+                <span>{label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="faq-section">
+        <div className="faq-inner">
+          <div className="faq-header">
+            <div className="section-eyebrow">Common Questions</div>
+            <h2>Frequently Asked Questions</h2>
+            <p>Everything you need to know about our Ask the Doctor service</p>
+          </div>
+
+          {FAQ_ITEMS.map((item, index) => (
+            <div key={item.q} className={`faq-item${openFaq === index ? " open" : ""}`}>
+              <button type="button" className="faq-q" onClick={() => toggleFAQ(index)}>
+                <h4>{item.q}</h4>
+                <div className="faq-chevron">▾</div>
+              </button>
+              <div className="faq-a">{item.a}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="cta-band">
+        <div className="eyebrow">Need More Than an Answer?</div>
+        <h2>Book a Full Doctor Consultation</h2>
+        <p>
+          For a thorough, personalised evaluation with one of our specialists — video, phone, or chat. Same-day
+          appointments available from $49.
+        </p>
+        <div className="cta-btns">
+          <Link href="/book-consultation" className="btn-white">
+            📅 Book a Consultation
+          </Link>
+          <button type="button" className="btn-ghost" onClick={scrollToQA}>
+            💬 Browse All Q&As
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

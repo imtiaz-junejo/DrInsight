@@ -174,7 +174,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-[1240px]">
           <div className="mb-13 text-center">
             <div className="mb-2.5 text-[.78rem] font-bold uppercase tracking-widest text-blue">Our Specialties</div>
-            <h2 className="font-display text-[clamp(1.7rem,3vw,2.4rem)] leading-tight text-gray-900">
+            <h2 className="font-display text-[clamp(1.7rem,3vw,2.4rem)] font-bold leading-tight text-gray-900">
               Expert Care Across All Medical Fields
             </h2>
             <p className="mx-auto mt-3.5 max-w-[600px] text-[.98rem] text-gray-600">
@@ -209,7 +209,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-[1240px]">
           <div className="mb-13 text-center">
             <div className="mb-2.5 text-[.78rem] font-bold uppercase tracking-widest text-blue">Free Health Tools</div>
-            <h2 className="font-display text-[clamp(1.7rem,3vw,2.4rem)] leading-tight text-gray-900">
+            <h2 className="font-display text-[clamp(1.7rem,3vw,2.4rem)] font-bold leading-tight text-gray-900">
               Calculate Your Health Metrics Instantly
             </h2>
             <p className="mx-auto mt-3.5 max-w-[600px] text-[.98rem] text-gray-600">
@@ -247,7 +247,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-[1240px]">
           <div className="mb-13 text-center">
             <div className="mb-2.5 text-[.78rem] font-bold uppercase tracking-widest text-blue">Medical Blog</div>
-            <h2 className="font-display text-[clamp(1.7rem,3vw,2.4rem)] leading-tight text-gray-900">
+            <h2 className="font-display text-[clamp(1.7rem,3vw,2.4rem)] font-bold leading-tight text-gray-900">
               Latest Health Insights from Our Doctors
             </h2>
             <p className="mx-auto mt-3.5 max-w-[600px] text-[.98rem] text-gray-600">
@@ -255,14 +255,14 @@ export default function HomePage() {
               informed, stay healthy.
             </p>
           </div>
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-7">
+          <div className="grid  grid-cols-[repeat(auto-fill,minmax(300px,1fr))]  gap-7">
             {blogPosts.map((post) => (
               <Link
                 key={post.title}
                 href="/blog"
-                className="overflow-hidden rounded-[20px] border border-gray-200 bg-white transition hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]"
+                className="overflow-hidden rounded-[20px] border border-gray-200 bg-gray-300 transition hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]"
               >
-                <div className="relative flex h-[180px] items-center justify-center bg-gradient-to-br from-blue-light to-[#dbeafe] text-5xl">
+                <div className="relative flex h-[180px] items-center justify-center bg-gradient-to-br from-gray-dark to-[#dbeafe] text-5xl">
                   {post.emoji}
                   <div className="absolute bottom-3 left-3 rounded-full bg-blue px-3 py-1 text-[.72rem] font-bold tracking-wide text-white">
                     {post.cat}
@@ -296,7 +296,7 @@ export default function HomePage() {
         <div className="mx-auto grid max-w-[1240px] items-center gap-12 md:grid-cols-2 md:gap-[60px]">
           <div>
             <div className="mb-2.5 text-[.78rem] font-bold uppercase tracking-widest text-blue">Ask the Doctor</div>
-            <h2 className="font-display text-[clamp(1.7rem,3vw,2.3rem)] leading-tight text-gray-900">
+            <h2 className="font-display text-[clamp(1.7rem,3vw,2.3rem)] font-bold leading-tight text-gray-900">
               Get Expert Medical Answers to Your Questions
             </h2>
             <p className="mt-4 leading-relaxed text-gray-600">
@@ -323,7 +323,7 @@ export default function HomePage() {
             </Button>
           </div>
           <div className="rounded-[20px] border border-gray-200 bg-white p-8 shadow-[var(--shadow-lg)]">
-            <h3 className="font-display text-[1.3rem]">Ask Your Question</h3>
+            <h3 className="font-display text-[1.3rem] font-bold">Ask Your Question</h3>
             <p className="mb-5 text-[.85rem] text-gray-600">
               Get a free answer from one of our 200+ specialist doctors
             </p>
@@ -372,7 +372,7 @@ export default function HomePage() {
         <div className="mb-2.5 text-[.78rem] font-bold uppercase tracking-widest text-[#93c5fd]">
           Virtual & In-Person Consultations
         </div>
-        <h2 className="font-display text-[clamp(1.8rem,3.5vw,2.6rem)]">Talk to a Doctor Today</h2>
+        <h2 className="font-display text-[clamp(1.8rem,3.5vw,2.6rem)] font-bold">Talk to a Doctor Today</h2>
         <p className="mx-auto mb-8 mt-4 max-w-[540px] text-base opacity-88">
           Book a video, phone, or chat consultation with a specialist from the comfort of your home.
           Same-day appointments available.
@@ -399,7 +399,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-[1240px]">
           <div className="mb-13 text-center">
             <div className="mb-2.5 text-[.78rem] font-bold uppercase tracking-widest text-blue">Patient Stories</div>
-            <h2 className="font-display text-[clamp(1.7rem,3vw,2.4rem)] leading-tight text-gray-900">
+            <h2 className="font-display text-[clamp(1.7rem,3vw,2.4rem)] font-bold leading-tight text-gray-900">
               Trusted by Hundreds of Thousands
             </h2>
             <p className="mx-auto mt-3.5 max-w-[600px] text-[.98rem] text-gray-600">
@@ -435,7 +435,7 @@ export default function HomePage() {
       {/* Newsletter */}
       <section className="border-t border-gray-200 bg-gray-50 px-6 py-20">
         <div className="mx-auto max-w-[600px] text-center">
-          <h2 className="font-display text-[clamp(1.6rem,3vw,2.2rem)]">Stay Informed, Stay Healthy</h2>
+          <h2 className="font-display text-[clamp(1.6rem,3vw,2.2rem)] font-bold">Stay Informed, Stay Healthy</h2>
           <p className="my-3 text-gray-600">
             Subscribe to our newsletter for weekly health tips from board-certified physicians.
           </p>

@@ -1,0 +1,649 @@
+.health-tools-page {
+  --blue: #1a56a0;
+  --blue-dark: #0f3d7a;
+  --blue-light: #e8f0fb;
+  --teal: #0891b2;
+  --green: #059669;
+  --red: #dc2626;
+  --amber: #d97706;
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-400: #94a3b8;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1e293b;
+  --gray-900: #0f172a;
+  --font-display: var(--font-playfair), "Playfair Display", Georgia, serif;
+  --font-body: var(--font-dm-sans), "DM Sans", system-ui, sans-serif;
+  --radius: 12px;
+  --radius-lg: 18px;
+  --shadow-lg: 0 8px 28px rgba(26, 86, 160, 0.13);
+  --transition: all 0.2s ease;
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--gray-800);
+}
+
+.health-tools-page a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.health-tools-page .breadcrumb {
+  background: var(--gray-50);
+  border-bottom: 1px solid var(--gray-200);
+  padding: 8px 18px;
+}
+
+.health-tools-page .breadcrumb-inner {
+  max-width: 1200px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.74rem;
+  color: var(--gray-400);
+}
+
+.health-tools-page .breadcrumb-inner span {
+  color: var(--blue);
+  font-weight: 500;
+}
+
+.health-tools-page .page-hero {
+  background: linear-gradient(135deg, var(--blue-dark), var(--blue) 55%, var(--teal));
+  color: #fff;
+  padding: 60px 18px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.health-tools-page .page-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.health-tools-page .page-hero-inner {
+  max-width: 680px;
+  margin: auto;
+  position: relative;
+}
+
+.health-tools-page .eyebrow {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #93c5fd;
+  margin-bottom: 8px;
+}
+
+.health-tools-page .page-hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3.5vw, 2.7rem);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 14px;
+}
+
+.health-tools-page .page-hero p {
+  font-size: 0.9rem;
+  opacity: 0.88;
+  line-height: 1.75;
+  max-width: 540px;
+  margin: auto;
+}
+
+.health-tools-page .hero-pills {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.health-tools-page .hero-pill {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50px;
+  padding: 5px 14px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  backdrop-filter: blur(4px);
+}
+
+.health-tools-page .tools-main {
+  max-width: 1200px;
+  margin: auto;
+  padding: 48px 18px;
+}
+
+.health-tools-page .section-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.health-tools-page .section-header h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.5vw, 1.9rem);
+  color: var(--gray-900);
+  margin-bottom: 10px;
+  line-height: 1.25;
+}
+
+.health-tools-page .section-header p {
+  color: var(--gray-600);
+  max-width: 520px;
+  margin: auto;
+  font-size: 0.86rem;
+}
+
+.health-tools-page .eyebrow-blue {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin-bottom: 7px;
+}
+
+.health-tools-page .tools-nav {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.health-tools-page .tool-tab {
+  padding: 7px 16px;
+  border-radius: 50px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: 1.5px solid var(--gray-200);
+  cursor: pointer;
+  transition: var(--transition);
+  background: #fff;
+  color: var(--gray-600);
+  font-family: inherit;
+}
+
+.health-tools-page .tool-tab:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+.health-tools-page .tool-tab.active {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue);
+}
+
+.health-tools-page .tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 24px;
+}
+
+.health-tools-page .tool-panel {
+  background: #fff;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+.health-tools-page .tool-panel:hover {
+  border-color: var(--blue);
+  box-shadow: var(--shadow-lg);
+}
+
+.health-tools-page .tool-header {
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid var(--gray-100);
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+}
+
+.health-tools-page .tool-ico {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.health-tools-page .tool-ico.blue {
+  background: var(--blue-light);
+}
+
+.health-tools-page .tool-ico.teal {
+  background: #e0f7fa;
+}
+
+.health-tools-page .tool-ico.green {
+  background: #ecfdf5;
+}
+
+.health-tools-page .tool-ico.amber {
+  background: #fffbeb;
+}
+
+.health-tools-page .tool-ico.pink {
+  background: #fdf2f8;
+}
+
+.health-tools-page .tool-ico.purple {
+  background: #f3f0ff;
+}
+
+.health-tools-page .tool-header-text h3 {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: 3px;
+}
+
+.health-tools-page .tool-header-text p {
+  font-size: 0.76rem;
+  color: var(--gray-600);
+  line-height: 1.55;
+}
+
+.health-tools-page .tool-body {
+  padding: 18px 22px;
+}
+
+.health-tools-page .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.health-tools-page .form-row.single {
+  grid-template-columns: 1fr;
+}
+
+.health-tools-page .form-group label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--gray-600);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.health-tools-page .form-group input,
+.health-tools-page .form-group select {
+  width: 100%;
+  padding: 8px 11px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 8px;
+  font-size: 0.84rem;
+  color: var(--gray-800);
+  background: #fff;
+  transition: var(--transition);
+  font-family: inherit;
+}
+
+.health-tools-page .form-group input:focus,
+.health-tools-page .form-group select:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(26, 86, 160, 0.08);
+}
+
+.health-tools-page .calc-btn {
+  width: 100%;
+  padding: 10px;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+  margin-top: 4px;
+}
+
+.health-tools-page .calc-btn:hover {
+  background: var(--blue-dark);
+  transform: translateY(-1px);
+}
+
+.health-tools-page .result-box {
+  background: linear-gradient(135deg, var(--blue-light), #dbeafe);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-top: 14px;
+  border: 1px solid #bfdbfe;
+}
+
+.health-tools-page .result-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--blue);
+  margin-bottom: 4px;
+}
+
+.health-tools-page .result-value {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--blue-dark);
+}
+
+.health-tools-page .result-sub {
+  font-size: 0.74rem;
+  color: var(--gray-600);
+  margin-top: 3px;
+  line-height: 1.5;
+}
+
+.health-tools-page .result-bar {
+  height: 8px;
+  background: var(--gray-200);
+  border-radius: 50px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.health-tools-page .result-fill {
+  height: 100%;
+  border-radius: 50px;
+  transition: width 0.5s ease;
+}
+
+.health-tools-page .disclaimer {
+  background: #fffbeb;
+  border-left: 3px solid #f59e0b;
+  padding: 9px 12px;
+  border-radius: 0 7px 7px 0;
+  font-size: 0.72rem;
+  color: #92400e;
+  margin-top: 12px;
+  line-height: 1.6;
+}
+
+.health-tools-page .related-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.health-tools-page .related-tag {
+  background: var(--gray-100);
+  color: var(--gray-600);
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.health-tools-page .related-tag:hover {
+  background: var(--blue-light);
+  color: var(--blue);
+}
+
+.health-tools-page .risk-badge {
+  display: inline-block;
+  padding: 5px 14px;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.health-tools-page .risk-low {
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.health-tools-page .risk-mod {
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.health-tools-page .risk-high {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.health-tools-page .bpcat {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 50px;
+  display: inline-block;
+  margin-top: 4px;
+}
+
+.health-tools-page .bp-normal {
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.health-tools-page .bp-elevated {
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.health-tools-page .bp-high1 {
+  background: #fff7ed;
+  color: #9a3412;
+}
+
+.health-tools-page .bp-high2 {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.health-tools-page .category-title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: var(--gray-900);
+  margin-bottom: 4px;
+  margin-top: 36px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--blue-light);
+}
+
+.health-tools-page .category-title:first-child {
+  margin-top: 0;
+}
+
+.health-tools-page .category-title.spaced {
+  margin-top: 44px;
+}
+
+.health-tools-page .category-subtitle {
+  font-size: 0.8rem;
+  color: var(--gray-400);
+  margin-bottom: 18px;
+}
+
+.health-tools-page .hr-zones {
+  margin-top: 10px;
+  font-size: 0.78rem;
+  display: grid;
+  gap: 5px;
+}
+
+.health-tools-page .hr-zone-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 0 6px 6px 0;
+}
+
+.health-tools-page .preg-trimesters {
+  margin-top: 10px;
+  font-size: 0.76rem;
+  display: grid;
+  gap: 4px;
+}
+
+.health-tools-page .preg-t1 {
+  background: #ecfdf5;
+  padding: 5px 10px;
+  border-radius: 6px;
+  color: #065f46;
+}
+
+.health-tools-page .preg-t2 {
+  background: #fffbeb;
+  padding: 5px 10px;
+  border-radius: 6px;
+  color: #92400e;
+}
+
+.health-tools-page .preg-t3 {
+  background: #fef2f2;
+  padding: 5px 10px;
+  border-radius: 6px;
+  color: #991b1b;
+}
+
+.health-tools-page .phq-intro {
+  font-size: 0.78rem;
+  color: var(--gray-600);
+  margin-bottom: 14px;
+}
+
+.health-tools-page .phq-questions {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.health-tools-page .phq-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+  padding: 8px 10px;
+  background: var(--gray-50);
+  border-radius: 7px;
+}
+
+.health-tools-page .phq-row.critical {
+  background: #fef2f2;
+  border-left: 3px solid #fca5a5;
+}
+
+.health-tools-page .phq-row span {
+  flex: 1;
+  color: var(--gray-700);
+}
+
+.health-tools-page .phq-select {
+  width: 56px;
+  font-size: 0.78rem;
+  padding: 4px 6px;
+  border: 1px solid var(--gray-200);
+  border-radius: 6px;
+  font-family: inherit;
+}
+
+.health-tools-page .risk-advice {
+  font-size: 0.78rem;
+  color: var(--gray-600);
+  line-height: 1.6;
+}
+
+.health-tools-page .risk-advice.spaced {
+  margin-top: 6px;
+  line-height: 1.65;
+}
+
+.health-tools-page .tools-cta {
+  background: linear-gradient(135deg, #0f3d7a, #1a56a0);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  text-align: center;
+  margin-top: 48px;
+  color: #fff;
+}
+
+.health-tools-page .tools-cta .eyebrow {
+  margin-bottom: 8px;
+}
+
+.health-tools-page .tools-cta h2 {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  margin-bottom: 10px;
+}
+
+.health-tools-page .tools-cta p {
+  font-size: 0.88rem;
+  opacity: 0.88;
+  max-width: 480px;
+  margin: auto auto 24px;
+  line-height: 1.7;
+}
+
+.health-tools-page .tools-cta-btns {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.health-tools-page .tools-cta-primary {
+  background: #fff;
+  color: #0f3d7a;
+  border: none;
+  padding: 11px 22px;
+  border-radius: 9px;
+  font-weight: 700;
+  font-size: 0.86rem;
+  cursor: pointer;
+  font-family: inherit;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.health-tools-page .tools-cta-secondary {
+  background: transparent;
+  color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  padding: 10px 22px;
+  border-radius: 9px;
+  font-weight: 600;
+  font-size: 0.86rem;
+  cursor: pointer;
+  font-family: inherit;
+  display: inline-block;
+  text-decoration: none;
+}
+
+@media (max-width: 720px) {
+  .health-tools-page .tools-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .health-tools-page .form-row {
+    grid-template-columns: 1fr;
+  }
+}

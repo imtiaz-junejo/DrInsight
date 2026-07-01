@@ -1,178 +1,298 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { Breadcrumb } from "@/components/layout/Breadcrumb";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import { useDoctors, useDoctorSpecialties } from "@/services/api-hooks";
+import { useCallback, useMemo, useRef, useState } from "react";
+import "@/styles/doctors-page.css";
+import {
+  AVAIL_FILTERS,
+  COUNTRY_FILTERS,
+  DOCTORS,
+  HERO_STATS,
+  SPECIALTY_FILTERS,
+  type Doctor,
+} from "./doctors";
+
+type FilterGroup = "spec" | "country" | "avail";
+type ActiveFilters = Record<FilterGroup, string>;
+
+function DoctorCard({
+  doctor,
+  onProfile,
+  onBook,
+}: {
+  doctor: Doctor;
+  onProfile: (init: string) => void;
+  onBook: (name: string) => void;
+}) {
+  return (
+    <div className="doc-card" onClick={() => onProfile(doctor.init)} role="button" tabIndex={0}>
+      <div className="doc-cover" style={{ background: doctor.bg }}>
+        <div className="doc-rating-badge">
+          ⭐ {doctor.rating.toFixed(1)}{" "}
+          <span className="review-count">({doctor.reviews})</span>
+        </div>
+        <div className="doc-av-wrap">
+          <div className="doc-av" style={{ background: doctor.bg }}>
+            {doctor.init}
+            {doctor.online && <div className="doc-online" />}
+          </div>
+        </div>
+      </div>
+      <div className="doc-body">
+        <div className="doc-name">{doctor.name}</div>
+        <div className="doc-spec">{doctor.specLabel}</div>
+        <div className="doc-meta-row">
+          <span className="icon">🎓</span>
+          {doctor.cred}
+        </div>
+        <div className="doc-meta-row">
+          <span className="icon">🏥</span>
+          {doctor.inst}
+        </div>
+        <div className="doc-meta-row">
+          <span className="icon">📍</span>
+          {doctor.countryLabel}
+        </div>
+        <div className="doc-meta-row">
+          <span className="icon">⏱️</span>
+          {doctor.exp}+ years experience
+        </div>
+        <div className="doc-tags">
+          {doctor.tags.map((tag) => (
+            <span key={tag} className="doc-tag">
+              {tag}
+            </span>
+          ))}
+        </div>
+        <div className="doc-stats-row">
+          <div className="doc-stat">
+            <strong>{doctor.articles}</strong>
+            <span>Articles</span>
+          </div>
+          <div className="doc-stat">
+            <strong>{doctor.reviews}</strong>
+            <span>Reviews</span>
+          </div>
+          <div className="doc-stat">
+            <strong>{doctor.online ? "🟢 Online" : "⚫ Offline"}</strong>
+            <span>Status</span>
+          </div>
+        </div>
+        <div className="doc-cta-row">
+          <button
+            type="button"
+            className="doc-btn outline"
+            onClick={(e) => {
+              e.stopPropagation();
+              onProfile(doctor.init);
+            }}
+          >
+            View Profile
+          </button>
+          <button
+            type="button"
+            className="doc-btn primary"
+            onClick={(e) => {
+              e.stopPropagation();
+              onBook(doctor.name);
+            }}
+          >
+            Book Consultation
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function DoctorsPage() {
   const [search, setSearch] = useState("");
-  const [specialty, setSpecialty] = useState("all");
   const [sort, setSort] = useState("rating");
-  const doctorsQuery = useDoctors({
-    search,
-    specialty: specialty === "all" ? undefined : specialty,
-    limit: 24,
+  const [activeFilters, setActiveFilters] = useState<ActiveFilters>({
+    spec: "all",
+    country: "all",
+    avail: "all",
   });
-  const specialtiesQuery = useDoctorSpecialties();
-  const doctors = doctorsQuery.data?.data ?? [];
-  const total = doctorsQuery.data?.meta.total ?? 0;
+  const [toast, setToast] = useState("");
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showToast = useCallback((msg: string) => {
+    setToast(msg);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(""), 2400);
+  }, []);
+
+  const setFilter = (group: FilterGroup, val: string) => {
+    setActiveFilters((prev) => ({ ...prev, [group]: val }));
+  };
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase().trim();
+
+    let list = DOCTORS.filter((d) => {
+      if (activeFilters.spec !== "all" && d.spec !== activeFilters.spec) return false;
+      if (activeFilters.country !== "all" && d.country !== activeFilters.country) return false;
+      if (activeFilters.avail === "online" && !d.online) return false;
+      if (activeFilters.avail === "rating4plus" && d.rating < 4.5) return false;
+      if (q) {
+        const hay = `${d.name} ${d.specLabel} ${d.cred} ${d.inst} ${d.tags.join(" ")}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+
+    list = [...list].sort((a, b) => {
+      if (sort === "rating") return b.rating - a.rating;
+      if (sort === "experience") return b.exp - a.exp;
+      if (sort === "reviews") return b.reviews - a.reviews;
+      if (sort === "name") return a.name.localeCompare(b.name);
+      return 0;
+    });
+
+    return list;
+  }, [search, sort, activeFilters]);
 
   return (
-    <>
-      <Breadcrumb items={[{ label: "Our Doctors" }]} />
+    <div className="doctors-page">
+      <div className="breadcrumb">
+        <div className="breadcrumb-inner">
+          <Link href="/">🏠 Home</Link>
+          <span>›</span>
+          <span className="current">Our Doctors</span>
+        </div>
+      </div>
 
-      <section className="bg-gradient-to-br from-blue-dark via-blue to-teal px-6 py-16 text-center text-white">
-        <div className="mx-auto max-w-[800px]">
-          <div className="mb-2 text-[.72rem] font-bold uppercase tracking-widest text-[#93c5fd]">
-            👨‍⚕️ MEET THE EXPERTS
-          </div>
-          <h1 className="font-display text-[clamp(2rem,4vw,2.8rem)] font-bold">
-            Our Medical <span className="text-[#93c5fd]">Team</span>
+      <div className="page-hero">
+        <div className="page-hero-inner">
+          <div className="page-eyebrow">👨‍⚕️ MEET THE EXPERTS</div>
+          <h1>
+            Our Medical <span>Team</span>
           </h1>
-          <p className="mx-auto mt-4 max-w-[600px] text-[.95rem] opacity-90">
-            Every article, consultation, and answer on DrInsight comes from a verified, board-certified physician.
+          <p>
+            Every article, consultation, and answer on MedAuthority comes from a verified, board-certified
+            physician. Search our network of specialists by name, specialty, country, or rating.
           </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-8">
-            {[
-              ["200+", "Verified Doctors"],
-              ["12", "Specialties"],
-              ["8", "Countries"],
-              ["4.8★", "Avg. Rating"],
-            ].map(([num, label]) => (
-              <div key={label as string}>
-                <div className="font-display text-2xl font-bold">{num}</div>
-                <div className="text-[.75rem] opacity-80">{label}</div>
+          <div className="stats-strip">
+            {HERO_STATS.map(({ num, label }) => (
+              <div key={label} className="stat-box">
+                <div className="stat-num">{num}</div>
+                <div className="stat-label">{label}</div>
               </div>
             ))}
           </div>
         </div>
-      </section>
+      </div>
 
-      <div className="sticky top-[70px] z-50 border-b border-gray-200 bg-white px-6 py-4 shadow-sm">
-        <div className="mx-auto max-w-[1240px] space-y-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by doctor name, specialty, or condition..."
-              className="max-w-md flex-1"
-            />
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value)}
-              className="h-11 rounded-lg border-[1.5px] border-gray-200 px-3 text-sm focus:border-blue focus:outline-none"
-            >
+      <div className="filter-section">
+        <div className="filter-inner">
+          <div className="search-row">
+            <div className="search-wrap">
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Search by doctor name, specialty, or condition..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <select className="sort-select" value={sort} onChange={(e) => setSort(e.target.value)}>
               <option value="rating">Sort: Highest Rated</option>
               <option value="experience">Sort: Most Experienced</option>
               <option value="reviews">Sort: Most Reviewed</option>
               <option value="name">Sort: Name (A–Z)</option>
             </select>
-            <span className="text-[.82rem] text-gray-500">
-              Showing <strong>{doctors.length}</strong> of <strong>{total}</strong> doctors
-            </span>
+            <div className="results-count">
+              Showing <strong>{filtered.length}</strong> of <strong>{DOCTORS.length}</strong> doctors
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setSpecialty("all")}
-              className={cn(
-                "rounded-full border px-3 py-1.5 text-[.75rem] font-semibold transition",
-                specialty === "all"
-                  ? "border-blue bg-blue text-white"
-                  : "border-gray-200 text-gray-600 hover:border-blue hover:text-blue",
-              )}
-            >
-              All Specialties
-            </button>
-            {(specialtiesQuery.data ?? []).map((f) => (
-              <button
-                key={f.name}
-                onClick={() => setSpecialty(f.name)}
-                className={cn(
-                  "rounded-full border px-3 py-1.5 text-[.75rem] font-semibold transition",
-                  specialty === f.name
-                    ? "border-blue bg-blue text-white"
-                    : "border-gray-200 text-gray-600 hover:border-blue hover:text-blue",
-                )}
-              >
-                {f.name} ({f.count})
-              </button>
+          <div className="filter-groups">
+            <div className="filter-group">
+              <div className="filter-group-label">Specialty</div>
+              <div className="filter-pills">
+                {SPECIALTY_FILTERS.map(({ val, label }) => (
+                  <button
+                    key={val}
+                    type="button"
+                    className={`f-pill${activeFilters.spec === val ? " on" : ""}`}
+                    onClick={() => setFilter("spec", val)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="filter-group">
+              <div className="filter-group-label">Country</div>
+              <div className="filter-pills">
+                {COUNTRY_FILTERS.map(({ val, label }) => (
+                  <button
+                    key={val}
+                    type="button"
+                    className={`f-pill${activeFilters.country === val ? " on" : ""}`}
+                    onClick={() => setFilter("country", val)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="filter-group">
+              <div className="filter-group-label">Availability</div>
+              <div className="filter-pills">
+                {AVAIL_FILTERS.map(({ val, label }) => (
+                  <button
+                    key={val}
+                    type="button"
+                    className={`f-pill${activeFilters.avail === val ? " on" : ""}`}
+                    onClick={() => setFilter("avail", val)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid-section">
+        {filtered.length > 0 && (
+          <div className="doc-grid">
+            {filtered.map((doctor) => (
+              <DoctorCard
+                key={doctor.init}
+                doctor={doctor}
+                onProfile={(init) => showToast(`Opening profile for ${init}...`)}
+                onBook={(name) => showToast(`Opening booking form for ${name}...`)}
+              />
             ))}
           </div>
+        )}
+
+        <div className={`no-results${filtered.length === 0 ? " show" : ""}`}>
+          <div className="nr-icon">🔍</div>
+          <h3>No doctors found</h3>
+          <p>Try adjusting your search or filters to find the right specialist.</p>
+        </div>
+
+        <div className="join-cta">
+          <h3>✍️ Are You a Licensed Physician?</h3>
+          <p>
+            Join our network of 200+ verified medical professionals. Write articles, answer patient questions,
+            offer consultations, and reach 500,000+ readers every month.
+          </p>
+          <div className="join-btns">
+            <button type="button" className="btn-join-w" onClick={() => showToast("Opening application form...")}>
+              Apply to Join →
+            </button>
+            <Link href="/contact" className="btn-join-o">
+              📋 View Author Guidelines
+            </Link>
+          </div>
         </div>
       </div>
 
-      <div className="mx-auto max-w-[1240px] px-6 py-12">
-        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-          {doctorsQuery.isLoading && (
-            <div className="col-span-full rounded-xl border border-gray-200 bg-white p-8 text-center text-gray-500">
-              Loading doctors...
-            </div>
-          )}
-          {doctorsQuery.isError && (
-            <div className="col-span-full rounded-xl border border-[#fecaca] bg-[#fef2f2] p-8 text-center text-red">
-              Unable to load doctors. Please try again.
-            </div>
-          )}
-          {!doctorsQuery.isLoading && !doctorsQuery.isError && doctors.length === 0 && (
-            <div className="col-span-full rounded-xl border border-gray-200 bg-white p-8 text-center text-gray-500">
-              No doctors match your search.
-            </div>
-          )}
-          {doctors.map((doc) => {
-            const fullName = `Dr. ${doc.user?.firstName ?? ""} ${doc.user?.lastName ?? ""}`.trim();
-            const initials = `${doc.user?.firstName?.[0] ?? "D"}${doc.user?.lastName?.[0] ?? "R"}`;
-
-            return (
-            <Card key={doc.id} className="overflow-hidden transition hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]">
-              <CardContent className="p-0">
-                <div className="border-b border-gray-100 p-5">
-                  <div className="flex items-start gap-4">
-                    <div
-                      className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-lg font-bold text-white"
-                      style={{ background: "linear-gradient(135deg,#1a56a0,#0891b2)" }}
-                    >
-                      {initials}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-display text-[1.05rem] font-bold text-gray-900">{fullName}</h3>
-                      <p className="text-[.82rem] font-semibold text-blue">{doc.specialty}</p>
-                      <div className="mt-1 flex flex-wrap items-center gap-2 text-[.75rem] text-gray-500">
-                        <span className="text-amber">★ {doc.rating}</span>
-                        <span>({doc.reviewCount} reviews)</span>
-                        <span>· {doc.experienceYears} yrs</span>
-                      </div>
-                    </div>
-                    {doc.user?.isOnline && (
-                      <span className="rounded-full bg-[#ecfdf5] px-2 py-0.5 text-[.68rem] font-bold text-green">
-                        🟢 Online
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="space-y-2 p-5 text-[.78rem] text-gray-600">
-                  <div>🏥 {doc.hospital || "DrInsight Virtual Clinic"}</div>
-                  <div>🗣️ {doc.languages?.join(", ") || "English"}</div>
-                  <div>💳 Fee: ${Number(doc.consultationFee || 0).toFixed(2)}</div>
-                </div>
-                <div className="flex gap-2 border-t border-gray-100 p-4">
-                  <Button asChild size="sm" className="flex-1">
-                    <Link href={`/book-consultation?doctorId=${doc.id}`}>Book Now</Link>
-                  </Button>
-                  <Button asChild variant="secondary" size="sm" className="flex-1">
-                    <Link href="/ask-doctor">Ask Question</Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          );
-          })}
-        </div>
-      </div>
-    </>
+      <div className={`toast${toast ? " show" : ""}`}>{toast}</div>
+    </div>
   );
 }

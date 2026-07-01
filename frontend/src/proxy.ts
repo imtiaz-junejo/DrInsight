@@ -69,7 +69,7 @@ async function verifyJwt(token?: string): Promise<JwtPayload | null> {
   return parsed;
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("drinsight_access")?.value;
   const session = await verifyJwt(token);

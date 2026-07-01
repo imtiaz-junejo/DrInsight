@@ -68,14 +68,14 @@ export function Navbar() {
           <Logo />
         </Link>
 
-        <div className="hidden items-center gap-1 md:flex">
+        <div className="hidden items-center md:flex">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               className={cn(
-                "rounded-lg px-3.5 py-2 text-[.9rem] font-medium text-gray-600 transition-all duration-[.22s]",
-                link.cta && "bg-blue px-5 font-semibold text-white hover:bg-blue-dark hover:text-white",
+                "rounded px-3.5 py-2 text-[.9rem] font-medium text-gray-600 transition-all duration-[.22s]",
+                link.cta && "bg-blue px-4 font-semibold text-white hover:bg-blue-dark hover:text-white",
                 isActive(link.href) && !link.cta && "bg-blue-light font-semibold text-blue",
                 !isActive(link.href) && !link.cta && "hover:bg-blue-light hover:text-blue",
               )}
@@ -83,7 +83,7 @@ export function Navbar() {
               {link.label}
             </Link>
           ))}
-          {user ? (
+          {/* {user ? (
             <button
               type="button"
               onClick={() => {
@@ -101,7 +101,7 @@ export function Navbar() {
             >
               Login
             </Link>
-          )}
+          )} */}
         </div>
 
         <button
