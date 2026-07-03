@@ -1,6 +1,8 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-import { Public } from '../common/decorators/auth.decorators';
+import { Body, Controller, Get, Patch, Param, Post, Query } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { UserRole } from '@prisma/client';
+import { Public, Roles } from '../common/decorators/auth.decorators';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AskDoctorService } from './ask-doctor.service';
 
 @ApiTags('ask-doctor')
@@ -36,5 +38,26 @@ export class AskDoctorController {
     },
   ) {
     return this.askDoctorService.submit(body);
+  }
+
+  @Get('pending')
+  @ApiBearerAuth()
+  @Roles(UserRole.DOCTOR, UserRole.ADMIN)
+  findPending(
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.askDoctorService.findPending({ page: +page! || 1, limit: +limit! || 20 });
+  }
+
+  @Patch(':id/answer')
+  @ApiBearerAuth()
+  @Roles(UserRole.DOCTOR, UserRole.ADMIN)
+  answer(
+    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
+    @Body('answer') answer: string,
+  ) {
+    return this.askDoctorService.answer(id, userId, answer);
   }
 }

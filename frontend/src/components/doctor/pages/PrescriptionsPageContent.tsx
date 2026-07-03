@@ -1,11 +1,31 @@
 "use client";
 
+import { useMemo } from "react";
 import { DashButton, DashCard, DashPageHeader } from "@/components/doctor/ui/DoctorPrimitives";
+import { formatDate } from "@/lib/data-mappers";
 import { todayFormatted } from "@/lib/doctor-utils";
+import { useDoctorPrescriptions } from "@/services/doctor-api-hooks";
 import { useDoctorUiStore } from "@/store/doctor-ui.store";
 
 export function PrescriptionsPageContent() {
   const showToast = useDoctorUiStore((s) => s.showToast);
+  const prescriptionsQuery = useDoctorPrescriptions();
+
+  const rows = useMemo(() => {
+    const prescriptions = prescriptionsQuery.data ?? [];
+    return prescriptions.flatMap((rx) =>
+      rx.items.map((item, index) => ({
+        key: `${rx.id}-${index}`,
+        patient: `${rx.patient?.user?.firstName ?? ""} ${rx.patient?.user?.lastName ?? ""}`.trim() || "Patient",
+        medication: item.medication,
+        dosage: `${item.dosage} — ${item.frequency}`,
+        issued: formatDate(rx.createdAt),
+        refills: item.duration || "—",
+        statusClass: "st-active",
+        statusLabel: "Active",
+      })),
+    );
+  }, [prescriptionsQuery.data]);
 
   return (
     <>
@@ -29,30 +49,39 @@ export function PrescriptionsPageContent() {
                 <th>Medication</th>
                 <th>Dosage</th>
                 <th>Issued</th>
-                <th>Refills</th>
+                <th>Duration</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              {[
-                ["Fatima Khan", "Furosemide", "40mg — Once daily", "Jun 1, 2026", "3 remaining", "st-active", "Active"],
-                ["Ahmed Raza", "Bisoprolol", "5mg — Once daily", "Today", "2 remaining", "st-new", "Pending"],
-                ["Sara Malik", "Amlodipine", "10mg — Once daily", "May 20, 2026", "1 remaining", "st-followup", "Refill needed"],
-                ["Imran Ali", "Clopidogrel", "75mg — Once daily", "May 10, 2026", "0 remaining", "st-critical", "Expired"],
-              ].map(([patient, med, dose, issued, refills, statusClass, statusLabel]) => (
-                <tr key={patient + med}>
-                  <td>
-                    <strong>{patient}</strong>
-                  </td>
-                  <td>{med}</td>
-                  <td>{dose}</td>
-                  <td>{issued}</td>
-                  <td>{refills}</td>
-                  <td>
-                    <span className={`st-chip ${statusClass}`}>{statusLabel}</span>
+              {prescriptionsQuery.isLoading ? (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: "center", color: "var(--gray-400)", padding: 24 }}>
+                    Loading...
                   </td>
                 </tr>
-              ))}
+              ) : rows.length === 0 ? (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: "center", color: "var(--gray-400)", padding: 24 }}>
+                    No prescriptions issued yet
+                  </td>
+                </tr>
+              ) : (
+                rows.map((row) => (
+                  <tr key={row.key}>
+                    <td>
+                      <strong>{row.patient}</strong>
+                    </td>
+                    <td>{row.medication}</td>
+                    <td>{row.dosage}</td>
+                    <td>{row.issued}</td>
+                    <td>{row.refills}</td>
+                    <td>
+                      <span className={`st-chip ${row.statusClass}`}>{row.statusLabel}</span>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

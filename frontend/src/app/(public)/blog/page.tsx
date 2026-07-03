@@ -1,167 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import "@/styles/blog-page.css";
-
-const FILTER_PILLS = [
-  { id: "all", label: "All" },
-  { id: "cardiology", label: "❤️ Cardiology" },
-  { id: "neurology", label: "🧠 Neurology" },
-  { id: "diabetes", label: "🩸 Diabetes" },
-  { id: "mental", label: "🧘 Mental Health" },
-  { id: "womens", label: "🤰 Women's Health" },
-  { id: "pediatrics", label: "👶 Pediatrics" },
-  { id: "nutrition", label: "🍎 Nutrition" },
-  { id: "skin", label: "🦷 Dermatology" },
-];
-
-const BLOG_POSTS = [
-  {
-    cat: "cardiology",
-    emoji: "❤️",
-    thumbBg: "#fef2f2",
-    badgeBg: "#dc2626",
-    badge: "CARDIOLOGY",
-    catLabel: "Cardiology",
-    catColor: "#dc2626",
-    title: "10 Early Warning Signs of Heart Disease You Should Never Ignore",
-    excerpt:
-      "Cardiologists reveal subtle symptoms often dismissed — from jaw pain to ankle swelling — that could signal serious cardiac risk.",
-    authorInitials: "SM",
-    authorGradient: "linear-gradient(135deg,#1a56a0,#0891b2)",
-    author: "Dr. S. Mitchell",
-    readTime: "6 min",
-  },
-  {
-    cat: "diabetes",
-    emoji: "🩸",
-    thumbBg: "#fffbeb",
-    badgeBg: "#d97706",
-    badge: "DIABETES",
-    catLabel: "Diabetes & Endocrinology",
-    catColor: "#d97706",
-    title: "How to Reverse Pre-Diabetes Naturally: A Clinician's Evidence-Based Guide",
-    excerpt:
-      "The landmark DPP trial showed lifestyle changes cut diabetes risk by 58%. Here's exactly what to do, based on the evidence.",
-    authorInitials: "PS",
-    authorGradient: "linear-gradient(135deg,#059669,#0891b2)",
-    author: "Dr. P. Sharma",
-    readTime: "9 min",
-  },
-  {
-    cat: "neurology",
-    emoji: "🧠",
-    thumbBg: "#f3f0ff",
-    badgeBg: "#7c3aed",
-    badge: "NEUROLOGY",
-    catLabel: "Neurology",
-    catColor: "#7c3aed",
-    title: "Migraine vs Headache: How to Tell the Difference and When to See a Doctor",
-    excerpt:
-      "Not all head pain is the same. A neurologist explains the key distinctions and what each type means for your health.",
-    authorInitials: "JO",
-    authorGradient: "linear-gradient(135deg,#7c3aed,#4a90d9)",
-    author: "Dr. J. Okafor",
-    readTime: "7 min",
-  },
-  {
-    cat: "mental",
-    emoji: "🧘",
-    thumbBg: "#eef2ff",
-    badgeBg: "#4f46e5",
-    badge: "MENTAL HEALTH",
-    catLabel: "Mental Health & Psychiatry",
-    catColor: "#4f46e5",
-    title: "Understanding Anxiety Disorders: Types, Triggers, and the Most Effective Treatments",
-    excerpt:
-      "A psychiatrist's comprehensive guide to the anxiety spectrum — from GAD to panic disorder — and what actually works.",
-    authorInitials: "EC",
-    authorGradient: "linear-gradient(135deg,#7c3aed,#ec4899)",
-    author: "Dr. E. Chen",
-    readTime: "11 min",
-  },
-  {
-    cat: "womens",
-    emoji: "🤰",
-    thumbBg: "#fdf2f8",
-    badgeBg: "#db2777",
-    badge: "WOMEN'S HEALTH",
-    catLabel: "Women's Health",
-    catColor: "#db2777",
-    title: "PCOS Explained: Symptoms, Diagnosis, and a Complete Management Plan",
-    excerpt:
-      "Affecting 1 in 10 women, PCOS is often misunderstood. A gynaecologist explains the full picture from hormones to fertility.",
-    authorInitials: "EC",
-    authorGradient: "linear-gradient(135deg,#db2777,#f59e0b)",
-    author: "Dr. E. Chen",
-    readTime: "10 min",
-  },
-  {
-    cat: "nutrition",
-    emoji: "🍎",
-    thumbBg: "#ecfdf5",
-    badgeBg: "#059669",
-    badge: "NUTRITION",
-    catLabel: "Nutrition & Lifestyle",
-    catColor: "#059669",
-    title: "The Anti-Inflammatory Diet: A Physician's Guide to Eating for Long-Term Health",
-    excerpt:
-      "Chronic inflammation drives heart disease, cancer, and diabetes. Here's exactly what to eat — and avoid — according to the evidence.",
-    authorInitials: "PS",
-    authorGradient: "linear-gradient(135deg,#059669,#0891b2)",
-    author: "Dr. P. Sharma",
-    readTime: "8 min",
-  },
-  {
-    cat: "pediatrics",
-    emoji: "👶",
-    thumbBg: "#f0fdf4",
-    badgeBg: "#16a34a",
-    badge: "PEDIATRICS",
-    catLabel: "Pediatrics",
-    catColor: "#16a34a",
-    title: "Childhood Vaccine Schedule 2026: What Every Parent Needs to Know",
-    excerpt:
-      "A paediatrician breaks down the full immunisation schedule — what each vaccine does, when to give it, and common myths debunked.",
-    authorInitials: "CR",
-    authorGradient: "linear-gradient(135deg,#f59e0b,#059669)",
-    author: "Dr. C. Rivera",
-    readTime: "12 min",
-  },
-  {
-    cat: "skin",
-    emoji: "🦷",
-    thumbBg: "#fff7ed",
-    badgeBg: "#ea580c",
-    badge: "DERMATOLOGY",
-    catLabel: "Dermatology",
-    catColor: "#ea580c",
-    title: "Eczema, Psoriasis, or Rosacea? How to Tell Them Apart and Treat Each Correctly",
-    excerpt:
-      "Three of the most commonly confused skin conditions — a dermatologist explains the differences and the latest treatment approaches.",
-    authorInitials: "AH",
-    authorGradient: "linear-gradient(135deg,#ea580c,#d97706)",
-    author: "Dr. A. Hassan",
-    readTime: "8 min",
-  },
-  {
-    cat: "cardiology",
-    emoji: "🫀",
-    thumbBg: "#e0f7fa",
-    badgeBg: "#0891b2",
-    badge: "CARDIOLOGY",
-    catLabel: "Cardiology",
-    catColor: "#0891b2",
-    title: "High Blood Pressure: The Silent Killer and How to Control It Without Side Effects",
-    excerpt:
-      "Hypertension affects 1 in 3 adults. A cardiologist explains medication, lifestyle changes, and the latest evidence on control.",
-    authorInitials: "SM",
-    authorGradient: "linear-gradient(135deg,#1a56a0,#0891b2)",
-    author: "Dr. S. Mitchell",
-    readTime: "7 min",
-  },
-];
+import { formatStatCount, mapBlogPostToCard, specialtyEmoji } from "@/lib/data-mappers";
+import { useBlogCategories, useBlogPosts, usePlatformStats } from "@/services/api-hooks";
 
 const TRENDING = [
   {
@@ -313,14 +156,41 @@ export default function BlogPage() {
   const mainWrapRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const visiblePosts = BLOG_POSTS.filter((post) => {
-    if (isSearchMode && searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim();
-      const text = `${post.title} ${post.excerpt}`.toLowerCase();
-      return text.includes(q);
-    }
-    return activeFilter === "all" || post.cat === activeFilter;
+  const { data: stats } = usePlatformStats();
+  const { data: categories } = useBlogCategories();
+  const { data: postsData, isLoading } = useBlogPosts({
+    limit: 50,
+    category: !isSearchMode && activeFilter !== "all" ? activeFilter : undefined,
+    search: isSearchMode && searchQuery.trim() ? searchQuery.trim() : undefined,
   });
+
+  const filterPills = useMemo(
+    () => [
+      { id: "all", label: "All" },
+      ...(categories ?? []).map((c) => ({
+        id: c.slug,
+        label: `${specialtyEmoji(c.name)} ${c.name}`,
+      })),
+    ],
+    [categories],
+  );
+
+  const blogPosts = useMemo(() => {
+    return (postsData?.data ?? []).map((post) => {
+      const card = mapBlogPostToCard(post);
+      return {
+        ...card,
+        cat: post.category?.slug ?? "all",
+        thumbBg: "#f0f7ff",
+        badgeBg: "#1a56a0",
+        catLabel: post.category?.name ?? "Health",
+        catColor: "#1a56a0",
+        readTime: card.read.replace(" read", ""),
+      };
+    });
+  }, [postsData]);
+
+  const featured = blogPosts[0];
 
   function filterPosts(cat: string) {
     setIsSearchMode(false);
@@ -351,7 +221,7 @@ export default function BlogPage() {
             <div className="eyebrow">Evidence-Based Medical Blog</div>
             <h1>Doctor-Written Health Articles You Can Trust</h1>
             <p>
-              1,000+ peer-reviewed articles across every medical specialty — written and reviewed by
+              {stats ? formatStatCount(stats.blogCount) : "1,000+"} peer-reviewed articles across every medical specialty — written and reviewed by
               board-certified physicians. No misinformation, ever.
             </p>
             <div className="hero-search">
@@ -368,15 +238,15 @@ export default function BlogPage() {
             </div>
             <div className="hero-stats">
               <div className="h-stat">
-                <strong>1,000+</strong>
+                <strong>{stats ? formatStatCount(stats.blogCount) : "—"}</strong>
                 <span>Articles Published</span>
               </div>
               <div className="h-stat">
-                <strong>200+</strong>
+                <strong>{stats ? formatStatCount(stats.doctorCount) : "—"}</strong>
                 <span>Doctor Authors</span>
               </div>
               <div className="h-stat">
-                <strong>50+</strong>
+                <strong>{stats?.specialtyCount ?? "—"}</strong>
                 <span>Specialties Covered</span>
               </div>
               <div className="h-stat">
@@ -386,19 +256,27 @@ export default function BlogPage() {
             </div>
           </div>
           <div>
-            <div className="featured-card">
-              <div className="featured-thumb">
-                ❤️
-                <div className="featured-badge">⭐ FEATURED</div>
-              </div>
-              <div className="featured-body">
-                <div className="featured-cat">Cardiology · Editor&apos;s Pick</div>
-                <h3>The Silent Heart Attack: 8 Warning Signs Most People Miss Until It&apos;s Too Late</h3>
-                <div className="featured-meta">
-                  <span>Dr. Sarah Mitchell</span> · <span>8 min read</span> · <span>May 30, 2026</span>
+            {featured ? (
+              <Link href={`/blog/${featured.slug}`} className="featured-card">
+                <div className="featured-thumb">
+                  {featured.emoji}
+                  <div className="featured-badge">⭐ FEATURED</div>
+                </div>
+                <div className="featured-body">
+                  <div className="featured-cat">{featured.catLabel} · Editor&apos;s Pick</div>
+                  <h3>{featured.title}</h3>
+                  <div className="featured-meta">
+                    <span>{featured.author}</span> · <span>{featured.read}</span> · <span>{featured.date}</span>
+                  </div>
+                </div>
+              </Link>
+            ) : (
+              <div className="featured-card">
+                <div className="featured-body">
+                  <p style={{ color: "var(--gray-500)" }}>No featured article yet.</p>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -410,7 +288,7 @@ export default function BlogPage() {
             <div className="section-title">Recent Medical Insights</div>
 
             <div className="filter-bar" id="filter-bar">
-              {FILTER_PILLS.map((pill) => (
+              {filterPills.map((pill) => (
                 <div
                   key={pill.id}
                   className={`filter-pill${!isSearchMode && activeFilter === pill.id ? " active" : ""}`}
@@ -425,35 +303,37 @@ export default function BlogPage() {
             </div>
 
             <div className="blog-grid" id="blog-grid">
-              {visiblePosts.map((post) => (
-                <div key={post.title} className="blog-card" data-cat={post.cat}>
-                  <div className="blog-thumb" style={{ background: post.thumbBg }}>
-                    {post.emoji}
-                    <div className="blog-badge" style={{ background: post.badgeBg }}>
-                      {post.badge}
-                    </div>
-                  </div>
-                  <div className="blog-body">
-                    <div className="blog-cat-label" style={{ color: post.catColor }}>
-                      {post.catLabel}
-                    </div>
-                    <h3>{post.title}</h3>
-                    <p>{post.excerpt}</p>
-                    <div className="blog-footer">
-                      <div className="blog-meta-sm">
-                        <div className="author-dot" style={{ background: post.authorGradient }}>
-                          {post.authorInitials}
-                        </div>
-                        <span>{post.author}</span>
+              {isLoading ? (
+                <p style={{ gridColumn: "1 / -1", textAlign: "center", color: "var(--gray-500)" }}>Loading articles...</p>
+              ) : blogPosts.length > 0 ? (
+                blogPosts.map((post) => (
+                  <Link key={post.slug} href={`/blog/${post.slug}`} className="blog-card" data-cat={post.cat}>
+                    <div className="blog-thumb" style={{ background: post.thumbBg }}>
+                      {post.emoji}
+                      <div className="blog-badge" style={{ background: post.badgeBg }}>
+                        {post.cat}
                       </div>
-                      <div className="read-time">⏱ {post.readTime}</div>
-                      <span className="read-more-link">Read →</span>
                     </div>
-                  </div>
-                </div>
-              ))}
-
-              {visiblePosts.length === 0 && (
+                    <div className="blog-body">
+                      <div className="blog-cat-label" style={{ color: post.catColor }}>
+                        {post.catLabel}
+                      </div>
+                      <h3>{post.title}</h3>
+                      <p>{post.excerpt}</p>
+                      <div className="blog-footer">
+                        <div className="blog-meta-sm">
+                          <div className="author-dot" style={{ background: post.authorGradient }}>
+                            {post.authorInitials}
+                          </div>
+                          <span>{post.author}</span>
+                        </div>
+                        <div className="read-time">⏱ {post.readTime}</div>
+                        <span className="read-more-link">Read →</span>
+                      </div>
+                    </div>
+                  </Link>
+                ))
+              ) : (
                 <div className="no-results" id="no-results">
                   <div className="no-results-icon">🔍</div>
                   <p>No articles match your search or filter. Try different keywords.</p>

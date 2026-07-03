@@ -18,6 +18,7 @@ export class PrescriptionsController {
   }
 
   @Get()
+  @Roles(UserRole.DOCTOR, UserRole.PATIENT, UserRole.ADMIN)
   findAll(@CurrentUser('id') userId: string, @CurrentUser('role') role: UserRole) {
     return this.prescriptionsService.findForUser(userId, role);
   }

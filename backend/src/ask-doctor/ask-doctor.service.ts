@@ -55,6 +55,44 @@ export class AskDoctorService {
     });
   }
 
+  async findPending(query: { page?: number; limit?: number }) {
+    const page = query.page || 1;
+    const limit = query.limit || 20;
+    const skip = (page - 1) * limit;
+
+    const where = { status: QuestionStatus.PENDING };
+
+    const [data, total] = await Promise.all([
+      this.prisma.askDoctorQuestion.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.askDoctorQuestion.count({ where }),
+    ]);
+
+    return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
+  }
+
+  async answer(questionId: string, doctorUserId: string, answer: string) {
+    const question = await this.prisma.askDoctorQuestion.findUnique({ where: { id: questionId } });
+    if (!question) throw new NotFoundException('Question not found');
+
+    return this.prisma.askDoctorQuestion.update({
+      where: { id: questionId },
+      data: {
+        answer,
+        status: QuestionStatus.ANSWERED,
+        answeredById: doctorUserId,
+        answeredAt: new Date(),
+      },
+      include: {
+        answeredBy: { select: { firstName: true, lastName: true, role: true } },
+      },
+    });
+  }
+
   async getCount() {
     return this.prisma.askDoctorQuestion.count({ where: { status: QuestionStatus.ANSWERED } });
   }

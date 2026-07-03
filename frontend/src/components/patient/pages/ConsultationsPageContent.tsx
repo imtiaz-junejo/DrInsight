@@ -1,14 +1,32 @@
 "use client";
 
 import Link from "next/link";
-import { PAST_CONSULTATIONS, UPCOMING_CONSULTATIONS } from "@/components/patient/data/patient-demo-data";
-import { ConsultationCard } from "@/components/patient/ui/PatientShared";
+import { useMemo } from "react";
+import { ConsultationCard, EmptyState } from "@/components/patient/ui/PatientShared";
 import { DashButton, DashCard, DashPageHeader } from "@/components/patient/ui/PatientPrimitives";
+import { mapAppointmentToConsultation } from "@/lib/data-mappers";
 import { todayFormatted } from "@/lib/patient-utils";
+import { usePatientAppointments } from "@/services/patient-api-hooks";
 import { usePatientUiStore } from "@/store/patient-ui.store";
+
+const UPCOMING_STATUSES = new Set(["CONFIRMED", "PENDING", "IN_PROGRESS"]);
 
 export function ConsultationsPageContent() {
   const showToast = usePatientUiStore((s) => s.showToast);
+  const appointmentsQuery = usePatientAppointments({ limit: 50 });
+
+  const { upcoming, past } = useMemo(() => {
+    const appointments = appointmentsQuery.data?.data ?? [];
+    const up = appointments
+      .filter((a) => UPCOMING_STATUSES.has(a.status))
+      .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime())
+      .map((a) => mapAppointmentToConsultation(a));
+    const pa = appointments
+      .filter((a) => !UPCOMING_STATUSES.has(a.status))
+      .sort((a, b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime())
+      .map((a) => mapAppointmentToConsultation(a));
+    return { upcoming: up, past: pa };
+  }, [appointmentsQuery.data?.data]);
 
   return (
     <>
@@ -27,17 +45,25 @@ export function ConsultationsPageContent() {
 
       <DashCard title="📅 Upcoming Consultations">
         <div className="cons-list">
-          {UPCOMING_CONSULTATIONS.map((item) => (
-            <ConsultationCard key={item.id} item={item} variant="full" />
-          ))}
+          {appointmentsQuery.isLoading ? (
+            <EmptyState message="Loading upcoming consultations..." />
+          ) : upcoming.length > 0 ? (
+            upcoming.map((item) => <ConsultationCard key={item.id} item={item} variant="full" />)
+          ) : (
+            <EmptyState message="No upcoming consultations scheduled." />
+          )}
         </div>
       </DashCard>
 
       <DashCard title="✅ Past Consultations">
         <div className="cons-list">
-          {PAST_CONSULTATIONS.map((item) => (
-            <ConsultationCard key={item.id} item={item} variant="full" />
-          ))}
+          {appointmentsQuery.isLoading ? (
+            <EmptyState message="Loading past consultations..." />
+          ) : past.length > 0 ? (
+            past.map((item) => <ConsultationCard key={item.id} item={item} variant="full" />)
+          ) : (
+            <EmptyState message="No past consultations yet." />
+          )}
         </div>
       </DashCard>
     </>

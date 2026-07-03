@@ -31,6 +31,18 @@ export class PrescriptionsService {
   }
 
   async findForUser(userId: string, role: UserRole) {
+    if (role === UserRole.ADMIN) {
+      return this.prisma.prescription.findMany({
+        include: {
+          appointment: true,
+          doctor: { include: { user: true } },
+          patient: { include: { user: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 100,
+      });
+    }
+
     if (role === UserRole.DOCTOR) {
       const doctor = await this.prisma.doctorProfile.findUnique({ where: { userId } });
       if (!doctor) return [];

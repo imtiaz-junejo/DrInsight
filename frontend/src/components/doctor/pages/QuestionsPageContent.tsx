@@ -1,52 +1,43 @@
 "use client";
 
+import { useState } from "react";
 import { DashCard, DashPageHeader, PersonAvatar } from "@/components/doctor/ui/DoctorPrimitives";
-import { QA_PENDING } from "@/components/doctor/data/doctor-demo-data";
+import { formatDate, formatRelativeTime, getInitials, gradientForId } from "@/lib/data-mappers";
 import { todayFormatted } from "@/lib/doctor-utils";
+import { useAnswerQuestion, usePendingQuestions } from "@/services/doctor-api-hooks";
 import { useDoctorUiStore } from "@/store/doctor-ui.store";
 
-const ANSWERED = [
-  {
-    name: "Michael C.",
-    question: "What does an ejection fraction of 45% mean?",
-    answer:
-      "An ejection fraction of 45% falls in the mildly reduced range. Normal is above 55%. This warrants further workup including echocardiography and lifestyle modification.",
-    date: "May 28, 2026",
-  },
-  {
-    name: "David T.",
-    question: "Is it safe to fly with atrial fibrillation?",
-    answer:
-      "Most patients with well-controlled AF can fly safely. Ensure anticoagulation is therapeutic and avoid dehydration during the flight.",
-    date: "May 25, 2026",
-  },
-];
-
-const MORE_PENDING = [
-  ...QA_PENDING,
-  {
-    initials: "LP",
-    avatarBg: "linear-gradient(135deg,#d97706,#f59e0b)",
-    name: "Linda Patel",
-    spec: "Endocrinology · Jun 2",
-    urgent: false,
-    question: "What is the ideal HbA1c target for a 55-year-old diabetic patient with no complications?",
-    modal: QA_PENDING[0].modal,
-  },
-  {
-    initials: "AM",
-    avatarBg: "linear-gradient(135deg,#7c3aed,#8b5cf6)",
-    name: "Aisha Mirza",
-    spec: "Cardiology · May 30",
-    urgent: false,
-    question: "Are palpitations always a sign of a serious heart problem, or can they be harmless?",
-    modal: QA_PENDING[0].modal,
-  },
-];
+function EmptyState({ loading, message }: { loading?: boolean; message: string }) {
+  return (
+    <div style={{ padding: "24px 0", textAlign: "center", color: "var(--gray-400)", fontSize: "0.84rem" }}>
+      {loading ? "Loading..." : message}
+    </div>
+  );
+}
 
 export function QuestionsPageContent() {
   const showToast = useDoctorUiStore((s) => s.showToast);
   const openPatientModal = useDoctorUiStore((s) => s.openPatientModal);
+  const questionsQuery = usePendingQuestions();
+  const answerQuestion = useAnswerQuestion();
+  const [replyingId, setReplyingId] = useState<string | null>(null);
+
+  const pending = questionsQuery.data?.data ?? [];
+  const pendingCount = questionsQuery.data?.meta.total ?? 0;
+
+  const handleReply = (id: string) => {
+    const answer = window.prompt("Enter your answer:");
+    if (!answer?.trim()) return;
+    setReplyingId(id);
+    answerQuestion.mutate(
+      { id, answer: answer.trim() },
+      {
+        onSuccess: () => showToast("Answer submitted successfully"),
+        onError: () => showToast("Failed to submit answer"),
+        onSettled: () => setReplyingId(null),
+      },
+    );
+  };
 
   return (
     <>
@@ -56,78 +47,117 @@ export function QuestionsPageContent() {
         title={
           <>
             💬 Pending Your Reply{" "}
-            <span style={{ fontSize: "0.72rem", background: "var(--red)", color: "#fff", padding: "2px 8px", borderRadius: 50, marginLeft: 4 }}>
-              12
-            </span>
+            {!questionsQuery.isLoading && pendingCount > 0 ? (
+              <span style={{ fontSize: "0.72rem", background: "var(--red)", color: "#fff", padding: "2px 8px", borderRadius: 50, marginLeft: 4 }}>
+                {pendingCount}
+              </span>
+            ) : null}
           </>
         }
       >
-        {MORE_PENDING.map((q) => (
-          <div key={q.name + q.spec} className="qa-item">
-            <div className="qa-top">
-              <PersonAvatar initials={q.initials} className="qa-av" style={{ background: q.avatarBg }} seed={q.name} />
-              <div className="qa-meta">
-                <div className="qa-pname">
-                  {q.name}
-                  {q.urgent ? <span className="qa-urgent">⚡ Urgent</span> : null}
+        {questionsQuery.isLoading ? (
+          <EmptyState loading message="" />
+        ) : pending.length === 0 ? (
+          <EmptyState message="No pending questions — all caught up!" />
+        ) : (
+          pending.map((q) => {
+            const name = q.isAnonymous ? q.submitterName ?? "Anonymous" : q.submitterName ?? "Patient";
+            const initials = getInitials(name.split(" ")[0], name.split(" ")[1]);
+            const avatarBg = gradientForId(q.id);
+            const modal = {
+              initials,
+              name,
+              age: "—",
+              gender: "M" as const,
+              diagnosis: q.category,
+              status: "Active" as const,
+              avatarBg,
+            };
+
+            return (
+              <div key={q.id} className="qa-item">
+                <div className="qa-top">
+                  <PersonAvatar initials={initials} className="qa-av" style={{ background: avatarBg }} seed={name} />
+                  <div className="qa-meta">
+                    <div className="qa-pname">
+                      {name}
+                      {q.category.toLowerCase().includes("urgent") ? <span className="qa-urgent">⚡ Urgent</span> : null}
+                    </div>
+                    <div className="qa-spec">
+                      {q.category} · {formatRelativeTime(q.createdAt)}
+                    </div>
+                  </div>
                 </div>
-                <div className="qa-spec">{q.spec}</div>
+                <div className="qa-q">&quot;{q.question}&quot;</div>
+                <div className="qa-actions">
+                  <button
+                    type="button"
+                    className="qa-btn reply"
+                    disabled={answerQuestion.isPending && replyingId === q.id}
+                    onClick={() => handleReply(q.id)}
+                  >
+                    ✏️ Reply Now
+                  </button>
+                  <button type="button" className="qa-btn" onClick={() => openPatientModal(modal)}>
+                    📋 Patient File
+                  </button>
+                  <button type="button" className="qa-btn" onClick={() => showToast("Calling patient...")}>
+                    📞 Call
+                  </button>
+                </div>
               </div>
-            </div>
-            <div className="qa-q">&quot;{q.question}&quot;</div>
-            <div className="qa-actions">
-              <button type="button" className="qa-btn reply" onClick={() => showToast("Reply editor opened")}>
-                ✏️ Reply Now
-              </button>
-              <button type="button" className="qa-btn" onClick={() => openPatientModal(q.modal)}>
-                📋 Patient File
-              </button>
-              <button type="button" className="qa-btn" onClick={() => showToast("Calling patient...")}>
-                📞 Call
-              </button>
-            </div>
-          </div>
-        ))}
+            );
+          })
+        )}
       </DashCard>
 
       <DashCard title="✅ Recently Answered">
-        {ANSWERED.map((item) => (
-          <div key={item.name} style={{ padding: "16px 0", borderBottom: "1px solid var(--gray-100)" }}>
-            <div style={{ fontWeight: 600, fontSize: "0.84rem", marginBottom: 8, display: "flex", gap: 7 }}>
-              <span>✅</span>
-              <span>
-                <strong>{item.name}:</strong> {item.question}
-              </span>
-            </div>
-            <div
-              style={{
-                fontSize: "0.82rem",
-                color: "var(--gray-500)",
-                lineHeight: 1.6,
-                paddingLeft: 20,
-                borderLeft: "2px solid var(--blue-light)",
-                marginBottom: 6,
-              }}
-            >
-              {item.answer}
-            </div>
-            <div style={{ fontSize: "0.72rem", color: "var(--gray-400)" }}>
-              {item.date} ·{" "}
-              <span
-                style={{
-                  fontSize: "0.68rem",
-                  fontWeight: 700,
-                  padding: "2px 8px",
-                  borderRadius: 50,
-                  background: "var(--blue-light)",
-                  color: "var(--blue)",
-                }}
-              >
-                answered
-              </span>
-            </div>
-          </div>
-        ))}
+        {pending.filter((q) => q.answer).length === 0 ? (
+          <EmptyState message="No recently answered questions in this view" />
+        ) : (
+          pending
+            .filter((q) => q.answer)
+            .map((q) => {
+              const name = q.isAnonymous ? q.submitterName ?? "Anonymous" : q.submitterName ?? "Patient";
+              return (
+                <div key={q.id} style={{ padding: "16px 0", borderBottom: "1px solid var(--gray-100)" }}>
+                  <div style={{ fontWeight: 600, fontSize: "0.84rem", marginBottom: 8, display: "flex", gap: 7 }}>
+                    <span>✅</span>
+                    <span>
+                      <strong>{name}:</strong> {q.question}
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "0.82rem",
+                      color: "var(--gray-500)",
+                      lineHeight: 1.6,
+                      paddingLeft: 20,
+                      borderLeft: "2px solid var(--blue-light)",
+                      marginBottom: 6,
+                    }}
+                  >
+                    {q.answer}
+                  </div>
+                  <div style={{ fontSize: "0.72rem", color: "var(--gray-400)" }}>
+                    {q.answeredAt ? formatDate(q.answeredAt) : "—"} ·{" "}
+                    <span
+                      style={{
+                        fontSize: "0.68rem",
+                        fontWeight: 700,
+                        padding: "2px 8px",
+                        borderRadius: 50,
+                        background: "var(--blue-light)",
+                        color: "var(--blue)",
+                      }}
+                    >
+                      answered
+                    </span>
+                  </div>
+                </div>
+              );
+            })
+        )}
       </DashCard>
     </>
   );

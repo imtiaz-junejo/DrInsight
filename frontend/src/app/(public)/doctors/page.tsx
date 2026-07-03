@@ -1,16 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useRef, useState } from "react";
 import "@/styles/doctors-page.css";
-import {
-  AVAIL_FILTERS,
-  COUNTRY_FILTERS,
-  DOCTORS,
-  HERO_STATS,
-  SPECIALTY_FILTERS,
-  type Doctor,
-} from "./doctors";
+import { mapDoctorProfile, specialtyEmoji, formatStatCount } from "@/lib/data-mappers";
+import type { MappedDoctorCard } from "@/lib/data-mappers";
+import { useDoctors, useDoctorSpecialties, usePlatformStats } from "@/services/api-hooks";
+import { AVAIL_FILTERS, COUNTRY_FILTERS } from "./doctors";
+
+type DoctorCardData = MappedDoctorCard & { articles: number };
 
 type FilterGroup = "spec" | "country" | "avail";
 type ActiveFilters = Record<FilterGroup, string>;
@@ -20,12 +19,12 @@ function DoctorCard({
   onProfile,
   onBook,
 }: {
-  doctor: Doctor;
-  onProfile: (init: string) => void;
-  onBook: (name: string) => void;
+  doctor: DoctorCardData;
+  onProfile: (id: string) => void;
+  onBook: (id: string) => void;
 }) {
   return (
-    <div className="doc-card" onClick={() => onProfile(doctor.init)} role="button" tabIndex={0}>
+    <div className="doc-card" onClick={() => onProfile(doctor.id)} role="button" tabIndex={0}>
       <div className="doc-cover" style={{ background: doctor.bg }}>
         <div className="doc-rating-badge">
           ⭐ {doctor.rating.toFixed(1)}{" "}
@@ -84,7 +83,7 @@ function DoctorCard({
             className="doc-btn outline"
             onClick={(e) => {
               e.stopPropagation();
-              onProfile(doctor.init);
+              onProfile(doctor.id);
             }}
           >
             View Profile
@@ -94,7 +93,7 @@ function DoctorCard({
             className="doc-btn primary"
             onClick={(e) => {
               e.stopPropagation();
-              onBook(doctor.name);
+              onBook(doctor.id);
             }}
           >
             Book Consultation
@@ -106,6 +105,7 @@ function DoctorCard({
 }
 
 export default function DoctorsPage() {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("rating");
   const [activeFilters, setActiveFilters] = useState<ActiveFilters>({
@@ -115,6 +115,36 @@ export default function DoctorsPage() {
   });
   const [toast, setToast] = useState("");
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const { data: doctorsData, isLoading } = useDoctors({ limit: 100 });
+  const { data: specialties } = useDoctorSpecialties();
+  const { data: stats } = usePlatformStats();
+
+  const doctors: DoctorCardData[] = useMemo(
+    () => (doctorsData?.data ?? []).map((d) => ({ ...mapDoctorProfile(d), articles: 0 })),
+    [doctorsData],
+  );
+
+  const specialtyFilters = useMemo(
+    () => [
+      { val: "all", label: "All Specialties" },
+      ...(specialties ?? []).map((s) => ({
+        val: s.name.toLowerCase(),
+        label: `${specialtyEmoji(s.name)} ${s.name}`,
+      })),
+    ],
+    [specialties],
+  );
+
+  const heroStats = useMemo(
+    () => [
+      { num: stats ? formatStatCount(stats.doctorCount) : "—", label: "Verified Doctors" },
+      { num: stats?.specialtyCount ?? specialties?.length ?? "—", label: "Specialties" },
+      { num: stats ? `${stats.averageRating.toFixed(1)}★` : "—", label: "Avg. Rating" },
+      { num: stats ? formatStatCount(stats.reviewCount ?? 0) : "—", label: "Patient Reviews" },
+    ],
+    [stats, specialties],
+  );
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -129,9 +159,8 @@ export default function DoctorsPage() {
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
 
-    let list = DOCTORS.filter((d) => {
+    let list = doctors.filter((d) => {
       if (activeFilters.spec !== "all" && d.spec !== activeFilters.spec) return false;
-      if (activeFilters.country !== "all" && d.country !== activeFilters.country) return false;
       if (activeFilters.avail === "online" && !d.online) return false;
       if (activeFilters.avail === "rating4plus" && d.rating < 4.5) return false;
       if (q) {
@@ -150,7 +179,10 @@ export default function DoctorsPage() {
     });
 
     return list;
-  }, [search, sort, activeFilters]);
+  }, [search, sort, activeFilters, doctors]);
+
+  const goProfile = (id: string) => router.push(`/doctors/${id}`);
+  const goBook = (id: string) => router.push(`/book-consultation?doctorId=${id}`);
 
   return (
     <div className="doctors-page">
@@ -173,7 +205,7 @@ export default function DoctorsPage() {
             physician. Search our network of specialists by name, specialty, country, or rating.
           </p>
           <div className="stats-strip">
-            {HERO_STATS.map(({ num, label }) => (
+            {heroStats.map(({ num, label }) => (
               <div key={label} className="stat-box">
                 <div className="stat-num">{num}</div>
                 <div className="stat-label">{label}</div>
@@ -202,14 +234,14 @@ export default function DoctorsPage() {
               <option value="name">Sort: Name (A–Z)</option>
             </select>
             <div className="results-count">
-              Showing <strong>{filtered.length}</strong> of <strong>{DOCTORS.length}</strong> doctors
+              Showing <strong>{filtered.length}</strong> of <strong>{doctors.length}</strong> doctors
             </div>
           </div>
           <div className="filter-groups">
             <div className="filter-group">
               <div className="filter-group-label">Specialty</div>
               <div className="filter-pills">
-                {SPECIALTY_FILTERS.map(({ val, label }) => (
+                {specialtyFilters.map(({ val, label }) => (
                   <button
                     key={val}
                     type="button"
@@ -256,36 +288,38 @@ export default function DoctorsPage() {
       </div>
 
       <div className="grid-section">
-        {filtered.length > 0 && (
+        {isLoading ? (
+          <p style={{ textAlign: "center", padding: "40px 0", color: "var(--gray-500)" }}>Loading doctors...</p>
+        ) : filtered.length > 0 ? (
           <div className="doc-grid">
             {filtered.map((doctor) => (
               <DoctorCard
-                key={doctor.init}
+                key={doctor.id}
                 doctor={doctor}
-                onProfile={(init) => showToast(`Opening profile for ${init}...`)}
-                onBook={(name) => showToast(`Opening booking form for ${name}...`)}
+                onProfile={goProfile}
+                onBook={goBook}
               />
             ))}
           </div>
+        ) : (
+          <div className="no-results show">
+            <div className="nr-icon">🔍</div>
+            <h3>No doctors found</h3>
+            <p>Try adjusting your search or filters to find the right specialist.</p>
+          </div>
         )}
-
-        <div className={`no-results${filtered.length === 0 ? " show" : ""}`}>
-          <div className="nr-icon">🔍</div>
-          <h3>No doctors found</h3>
-          <p>Try adjusting your search or filters to find the right specialist.</p>
-        </div>
 
         <div className="join-cta">
           <h3>✍️ Are You a Licensed Physician?</h3>
           <p>
-            Join our network of 200+ verified medical professionals. Write articles, answer patient questions,
-            offer consultations, and reach 500,000+ readers every month.
+            Join our network of verified medical professionals. Write articles, answer patient questions,
+            offer consultations, and reach patients every month.
           </p>
           <div className="join-btns">
             <button type="button" className="btn-join-w" onClick={() => showToast("Opening application form...")}>
               Apply to Join →
             </button>
-            <Link href="/contact" className="btn-join-o">
+            <Link href="/author-guidelines" className="btn-join-o">
               📋 View Author Guidelines
             </Link>
           </div>

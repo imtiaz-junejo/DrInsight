@@ -16,4 +16,11 @@ export class ContactService {
       create: { email },
     });
   }
+
+  async findSubmissions() {
+    return this.prisma.contactSubmission.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    });
+  }
 }

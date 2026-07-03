@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Body, Param } from '@nestjs/common';
+import { Controller, Get, Patch, Body, Param, Query } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { UserRole, UserStatus } from '@prisma/client';
 import { UsersService } from './users.service';
@@ -22,6 +22,33 @@ export class UsersController {
     @Body() body: { firstName?: string; lastName?: string; phone?: string; avatarUrl?: string },
   ) {
     return this.usersService.updateProfile(userId, body);
+  }
+
+  @Patch('me/patient-profile')
+  updatePatientProfile(
+    @CurrentUser('id') userId: string,
+    @Body()
+    body: {
+      dateOfBirth?: string;
+      gender?: string;
+      bloodGroup?: string;
+      allergies?: string[];
+      medicalHistory?: string;
+      emergencyContact?: string;
+    },
+  ) {
+    return this.usersService.updatePatientProfile(userId, body);
+  }
+
+  @Get()
+  @Roles(UserRole.ADMIN)
+  findAll(
+    @Query('role') role?: UserRole,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('search') search?: string,
+  ) {
+    return this.usersService.findAll({ role, page: +page! || 1, limit: +limit! || 20, search });
   }
 
   @Get('pending')

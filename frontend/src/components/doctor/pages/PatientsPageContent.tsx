@@ -9,31 +9,46 @@ import {
   PersonAvatar,
   TableButton,
 } from "@/components/doctor/ui/DoctorPrimitives";
-import { PATIENT_ROWS } from "@/components/doctor/data/doctor-demo-data";
+import { formatDate, getInitials, gradientForId } from "@/lib/data-mappers";
 import { todayFormatted } from "@/lib/doctor-utils";
+import { useDoctorPatients } from "@/services/doctor-api-hooks";
 import { useDoctorUiStore } from "@/store/doctor-ui.store";
 
 const FILTERS = ["all", "critical", "followup", "active", "new"] as const;
-const FILTER_LABELS = ["All (142)", "🔴 Critical (4)", "🟡 Follow-up (28)", "🟢 Active (98)", "🔵 New (12)"];
 
 export function PatientsPageContent() {
   const [filterIndex, setFilterIndex] = useState(0);
   const [search, setSearch] = useState("");
   const showToast = useDoctorUiStore((s) => s.showToast);
   const openPatientModal = useDoctorUiStore((s) => s.openPatientModal);
+  const patientsQuery = useDoctorPatients();
+
+  const allPatients = patientsQuery.data ?? [];
+  const filterLabels = useMemo(
+    () => [
+      `All (${allPatients.length})`,
+      "🔴 Critical (0)",
+      "🟡 Follow-up (0)",
+      "🟢 Active (0)",
+      "🔵 New (0)",
+    ],
+    [allPatients.length],
+  );
 
   const rows = useMemo(() => {
     const filter = FILTERS[filterIndex];
-    return PATIENT_ROWS.filter((row) => {
-      const matchesFilter = filter === "all" || row.filter === filter;
+    if (filter !== "all") return [];
+    return allPatients.filter((patient) => {
+      const name = `${patient.user.firstName} ${patient.user.lastName}`;
+      const id = `#PT-${patient.patientId.slice(-4).toUpperCase()}`;
       const matchesSearch =
         !search ||
-        row.name.toLowerCase().includes(search.toLowerCase()) ||
-        row.id.toLowerCase().includes(search.toLowerCase()) ||
-        row.condition.toLowerCase().includes(search.toLowerCase());
-      return matchesFilter && matchesSearch;
+        name.toLowerCase().includes(search.toLowerCase()) ||
+        id.toLowerCase().includes(search.toLowerCase()) ||
+        patient.patientId.toLowerCase().includes(search.toLowerCase());
+      return filterIndex === 0 && matchesSearch;
     });
-  }, [filterIndex, search]);
+  }, [allPatients, filterIndex, search]);
 
   return (
     <>
@@ -44,7 +59,14 @@ export function PatientsPageContent() {
         actions={<DashButton variant="solid" onClick={() => showToast("Exporting...")}>📤 Export</DashButton>}
       />
 
-      <DashCard title="👥 Patient Records" headerExtra={<span style={{ fontSize: "0.76rem", color: "var(--gray-400)" }}>142 patients</span>}>
+      <DashCard
+        title="👥 Patient Records"
+        headerExtra={
+          <span style={{ fontSize: "0.76rem", color: "var(--gray-400)" }}>
+            {patientsQuery.isLoading ? "Loading..." : `${allPatients.length} patients`}
+          </span>
+        }
+      >
         <div className="search-bar">
           <div className="search-ico-w">
             <input
@@ -55,7 +77,7 @@ export function PatientsPageContent() {
             />
           </div>
         </div>
-        <FilterPills filters={FILTER_LABELS} activeIndex={filterIndex} onChange={setFilterIndex} />
+        <FilterPills filters={filterLabels} activeIndex={filterIndex} onChange={setFilterIndex} />
         <div style={{ overflowX: "auto" }}>
           <table className="pt-table">
             <thead>
@@ -70,42 +92,72 @@ export function PatientsPageContent() {
               </tr>
             </thead>
             <tbody>
-              {rows.map((row) => (
-                <tr key={row.id}>
-                  <td>
-                    <div className="pt-name-cell">
-                      <PersonAvatar initials={row.initials} className="pt-av" style={{ background: row.avatarBg }} seed={row.name} />
-                      <div>
-                        <div className="pt-n">{row.name}</div>
-                        <div className="pt-id">{row.id}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>{row.ageGender}</td>
-                  <td>{row.condition}</td>
-                  <td>{row.lastVisit}</td>
-                  <td>{row.nextAppt}</td>
-                  <td>
-                    <span className={`st-chip ${row.statusClass}`}>{row.status}</span>
-                  </td>
-                  <td>
-                    <TableButton variant="view" onClick={() => openPatientModal(row.modal)}>
-                      View
-                    </TableButton>
-                    <TableButton onClick={() => showToast("Opening message...")}>Message</TableButton>
+              {patientsQuery.isLoading ? (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: "center", color: "var(--gray-400)", padding: 24 }}>
+                    Loading...
                   </td>
                 </tr>
-              ))}
+              ) : rows.length === 0 ? (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: "center", color: "var(--gray-400)", padding: 24 }}>
+                    No patients found
+                  </td>
+                </tr>
+              ) : (
+                rows.map((patient) => {
+                  const name = `${patient.user.firstName} ${patient.user.lastName}`;
+                  const initials = getInitials(patient.user.firstName, patient.user.lastName);
+                  const avatarBg = gradientForId(patient.patientId);
+                  const id = `#PT-${patient.patientId.slice(-4).toUpperCase()}`;
+                  const modal = {
+                    initials,
+                    name,
+                    age: "—",
+                    gender: "M" as const,
+                    diagnosis: "—",
+                    status: "Active" as const,
+                    avatarBg,
+                  };
+
+                  return (
+                    <tr key={patient.patientId}>
+                      <td>
+                        <div className="pt-name-cell">
+                          <PersonAvatar initials={initials} className="pt-av" style={{ background: avatarBg }} seed={name} />
+                          <div>
+                            <div className="pt-n">{name}</div>
+                            <div className="pt-id">{id}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>—</td>
+                      <td>—</td>
+                      <td>{formatDate(patient.lastVisit)}</td>
+                      <td>{patient.nextAppt ? formatDate(patient.nextAppt) : "—"}</td>
+                      <td>
+                        <span className="st-chip st-active">🟢 Active</span>
+                      </td>
+                      <td>
+                        <TableButton variant="view" onClick={() => openPatientModal(modal)}>
+                          View
+                        </TableButton>
+                        <TableButton onClick={() => showToast("Opening message...")}>Message</TableButton>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
         <div className="table-pager">
-          <span>Showing {rows.length} of 142 patients</span>
+          <span>
+            Showing {rows.length} of {allPatients.length} patients
+          </span>
           <div style={{ display: "flex", gap: 6 }}>
             <TableButton>← Prev</TableButton>
             <TableButton variant="view">1</TableButton>
-            <TableButton>2</TableButton>
-            <TableButton>3</TableButton>
             <TableButton>Next →</TableButton>
           </div>
         </div>

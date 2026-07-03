@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo } from "react";
 import {
   CardLink,
   DashButton,
@@ -10,45 +11,116 @@ import {
   PersonAvatar,
   StatCardRow,
 } from "@/components/doctor/ui/DoctorPrimitives";
-import { EARNINGS_CHART, QA_PENDING, SCHEDULE_ITEMS } from "@/components/doctor/data/doctor-demo-data";
+import {
+  consultationTypeLabel,
+  earningsToChartData,
+  formatCurrency,
+  formatDate,
+  formatRelativeTime,
+  formatTimeSlot,
+  getInitials,
+  gradientForId,
+  isSameDay,
+  scheduleChipForStatus,
+  starsDisplay,
+} from "@/lib/data-mappers";
 import { doctorDisplayName, todayFormatted, todayShortFormatted } from "@/lib/doctor-utils";
+import {
+  useDoctorAppointments,
+  useDoctorBlogPosts,
+  useDoctorEarnings,
+  useDoctorPatients,
+  useDoctorProfile,
+  useDoctorReviews,
+  usePendingQuestions,
+  useUpdateAppointmentStatus,
+} from "@/services/doctor-api-hooks";
+import type { Appointment } from "@/services/api-hooks";
 import { useDoctorUiStore } from "@/store/doctor-ui.store";
 import { useAuthStore } from "@/store/auth.store";
 
-function ScheduleList({ compact }: { compact?: boolean }) {
+function EmptyState({ loading, message }: { loading?: boolean; message: string }) {
+  return (
+    <div style={{ padding: "24px 0", textAlign: "center", color: "var(--gray-400)", fontSize: "0.84rem" }}>
+      {loading ? "Loading..." : message}
+    </div>
+  );
+}
+
+function ScheduleList({
+  appointments,
+  loading,
+  compact,
+}: {
+  appointments: Appointment[];
+  loading?: boolean;
+  compact?: boolean;
+}) {
   const showToast = useDoctorUiStore((s) => s.showToast);
   const openPatientModal = useDoctorUiStore((s) => s.openPatientModal);
+  const updateStatus = useUpdateAppointmentStatus();
+
+  if (loading) return <EmptyState loading message="" />;
+  if (!appointments.length) return <EmptyState message="No appointments scheduled for today" />;
 
   return (
     <>
-      {SCHEDULE_ITEMS.map((item) => (
-        <div key={item.time + item.name} className="sch-item">
-          <div className="sch-time">{item.time}</div>
-          <PersonAvatar initials={item.initials} seed={item.name} className="sch-av" style={{ background: item.avatarBg }} />
-          <div className="sch-info">
-            <div className="sch-name">{item.name}</div>
-            <div className="sch-sub">{item.sub}</div>
+      {appointments.map((appt) => {
+        const user = appt.patient?.user;
+        const name = `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim() || "Patient";
+        const initials = getInitials(user?.firstName, user?.lastName);
+        const avatarBg = gradientForId(appt.id);
+        const { chip, chipLabel, live } = scheduleChipForStatus(appt.status);
+        const sub = `${consultationTypeLabel(appt.consultationType)} · ${appt.reason ?? "Consultation"}`;
+
+        return (
+          <div key={appt.id} className="sch-item">
+            <div className="sch-time">{formatTimeSlot(appt.scheduledAt)}</div>
+            <PersonAvatar initials={initials} seed={name} className="sch-av" style={{ background: avatarBg }} />
+            <div className="sch-info">
+              <div className="sch-name">{name}</div>
+              <div className="sch-sub">{sub}</div>
+            </div>
+            <span className={`sch-chip ${chip}`}>{chipLabel}</span>
+            {appt.status === "PENDING" ? (
+              <button
+                type="button"
+                className="sch-btn"
+                disabled={updateStatus.isPending}
+                onClick={() =>
+                  updateStatus.mutate(
+                    { id: appt.id, status: "CONFIRMED" },
+                    { onSuccess: () => showToast("Consultation confirmed!") },
+                  )
+                }
+              >
+                Confirm
+              </button>
+            ) : (
+              <button
+                type="button"
+                className={`sch-btn${live ? " go" : ""}`}
+                onClick={() => {
+                  if (live) showToast("Joining video call...");
+                  else if (user) {
+                    openPatientModal({
+                      initials,
+                      name,
+                      age: "—",
+                      gender: "M",
+                      diagnosis: appt.reason ?? "—",
+                      status: "Active",
+                      avatarBg,
+                    });
+                  } else showToast("Preparing...");
+                }}
+              >
+                {live ? "Join →" : compact ? "Prep" : "Prep"}
+              </button>
+            )}
           </div>
-          <span className={`sch-chip ${item.chip}`}>{item.chipLabel}</span>
-          {item.chip === "sc-pend" ? (
-            <button type="button" className="sch-btn" onClick={() => showToast("Consultation confirmed!")}>
-              Confirm
-            </button>
-          ) : (
-            <button
-              type="button"
-              className={`sch-btn${item.live ? " go" : ""}`}
-              onClick={() => {
-                if (item.live) showToast("Joining video call...");
-                else if (item.patient) openPatientModal(item.patient);
-                else showToast("Preparing...");
-              }}
-            >
-              {item.live ? "Join →" : compact ? "Prep" : "Prep"}
-            </button>
-          )}
-        </div>
-      ))}
+        );
+      })}
     </>
   );
 }
@@ -58,6 +130,34 @@ export function DashboardPageContent() {
   const openPatientModal = useDoctorUiStore((s) => s.openPatientModal);
   const user = useAuthStore((s) => s.user);
   const displayName = doctorDisplayName(user?.firstName, user?.lastName);
+
+  const appointmentsQuery = useDoctorAppointments({ limit: 100 });
+  const patientsQuery = useDoctorPatients();
+  const questionsQuery = usePendingQuestions();
+  const earningsQuery = useDoctorEarnings();
+  const profileQuery = useDoctorProfile();
+  const reviewsQuery = useDoctorReviews(profileQuery.data?.id);
+  const blogQuery = useDoctorBlogPosts(user?.id);
+
+  const today = useMemo(() => new Date(), []);
+  const todayAppointments = useMemo(
+    () =>
+      (appointmentsQuery.data?.data ?? [])
+        .filter((a) => isSameDay(new Date(a.scheduledAt), today))
+        .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime()),
+    [appointmentsQuery.data, today],
+  );
+
+  const earnings = earningsQuery.data;
+  const monthly = earnings?.monthly ?? [];
+  const chartData = earningsToChartData(monthly);
+  const thisMonthCents = monthly.length ? monthly[monthly.length - 1].amountCents : 0;
+  const yearCents = earnings?.totalCents ?? 0;
+  const pendingCount = questionsQuery.data?.meta.total ?? 0;
+  const patientCount = patientsQuery.data?.length ?? 0;
+  const remainingToday = todayAppointments.filter((a) => !["COMPLETED", "CANCELLED"].includes(a.status)).length;
+  const reviews = reviewsQuery.data?.data ?? [];
+  const articles = blogQuery.data?.data ?? [];
 
   return (
     <>
@@ -79,69 +179,122 @@ export function DashboardPageContent() {
 
       <StatCardRow
         items={[
-          { ic: "ic1", icon: "👥", num: "142", label: "Total Patients", tag: "+8 this month", tagClass: "tt-b", bgIcon: "👥" },
-          { ic: "ic2", icon: "📅", num: "6", label: "Today's Consultations", tag: "3 remaining", tagClass: "tt-g", bgIcon: "📅" },
-          { ic: "ic3", icon: "💬", num: "12", label: "Pending Q&A Replies", tag: "Needs attention", tagClass: "tt-r", bgIcon: "💬" },
-          { ic: "ic2", icon: "💰", num: "$3,240", label: "This Month's Earnings", tag: "↑ 18% vs last", tagClass: "tt-g", bgIcon: "💰" },
+          {
+            ic: "ic1",
+            icon: "👥",
+            num: patientsQuery.isLoading ? "—" : String(patientCount),
+            label: "Total Patients",
+            tag: patientsQuery.isLoading ? "Loading" : `${patientCount} registered`,
+            tagClass: "tt-b",
+            bgIcon: "👥",
+          },
+          {
+            ic: "ic2",
+            icon: "📅",
+            num: appointmentsQuery.isLoading ? "—" : String(todayAppointments.length),
+            label: "Today's Consultations",
+            tag: appointmentsQuery.isLoading ? "Loading" : `${remainingToday} remaining`,
+            tagClass: "tt-g",
+            bgIcon: "📅",
+          },
+          {
+            ic: "ic3",
+            icon: "💬",
+            num: questionsQuery.isLoading ? "—" : String(pendingCount),
+            label: "Pending Q&A Replies",
+            tag: pendingCount > 0 ? "Needs attention" : "All caught up",
+            tagClass: pendingCount > 0 ? "tt-r" : "tt-g",
+            bgIcon: "💬",
+          },
+          {
+            ic: "ic2",
+            icon: "💰",
+            num: earningsQuery.isLoading ? "—" : formatCurrency(thisMonthCents / 100),
+            label: "This Month's Earnings",
+            tag: earningsQuery.isLoading ? "Loading" : `${earnings?.paymentCount ?? 0} payments`,
+            tagClass: "tt-g",
+            bgIcon: "💰",
+          },
         ]}
       />
 
       <div className="g21-dr">
         <DashCard title={`📅 Today's Schedule — ${todayShortFormatted()}`} actions={<CardLink onClick={() => showToast("Opening calendar...")}>Full calendar →</CardLink>}>
-          <ScheduleList />
+          <ScheduleList appointments={todayAppointments} loading={appointmentsQuery.isLoading} />
         </DashCard>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           <DashCard title="💰 Earnings Overview" actions={<CardLink href="/doctor/earnings">Details →</CardLink>}>
-            <div className="earn-grid">
-              <div className="earn-box">
-                <div className="earn-n">$3,240</div>
-                <div className="earn-l">This Month</div>
-                <div className="earn-s" style={{ color: "var(--green)" }}>
-                  ↑ 18%
+            {earningsQuery.isLoading ? (
+              <EmptyState loading message="" />
+            ) : (
+              <>
+                <div className="earn-grid">
+                  <div className="earn-box">
+                    <div className="earn-n">{formatCurrency(thisMonthCents / 100)}</div>
+                    <div className="earn-l">This Month</div>
+                    <div className="earn-s" style={{ color: "var(--green)" }}>
+                      {monthly.length > 1 ? "Latest period" : "—"}
+                    </div>
+                  </div>
+                  <div className="earn-box">
+                    <div className="earn-n">{formatCurrency(yearCents / 100)}</div>
+                    <div className="earn-l">Total Earned</div>
+                    <div className="earn-s" style={{ color: "var(--blue)" }}>
+                      {earnings?.paymentCount ?? 0} consultations
+                    </div>
+                  </div>
+                  <div className="earn-box">
+                    <div className="earn-n">{formatCurrency(0)}</div>
+                    <div className="earn-l">Pending</div>
+                    <div className="earn-s" style={{ color: "var(--amber)" }}>
+                      Processing
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="earn-box">
-                <div className="earn-n">$38,120</div>
-                <div className="earn-l">This Year</div>
-                <div className="earn-s" style={{ color: "var(--blue)" }}>
-                  On track
-                </div>
-              </div>
-              <div className="earn-box">
-                <div className="earn-n">$840</div>
-                <div className="earn-l">Pending</div>
-                <div className="earn-s" style={{ color: "var(--amber)" }}>
-                  Processing
-                </div>
-              </div>
-            </div>
-            <div style={{ fontSize: "0.74rem", color: "var(--gray-400)", marginBottom: 6 }}>Monthly earnings (last 6 months)</div>
-            <EarningsChart data={EARNINGS_CHART} />
+                <div style={{ fontSize: "0.74rem", color: "var(--gray-400)", marginBottom: 6 }}>Monthly earnings (last 6 months)</div>
+                {chartData.length ? <EarningsChart data={chartData} /> : <EmptyState message="No earnings data yet" />}
+              </>
+            )}
           </DashCard>
 
           <DashCard title="⭐ Patient Reviews" actions={<CardLink href="/doctor/reviews">All →</CardLink>}>
-            <div className="rev-summary">
-              <div className="rev-big">4.9</div>
-              <div>
-                <div className="stars-row">★★★★★</div>
-                <div style={{ fontSize: "0.74rem", color: "var(--gray-400)" }}>Based on 312 reviews</div>
-              </div>
-            </div>
-            {[
-              ["Sara Malik", "SM", "linear-gradient(135deg,#e11d48,#f43f5e)", "Explained my condition in terms I could actually understand. Excellent doctor.", "June 3, 2026 · Video Consultation"],
-              ["Fatima Khan", "FK", "linear-gradient(135deg,#059669,#10b981)", "Very thorough and patient. Best cardiology consultation I have had.", "June 1, 2026 · Phone Consultation"],
-            ].map(([name, initials, bg, text, date]) => (
-              <div key={name} className="rev-item">
-                <div className="rev-hd">
-                  <PersonAvatar initials={initials} className="rev-av" style={{ background: bg }} seed={name} />
-                  <span className="rev-name">{name}</span>
-                  <span className="rev-stars">★★★★★</span>
+            {reviewsQuery.isLoading || profileQuery.isLoading ? (
+              <EmptyState loading message="" />
+            ) : (
+              <>
+                <div className="rev-summary">
+                  <div className="rev-big">{profileQuery.data?.rating.toFixed(1) ?? "—"}</div>
+                  <div>
+                    <div className="stars-row">{starsDisplay(profileQuery.data?.rating ?? 0)}</div>
+                    <div style={{ fontSize: "0.74rem", color: "var(--gray-400)" }}>
+                      Based on {profileQuery.data?.reviewCount ?? 0} reviews
+                    </div>
+                  </div>
                 </div>
-                <div className="rev-text">&quot;{text}&quot;</div>
-                <div className="rev-date">{date}</div>
-              </div>
-            ))}
+                {reviews.length === 0 ? (
+                  <EmptyState message="No reviews yet" />
+                ) : (
+                  reviews.slice(0, 2).map((rev) => {
+                    const pUser = rev.patient?.user;
+                    const name = `${pUser?.firstName ?? ""} ${pUser?.lastName ?? ""}`.trim() || "Patient";
+                    const initials = getInitials(pUser?.firstName, pUser?.lastName);
+                    const bg = gradientForId(rev.id);
+                    return (
+                      <div key={rev.id} className="rev-item">
+                        <div className="rev-hd">
+                          <PersonAvatar initials={initials} className="rev-av" style={{ background: bg }} seed={name} />
+                          <span className="rev-name">{name}</span>
+                          <span className="rev-stars">{starsDisplay(rev.rating)}</span>
+                        </div>
+                        <div className="rev-text">&quot;{rev.comment ?? "No comment"}&quot;</div>
+                        <div className="rev-date">{formatDate(rev.createdAt)}</div>
+                      </div>
+                    );
+                  })
+                )}
+              </>
+            )}
           </DashCard>
         </div>
       </div>
@@ -151,59 +304,103 @@ export function DashboardPageContent() {
           title={
             <>
               💬 Patient Questions — Awaiting Reply{" "}
-              <span style={{ fontSize: "0.72rem", background: "var(--red)", color: "#fff", padding: "2px 8px", borderRadius: 50, marginLeft: 4 }}>
-                12
-              </span>
+              {!questionsQuery.isLoading && pendingCount > 0 ? (
+                <span style={{ fontSize: "0.72rem", background: "var(--red)", color: "#fff", padding: "2px 8px", borderRadius: 50, marginLeft: 4 }}>
+                  {pendingCount}
+                </span>
+              ) : null}
             </>
           }
           actions={<CardLink href="/doctor/questions">View all →</CardLink>}
         >
-          {QA_PENDING.map((q) => (
-            <div key={q.name + q.spec} className="qa-item">
-              <div className="qa-top">
-                <PersonAvatar initials={q.initials} className="qa-av" style={{ background: q.avatarBg }} seed={q.name} />
-                <div className="qa-meta">
-                  <div className="qa-pname">
-                    {q.name}
-                    {q.urgent ? <span className="qa-urgent">⚡ Urgent</span> : null}
+          {questionsQuery.isLoading ? (
+            <EmptyState loading message="" />
+          ) : (questionsQuery.data?.data ?? []).length === 0 ? (
+            <EmptyState message="No pending questions" />
+          ) : (
+            (questionsQuery.data?.data ?? []).slice(0, 3).map((q) => {
+              const name = q.isAnonymous ? q.submitterName ?? "Anonymous" : q.submitterName ?? "Patient";
+              const initials = getInitials(name.split(" ")[0], name.split(" ")[1]);
+              const avatarBg = gradientForId(q.id);
+              return (
+                <div key={q.id} className="qa-item">
+                  <div className="qa-top">
+                    <PersonAvatar initials={initials} className="qa-av" style={{ background: avatarBg }} seed={name} />
+                    <div className="qa-meta">
+                      <div className="qa-pname">
+                        {name}
+                        {q.category.toLowerCase().includes("urgent") ? <span className="qa-urgent">⚡ Urgent</span> : null}
+                      </div>
+                      <div className="qa-spec">
+                        {q.category} · {formatRelativeTime(q.createdAt)}
+                      </div>
+                    </div>
                   </div>
-                  <div className="qa-spec">{q.spec}</div>
+                  <div className="qa-q">&quot;{q.question}&quot;</div>
+                  <div className="qa-actions">
+                    <button type="button" className="qa-btn reply" onClick={() => showToast("Reply editor opened")}>
+                      ✏️ Reply Now
+                    </button>
+                    <button
+                      type="button"
+                      className="qa-btn"
+                      onClick={() =>
+                        openPatientModal({
+                          initials,
+                          name,
+                          age: "—",
+                          gender: "M",
+                          diagnosis: q.category,
+                          status: "Active",
+                          avatarBg,
+                        })
+                      }
+                    >
+                      📋 Patient File
+                    </button>
+                    <button type="button" className="qa-btn" onClick={() => showToast("Calling patient...")}>
+                      📞 Call
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <div className="qa-q">&quot;{q.question}&quot;</div>
-              <div className="qa-actions">
-                <button type="button" className="qa-btn reply" onClick={() => showToast("Reply editor opened")}>
-                  ✏️ Reply Now
-                </button>
-                <button type="button" className="qa-btn" onClick={() => openPatientModal(q.modal)}>
-                  📋 Patient File
-                </button>
-                <button type="button" className="qa-btn" onClick={() => showToast("Calling patient...")}>
-                  📞 Call
-                </button>
-              </div>
-            </div>
-          ))}
+              );
+            })
+          )}
         </DashCard>
 
-        <DashCard title="📰 My Articles" actions={<CardLink href="/doctor/articles">All 47 →</CardLink>}>
-          {[
-            ["Hypertension Management Guidelines 2025", "14.2K views · 4.9 ★ · Jun 1, 2026", "as-live", "Live", "❤️", "#fce7f3,#fbcfe8"],
-            ["Beta Blockers: Complete Clinical Guide", "8.7K views · 4.8 ★ · May 20, 2026", "as-live", "Live", "💊", "#dbeafe,#bfdbfe"],
-            ["ECG Interpretation for Beginners", "Draft · Last edited today", "as-draft", "Draft", "🔬", "#fef3c7,#fde68a"],
-            ["Heart Failure: A Patient's Guide", "Under Review · Submitted Jun 3", "as-review", "Review", "📋", "#f5f3ff,#ede9fe"],
-          ].map(([title, meta, statusClass, statusLabel, emoji, bg]) => (
-            <div key={title} className="art-item">
-              <div className="art-thumb" style={{ background: `linear-gradient(135deg,${bg})` }}>
-                {emoji}
-              </div>
-              <div className="art-info">
-                <div className="art-title">{title}</div>
-                <div className="art-meta">{meta}</div>
-              </div>
-              <span className={`art-status ${statusClass}`}>{statusLabel}</span>
-            </div>
-          ))}
+        <DashCard title="📰 My Articles" actions={<CardLink href="/doctor/articles">All {blogQuery.data?.meta.total ?? 0} →</CardLink>}>
+          {blogQuery.isLoading ? (
+            <EmptyState loading message="" />
+          ) : articles.length === 0 ? (
+            <EmptyState message="No articles yet" />
+          ) : (
+            articles.slice(0, 4).map((post) => {
+              const status = (post as { status?: string }).status ?? "DRAFT";
+              const statusClass = status === "PUBLISHED" ? "as-live" : status === "DRAFT" ? "as-draft" : "as-review";
+              const statusLabel = status === "PUBLISHED" ? "Live" : status === "DRAFT" ? "Draft" : "Review";
+              const views = (post as { viewCount?: number }).viewCount;
+              const meta =
+                status === "PUBLISHED"
+                  ? `${views?.toLocaleString() ?? 0} views · ${post.publishedAt ? formatDate(post.publishedAt) : "—"}`
+                  : status === "DRAFT"
+                    ? "Draft · Last edited recently"
+                    : "Under Review";
+              const emoji = "📋";
+              const bg = "#dbeafe,#bfdbfe";
+              return (
+                <div key={post.id} className="art-item">
+                  <div className="art-thumb" style={{ background: `linear-gradient(135deg,${bg})` }}>
+                    {emoji}
+                  </div>
+                  <div className="art-info">
+                    <div className="art-title">{post.title}</div>
+                    <div className="art-meta">{meta}</div>
+                  </div>
+                  <span className={`art-status ${statusClass}`}>{statusLabel}</span>
+                </div>
+              );
+            })
+          )}
         </DashCard>
       </div>
     </>

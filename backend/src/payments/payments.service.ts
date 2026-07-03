@@ -292,6 +292,73 @@ export class PaymentsService {
     return this.handleStripeWebhook({ providerIntentId, status: 'succeeded' });
   }
 
+  async findPaymentHistory(patientUserId: string) {
+    const patient = await this.prisma.patientProfile.findUnique({ where: { userId: patientUserId } });
+    if (!patient) return [];
+
+    return this.prisma.payment.findMany({
+      where: {
+        bookingDraft: { patientId: patient.id },
+        status: 'SUCCEEDED',
+      },
+      include: {
+        appointment: {
+          include: {
+            doctor: { include: { user: { select: { firstName: true, lastName: true } } } },
+          },
+        },
+        bookingDraft: true,
+      },
+      orderBy: { confirmedAt: 'desc' },
+    });
+  }
+
+  async findDoctorEarnings(doctorUserId: string) {
+    const doctor = await this.prisma.doctorProfile.findUnique({ where: { userId: doctorUserId } });
+    if (!doctor) return { totalCents: 0, monthly: [] };
+
+    const payments = await this.prisma.payment.findMany({
+      where: {
+        status: 'SUCCEEDED',
+        bookingDraft: { doctorId: doctor.id },
+      },
+      select: { amountCents: true, confirmedAt: true },
+      orderBy: { confirmedAt: 'asc' },
+    });
+
+    const totalCents = payments.reduce((sum, p) => sum + p.amountCents, 0);
+    const monthlyMap = new Map<string, number>();
+
+    for (const p of payments) {
+      if (!p.confirmedAt) continue;
+      const key = `${p.confirmedAt.getFullYear()}-${String(p.confirmedAt.getMonth() + 1).padStart(2, '0')}`;
+      monthlyMap.set(key, (monthlyMap.get(key) || 0) + p.amountCents);
+    }
+
+    const monthly = Array.from(monthlyMap.entries())
+      .slice(-6)
+      .map(([month, amountCents]) => ({ month, amountCents }));
+
+    return { totalCents, monthly, paymentCount: payments.length };
+  }
+
+  async findAllPayments() {
+    return this.prisma.payment.findMany({
+      where: { status: 'SUCCEEDED' },
+      include: {
+        bookingDraft: {
+          include: {
+            doctor: { include: { user: { select: { firstName: true, lastName: true } } } },
+            patient: { include: { user: { select: { firstName: true, lastName: true } } } },
+          },
+        },
+        appointment: true,
+      },
+      orderBy: { confirmedAt: 'desc' },
+      take: 100,
+    });
+  }
+
   constructStripeEvent(rawBody: Buffer | string, signature?: string | string[]) {
     if (!this.stripe) {
       throw new BadRequestException('Stripe is not configured');

@@ -60,6 +60,27 @@ export class PaymentsController {
     return this.paymentsService.confirmDevPayment(userId, providerIntentId);
   }
 
+  @Get('history')
+  @ApiBearerAuth()
+  @Roles(UserRole.PATIENT)
+  getPaymentHistory(@CurrentUser('id') userId: string) {
+    return this.paymentsService.findPaymentHistory(userId);
+  }
+
+  @Get('earnings')
+  @ApiBearerAuth()
+  @Roles(UserRole.DOCTOR)
+  getDoctorEarnings(@CurrentUser('id') userId: string) {
+    return this.paymentsService.findDoctorEarnings(userId);
+  }
+
+  @Get('admin')
+  @ApiBearerAuth()
+  @Roles(UserRole.ADMIN)
+  getAllPayments() {
+    return this.paymentsService.findAllPayments();
+  }
+
   @Public()
   @Post('webhooks/stripe')
   handleStripeWebhook(

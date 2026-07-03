@@ -1,0 +1,192 @@
+/* Site footer — matches home_page.html */
+.site-footer {
+  background: #0f172a;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  padding: 64px 24px 0;
+}
+
+.site-footer .footer-grid {
+  max-width: 1240px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.5fr 1.5fr;
+  gap: 48px;
+}
+
+.site-footer ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.site-footer .footer-brand .logo {
+  margin-bottom: 0;
+}
+
+.site-footer .footer-brand p {
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.site-footer .footer-social {
+  display: flex;
+  gap: 10px;
+}
+
+.site-footer .social-btn {
+  width: 36px;
+  height: 36px;
+  background: #1e293b;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 0.9rem;
+}
+
+.site-footer .social-btn:hover {
+  background: #1a56a0;
+  color: #fff;
+}
+
+.site-footer .footer-col h4 {
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #1e293b;
+}
+
+.site-footer .footer-col ul li {
+  margin-bottom: 8px;
+}
+
+.site-footer .footer-col ul li a {
+  color: #94a3b8;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 0.83rem;
+}
+
+.site-footer .footer-col ul li a:hover {
+  color: #93c5fd;
+}
+
+.site-footer .footer-subscribe input {
+  width: 100%;
+  padding: 10px 14px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  color: #fff;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+}
+
+.site-footer .footer-subscribe input::placeholder {
+  color: #64748b;
+}
+
+.site-footer .footer-subscribe input:focus {
+  outline: none;
+  border-color: #1a56a0;
+}
+
+.site-footer .footer-subscribe button {
+  width: 100%;
+  background: #1a56a0;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.site-footer .footer-subscribe button:hover {
+  background: #4a90d9;
+}
+
+.site-footer .footer-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 0.82rem;
+}
+
+.site-footer .footer-contact-item svg {
+  width: 16px;
+  height: 16px;
+  color: #4a90d9;
+  flex-shrink: 0;
+}
+
+.site-footer .hipaa-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  color: #64748b;
+  margin-top: 8px;
+}
+
+.site-footer .footer-bottom {
+  max-width: 1240px;
+  margin: auto;
+  padding: 24px 0;
+  border-top: 1px solid #1e293b;
+  margin-top: 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.site-footer .footer-bottom p {
+  font-size: 0.78rem;
+}
+
+.site-footer .footer-bottom-links {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.site-footer .footer-bottom-links a {
+  font-size: 0.78rem;
+  color: #64748b;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.site-footer .footer-bottom-links a:hover {
+  color: #93c5fd;
+}
+
+@media (max-width: 900px) {
+  .site-footer .footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .site-footer .footer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .site-footer .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

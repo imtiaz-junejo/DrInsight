@@ -1,0 +1,1090 @@
+@import url("https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css");
+
+.book-consultation-page {
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #64748b;
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f8fafc;
+  --color-background-info: #e8f0fb;
+  --color-text-info: #1a56a0;
+  --color-border-tertiary: #e2e8f0;
+  --color-border-secondary: #cbd5e1;
+  --color-background-success: #ecfdf5;
+  --color-text-success: #059669;
+  --color-background-warning: #fffbeb;
+  --color-text-warning: #92400e;
+  --color-border-warning: #f59e0b;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --font-body: var(--font-dm-sans), "DM Sans", system-ui, sans-serif;
+  font-family: var(--font-body);
+  background: #fff;
+  color: var(--color-text-primary);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.book-consultation-page a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.book-consultation-page .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.book-consultation-page .breadcrumb {
+  background: var(--color-background-secondary);
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+  padding: 8px 16px;
+}
+
+.book-consultation-page .breadcrumb-inner {
+  max-width: 1100px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  color: var(--color-text-secondary);
+}
+
+.book-consultation-page .breadcrumb-inner a:hover {
+  color: #1a56a0;
+}
+
+.book-consultation-page .breadcrumb .cur {
+  color: #1a56a0;
+  font-weight: 500;
+}
+
+.book-consultation-page .page-hero {
+  background: #0f3d7a;
+  color: #fff;
+  padding: 52px 16px;
+  text-align: center;
+}
+
+.book-consultation-page .page-hero h1 {
+  font-size: clamp(1.6rem, 3vw, 2.3rem);
+  font-weight: 500;
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+
+.book-consultation-page .page-hero p {
+  font-size: 0.9rem;
+  opacity: 0.85;
+  max-width: 520px;
+  margin: auto auto 20px;
+  line-height: 1.7;
+}
+
+.book-consultation-page .hero-badges {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.book-consultation-page .hbadge {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 50px;
+  padding: 5px 14px;
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.book-consultation-page .steps-bar {
+  background: var(--color-background-secondary);
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+  padding: 14px 16px;
+}
+
+.book-consultation-page .steps-inner {
+  max-width: 1100px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.book-consultation-page .step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.book-consultation-page .step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.76rem;
+  font-weight: 500;
+  flex-shrink: 0;
+  border: 1.5px solid var(--color-border-secondary);
+  background: var(--color-background-primary);
+  color: var(--color-text-secondary);
+  transition: all 0.2s;
+}
+
+.book-consultation-page .step.active .step-num {
+  background: #1a56a0;
+  color: #fff;
+  border-color: #1a56a0;
+}
+
+.book-consultation-page .step.done .step-num {
+  background: #059669;
+  color: #fff;
+  border-color: #059669;
+}
+
+.book-consultation-page .step-label {
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.book-consultation-page .step.active .step-label {
+  color: #1a56a0;
+  font-weight: 500;
+}
+
+.book-consultation-page .step.done .step-label {
+  color: #059669;
+}
+
+.book-consultation-page .step-line {
+  height: 1px;
+  background: var(--color-border-secondary);
+  flex: 1;
+  margin: 0 6px;
+  min-width: 12px;
+}
+
+.book-consultation-page .main {
+  max-width: 1100px;
+  margin: auto;
+  padding: 32px 16px;
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 28px;
+  align-items: start;
+}
+
+.book-consultation-page .form-panel {
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  padding: 24px;
+}
+
+.book-consultation-page .panel-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.book-consultation-page .panel-sub {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 20px;
+}
+
+.book-consultation-page .spec-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.book-consultation-page .spec-tile {
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md);
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: all 0.18s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-background-primary);
+}
+
+.book-consultation-page .spec-tile:hover {
+  border-color: #1a56a0;
+  background: var(--color-background-info);
+}
+
+.book-consultation-page .spec-tile.sel {
+  border-color: #1a56a0;
+  background: var(--color-background-info);
+  border-width: 1.5px;
+}
+
+.book-consultation-page .spec-ico {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.book-consultation-page .spec-name {
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  line-height: 1.3;
+}
+
+.book-consultation-page .doc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.book-consultation-page .doc-card {
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.18s;
+  text-align: center;
+  background: var(--color-background-primary);
+}
+
+.book-consultation-page .doc-card:hover {
+  border-color: #1a56a0;
+}
+
+.book-consultation-page .doc-card.sel {
+  border-color: #1a56a0;
+  border-width: 1.5px;
+  background: var(--color-background-info);
+}
+
+.book-consultation-page .doc-av {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #fff;
+  margin: 0 auto 10px;
+}
+
+.book-consultation-page .doc-card h4 {
+  font-size: 0.84rem;
+  font-weight: 500;
+  margin-bottom: 3px;
+}
+
+.book-consultation-page .doc-card .dspec {
+  font-size: 0.72rem;
+  color: #1a56a0;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.book-consultation-page .doc-card .dexp {
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+}
+
+.book-consultation-page .doc-card .drating {
+  font-size: 0.72rem;
+  color: #d97706;
+  margin-top: 5px;
+}
+
+.book-consultation-page .doc-card .dfee {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-top: 5px;
+}
+
+.book-consultation-page .doc-badge {
+  font-size: 0.64rem;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 50px;
+  display: inline-block;
+  margin-top: 4px;
+  background: var(--color-background-success);
+  color: var(--color-text-success);
+}
+
+.book-consultation-page .type-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.book-consultation-page .type-tile {
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md);
+  padding: 16px 12px;
+  cursor: pointer;
+  transition: all 0.18s;
+  text-align: center;
+  background: var(--color-background-primary);
+}
+
+.book-consultation-page .type-tile:hover {
+  border-color: #1a56a0;
+  background: var(--color-background-info);
+}
+
+.book-consultation-page .type-tile.sel {
+  border-color: #1a56a0;
+  border-width: 1.5px;
+  background: var(--color-background-info);
+}
+
+.book-consultation-page .type-tile i {
+  font-size: 22px;
+  color: #1a56a0;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.book-consultation-page .type-tile h4 {
+  font-size: 0.82rem;
+  font-weight: 500;
+  margin-bottom: 3px;
+}
+
+.book-consultation-page .type-tile p {
+  font-size: 0.72rem;
+  color: var(--color-text-secondary);
+}
+
+.book-consultation-page .type-tile .price {
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: #1a56a0;
+  margin-top: 6px;
+}
+
+.book-consultation-page .cal-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.book-consultation-page .cal-box {
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+}
+
+.book-consultation-page .cal-head {
+  background: var(--color-background-secondary);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+
+.book-consultation-page .cal-head span {
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.book-consultation-page .cal-head button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.book-consultation-page .cal-head button:hover {
+  background: var(--color-background-secondary);
+}
+
+.book-consultation-page .cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 10px;
+}
+
+.book-consultation-page .cal-day-name {
+  font-size: 0.66rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+  padding: 4px 0;
+}
+
+.book-consultation-page .cal-day {
+  font-size: 0.76rem;
+  text-align: center;
+  padding: 5px 3px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--color-text-primary);
+  background: none;
+  border: none;
+  font-family: inherit;
+}
+
+.book-consultation-page .cal-day:hover:not(.empty):not(.past) {
+  background: var(--color-background-info);
+  color: #1a56a0;
+}
+
+.book-consultation-page .cal-day.sel {
+  background: #1a56a0;
+  color: #fff;
+}
+
+.book-consultation-page .cal-day.past {
+  color: var(--color-text-secondary);
+  opacity: 0.4;
+  cursor: default;
+}
+
+.book-consultation-page .cal-day.empty {
+  cursor: default;
+}
+
+.book-consultation-page .cal-day.today {
+  font-weight: 500;
+  border: 1px solid #1a56a0;
+}
+
+.book-consultation-page .time-label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.book-consultation-page .time-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 4px;
+}
+
+.book-consultation-page .time-slot {
+  padding: 7px 4px;
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: 6px;
+  font-size: 0.72rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--color-text-primary);
+  background: var(--color-background-primary);
+  font-family: inherit;
+}
+
+.book-consultation-page .time-slot:hover {
+  border-color: #1a56a0;
+  color: #1a56a0;
+  background: var(--color-background-info);
+}
+
+.book-consultation-page .time-slot.sel {
+  background: #1a56a0;
+  color: #fff;
+  border-color: #1a56a0;
+}
+
+.book-consultation-page .time-slot.unavail {
+  opacity: 0.35;
+  cursor: not-allowed;
+  background: var(--color-background-secondary);
+}
+
+.book-consultation-page .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.book-consultation-page .form-row.single {
+  grid-template-columns: 1fr;
+}
+
+.book-consultation-page .form-group label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.book-consultation-page .form-group input,
+.book-consultation-page .form-group select,
+.book-consultation-page .form-group textarea {
+  width: 100%;
+  font-family: inherit;
+}
+
+.book-consultation-page .form-group input,
+.book-consultation-page .form-group select {
+  padding: 8px 10px;
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md);
+  font-size: 0.84rem;
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
+}
+
+.book-consultation-page .form-group input:focus,
+.book-consultation-page .form-group select:focus {
+  outline: none;
+  border-color: #1a56a0;
+  box-shadow: 0 0 0 3px rgba(26, 86, 160, 0.1);
+}
+
+.book-consultation-page .form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.6;
+  padding: 8px 10px;
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md);
+  font-size: 0.84rem;
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
+}
+
+.book-consultation-page .form-group textarea:focus {
+  outline: none;
+  border-color: #1a56a0;
+  box-shadow: 0 0 0 3px rgba(26, 86, 160, 0.1);
+}
+
+.book-consultation-page .upload-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.book-consultation-page .upload-zone {
+  border: 1.5px dashed var(--color-border-secondary);
+  border-radius: var(--border-radius-md);
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.18s;
+  background: var(--color-background-secondary);
+}
+
+.book-consultation-page .upload-zone:hover {
+  border-color: #1a56a0;
+  background: var(--color-background-info);
+}
+
+.book-consultation-page .upload-zone i {
+  font-size: 24px;
+  color: var(--color-text-secondary);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.book-consultation-page .upload-zone p {
+  font-size: 0.78rem;
+  color: var(--color-text-secondary);
+}
+
+.book-consultation-page .upload-zone span {
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+  opacity: 0.7;
+}
+
+.book-consultation-page .file-list {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.book-consultation-page .file-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: var(--color-background-secondary);
+  border-radius: 6px;
+  font-size: 0.76rem;
+}
+
+.book-consultation-page .file-item span:first-of-type {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.book-consultation-page .file-size {
+  color: var(--color-text-secondary);
+  font-size: 0.7rem;
+}
+
+.book-consultation-page .payment-box {
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md);
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.book-consultation-page .payment-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.book-consultation-page .payment-row:last-child {
+  margin-bottom: 0;
+}
+
+.book-consultation-page .payment-method {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.book-consultation-page .pay-tile {
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md);
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 0.76rem;
+  font-weight: 500;
+  background: var(--color-background-primary);
+  font-family: inherit;
+}
+
+.book-consultation-page .pay-tile:hover {
+  border-color: #1a56a0;
+}
+
+.book-consultation-page .pay-tile.sel {
+  border-color: #1a56a0;
+  border-width: 1.5px;
+  background: var(--color-background-info);
+  color: #1a56a0;
+}
+
+.book-consultation-page .pay-tile i {
+  font-size: 18px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.book-consultation-page .pay-method-label {
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.book-consultation-page .secure-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  color: var(--color-text-secondary);
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.book-consultation-page .nav-btns {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.book-consultation-page .btn-back {
+  background: none;
+  border: 0.5px solid var(--color-border-secondary);
+  padding: 10px 20px;
+  border-radius: var(--border-radius-md);
+  font-size: 0.84rem;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--color-text-secondary);
+  transition: all 0.15s;
+}
+
+.book-consultation-page .btn-back:hover {
+  background: var(--color-background-secondary);
+}
+
+.book-consultation-page .btn-next {
+  background: #1a56a0;
+  color: #fff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: var(--border-radius-md);
+  font-size: 0.86rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.book-consultation-page .btn-next:hover {
+  background: #0f3d7a;
+}
+
+.book-consultation-page .btn-confirm {
+  background: #059669;
+  color: #fff;
+  border: none;
+  padding: 11px 28px;
+  border-radius: var(--border-radius-md);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.book-consultation-page .btn-confirm:hover {
+  background: #047857;
+}
+
+.book-consultation-page .summary-card {
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  padding: 20px;
+  position: sticky;
+  top: 72px;
+}
+
+.book-consultation-page .summary-card h4 {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.book-consultation-page .sum-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  gap: 8px;
+}
+
+.book-consultation-page .sum-label {
+  font-size: 0.76rem;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+
+.book-consultation-page .sum-val {
+  font-size: 0.78rem;
+  font-weight: 500;
+  text-align: right;
+  color: var(--color-text-primary);
+}
+
+.book-consultation-page .sum-val.placeholder {
+  color: var(--color-text-secondary);
+  font-weight: 400;
+  font-style: italic;
+}
+
+.book-consultation-page .sum-divider {
+  height: 0.5px;
+  background: var(--color-border-tertiary);
+  margin: 12px 0;
+}
+
+.book-consultation-page .sum-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.book-consultation-page .sum-total span:first-child {
+  font-size: 0.84rem;
+  font-weight: 500;
+}
+
+.book-consultation-page .sum-total span:last-child {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #1a56a0;
+}
+
+.book-consultation-page .policy-list {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.book-consultation-page .policy-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 0.73rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.book-consultation-page .policy-item i {
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #059669;
+}
+
+.book-consultation-page .guarantee-box {
+  background: var(--color-background-success);
+  border-radius: var(--border-radius-md);
+  padding: 10px 12px;
+  margin-top: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.73rem;
+  color: var(--color-text-success);
+  line-height: 1.5;
+}
+
+.book-consultation-page .guarantee-box i {
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.book-consultation-page .confirm-page {
+  text-align: center;
+  padding: 32px 16px;
+  display: none;
+}
+
+.book-consultation-page .confirm-page.show {
+  display: block;
+}
+
+.book-consultation-page .confirm-circle {
+  width: 72px;
+  height: 72px;
+  background: #ecfdf5;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  border: 2px solid #6ee7b7;
+}
+
+.book-consultation-page .confirm-circle i {
+  font-size: 32px;
+  color: #059669;
+}
+
+.book-consultation-page .confirm-page h2 {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.book-consultation-page .confirm-page p {
+  font-size: 0.88rem;
+  color: var(--color-text-secondary);
+  max-width: 480px;
+  margin: auto auto 24px;
+  line-height: 1.7;
+}
+
+.book-consultation-page .confirm-details {
+  background: var(--color-background-secondary);
+  border-radius: var(--border-radius-lg);
+  padding: 20px;
+  max-width: 440px;
+  margin: 0 auto 24px;
+  text-align: left;
+}
+
+.book-consultation-page .cd-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+  font-size: 0.82rem;
+}
+
+.book-consultation-page .cd-row:last-child {
+  border-bottom: none;
+}
+
+.book-consultation-page .cd-row span:first-child {
+  color: var(--color-text-secondary);
+}
+
+.book-consultation-page .cd-row span:last-child {
+  font-weight: 500;
+}
+
+.book-consultation-page .confirm-btns {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.book-consultation-page .cbtn-primary {
+  background: #1a56a0;
+  color: #fff;
+  border: none;
+  padding: 11px 22px;
+  border-radius: var(--border-radius-md);
+  font-size: 0.86rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.book-consultation-page .cbtn-secondary {
+  background: none;
+  border: 0.5px solid var(--color-border-secondary);
+  padding: 10px 22px;
+  border-radius: var(--border-radius-md);
+  font-size: 0.86rem;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--color-text-secondary);
+}
+
+.book-consultation-page .ref-num {
+  font-size: 0.72rem;
+  color: var(--color-text-secondary);
+  margin-top: 12px;
+}
+
+.book-consultation-page .disclaimer {
+  background: var(--color-background-warning);
+  border-left: 2px solid var(--color-border-warning);
+  border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0;
+  padding: 8px 12px;
+  font-size: 0.72rem;
+  color: var(--color-text-warning);
+  line-height: 1.6;
+  margin-top: 14px;
+}
+
+.book-consultation-page .payment-divider {
+  height: 0.5px;
+  background: var(--color-border-tertiary);
+  margin: 10px 0;
+}
+
+.book-consultation-page .payment-row-label {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.book-consultation-page .payment-row-val {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.book-consultation-page .payment-total-label {
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.book-consultation-page .payment-total-val {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1a56a0;
+}
+
+.book-consultation-page .panel-spaced {
+  margin-top: 16px;
+}
+
+@media (max-width: 800px) {
+  .book-consultation-page .main {
+    grid-template-columns: 1fr;
+  }
+
+  .book-consultation-page .summary-card {
+    position: static;
+  }
+
+  .book-consultation-page .cal-wrap {
+    grid-template-columns: 1fr;
+  }
+
+  .book-consultation-page .type-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .book-consultation-page .spec-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .book-consultation-page .form-row {
+    grid-template-columns: 1fr;
+  }
+}

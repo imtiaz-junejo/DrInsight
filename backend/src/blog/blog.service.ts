@@ -6,7 +6,14 @@ import { PrismaService } from '../prisma/prisma.service';
 export class BlogService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(query: { page?: number; limit?: number; category?: string; search?: string; status?: BlogStatus }) {
+  async findAll(query: {
+    page?: number;
+    limit?: number;
+    category?: string;
+    search?: string;
+    status?: BlogStatus;
+    authorId?: string;
+  }) {
     const page = query.page || 1;
     const limit = query.limit || 12;
     const skip = (page - 1) * limit;
@@ -14,6 +21,7 @@ export class BlogService {
 
     const where: Prisma.BlogPostWhereInput = {
       status,
+      ...(query.authorId && { authorId: query.authorId }),
       ...(query.category && { category: { slug: query.category } }),
       ...(query.search && {
         OR: [

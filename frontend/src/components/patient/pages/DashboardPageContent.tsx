@@ -1,24 +1,79 @@
 "use client";
 
 import Link from "next/link";
-import {
-  DOCTOR_REPLIES,
-  HEALTH_TOOLS,
-  RECENT_ACTIVITY,
-  SAVED_ARTICLES,
-  UPCOMING_CONSULTATIONS,
-  VITALS,
-} from "@/components/patient/data/patient-demo-data";
-import { ConsultationCard, MedicationsList, VitalsGrid } from "@/components/patient/ui/PatientShared";
+import { useMemo } from "react";
+import { ConsultationCard, EmptyState, MedicationsList, VitalsGrid, type VitalItem } from "@/components/patient/ui/PatientShared";
 import { CardLink, DashButton, DashCard, DashPageHeader, GridThree, PersonAvatar, StatCardRow } from "@/components/patient/ui/PatientPrimitives";
+import { formatDate, formatDateTime, mapAppointmentToConsultation, mapBlogPostToCard } from "@/lib/data-mappers";
 import { todayFormatted } from "@/lib/patient-utils";
+import { useBlogPosts, useNotifications } from "@/services/api-hooks";
+import type { AuthProfile } from "@/services/patient-api-hooks";
+import { useAuthProfile, usePatientAppointments, usePatientPrescriptions } from "@/services/patient-api-hooks";
 import { useAuthStore } from "@/store/auth.store";
 import { usePatientUiStore } from "@/store/patient-ui.store";
+
+const HEALTH_TOOLS = [
+  { icon: "⚖️", name: "BMI Calculator", sub: "Check your BMI", toast: "Opening BMI Calculator..." },
+  { icon: "❤️", name: "Heart Risk", sub: "Assess cardiovascular risk", toast: "Opening Heart Risk..." },
+  { icon: "🩸", name: "Diabetes Risk", sub: "Screen diabetes risk", toast: "Opening Diabetes Risk..." },
+  { icon: "🫁", name: "Lung Age", sub: "Estimate lung age", toast: "Opening Lung Age..." },
+  { icon: "🧠", name: "Mental Health", sub: "PHQ-9 screening", toast: "Opening Mental Health..." },
+  { icon: "🔎", name: "Symptom Checker", sub: "Try it now", toast: "Opening Symptom Checker..." },
+] as const;
+
+const UPCOMING_STATUSES = new Set(["CONFIRMED", "PENDING", "IN_PROGRESS"]);
+
+function buildProfileVitals(patientProfile: AuthProfile["patientProfile"]): VitalItem[] {
+  if (!patientProfile) return [];
+  const items: VitalItem[] = [];
+  if (patientProfile.bloodGroup) {
+    items.push({ val: patientProfile.bloodGroup, unit: "", label: "Blood Group", badge: "vb-n", badgeLabel: "On file" });
+  }
+  if (patientProfile.allergies?.length) {
+    items.push({ val: patientProfile.allergies.join(", "), unit: "", label: "Allergies", badge: "vb-l", badgeLabel: "Listed" });
+  }
+  if (patientProfile.gender) {
+    items.push({ val: patientProfile.gender, unit: "", label: "Gender", badge: "vb-n", badgeLabel: "On file" });
+  }
+  if (patientProfile.dateOfBirth) {
+    items.push({ val: formatDate(patientProfile.dateOfBirth), unit: "", label: "Date of Birth", badge: "vb-n", badgeLabel: "On file" });
+  }
+  if (patientProfile.medicalHistory) {
+    items.push({ val: patientProfile.medicalHistory, unit: "", label: "Medical History", badge: "vb-n", badgeLabel: "On file" });
+  }
+  return items;
+}
 
 export function DashboardPageContent() {
   const showToast = usePatientUiStore((s) => s.showToast);
   const user = useAuthStore((s) => s.user);
-  const firstName = user?.firstName?.split(" ")[0] ?? "Sarah";
+  const profileQuery = useAuthProfile();
+  const appointmentsQuery = usePatientAppointments({ limit: 50 });
+  const prescriptionsQuery = usePatientPrescriptions();
+  const notificationsQuery = useNotifications();
+  const blogQuery = useBlogPosts({ limit: 3 });
+
+  const firstName = profileQuery.data?.firstName?.split(" ")[0] ?? user?.firstName?.split(" ")[0] ?? "there";
+
+  const appointments = appointmentsQuery.data?.data ?? [];
+  const upcoming = useMemo(
+    () =>
+      appointments
+        .filter((a) => UPCOMING_STATUSES.has(a.status))
+        .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime()),
+    [appointments],
+  );
+  const upcomingMapped = upcoming.slice(0, 2).map((a) => mapAppointmentToConsultation(a));
+  const nextAppointment = upcoming[0];
+
+  const notifications = notificationsQuery.data?.data ?? [];
+  const unreadCount = notifications.filter((n) => !n.readAt).length;
+
+  const articles = (blogQuery.data?.data ?? []).map(mapBlogPostToCard);
+  const profileVitals = buildProfileVitals(profileQuery.data?.patientProfile);
+  const prescriptions = prescriptionsQuery.data ?? [];
+
+  const totalConsultations = appointmentsQuery.data?.meta.total ?? appointments.length;
 
   return (
     <>
@@ -38,43 +93,93 @@ export function DashboardPageContent() {
         }
       />
 
-      <div className="alert-banner">
-        <div className="ab-ico">📅</div>
-        <div className="ab-text">
-          <strong>Consultation Tomorrow — Dr. James Okafor (Neurology)</strong>
-          <span>Video call at 3:00 PM EST. Make sure your camera and microphone are working.</span>
+      {nextAppointment ? (
+        <div className="alert-banner">
+          <div className="ab-ico">📅</div>
+          <div className="ab-text">
+            <strong>
+              Consultation — {mapAppointmentToConsultation(nextAppointment).doctorName}
+            </strong>
+            <span>
+              {formatDateTime(nextAppointment.scheduledAt)}. Make sure your camera and microphone are working.
+            </span>
+          </div>
+          <button type="button" className="ab-btn" onClick={() => showToast("Preparing...")}>
+            Prepare Now →
+          </button>
         </div>
-        <button type="button" className="ab-btn" onClick={() => showToast("Preparing...")}>
-          Prepare Now →
-        </button>
-      </div>
+      ) : null}
 
       <StatCardRow
         items={[
-          { ic: "ic1", icon: "📅", num: "8", label: "Total Consultations", tag: "2 upcoming", tagClass: "tt-b", bgIcon: "📅" },
-          { ic: "ic2", icon: "💬", num: "5", label: "Doctor Replies", tag: "2 new", tagClass: "tt-g", bgIcon: "💬" },
-          { ic: "ic3", icon: "🔖", num: "12", label: "Saved Articles", tag: "3 updated", tagClass: "tt-a", bgIcon: "📚" },
-          { ic: "ic4", icon: "🔧", num: "8", label: "Health Tools Used", tag: "Score: 78", tagClass: "tt-t", bgIcon: "⚕️" },
+          {
+            ic: "ic1",
+            icon: "📅",
+            num: String(totalConsultations),
+            label: "Total Consultations",
+            tag: `${upcoming.length} upcoming`,
+            tagClass: "tt-b",
+            bgIcon: "📅",
+          },
+          {
+            ic: "ic2",
+            icon: "💬",
+            num: String(notificationsQuery.data?.meta.total ?? notifications.length),
+            label: "Notifications",
+            tag: unreadCount > 0 ? `${unreadCount} new` : "All read",
+            tagClass: unreadCount > 0 ? "tt-g" : "tt-b",
+            bgIcon: "💬",
+          },
+          {
+            ic: "ic3",
+            icon: "🔖",
+            num: String(blogQuery.data?.meta.total ?? articles.length),
+            label: "Suggested Articles",
+            tag: "From blog",
+            tagClass: "tt-a",
+            bgIcon: "📚",
+          },
+          {
+            ic: "ic4",
+            icon: "💊",
+            num: String(prescriptions.length),
+            label: "Prescriptions",
+            tag: `${prescriptions.flatMap((p) => p.items).length} medications`,
+            tagClass: "tt-t",
+            bgIcon: "⚕️",
+          },
         ]}
       />
 
       <div className="g21">
         <DashCard title="📅 Upcoming Consultations" actions={<CardLink href="/patient/consultations">View All →</CardLink>}>
           <div className="cons-list">
-            {UPCOMING_CONSULTATIONS.map((item) => (
-              <ConsultationCard key={item.id} item={item} />
-            ))}
+            {appointmentsQuery.isLoading ? (
+              <EmptyState message="Loading consultations..." />
+            ) : upcomingMapped.length > 0 ? (
+              upcomingMapped.map((item) => <ConsultationCard key={item.id} item={item} />)
+            ) : (
+              <EmptyState message="No upcoming consultations. Book one to get started." />
+            )}
           </div>
         </DashCard>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           <DashCard title="📊 My Latest Vitals" actions={<CardLink href="/patient/health">Update →</CardLink>}>
-            <div style={{ fontSize: "0.72rem", color: "var(--gray-400)", marginBottom: 12 }}>Last recorded: May 28, 2026</div>
-            <VitalsGrid vitals={VITALS} />
+            {profileQuery.isLoading ? (
+              <EmptyState message="Loading profile..." />
+            ) : profileVitals.length > 0 ? (
+              <>
+                <div style={{ fontSize: "0.72rem", color: "var(--gray-400)", marginBottom: 12 }}>From your medical profile</div>
+                <VitalsGrid vitals={profileVitals} />
+              </>
+            ) : (
+              <EmptyState message="No vitals recorded" />
+            )}
           </DashCard>
 
           <DashCard title="💊 Current Medications" actions={<CardLink onClick={() => showToast("Opening medications...")}>Manage →</CardLink>}>
-            <MedicationsList />
+            <MedicationsList prescriptions={prescriptions} loading={prescriptionsQuery.isLoading} />
           </DashCard>
         </div>
       </div>
@@ -83,52 +188,76 @@ export function DashboardPageContent() {
         <DashCard
           title="💬 Doctor Replies"
           headerExtra={
-            <span style={{ fontSize: "0.7rem", background: "var(--green)", color: "#fff", padding: "2px 9px", borderRadius: 50, fontWeight: 700 }}>
-              2 new
-            </span>
+            unreadCount > 0 ? (
+              <span style={{ fontSize: "0.7rem", background: "var(--green)", color: "#fff", padding: "2px 9px", borderRadius: 50, fontWeight: 700 }}>
+                {unreadCount} new
+              </span>
+            ) : null
           }
         >
-          {DOCTOR_REPLIES.map((reply) => (
-            <div key={reply.name + reply.time} className="reply-item">
-              <div className="reply-meta">
-                <PersonAvatar initials={reply.initials} className="reply-av" style={{ background: reply.avatarBg }} seed={reply.name} />
-                <span className="reply-name">{reply.name}</span>
-                <span className="reply-time">{reply.time}</span>
+          {notificationsQuery.isLoading ? (
+            <EmptyState message="Loading notifications..." />
+          ) : notifications.length > 0 ? (
+            notifications.slice(0, 2).map((reply) => (
+              <div key={reply.id} className="reply-item">
+                <div className="reply-meta">
+                  <PersonAvatar initials="DR" className="reply-av" seed={reply.id} />
+                  <span className="reply-name">{reply.title}</span>
+                  <span className="reply-time">Recent</span>
+                </div>
+                <div className="reply-q">&quot;{reply.title}&quot;</div>
+                <div className="reply-a">{reply.body}</div>
               </div>
-              <div className="reply-q">&quot;{reply.question}&quot;</div>
-              <div className="reply-a">{reply.answer}</div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <EmptyState message="No doctor replies yet." />
+          )}
         </DashCard>
 
         <DashCard title="🔖 Saved Articles" actions={<CardLink href="/patient/articles">All →</CardLink>}>
-          {SAVED_ARTICLES.map((art) => (
-            <div key={art.title} className="art-item">
-              <div className="art-thumb" style={{ background: `linear-gradient(135deg,${art.bg})` }}>
-                {art.emoji}
-              </div>
-              <div className="art-info">
-                <div className="art-cat">{art.cat}</div>
-                <div className="art-title">{art.title}</div>
-                <div className="art-meta">{art.meta}</div>
-                <div className="art-bar">
-                  <div className="art-fill" style={{ width: `${art.pct}%` }} />
+          {blogQuery.isLoading ? (
+            <EmptyState message="Loading articles..." />
+          ) : articles.length > 0 ? (
+            articles.map((art) => (
+              <div key={art.slug} className="art-item">
+                <div className="art-thumb" style={{ background: art.authorGradient }}>
+                  {art.emoji}
+                </div>
+                <div className="art-info">
+                  <div className="art-cat">{art.cat}</div>
+                  <div className="art-title">{art.title}</div>
+                  <div className="art-meta">
+                    {art.author} · {art.read}
+                  </div>
+                  <div className="art-bar">
+                    <div className="art-fill" style={{ width: "0%" }} />
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <EmptyState message="No suggested articles available." />
+          )}
         </DashCard>
 
         <DashCard title="⚡ Recent Activity" actions={<CardLink onClick={() => showToast("Opening activity...")}>All →</CardLink>}>
-          {RECENT_ACTIVITY.map((act) => (
-            <div key={act.text} className="act-item">
-              <div className={`act-dot ${act.dot}`}>{act.icon}</div>
-              <div className="act-text">
-                <p dangerouslySetInnerHTML={{ __html: act.text }} />
-                <span>{act.time}</span>
+          {notificationsQuery.isLoading ? (
+            <EmptyState message="Loading activity..." />
+          ) : notifications.length > 0 ? (
+            notifications.slice(0, 6).map((act) => (
+              <div key={act.id} className="act-item">
+                <div className={`act-dot ${act.readAt ? "ad-b" : "ad-g"}`}>🔔</div>
+                <div className="act-text">
+                  <p>
+                    <strong>{act.title}</strong> — {act.body}
+                  </p>
+                  <span>Recent</span>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <EmptyState message="No recent activity." />
+          )}
         </DashCard>
       </GridThree>
 

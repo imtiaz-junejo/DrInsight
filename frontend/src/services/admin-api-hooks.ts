@@ -10,6 +10,9 @@ export interface PlatformStats {
   patientCount: number;
   answeredQuestions: number;
   averageRating: number;
+  appointmentCount?: number;
+  reviewCount?: number;
+  specialtyCount?: number;
 }
 
 export interface PendingUser {
@@ -47,6 +50,16 @@ export function usePlatformStats() {
     queryKey: ["platform-stats"],
     queryFn: async () => {
       const { data } = await api.get<PlatformStats>("/platform/stats");
+      return data;
+    },
+  });
+}
+
+export function useAdminUsers(params?: { role?: string; page?: number; limit?: number; search?: string }) {
+  return useQuery({
+    queryKey: ["admin-users", params],
+    queryFn: async () => {
+      const { data } = await api.get<Paginated<AdminUser>>("/users", { params });
       return data;
     },
   });
@@ -145,6 +158,59 @@ export function useAdminUnreadNotifications() {
     queryKey: ["admin-notifications-unread"],
     queryFn: async () => {
       const { data } = await api.get<{ count: number }>("/notifications/unread-count");
+      return data;
+    },
+  });
+}
+
+export function useAdminPrescriptions() {
+  return useQuery({
+    queryKey: ["admin-prescriptions"],
+    queryFn: async () => {
+      const { data } = await api.get<Array<{
+        id: string;
+        diagnosis?: string | null;
+        items: Array<{ medication: string; dosage: string }>;
+        createdAt: string;
+        doctor?: { user?: { firstName: string; lastName: string } };
+        patient?: { user?: { firstName: string; lastName: string } };
+      }>>("/prescriptions");
+      return data;
+    },
+  });
+}
+
+export function useAdminContactSubmissions() {
+  return useQuery({
+    queryKey: ["admin-contact-submissions"],
+    queryFn: async () => {
+      const { data } = await api.get<Array<{
+        id: string;
+        name: string;
+        email: string;
+        subject?: string | null;
+        message: string;
+        createdAt: string;
+      }>>("/contact/submissions");
+      return data;
+    },
+  });
+}
+
+export function useAdminPayments() {
+  return useQuery({
+    queryKey: ["admin-payments"],
+    queryFn: async () => {
+      const { data } = await api.get<Array<{
+        id: string;
+        amountCents: number;
+        currency: string;
+        confirmedAt?: string | null;
+        bookingDraft?: {
+          doctor?: { user?: { firstName: string; lastName: string } };
+          patient?: { user?: { firstName: string; lastName: string } };
+        };
+      }>>("/payments/admin");
       return data;
     },
   });

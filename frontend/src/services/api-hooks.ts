@@ -13,6 +13,8 @@ export interface DoctorProfile {
   specialty: string;
   subSpecialty?: string | null;
   bio?: string | null;
+  education?: string | null;
+  licenseNumber?: string;
   experienceYears: number;
   consultationFee: string | number;
   rating: number;
@@ -20,12 +22,15 @@ export interface DoctorProfile {
   availability: string;
   languages: string[];
   hospital?: string | null;
+  createdAt?: string;
   user?: {
     id: string;
     firstName: string;
     lastName: string;
     avatarUrl?: string | null;
     isOnline?: boolean;
+    email?: string;
+    phone?: string | null;
   };
 }
 
@@ -47,6 +52,8 @@ export interface Appointment {
   durationMinutes: number;
   consultationType: string;
   status: string;
+  reason?: string | null;
+  notes?: string | null;
   meetingRoomId?: string | null;
   doctor?: DoctorProfile;
   patient?: {
@@ -155,14 +162,117 @@ export function useConfirmDevPayment() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (providerIntentId: string) => {
-      const { data } = await api.post("/payments/webhooks/stripe", {
-        providerIntentId,
-        status: "succeeded",
-      });
+      const { data } = await api.post("/payments/confirm-dev", { providerIntentId });
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["appointments"] });
+    },
+  });
+}
+
+export function useDoctor(id: string) {
+  return useQuery({
+    queryKey: ["doctor", id],
+    queryFn: async () => {
+      const { data } = await api.get<DoctorProfile>(`/doctors/${id}`);
+      return data;
+    },
+    enabled: !!id,
+  });
+}
+
+export interface PlatformStats {
+  doctorCount: number;
+  blogCount: number;
+  patientCount: number;
+  answeredQuestions: number;
+  averageRating: number;
+  appointmentCount?: number;
+  reviewCount?: number;
+  specialtyCount?: number;
+}
+
+export function usePlatformStats() {
+  return useQuery({
+    queryKey: ["platform-stats"],
+    queryFn: async () => {
+      const { data } = await api.get<PlatformStats>("/platform/stats");
+      return data;
+    },
+  });
+}
+
+export interface AskDoctorQuestion {
+  id: string;
+  category: string;
+  question: string;
+  answer?: string | null;
+  status: string;
+  isAnonymous: boolean;
+  submitterName?: string | null;
+  createdAt: string;
+  answeredAt?: string | null;
+  answeredBy?: { firstName: string; lastName: string; role: string } | null;
+}
+
+export function useAskDoctorQuestions(params: { page?: number; limit?: number; category?: string; search?: string }) {
+  return useQuery({
+    queryKey: ["ask-doctor", params],
+    queryFn: async () => {
+      const { data } = await api.get<Paginated<AskDoctorQuestion>>("/ask-doctor", { params });
+      return data;
+    },
+  });
+}
+
+export function useSubmitQuestion() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (body: { category: string; question: string; name?: string; isAnonymous?: boolean }) => {
+      const { data } = await api.post("/ask-doctor", body);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["ask-doctor"] });
+      queryClient.invalidateQueries({ queryKey: ["platform-stats"] });
+    },
+  });
+}
+
+export interface Review {
+  id: string;
+  rating: number;
+  comment?: string | null;
+  createdAt: string;
+  patient?: { user?: { firstName: string; lastName: string } };
+  doctor?: { specialty: string; user?: { firstName: string; lastName: string } };
+}
+
+export function useRecentReviews(limit = 6) {
+  return useQuery({
+    queryKey: ["recent-reviews", limit],
+    queryFn: async () => {
+      const { data } = await api.get<Review[]>("/reviews/recent", { params: { limit } });
+      return data;
+    },
+  });
+}
+
+export function useContactSubmit() {
+  return useMutation({
+    mutationFn: async (body: { name: string; email: string; subject: string; message: string }) => {
+      const { data } = await api.post("/contact", body);
+      return data;
+    },
+  });
+}
+
+export function useNewsletterSubscribe() {
+  return useMutation({
+    mutationFn: async (email: string) => {
+      const { data } = await api.post("/contact/newsletter", { email });
+      return data;
     },
   });
 }

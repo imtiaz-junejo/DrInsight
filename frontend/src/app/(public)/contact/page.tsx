@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, type CSSProperties } from "react";
 import "@/styles/contact-page.css";
+import { useContactSubmit, useNewsletterSubscribe } from "@/services/api-hooks";
 
 const SUBJECT_TABS = [
   "General Enquiry",
@@ -149,6 +150,9 @@ function generateRefNum() {
 }
 
 export default function ContactPage() {
+  const contactSubmit = useContactSubmit();
+  const newsletterSubscribe = useNewsletterSubscribe();
+
   const [activeSubject, setActiveSubject] = useState("General Enquiry");
   const [subject, setSubject] = useState("General Enquiry");
   const [firstName, setFirstName] = useState("");
@@ -168,13 +172,30 @@ export default function ContactPage() {
     setSubject(label);
   }
 
-  function submitForm() {
+  async function submitForm() {
     if (!privacy) {
       alert("Please agree to the Privacy Policy to proceed.");
       return;
     }
-    setRefNum(generateRefNum());
-    setSubmitted(true);
+    if (!firstName.trim() || !lastName.trim() || !email.trim() || !message.trim()) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+    try {
+      await contactSubmit.mutateAsync({
+        name: `${firstName.trim()} ${lastName.trim()}`,
+        email: email.trim(),
+        subject: subject.trim(),
+        message: message.trim(),
+      });
+      if (newsletter && email.trim()) {
+        await newsletterSubscribe.mutateAsync(email.trim());
+      }
+      setRefNum(generateRefNum());
+      setSubmitted(true);
+    } catch {
+      alert("Failed to send message. Please try again.");
+    }
   }
 
   function resetForm() {
@@ -400,8 +421,13 @@ export default function ContactPage() {
                   and consent to MedAuthority processing my data *
                 </label>
               </div>
-              <button type="button" className="submit-btn" onClick={submitForm}>
-                ✉️ Send Message
+              <button
+                type="button"
+                className="submit-btn"
+                onClick={submitForm}
+                disabled={contactSubmit.isPending}
+              >
+                {contactSubmit.isPending ? "Sending..." : "✉️ Send Message"}
               </button>
 
               <div className="form-privacy-note">

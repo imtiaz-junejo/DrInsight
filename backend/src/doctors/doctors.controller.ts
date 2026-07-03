@@ -31,6 +31,20 @@ export class DoctorsController {
     return this.doctorsService.getSpecialties();
   }
 
+  @Get('me/profile')
+  @ApiBearerAuth()
+  @Roles(UserRole.DOCTOR)
+  getMyProfile(@CurrentUser('id') userId: string) {
+    return this.doctorsService.findByUserId(userId);
+  }
+
+  @Get('me/patients')
+  @ApiBearerAuth()
+  @Roles(UserRole.DOCTOR)
+  getMyPatients(@CurrentUser('id') userId: string) {
+    return this.doctorsService.getPatients(userId);
+  }
+
   @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {

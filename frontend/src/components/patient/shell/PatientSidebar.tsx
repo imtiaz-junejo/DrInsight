@@ -3,10 +3,13 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { patientNav } from "@/config/patient-nav";
-import { HEALTH_SCORE } from "@/components/patient/data/patient-demo-data";
+import { formatDate } from "@/lib/data-mappers";
 import { getInitials, patientDisplayName } from "@/lib/patient-utils";
+import { useAuthProfile, usePatientAppointments } from "@/services/patient-api-hooks";
 import { useAuthStore } from "@/store/auth.store";
 import { usePatientUiStore } from "@/store/patient-ui.store";
+
+const UPCOMING_STATUSES = new Set(["CONFIRMED", "PENDING", "IN_PROGRESS"]);
 
 export function PatientSidebar() {
   const pathname = usePathname();
@@ -15,9 +18,18 @@ export function PatientSidebar() {
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const showToast = usePatientUiStore((s) => s.showToast);
   const setMobileSidebarOpen = usePatientUiStore((s) => s.setMobileSidebarOpen);
+  const profileQuery = useAuthProfile();
+  const appointmentsQuery = usePatientAppointments({ limit: 50 });
 
-  const initials = getInitials(user?.firstName, user?.lastName);
-  const fullName = patientDisplayName(user?.firstName, user?.lastName);
+  const profile = profileQuery.data;
+  const initials = getInitials(profile?.firstName ?? user?.firstName, profile?.lastName ?? user?.lastName);
+  const fullName = patientDisplayName(profile?.firstName ?? user?.firstName, profile?.lastName ?? user?.lastName);
+  const memberSince = profile?.createdAt ? formatDate(profile.createdAt, { month: "short", year: "numeric" }) : "—";
+
+  const appointments = appointmentsQuery.data?.data ?? [];
+  const upcomingCount = appointments.filter((a) => UPCOMING_STATUSES.has(a.status)).length;
+  const totalCount = appointmentsQuery.data?.meta.total ?? appointments.length;
+  const completedCount = appointments.filter((a) => a.status === "COMPLETED").length;
 
   const handleSignOut = () => {
     showToast("Signing out...");
@@ -34,32 +46,48 @@ export function PatientSidebar() {
         </div>
         <div className="sidebar-name">{fullName}</div>
         <div className="sidebar-role">Patient</div>
-        <div className="sidebar-spec">Member since Jan 2025</div>
+        <div className="sidebar-spec">Member since {memberSince}</div>
       </div>
 
       <div className="hs-panel">
-        <div className="hs-label">Overall Health Score</div>
+        <div className="hs-label">My Consultations</div>
         <div className="hs-row">
           <div
             className="hs-circle"
-            style={{ background: `conic-gradient(var(--green) 0% ${HEALTH_SCORE.score}%, var(--gray-200) ${HEALTH_SCORE.score}%)` }}
+            style={{
+              background: `conic-gradient(var(--green) 0% ${totalCount > 0 ? Math.min(100, (upcomingCount / totalCount) * 100) : 0}%, var(--gray-200) ${totalCount > 0 ? Math.min(100, (upcomingCount / totalCount) * 100) : 0}%)`,
+            }}
           >
             <div className="hs-inner">
-              <div className="hs-num">{HEALTH_SCORE.score}</div>
-              <div className="hs-sub">/ 100</div>
+              <div className="hs-num">{upcomingCount}</div>
+              <div className="hs-sub">upcoming</div>
             </div>
           </div>
           <div>
-            <div className="hs-status">{HEALTH_SCORE.status}</div>
-            <div className="hs-desc">{HEALTH_SCORE.desc}</div>
+            <div className="hs-status">{upcomingCount > 0 ? "Scheduled 🟢" : "All clear 🟢"}</div>
+            <div className="hs-desc">
+              {appointmentsQuery.isLoading
+                ? "Loading appointments..."
+                : `${totalCount} total consultation${totalCount === 1 ? "" : "s"}`}
+            </div>
           </div>
         </div>
         <div className="mb-rows">
-          {HEALTH_SCORE.metrics.map((m) => (
+          {[
+            { label: "Total", value: totalCount, color: "var(--blue)" },
+            { label: "Upcoming", value: upcomingCount, color: "var(--green)" },
+            { label: "Completed", value: completedCount, color: "var(--teal)" },
+          ].map((m) => (
             <div key={m.label} className="mb-row">
               <span className="mb-lbl">{m.label}</span>
               <div className="mb-bar">
-                <div className="mb-fill" style={{ width: `${m.value}%`, background: m.color }} />
+                <div
+                  className="mb-fill"
+                  style={{
+                    width: totalCount > 0 ? `${Math.min(100, (m.value / totalCount) * 100)}%` : "0%",
+                    background: m.color,
+                  }}
+                />
               </div>
               <span className="mb-v">{m.value}</span>
             </div>

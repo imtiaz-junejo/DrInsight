@@ -3,22 +3,72 @@
 import Link from "next/link";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
+  doctorFullName,
+  formatDate,
+  formatStatCount,
+  getInitials,
+  gradientForId,
+} from "@/lib/data-mappers";
+import {
+  useAskDoctorQuestions,
+  usePlatformStats,
+  useSubmitQuestion,
+  type AskDoctorQuestion,
+} from "@/services/api-hooks";
+import {
   CAT_FILTERS,
   FAQ_ITEMS,
   FORM_CATEGORIES,
   HERO_PILLS,
-  HERO_STATS,
-  QA_ITEMS,
   SPECIALTIES,
-  type QAItem,
 } from "./questions";
+
+type MappedQA = {
+  id: string;
+  cat: string;
+  catLabel: string;
+  searchKeywords: string;
+  time: string;
+  anonymous?: boolean;
+  question: string;
+  doctor: {
+    initials: string;
+    avatarBg: string;
+    name: string;
+    specialty: string;
+  };
+  answerHtml: string;
+  helpfulCount: number;
+  tags: string[];
+};
+
+function mapQuestion(q: AskDoctorQuestion): MappedQA {
+  return {
+    id: q.id,
+    cat: q.category.toLowerCase(),
+    catLabel: q.category,
+    searchKeywords: `${q.question} ${q.answer ?? ""}`,
+    time: formatDate(q.answeredAt ?? q.createdAt),
+    anonymous: q.isAnonymous,
+    question: q.question,
+    doctor: {
+      initials: getInitials(q.answeredBy?.firstName, q.answeredBy?.lastName),
+      avatarBg: gradientForId(q.id),
+      name: q.answeredBy ? doctorFullName(q.answeredBy) : "DrInsight Medical Team",
+      specialty: q.answeredBy?.role ?? q.category,
+    },
+    answerHtml: q.answer ?? "<p>Our medical team is reviewing this question.</p>",
+    helpfulCount: 0,
+    tags: [q.category],
+  };
+}
 
 function QACard({
   item,
   helpfulCount,
   onLike,
 }: {
-  item: QAItem;
+  item: MappedQA;
   helpfulCount: number;
   onLike: () => void;
 }) {
@@ -74,9 +124,7 @@ function QACard({
 export default function AskDoctorPage() {
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
-  const [helpfulCounts, setHelpfulCounts] = useState<Record<number, number>>(() =>
-    Object.fromEntries(QA_ITEMS.map((item, i) => [i, item.helpfulCount])),
-  );
+  const [helpfulCounts, setHelpfulCounts] = useState<Record<string, number>>({});
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -88,18 +136,37 @@ export default function AskDoctorPage() {
 
   const qaFeedRef = useRef<HTMLDivElement>(null);
 
+  const { data: stats } = usePlatformStats();
+  const { data: questionsData, isLoading } = useAskDoctorQuestions({ limit: 50 });
+  const submitQuestion = useSubmitQuestion();
+
+  const qaItems = useMemo(
+    () => (questionsData?.data ?? []).map(mapQuestion),
+    [questionsData],
+  );
+
+  const heroStats = useMemo(
+    () => [
+      { num: stats ? formatStatCount(stats.answeredQuestions) : "—", label: "Questions Answered" },
+      { num: stats ? formatStatCount(stats.doctorCount) : "—", label: "Specialist Doctors" },
+      { num: "24–48h", label: "Response Time" },
+      { num: "100%", label: "Free Service" },
+    ],
+    [stats],
+  );
+
   const filteredQA = useMemo(() => {
     const q = search.toLowerCase().trim();
-    return QA_ITEMS.filter((item) => {
-      const catMatch = activeFilter === "all" || item.cat === activeFilter;
+    return qaItems.filter((item) => {
+      const catMatch = activeFilter === "all" || item.cat.includes(activeFilter);
       const text = `${item.searchKeywords} ${item.question}`.toLowerCase();
       const textMatch = !q || text.includes(q);
       return catMatch && textMatch;
     });
-  }, [search, activeFilter]);
+  }, [search, activeFilter, qaItems]);
 
-  const incrementHelpful = useCallback((index: number) => {
-    setHelpfulCounts((prev) => ({ ...prev, [index]: (prev[index] ?? 0) + 1 }));
+  const incrementHelpful = useCallback((id: string) => {
+    setHelpfulCounts((prev) => ({ ...prev, [id]: (prev[id] ?? 0) + 1 }));
   }, []);
 
   const toggleAnon = (checked: boolean) => {
@@ -107,7 +174,7 @@ export default function AskDoctorPage() {
     if (checked) setName("");
   };
 
-  const submitQuestion = () => {
+  const handleSubmit = async () => {
     if (!category) {
       alert("Please select a medical category.");
       return;
@@ -116,7 +183,17 @@ export default function AskDoctorPage() {
       alert("Please describe your question in more detail (at least 20 characters).");
       return;
     }
-    setSubmitted(true);
+    try {
+      await submitQuestion.mutateAsync({
+        category,
+        question: question.trim(),
+        name: anonymous ? undefined : name.trim() || undefined,
+        isAnonymous: anonymous,
+      });
+      setSubmitted(true);
+    } catch {
+      alert("Failed to submit question. Please try again.");
+    }
   };
 
   const resetForm = () => {
@@ -151,11 +228,11 @@ export default function AskDoctorPage() {
           <div className="eyebrow">Free Medical Q&A</div>
           <h1>Ask a Board-Certified Doctor — Free</h1>
           <p>
-            Submit your health question and receive a personalised, medically reviewed answer from one of our 200+
-            specialist physicians. Trusted by 500,000+ patients worldwide.
+            Submit your health question and receive a personalised, medically reviewed answer from one of our{" "}
+            {stats ? formatStatCount(stats.doctorCount) : "200+"} specialist physicians.
           </p>
           <div className="hero-stats">
-            {HERO_STATS.map(({ num, label }) => (
+            {heroStats.map(({ num, label }) => (
               <div key={label} className="hero-stat">
                 <strong>{num}</strong>
                 <span>{label}</span>
@@ -178,7 +255,7 @@ export default function AskDoctorPage() {
             <div className="section-eyebrow">Browse Questions</div>
             <div className="section-title">Featured Answered Questions</div>
             <div className="section-sub">
-              Browse 5,000+ questions answered by our specialist doctors. Use the search and filters to find answers
+              Browse {stats ? formatStatCount(stats.answeredQuestions) : "5,000+"} questions answered by our specialist doctors. Use the search and filters to find answers
               relevant to you.
             </div>
 
@@ -206,19 +283,18 @@ export default function AskDoctorPage() {
             </div>
 
             <div id="qa-feed" ref={qaFeedRef}>
-              {filteredQA.map((item) => {
-                const originalIndex = QA_ITEMS.indexOf(item);
-                return (
+              {isLoading ? (
+                <p style={{ textAlign: "center", color: "var(--gray-500)", padding: "24px 0" }}>Loading questions...</p>
+              ) : filteredQA.length > 0 ? (
+                filteredQA.map((item) => (
                   <QACard
-                    key={item.question}
+                    key={item.id}
                     item={item}
-                    helpfulCount={helpfulCounts[originalIndex] ?? item.helpfulCount}
-                    onLike={() => incrementHelpful(originalIndex)}
+                    helpfulCount={helpfulCounts[item.id] ?? item.helpfulCount}
+                    onLike={() => incrementHelpful(item.id)}
                   />
-                );
-              })}
-
-              {filteredQA.length === 0 && (
+                ))
+              ) : (
                 <div className="no-results">
                   <div className="no-results-icon">🔍</div>
                   <p>No questions match your search. Try different keywords or browse a category.</p>
@@ -231,7 +307,7 @@ export default function AskDoctorPage() {
             <div className="ask-form-card">
               <h3>💬 Submit Your Question</h3>
               <p>
-                Get a free, personalised answer from one of our 200+ board-certified specialist doctors within 24–48
+                Get a free, personalised answer from one of our {stats ? formatStatCount(stats.doctorCount) : "200+"} board-certified specialist doctors within 24–48
                 hours.
               </p>
 
@@ -288,8 +364,13 @@ export default function AskDoctorPage() {
                     />
                     <div className="char-count">{question.length} / 1000 characters</div>
                   </div>
-                  <button type="button" className="submit-btn" onClick={submitQuestion}>
-                    ✉️ Submit Question Free
+                  <button
+                    type="button"
+                    className="submit-btn"
+                    onClick={handleSubmit}
+                    disabled={submitQuestion.isPending}
+                  >
+                    {submitQuestion.isPending ? "Submitting..." : "✉️ Submit Question Free"}
                   </button>
                   <div className="disclaimer">
                     ⚠️ This service is for informational purposes only and does not replace professional medical advice,

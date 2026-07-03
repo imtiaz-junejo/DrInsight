@@ -94,10 +94,68 @@ export class DoctorsService {
   async findByUserId(userId: string) {
     const doctor = await this.prisma.doctorProfile.findUnique({
       where: { userId },
-      include: { user: true },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            avatarUrl: true,
+            email: true,
+            phone: true,
+            isOnline: true,
+          },
+        },
+      },
     });
     if (!doctor) throw new NotFoundException('Doctor profile not found');
     return doctor;
+  }
+
+  async getPatients(doctorUserId: string) {
+    const doctor = await this.prisma.doctorProfile.findUnique({ where: { userId: doctorUserId } });
+    if (!doctor) return [];
+
+    const appointments = await this.prisma.appointment.findMany({
+      where: { doctorId: doctor.id },
+      include: {
+        patient: {
+          include: {
+            user: { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
+          },
+        },
+      },
+      orderBy: { scheduledAt: 'desc' },
+    });
+
+    const seen = new Set<string>();
+    const patients: Array<{
+      patientId: string;
+      user: { id: string; firstName: string; lastName: string; avatarUrl: string | null };
+      lastVisit: Date;
+      nextAppt: Date | null;
+      appointmentCount: number;
+    }> = [];
+
+    for (const appt of appointments) {
+      if (seen.has(appt.patientId)) continue;
+      seen.add(appt.patientId);
+
+      const patientAppts = appointments.filter((a) => a.patientId === appt.patientId);
+      const upcoming = patientAppts
+        .filter((a) => a.scheduledAt > new Date() && !['CANCELLED', 'COMPLETED'].includes(a.status))
+        .sort((a, b) => a.scheduledAt.getTime() - b.scheduledAt.getTime());
+
+      patients.push({
+        patientId: appt.patientId,
+        user: appt.patient.user,
+        lastVisit: patientAppts[0].scheduledAt,
+        nextAppt: upcoming[0]?.scheduledAt ?? null,
+        appointmentCount: patientAppts.length,
+      });
+    }
+
+    return patients;
   }
 
   async updateProfile(userId: string, data: Partial<{

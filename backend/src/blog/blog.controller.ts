@@ -18,8 +18,17 @@ export class BlogController {
     @Query('limit') limit?: number,
     @Query('category') category?: string,
     @Query('search') search?: string,
+    @Query('authorId') authorId?: string,
+    @Query('status') status?: BlogStatus,
   ) {
-    return this.blogService.findAll({ page: +page!, limit: +limit!, category, search });
+    return this.blogService.findAll({
+      page: +page! || 1,
+      limit: +limit! || 12,
+      category,
+      search,
+      authorId,
+      status,
+    });
   }
 
   @Public()
