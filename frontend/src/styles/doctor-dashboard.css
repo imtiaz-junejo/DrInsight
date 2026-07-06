@@ -42,23 +42,12 @@
 .doctor-root ul { list-style: none; }
 .doctor-root button { font-family: var(--font-body); }
 
-
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-
-:root{
-  --blue:#1a56a0;--blue-dark:#0f3d7a;--blue-light:#e8f0fb;--blue-mid:#4a90d9;
-  --teal:#0891b2;--green:#059669;--red:#dc2626;--amber:#f59e0b;--purple:#7c3aed;
-  --white:#fff;--gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;
-  --gray-400:#94a3b8;--gray-500:#64748b;--gray-600:#475569;--gray-800:#1e293b;--gray-900:#0f172a;
-  --font-display:'Playfair Display',Georgia,serif;
-  --font-body:'DM Sans',system-ui,sans-serif;
-  --shadow-sm:0 1px 3px rgba(0,0,0,.08);--shadow-md:0 4px 16px rgba(0,0,0,.10);
-  --shadow-lg:0 8px 32px rgba(26,86,160,.14);--shadow-xl:0 20px 60px rgba(15,23,42,.18);
-  --radius:12px;--radius-lg:20px;--transition:all .22s cubic-bezier(.4,0,.2,1);
-}
-
-a{color:inherit;text-decoration:none}
-ul{list-style:none}
+/*
+ * Everything below is scoped under .doctor-root so this stylesheet can never
+ * bleed into public pages (Next.js keeps globally-imported CSS loaded across
+ * client-side navigations, so unscoped selectors here would otherwise reset
+ * margins/padding and strip link/list styling on the public site).
+ */
 .doctor-root .site-topbar{background:var(--blue-dark);padding:8px 0;font-size:.8rem}
 .doctor-root .site-topbar-inner{max-width:1240px;margin:auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .doctor-root .site-topbar-emergency{display:flex;align-items:center;gap:7px;color:#fca5a5;font-weight:600}
@@ -80,11 +69,6 @@ ul{list-style:none}
 .doctor-root .mobile-menu a{padding:10px 12px;border-radius:8px;font-size:.92rem;font-weight:500;color:var(--gray-600);transition:var(--transition)}
 .doctor-root .mobile-menu a:hover{background:var(--blue-light);color:var(--blue)}
 .doctor-root .mobile-menu.open{display:flex}
-.doctor-root .demo-bar{background:linear-gradient(90deg,#fffbeb,#fff8e1);border-bottom:2px solid #fde68a;padding:10px 24px}
-.doctor-root .demo-bar-inner{max-width:1240px;margin:auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.doctor-root .demo-bar strong{font-weight:700;color:#78350f}
-.doctor-root .demo-switch-btn{padding:5px 16px;border-radius:50px;border:1.5px solid #f59e0b;background:#fff;font-size:.78rem;font-weight:700;cursor:pointer;transition:var(--transition);font-family:var(--font-body);color:#92400e}
-.doctor-root .demo-switch-btn.active,.demo-switch-btn:hover{background:#f59e0b;border-color:#f59e0b;color:#fff}
 .doctor-root .dash-header{background:linear-gradient(135deg,var(--blue-dark) 0%,var(--blue) 55%,var(--teal) 100%);position:relative;overflow:hidden;padding:32px 24px}
 .doctor-root .dash-header::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
 .doctor-root .dash-header-inner{max-width:1240px;margin:auto;position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px}
@@ -417,7 +401,7 @@ ul{list-style:none}
 .doctor-root .toast{position:fixed;bottom:24px;right:24px;background:var(--gray-900);color:#fff;padding:13px 22px;border-radius:12px;font-size:.85rem;font-weight:500;z-index:999;opacity:0;transform:translateY(10px);transition:all .3s ease;pointer-events:none;max-width:320px}
 .doctor-root .toast.show{opacity:1;transform:translateY(0)}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
-.doctor-root footer{background:var(--gray-900);color:#94a3b8;font-size:.85rem;margin-top:auto}
+.doctor-root footer{background:#0a1224;color:#94a3b8;font-size:.85rem;margin-top:auto}
 .doctor-root .footer-main{max-width:1240px;margin:auto;padding:64px 24px 0}
 .doctor-root .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1.5fr 1.5fr;gap:48px;padding-bottom:48px}
 .doctor-root .footer-brand p{line-height:1.7;margin-bottom:18px;font-size:.84rem}
@@ -441,9 +425,7 @@ ul{list-style:none}
 .doctor-root .footer-bottom-links{display:flex;gap:16px;flex-wrap:wrap}
 .doctor-root .footer-bottom-links a{font-size:.78rem;color:#64748b;transition:var(--transition)}
 .doctor-root .footer-bottom-links a:hover{color:#93c5fd}
-@media(max-width:1060px){.dash-grid{grid-template-columns:1fr}.sidebar{position:static}.stats-row{grid-template-columns:repeat(2,1fr)}.footer-grid{grid-template-columns:1fr 1fr;gap:32px}}
-@media(max-width:900px){.g21,.g21-dr,.g13,.g2{grid-template-columns:1fr}}
-@media(max-width:640px){.nav-links{display:none}.hamburger{display:flex}.mobile-menu.open{display:flex}.stats-row{grid-template-columns:1fr 1fr}.footer-grid{grid-template-columns:1fr}.footer-bottom{flex-direction:column;align-items:flex-start}.form-row{grid-template-columns:1fr}.dash-body{padding:0 16px;margin:20px auto}.topbar-inner{flex-direction:column;align-items:flex-start}.g3{grid-template-columns:1fr}}
+/* Dashboard responsive rules live in styles/responsive.css (1024px desktop lock) */
 /* Rich Text Editor */
 .doctor-root .rte-wrap{border:1.5px solid var(--gray-200);border-radius:var(--radius);overflow:hidden;transition:var(--transition)}
 .doctor-root .rte-wrap:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,160,.08)}

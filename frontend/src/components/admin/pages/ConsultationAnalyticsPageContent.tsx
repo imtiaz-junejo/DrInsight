@@ -33,6 +33,10 @@ export function ConsultationAnalyticsPageContent() {
 
   const completed = appointments.filter((a) => a.status === "COMPLETED").length;
   const completionRate = appointments.length > 0 ? ((completed / appointments.length) * 100).toFixed(1) : "0";
+  const avgDuration =
+    appointments.length > 0
+      ? Math.round(appointments.reduce((sum, a) => sum + (a.durationMinutes || 0), 0) / appointments.length)
+      : 0;
 
   const specialtyMap = appointments.reduce<Record<string, number>>((acc, a) => {
     const spec = a.doctor?.specialty ?? "Unknown";
@@ -40,16 +44,36 @@ export function ConsultationAnalyticsPageContent() {
     return acc;
   }, {});
 
-  const specialtyRows = Object.entries(specialtyMap).map(([specialty, count]) => [specialty, String(count), "—"]);
+  const specialtyRows = Object.entries(specialtyMap).map(([specialty, count]) => [
+    specialty,
+    String(count),
+    (statsQuery.data?.averageRating ?? 0).toFixed(1),
+  ]);
 
   return (
     <>
       <StatCardRow
         items={[
-          { ic: "ic1", icon: "📅", num: formatNumber(total), label: "Consultations (30d)", tag: "Live data", tagClass: "tt-g" },
-          { ic: "ic2", icon: "✅", num: `${completionRate}%`, label: "Completion Rate", tag: "Current sample", tagClass: "tt-g" },
+          {
+            ic: "ic1",
+            icon: "📅",
+            num: formatNumber(statsQuery.data?.appointmentsLast30Days ?? total),
+            label: "Consultations (30d)",
+            tag: "Live data",
+            tagClass: "tt-g",
+          },
+          {
+            ic: "ic2",
+            icon: "✅",
+            num: statsQuery.data?.completedAppointments != null
+              ? `${((statsQuery.data.completedAppointments / Math.max(statsQuery.data.appointmentCount ?? 1, 1)) * 100).toFixed(1)}%`
+              : `${completionRate}%`,
+            label: "Completion Rate",
+            tag: "All appointments",
+            tagClass: "tt-g",
+          },
           { ic: "ic3", icon: "⭐", num: (statsQuery.data?.averageRating ?? 0).toFixed(2), label: "Avg Rating", tag: "Platform stats", tagClass: "tt-g" },
-          { ic: "ic4", icon: "⏱️", num: "—", label: "Avg Duration", tag: "No API", tagClass: "tt-b" },
+          { ic: "ic4", icon: "⏱️", num: `${avgDuration} min`, label: "Avg Duration", tag: "From appointments", tagClass: "tt-b" },
         ]}
       />
       <GridTwo>

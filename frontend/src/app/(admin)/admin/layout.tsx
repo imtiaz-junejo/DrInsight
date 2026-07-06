@@ -4,7 +4,7 @@ import { AdminShell } from "@/components/admin/shell/AdminShell";
 import "@/styles/admin-panel.css";
 
 export const metadata: Metadata = {
-  title: "Admin Panel — MedAuthority",
+  title: "Admin Panel — DrInsight",
   robots: { index: false, follow: false },
 };
 

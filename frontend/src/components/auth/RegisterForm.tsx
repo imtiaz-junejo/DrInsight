@@ -6,7 +6,18 @@ import { useMutation } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { formatStatCount } from "@/lib/data-mappers";
+import { usePlatformStats } from "@/services/api-hooks";
 import { useAuthStore, type AuthUser } from "@/store/auth.store";
+import { AuthSocialButtons } from "@/components/auth/AuthSocialButtons";
+import { FloatingInput } from "@/components/ui/floating-input";
+import { FloatingSelect } from "@/components/ui/floating-select";
+import {
+  clearOAuthLoadingProvider,
+  dashboardForRole,
+  startOAuth,
+  type OAuthProviderName,
+} from "@/lib/oauth";
 
 type AccountType = "patient" | "physician" | "";
 type SubType =
@@ -70,11 +81,6 @@ const PHYSICIAN_CLINICAL_TAGS = [
 
 const LEFT_DEFAULT = {
   eyebrow: "FREE ACCOUNT — NO CREDIT CARD REQUIRED",
-  title: (
-    <>
-      Join <span>500,000+</span> Informed Patients
-    </>
-  ),
   para: "Access trusted medical information, expert consultations, and powerful health tools — all in one place.",
   benefits: [
     { icon: "🔖", title: "Save Articles & Guides", desc: "Bookmark any article for quick access anytime" },
@@ -82,67 +88,24 @@ const LEFT_DEFAULT = {
     { icon: "📅", title: "Book Consultations", desc: "Schedule video, phone, or chat with our doctors" },
     { icon: "📊", title: "Health Dashboard", desc: "Track your health tool results and history" },
   ],
-  stats: [
-    { num: "500K+", label: "Active patients" },
-    { num: "200+", label: "Specialist doctors" },
-    { num: "Free", label: "Always free to join" },
-  ],
 };
 
 const LEFT_PATIENT = {
   eyebrow: "FREE PATIENT ACCOUNT",
-  title: (
-    <>
-      Your Personal <span>Health Hub</span>
-    </>
-  ),
   para: "Everything you need to manage your health in one secure, trusted platform.",
   benefits: LEFT_DEFAULT.benefits,
-  stats: LEFT_DEFAULT.stats,
 };
 
 const LEFT_PHYSICIAN = {
   eyebrow: "PHYSICIAN ACCOUNT",
-  title: (
-    <>
-      Join Our <span>Expert Medical Network</span>
-    </>
-  ),
-  para: "Connect with half a million patients and build your global medical reputation.",
+  para: "Connect with patients and build your medical reputation on a trusted platform.",
   benefits: [
-    { icon: "✍️", title: "Publish Articles", desc: "Reach 500,000+ readers with your expertise" },
+    { icon: "✍️", title: "Publish Articles", desc: "Reach patients with your expertise" },
     { icon: "🔬", title: "Review & Shape Content", desc: "Peer-review articles in your specialty" },
     { icon: "💬", title: "Answer Patient Questions", desc: "Respond to Ask the Doctor queries" },
     { icon: "🎓", title: "CPD/CME Recognition", desc: "Receive recognition letters for contributions" },
   ],
-  stats: [
-    { num: "500K+", label: "Active patients" },
-    { num: "200+", label: "Specialist doctors" },
-    { num: "🌍", label: "Global platform" },
-  ],
 };
-
-function GoogleIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden>
-      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" />
-      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84z" />
-    </svg>
-  );
-}
-
-function FacebookIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden>
-      <path
-        fill="#1877F2"
-        d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
-      />
-    </svg>
-  );
-}
 
 function getPasswordScore(pw: string) {
   let score = 0;
@@ -177,6 +140,9 @@ export function RegisterForm() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+  const [oauthLoading, setOauthLoading] = useState<OAuthProviderName | null>(null);
+  const [oauthPendingCode, setOauthPendingCode] = useState<string | null>(null);
+  const [oauthCompleteEmail, setOauthCompleteEmail] = useState("");
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -202,12 +168,49 @@ export function RegisterForm() {
   const [agree4, setAgree4] = useState(false);
 
   const pwScore = getPasswordScore(password);
+  const { data: stats } = usePlatformStats();
 
   const leftPanel = useMemo(() => {
-    if (accountType === "patient") return LEFT_PATIENT;
-    if (accountType === "physician") return LEFT_PHYSICIAN;
-    return LEFT_DEFAULT;
-  }, [accountType]);
+    const patientCount = stats ? formatStatCount(stats.patientsServed ?? stats.patientCount) : "—";
+    const doctorCount = stats ? formatStatCount(stats.doctorCount) : "—";
+    const panelStats = [
+      { num: patientCount, label: "Active patients" },
+      { num: doctorCount, label: "Specialist doctors" },
+      { num: accountType === "physician" ? String(stats?.specialtyCount ?? "—") : "Free", label: accountType === "physician" ? "Specialties" : "Always free to join" },
+    ];
+
+    if (accountType === "patient") {
+      return {
+        ...LEFT_PATIENT,
+        title: (
+          <>
+            Your Personal <span>Health Hub</span>
+          </>
+        ),
+        stats: panelStats,
+      };
+    }
+    if (accountType === "physician") {
+      return {
+        ...LEFT_PHYSICIAN,
+        title: (
+          <>
+            Join Our <span>Expert Medical Network</span>
+          </>
+        ),
+        stats: panelStats,
+      };
+    }
+    return {
+      ...LEFT_DEFAULT,
+      title: (
+        <>
+          Join <span>{patientCount}</span> Informed Patients
+        </>
+      ),
+      stats: panelStats,
+    };
+  }, [accountType, stats]);
 
   const step2Subtitle =
     accountType === "physician" ? "Your professional details" : "Tell us a little about yourself";
@@ -237,7 +240,7 @@ export function RegisterForm() {
       }
       if ("accessToken" in data && data.accessToken) {
         setAuth(data.user, data.accessToken, data.refreshToken);
-        setSuccessMsg("Welcome to MedAuthority! We've sent a verification email to your inbox.");
+        setSuccessMsg("Welcome to DrInsight! We've sent a verification email to your inbox.");
         setSuccess(true);
         setError("");
       }
@@ -267,10 +270,69 @@ export function RegisterForm() {
   }, []);
 
   useEffect(() => {
+    clearOAuthLoadingProvider();
+    setOauthLoading(null);
+
+    const params = new URLSearchParams(window.location.search);
+    const pending = params.get("oauthPending");
+    if (pending) {
+      setOauthPendingCode(pending);
+      setAccountType("patient");
+    }
+  }, []);
+
+  const completeOAuthMutation = useMutation({
+    mutationFn: async (payload: { code: string; email: string }) => {
+      const { data } = await api.post<{
+        accessToken: string;
+        refreshToken: string;
+        user: AuthUser;
+      }>("/auth/oauth/complete-registration", payload);
+      return data;
+    },
+    onSuccess: (data) => {
+      setAuth(data.user, data.accessToken, data.refreshToken);
+      setError("");
+      window.location.assign(dashboardForRole(data.user.role));
+    },
+    onError: (err) => {
+      if (isAxiosError(err)) {
+        const message = err.response?.data?.message;
+        if (Array.isArray(message)) {
+          showErr(message.join(", "));
+          return;
+        }
+        if (typeof message === "string" && message) {
+          showErr(message);
+          return;
+        }
+      }
+      showErr("Unable to complete Facebook registration. Please try again.");
+    },
+  });
+
+  useEffect(() => {
     if (!error) return;
     const timer = setTimeout(() => setError(""), 4000);
     return () => clearTimeout(timer);
   }, [error]);
+
+  function handleOAuth(provider: OAuthProviderName) {
+    setError("");
+    setOauthLoading(provider);
+    startOAuth(provider);
+  }
+
+  function handleCompleteOAuthRegistration() {
+    const email = oauthCompleteEmail.trim().toLowerCase();
+    if (!oauthPendingCode) return;
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showErr("Please enter a valid email address.");
+      return;
+    }
+    setError("");
+    completeOAuthMutation.mutate({ code: oauthPendingCode, email });
+  }
 
   function selectType(type: "patient" | "physician") {
     setAccountType(type);
@@ -393,16 +455,12 @@ export function RegisterForm() {
       if (subType === "indiv" || subType === "") {
         return (
           <div className="form-group">
-            <label className="form-label">Gender</label>
-            <div className="input-wrap">
-              <span className="input-icon">👤</span>
-              <select className="form-select" defaultValue="Male">
-                <option>Male</option>
-                <option>Female</option>
-                <option>Prefer not to say</option>
-                <option>Other</option>
-              </select>
-            </div>
+            <FloatingSelect label="Gender" defaultValue="Male">
+              <option>Male</option>
+              <option>Female</option>
+              <option>Prefer not to say</option>
+              <option>Other</option>
+            </FloatingSelect>
           </div>
         );
       }
@@ -410,22 +468,14 @@ export function RegisterForm() {
         return (
           <div className="form-row">
             <div className="form-group">
-              <label className="form-label">Child&apos;s Date of Birth</label>
-              <div className="input-wrap">
-                <span className="input-icon">📅</span>
-                <input type="date" className="form-input" />
-              </div>
+              <FloatingInput type="date" label="Child's Date of Birth" />
             </div>
             <div className="form-group">
-              <label className="form-label">Relationship</label>
-              <div className="input-wrap">
-                <span className="input-icon">👨‍👩‍👦</span>
-                <select className="form-select" defaultValue="Parent">
-                  <option>Parent</option>
-                  <option>Legal Guardian</option>
-                  <option>Other</option>
-                </select>
-              </div>
+              <FloatingSelect label="Relationship" defaultValue="Parent">
+                <option>Parent</option>
+                <option>Legal Guardian</option>
+                <option>Other</option>
+              </FloatingSelect>
             </div>
           </div>
         );
@@ -433,16 +483,12 @@ export function RegisterForm() {
       if (subType === "caregiver") {
         return (
           <div className="form-group">
-            <label className="form-label">Patient&apos;s Approximate Age Range</label>
-            <div className="input-wrap">
-              <span className="input-icon">👴</span>
-              <select className="form-select" defaultValue="60–70">
-                <option>60–70</option>
-                <option>70–80</option>
-                <option>80–90</option>
-                <option>90+</option>
-              </select>
-            </div>
+            <FloatingSelect label="Patient's Approximate Age Range" defaultValue="60–70">
+              <option>60–70</option>
+              <option>70–80</option>
+              <option>80–90</option>
+              <option>90+</option>
+            </FloatingSelect>
           </div>
         );
       }
@@ -450,26 +496,18 @@ export function RegisterForm() {
         return (
           <div className="form-row">
             <div className="form-group">
-              <label className="form-label">University / Institution</label>
-              <div className="input-wrap">
-                <span className="input-icon">🎓</span>
-                <input type="text" className="form-input" placeholder="University name" />
-              </div>
+              <FloatingInput type="text" label="University / Institution" />
             </div>
             <div className="form-group">
-              <label className="form-label">Year of Study</label>
-              <div className="input-wrap">
-                <span className="input-icon">📅</span>
-                <select className="form-select" defaultValue="Year 1">
-                  <option>Year 1</option>
-                  <option>Year 2</option>
-                  <option>Year 3</option>
-                  <option>Year 4</option>
-                  <option>Year 5</option>
-                  <option>Year 6</option>
-                  <option>Postgrad</option>
-                </select>
-              </div>
+              <FloatingSelect label="Year of Study" defaultValue="Year 1">
+                <option>Year 1</option>
+                <option>Year 2</option>
+                <option>Year 3</option>
+                <option>Year 4</option>
+                <option>Year 5</option>
+                <option>Year 6</option>
+                <option>Postgrad</option>
+              </FloatingSelect>
             </div>
           </div>
         );
@@ -480,18 +518,10 @@ export function RegisterForm() {
       let extra = (
         <div className="form-row">
           <div className="form-group">
-            <label className="form-label">Hospital / Clinic</label>
-            <div className="input-wrap">
-              <span className="input-icon">🏥</span>
-              <input type="text" className="form-input" placeholder="Institution name" />
-            </div>
+            <FloatingInput type="text" label="Hospital / Clinic" />
           </div>
           <div className="form-group">
-            <label className="form-label">City of Practice</label>
-            <div className="input-wrap">
-              <span className="input-icon">📍</span>
-              <input type="text" className="form-input" placeholder="City" />
-            </div>
+            <FloatingInput type="text" label="City of Practice" />
           </div>
         </div>
       );
@@ -501,24 +531,20 @@ export function RegisterForm() {
           <>
             {extra}
             <div className="form-group">
-              <label className="form-label">Primary Specialty</label>
-              <div className="input-wrap">
-                <span className="input-icon">🩺</span>
-                <select
-                  className="form-select"
-                  value={primarySpecialty}
-                  onChange={(e) => setPrimarySpecialty(e.target.value)}
-                >
-                  <option>Cardiology</option>
-                  <option>Neurology</option>
-                  <option>Endocrinology</option>
-                  <option>Gastroenterology</option>
-                  <option>Dermatology</option>
-                  <option>Oncology</option>
-                  <option>Pulmonology</option>
-                  <option>Other</option>
-                </select>
-              </div>
+              <FloatingSelect
+                label="Primary Specialty"
+                value={primarySpecialty}
+                onChange={(e) => setPrimarySpecialty(e.target.value)}
+              >
+                <option>Cardiology</option>
+                <option>Neurology</option>
+                <option>Endocrinology</option>
+                <option>Gastroenterology</option>
+                <option>Dermatology</option>
+                <option>Oncology</option>
+                <option>Pulmonology</option>
+                <option>Other</option>
+              </FloatingSelect>
             </div>
           </>
         );
@@ -527,16 +553,12 @@ export function RegisterForm() {
           <>
             {extra}
             <div className="form-group">
-              <label className="form-label">Years in Practice</label>
-              <div className="input-wrap">
-                <span className="input-icon">📅</span>
-                <select className="form-select" defaultValue="1–5">
-                  <option>1–5</option>
-                  <option>5–10</option>
-                  <option>10–20</option>
-                  <option>20+</option>
-                </select>
-              </div>
+              <FloatingSelect label="Years in Practice" defaultValue="1–5">
+                <option>1–5</option>
+                <option>5–10</option>
+                <option>10–20</option>
+                <option>20+</option>
+              </FloatingSelect>
             </div>
           </>
         );
@@ -546,22 +568,14 @@ export function RegisterForm() {
             {extra}
             <div className="form-row">
               <div className="form-group">
-                <label className="form-label">Surgical Specialty</label>
-                <div className="input-wrap">
-                  <span className="input-icon">🔪</span>
-                  <input type="text" className="form-input" placeholder="e.g. Cardiac Surgery" />
-                </div>
+                <FloatingInput type="text" label="Surgical Specialty" />
               </div>
               <div className="form-group">
-                <label className="form-label">Type of Practice</label>
-                <div className="input-wrap">
-                  <span className="input-icon">🏥</span>
-                  <select className="form-select" defaultValue="Public Hospital">
-                    <option>Public Hospital</option>
-                    <option>Private</option>
-                    <option>Academic</option>
-                  </select>
-                </div>
+                <FloatingSelect label="Type of Practice" defaultValue="Public Hospital">
+                  <option>Public Hospital</option>
+                  <option>Private</option>
+                  <option>Academic</option>
+                </FloatingSelect>
               </div>
             </div>
           </>
@@ -572,26 +586,18 @@ export function RegisterForm() {
             {extra}
             <div className="form-row">
               <div className="form-group">
-                <label className="form-label">Training Program</label>
-                <div className="input-wrap">
-                  <span className="input-icon">🎓</span>
-                  <input type="text" className="form-input" placeholder="Specialty training" />
-                </div>
+                <FloatingInput type="text" label="Training Program" />
               </div>
               <div className="form-group">
-                <label className="form-label">Year of Training</label>
-                <div className="input-wrap">
-                  <span className="input-icon">📅</span>
-                  <select className="form-select" defaultValue="PGY-1">
-                    <option>PGY-1</option>
-                    <option>PGY-2</option>
-                    <option>PGY-3</option>
-                    <option>PGY-4</option>
-                    <option>PGY-5</option>
-                    <option>PGY-6</option>
-                    <option>PGY-7</option>
-                  </select>
-                </div>
+                <FloatingSelect label="Year of Training" defaultValue="PGY-1">
+                  <option>PGY-1</option>
+                  <option>PGY-2</option>
+                  <option>PGY-3</option>
+                  <option>PGY-4</option>
+                  <option>PGY-5</option>
+                  <option>PGY-6</option>
+                  <option>PGY-7</option>
+                </FloatingSelect>
               </div>
             </div>
           </>
@@ -663,10 +669,41 @@ export function RegisterForm() {
 
           <div className={cn("alert", error && "error")}>{error ? `⚠️ ${error}` : null}</div>
 
-          {!success && currentStep === 1 && (
+          {!success && oauthPendingCode && (
+            <div id="oauth-complete">
+              <h2 className="step-title">Complete Facebook Registration</h2>
+              <p className="step-subtitle">
+                Facebook authenticated successfully, but your account does not expose an email address.
+                Enter your email to finish creating your patient account.
+              </p>
+              <div className="form-group">
+                <FloatingInput
+                  type="email"
+                  label="Email Address"
+                  value={oauthCompleteEmail}
+                  onChange={(e) => setOauthCompleteEmail(e.target.value)}
+                />
+              </div>
+              <div className="btn-row">
+                <button
+                  type="button"
+                  className="btn-next"
+                  onClick={handleCompleteOAuthRegistration}
+                  disabled={completeOAuthMutation.isPending}
+                >
+                  {completeOAuthMutation.isPending ? "Creating account..." : "Complete Registration →"}
+                </button>
+              </div>
+              <p className="login-link">
+                Already have an account? <Link href="/login">Sign in here</Link>
+              </p>
+            </div>
+          )}
+
+          {!success && !oauthPendingCode && currentStep === 1 && (
             <div id="step1">
               <h2 className="step-title">Create Your Account</h2>
-              <p className="step-subtitle">Choose how you&apos;ll be using MedAuthority</p>
+              <p className="step-subtitle">Choose how you&apos;ll be using DrInsight</p>
 
               <div className="type-grid">
                 <div
@@ -737,16 +774,11 @@ export function RegisterForm() {
                 </div>
               )}
 
-              <div className="social-grid">
-                <button type="button" className="social-btn">
-                  <GoogleIcon />
-                  Google
-                </button>
-                <button type="button" className="social-btn">
-                  <FacebookIcon />
-                  Facebook
-                </button>
-              </div>
+              <AuthSocialButtons
+                className="social-grid"
+                onOAuth={handleOAuth}
+                oauthLoading={oauthLoading}
+              />
               <div className="divider">or register with email</div>
               <div className="btn-row">
                 <button type="button" className="btn-next" onClick={() => goStep(2)}>
@@ -759,95 +791,66 @@ export function RegisterForm() {
             </div>
           )}
 
-          {!success && currentStep === 2 && (
+          {!success && !oauthPendingCode && currentStep === 2 && (
             <div id="step2">
               <h2 className="step-title">Personal Information</h2>
               <p className="step-subtitle">{step2Subtitle}</p>
 
               <div className="form-row">
                 <div className="form-group">
-                  <label className="form-label">First Name</label>
-                  <div className="input-wrap">
-                    <span className="input-icon">👤</span>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="John"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                    />
-                  </div>
+                  <FloatingInput
+                    type="text"
+                    label="First Name"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                  />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Last Name</label>
-                  <div className="input-wrap">
-                    <span className="input-icon">👤</span>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="Smith"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Email Address</label>
-                <div className="input-wrap">
-                  <span className="input-icon">✉️</span>
-                  <input
-                    type="email"
-                    className="form-input"
-                    placeholder="john@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                  <FloatingInput
+                    type="text"
+                    label="Last Name"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
                   />
                 </div>
               </div>
               <div className="form-group">
-                <label className="form-label">
-                  Phone Number <span style={{ fontWeight: 400, color: "var(--gray-400)" }}>(optional)</span>
-                </label>
-                <div className="input-wrap">
-                  <span className="input-icon">📱</span>
-                  <input
-                    type="tel"
-                    className="form-input"
-                    placeholder="+1 (555) 000-0000"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                  />
-                </div>
+                <FloatingInput
+                  type="email"
+                  label="Email Address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <div className="form-group">
+                <FloatingInput
+                  type="tel"
+                  label="Phone Number"
+                  hint="Optional"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
               </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label className="form-label">Date of Birth</label>
-                  <div className="input-wrap">
-                    <span className="input-icon">📅</span>
-                    <input
-                      type="date"
-                      className="form-input"
-                      value={dob}
-                      onChange={(e) => setDob(e.target.value)}
-                    />
-                  </div>
+                  <FloatingInput
+                    type="date"
+                    label="Date of Birth"
+                    value={dob}
+                    onChange={(e) => setDob(e.target.value)}
+                  />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Country</label>
-                  <div className="input-wrap">
-                    <span className="input-icon">🌍</span>
-                    <select className="form-select" value={country} onChange={(e) => setCountry(e.target.value)}>
-                      <option value="">Select country…</option>
-                      <option>United States</option>
-                      <option>United Kingdom</option>
-                      <option>Pakistan</option>
-                      <option>India</option>
-                      <option>Canada</option>
-                      <option>Australia</option>
-                      <option>Other</option>
-                    </select>
-                  </div>
+                  <FloatingSelect label="Country" value={country} onChange={(e) => setCountry(e.target.value)}>
+                    <option value="">Select country…</option>
+                    <option>United States</option>
+                    <option>United Kingdom</option>
+                    <option>Pakistan</option>
+                    <option>India</option>
+                    <option>Canada</option>
+                    <option>Australia</option>
+                    <option>Other</option>
+                  </FloatingSelect>
                 </div>
               </div>
 
@@ -864,7 +867,7 @@ export function RegisterForm() {
             </div>
           )}
 
-          {!success && currentStep === 3 && (
+          {!success && !oauthPendingCode && currentStep === 3 && (
             <div id="step3">
               {accountType !== "physician" && (
                 <div id="step3patient">
@@ -907,20 +910,16 @@ export function RegisterForm() {
                     />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Language Preference</label>
-                    <div className="input-wrap">
-                      <span className="input-icon">🌐</span>
-                      <select className="form-select" defaultValue="English">
-                        <option>English</option>
-                        <option>Urdu</option>
-                        <option>Arabic</option>
-                        <option>Hindi</option>
-                        <option>French</option>
-                        <option>German</option>
-                        <option>Spanish</option>
-                        <option>Other</option>
-                      </select>
-                    </div>
+                    <FloatingSelect label="Language Preference" defaultValue="English">
+                      <option>English</option>
+                      <option>Urdu</option>
+                      <option>Arabic</option>
+                      <option>Hindi</option>
+                      <option>French</option>
+                      <option>German</option>
+                      <option>Spanish</option>
+                      <option>Other</option>
+                    </FloatingSelect>
                   </div>
                 </div>
               )}
@@ -930,32 +929,23 @@ export function RegisterForm() {
                   <h2 className="step-title">Professional Profile</h2>
                   <p className="step-subtitle">Help us match you with relevant clinical content</p>
                   <div className="form-group">
-                    <label className="form-label">Medical License Number</label>
-                    <div className="input-wrap">
-                      <span className="input-icon">📋</span>
-                      <input
-                        type="text"
-                        className="form-input"
-                        placeholder="MD-12345678"
-                        value={licenseNumber}
-                        onChange={(e) => setLicenseNumber(e.target.value)}
-                      />
-                    </div>
+                    <FloatingInput
+                      type="text"
+                      label="Medical License Number"
+                      value={licenseNumber}
+                      onChange={(e) => setLicenseNumber(e.target.value)}
+                    />
                     <p className="input-note">⚠️ License will be verified before author/reviewer access is granted</p>
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Regulatory Body / Medical Council</label>
-                    <div className="input-wrap">
-                      <span className="input-icon">🏛️</span>
-                      <select className="form-select" defaultValue="Pakistan Medical Commission (PMC)">
-                        <option>Pakistan Medical Commission (PMC)</option>
-                        <option>General Medical Council (GMC — UK)</option>
-                        <option>American Medical Association (AMA)</option>
-                        <option>Medical Council of India (MCI)</option>
-                        <option>Australian Medical Association (AMA-AU)</option>
-                        <option>Other</option>
-                      </select>
-                    </div>
+                    <FloatingSelect label="Regulatory Body / Medical Council" defaultValue="Pakistan Medical Commission (PMC)">
+                      <option>Pakistan Medical Commission (PMC)</option>
+                      <option>General Medical Council (GMC — UK)</option>
+                      <option>American Medical Association (AMA)</option>
+                      <option>Medical Council of India (MCI)</option>
+                      <option>Australian Medical Association (AMA-AU)</option>
+                      <option>Other</option>
+                    </FloatingSelect>
                   </div>
                   <div className="form-group">
                     <label className="form-label">Clinical Interests</label>
@@ -1016,27 +1006,21 @@ export function RegisterForm() {
             </div>
           )}
 
-          {!success && currentStep === 4 && (
+          {!success && !oauthPendingCode && currentStep === 4 && (
             <div id="step4">
               <h2 className="step-title">Secure Your Account</h2>
               <p className="step-subtitle">Create a strong password to protect your health data</p>
 
               <div className="form-group">
-                <label className="form-label">Password</label>
-                <div className="input-wrap">
-                  <span className="input-icon">🔒</span>
-                  <input
-                    type={showPw1 ? "text" : "password"}
-                    className="form-input"
-                    placeholder="Create a strong password"
-                    style={{ paddingRight: 42 }}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                  <button type="button" className="pw-toggle-btn" onClick={() => setShowPw1((v) => !v)}>
-                    👁️
-                  </button>
-                </div>
+                <FloatingInput
+                  type={showPw1 ? "text" : "password"}
+                  label="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  showPasswordToggle
+                  passwordVisible={showPw1}
+                  onPasswordToggle={() => setShowPw1((v) => !v)}
+                />
                 <div className="pw-bar">
                   {[1, 2, 3, 4].map((i) => (
                     <div
@@ -1049,29 +1033,25 @@ export function RegisterForm() {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Confirm Password</label>
-                <div className="input-wrap">
-                  <span className="input-icon">🔒</span>
-                  <input
-                    type={showPw2 ? "text" : "password"}
-                    className="form-input"
-                    placeholder="Repeat your password"
-                    style={{ paddingRight: 42 }}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                  />
-                  <button type="button" className="pw-toggle-btn" onClick={() => setShowPw2((v) => !v)}>
-                    👁️
-                  </button>
-                  {confirmPassword && (
-                    <span
-                      className="pw-match"
-                      style={{ color: password === confirmPassword ? "var(--green)" : "var(--red)" }}
-                    >
-                      {password === confirmPassword ? "✓" : "✗"}
-                    </span>
-                  )}
-                </div>
+                <FloatingInput
+                  type={showPw2 ? "text" : "password"}
+                  label="Confirm Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  showPasswordToggle
+                  passwordVisible={showPw2}
+                  onPasswordToggle={() => setShowPw2((v) => !v)}
+                  suffix={
+                    confirmPassword ? (
+                      <span
+                        className="absolute right-10 top-1/2 z-10 -translate-y-1/2 text-[.9rem]"
+                        style={{ color: password === confirmPassword ? "var(--green)" : "var(--red)" }}
+                      >
+                        {password === confirmPassword ? "✓" : "✗"}
+                      </span>
+                    ) : null
+                  }
+                />
               </div>
 
               <div className="toggle-row">

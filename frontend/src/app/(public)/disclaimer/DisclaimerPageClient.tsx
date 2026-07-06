@@ -143,17 +143,11 @@ export default function DisclaimerPageClient() {
         <div className="progress-fill" style={{ width: `${progress}%` }} />
       </div>
 
-      <div className="breadcrumb">
-        <div className="breadcrumb-inner">
-          🏠 <Link href="/">Home</Link> › <span>Disclaimer</span>
-        </div>
-      </div>
-
       <div className="critical-banner">
         <div className="cb-inner">
           <h2>🚨 IMPORTANT MEDICAL NOTICE</h2>
           <p>
-            The content published on MedAuthority is intended for general informational and educational purposes only.
+            The content published on DrInsight is intended for general informational and educational purposes only.
             It is <strong>not a substitute</strong> for professional medical advice, diagnosis, or treatment. Always
             seek the advice of a qualified healthcare provider regarding any medical condition. Never disregard
             professional medical advice or delay seeking it because of something you have read on this platform.
@@ -262,7 +256,7 @@ export default function DisclaimerPageClient() {
               <div className="ch">🩺 No Professional-Patient Relationship Is Formed</div>
               <ul>
                 <li>
-                  Reading, accessing, or interacting with any content on MedAuthority does <strong>not</strong> create a
+                  Reading, accessing, or interacting with any content on DrInsight does <strong>not</strong> create a
                   doctor-patient, therapist-patient, pharmacist-patient, or any other professional-patient relationship
                 </li>
                 <li>
@@ -429,7 +423,7 @@ export default function DisclaimerPageClient() {
               </p>
               <p>
                 To report potentially outdated content: 📧{" "}
-                <a href="mailto:editorial@medauthority.com">editorial@medauthority.com</a>
+                <a href="mailto:editorial@drinsight.org">editorial@drinsight.org</a>
               </p>
             </div>
           </div>
@@ -617,7 +611,7 @@ export default function DisclaimerPageClient() {
               <ul>
                 <li>
                   Authors and medical reviewers are independent contributors — their inclusion does not constitute an
-                  endorsement of MedAuthority by their employing institution or professional society
+                  endorsement of DrInsight by their employing institution or professional society
                 </li>
                 <li>
                   Authors contribute in their personal professional capacity; views expressed may not represent any
@@ -658,7 +652,7 @@ export default function DisclaimerPageClient() {
             <div className="prose">
               <p>
                 To report a broken or inappropriate external link: 📧{" "}
-                <a href="mailto:editorial@medauthority.com">editorial@medauthority.com</a>
+                <a href="mailto:editorial@drinsight.org">editorial@drinsight.org</a>
               </p>
             </div>
           </div>
@@ -671,7 +665,7 @@ export default function DisclaimerPageClient() {
               <div className="ch">💰 Affiliate & Sponsorship Transparency</div>
               <ul>
                 <li>
-                  MedAuthority may participate in affiliate marketing programs — we may earn a commission if you purchase
+                  DrInsight may participate in affiliate marketing programs — we may earn a commission if you purchase
                   through an affiliate link, at no additional cost to you
                 </li>
                 <li>
@@ -696,7 +690,7 @@ export default function DisclaimerPageClient() {
             </div>
             <div className="prose">
               <p>
-                MedAuthority is accessible globally but content may primarily reflect international guidelines (WHO,
+                DrInsight is accessible globally but content may primarily reflect international guidelines (WHO,
                 international medical societies) and US, UK, and European clinical standards where specified. Drug names,
                 availability, dosages, and approval status vary significantly by country.
               </p>
@@ -744,7 +738,7 @@ export default function DisclaimerPageClient() {
             <div className="callout c-red">
               <div className="ch">⚖️ Legal Limitation of Liability</div>
               <p>
-                To the fullest extent permitted by applicable law, MedAuthority and its officers, directors, employees,
+                To the fullest extent permitted by applicable law, DrInsight and its officers, directors, employees,
                 authors, reviewers, and agents shall not be liable for:
               </p>
             </div>
@@ -817,23 +811,23 @@ export default function DisclaimerPageClient() {
             <div className="contact-grid">
               <div className="contact-card">
                 <h4>📝 Corrections & Inaccuracies</h4>
-                <a href="mailto:corrections@medauthority.com">corrections@medauthority.com</a>
+                <a href="mailto:corrections@drinsight.org">corrections@drinsight.org</a>
                 <p>Reviewed within 5 business days</p>
               </div>
               <div className="contact-card">
                 <h4>✍️ General Editorial</h4>
-                <a href="mailto:editorial@medauthority.com">editorial@medauthority.com</a>
+                <a href="mailto:editorial@drinsight.org">editorial@drinsight.org</a>
                 <p>All editorial enquiries</p>
               </div>
               <div className="contact-card">
                 <h4>🧠 Safe Messaging Concerns</h4>
-                <a href="mailto:safemessaging@medauthority.com">safemessaging@medauthority.com</a>
+                <a href="mailto:safemessaging@drinsight.org">safemessaging@drinsight.org</a>
                 <p>Mental health content issues</p>
               </div>
               <div className="contact-card">
                 <h4>📍 Mailing Address</h4>
                 <p>
-                  MedAuthority Inc.
+                  DrInsight
                   <br />
                   123 Medical Plaza, Suite 400
                   <br />

@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useState, type ReactElement, type ReactNode } from "react";
 import Link from "next/link";
 import { FAQ_CATEGORIES, FAQ_SECTIONS } from "@/components/pages/faq-data";
+import { CONTACT_PHONE, CONTACT_PHONE_TEL } from "@/lib/site-contact";
 import "@/styles/faq-page.css";
 
 function ChevronIcon() {
@@ -18,14 +19,6 @@ function SearchIcon() {
     <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
       <circle cx="11" cy="11" r="8" />
       <path d="m21 21-4.35-4.35" />
-    </svg>
-  );
-}
-
-function BreadcrumbChevron() {
-  return (
-    <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-      <path d="m9 18 6-6-6-6" />
     </svg>
   );
 }
@@ -143,14 +136,6 @@ export function FaqPageContent() {
         </div>
       </div>
 
-      <div className="breadcrumb">
-        <div className="breadcrumb-inner">
-          <Link href="/">Home</Link>
-          <BreadcrumbChevron />
-          <span>FAQ</span>
-        </div>
-      </div>
-
       <div className="faq-layout">
         <aside className="faq-sidebar">
           <h3>Browse by Category</h3>
@@ -234,15 +219,15 @@ export function FaqPageContent() {
               <h4>Live Chat</h4>
               <p>Mon–Fri, 8AM–8PM</p>
             </Link>
-            <a href="mailto:support@medauthority.com" className="contact-option">
+            <a href="mailto:support@drinsight.org" className="contact-option">
               <div className="opt-icon">✉️</div>
               <h4>Email Support</h4>
               <p>Reply within 24 hours</p>
             </a>
-            <a href="tel:+18006334357" className="contact-option">
+            <a href={`tel:${CONTACT_PHONE_TEL}`} className="contact-option">
               <div className="opt-icon">📞</div>
               <h4>Call Us</h4>
-              <p>+1 (800) MED-HELP</p>
+              <p>{CONTACT_PHONE}</p>
             </a>
           </div>
         </div>

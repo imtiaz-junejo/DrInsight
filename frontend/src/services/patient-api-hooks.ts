@@ -49,9 +49,19 @@ export interface PaymentRecord {
   currency: string;
   status: string;
   confirmedAt?: string | null;
+  createdAt?: string;
+  providerIntentId?: string;
+  receiptUrl?: string | null;
+  invoiceNumber?: string | null;
   appointment?: {
+    id?: string;
     scheduledAt: string;
-    doctor?: { user?: { firstName: string; lastName: string } };
+    consultationType?: string;
+    doctor?: { user?: { firstName: string; lastName: string }; specialty?: string };
+  };
+  bookingDraft?: {
+    scheduledAt?: string;
+    doctor?: { user?: { firstName: string; lastName: string }; specialty?: string };
   };
 }
 
@@ -118,14 +128,21 @@ export function usePatientPrescriptions() {
   });
 }
 
-export function usePatientPayments() {
+export function usePatientPayments(params?: { page?: number; limit?: number; status?: string; search?: string }) {
   return useQuery({
-    queryKey: ["patient-payments"],
+    queryKey: ["patient-payments", params],
     queryFn: async () => {
-      const { data } = await api.get<PaymentRecord[]>("/payments/history");
+      const { data } = await api.get<{ data: PaymentRecord[]; meta: { total: number; page: number; limit: number; totalPages: number } }>(
+        "/payments/history",
+        { params },
+      );
       return data;
     },
   });
+}
+
+export function downloadPaymentInvoice(paymentId: string) {
+  return api.get(`/payments/${paymentId}/invoice`, { responseType: "blob" });
 }
 
 export function useCancelAppointment() {

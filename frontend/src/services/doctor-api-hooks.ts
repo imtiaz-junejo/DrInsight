@@ -128,9 +128,10 @@ export function useDoctorBlogPosts(authorId?: string) {
   return useQuery({
     queryKey: ["doctor-blog", authorId],
     queryFn: async () => {
-      const { data } = await api.get<Paginated<BlogPost & { status?: string; viewCount?: number }>>("/blog", {
-        params: { authorId, limit: 50 },
-      });
+      const { data } = await api.get<Paginated<BlogPost & { status?: string; viewCount?: number }>>(
+        "/blog/manage",
+        { params: { authorId, limit: 50, status: "ALL" } },
+      );
       return data;
     },
     enabled: !!authorId,

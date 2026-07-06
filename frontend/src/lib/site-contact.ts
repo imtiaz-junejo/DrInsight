@@ -1,0 +1,2 @@
+export const CONTACT_PHONE = "+92 335 354 5545";
+export const CONTACT_PHONE_TEL = "+923353545545";

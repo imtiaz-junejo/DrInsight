@@ -5,7 +5,7 @@ import { SeoSettingsPageContent } from "@/components/admin/pages/SeoSettingsPage
 const routeId = "seo-settings" as const;
 
 export const metadata: Metadata = {
-  title: `${adminPageMeta[routeId][0]} — MedAuthority Admin`,
+  title: `${adminPageMeta[routeId][0]} — DrInsight Admin`,
   description: adminPageMeta[routeId][1],
 };
 

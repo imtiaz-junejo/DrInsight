@@ -582,6 +582,7 @@ export type AskDoctorQuestionSeed = {
   answer: string | null;
   submitterName: string | null;
   isAnonymous: boolean;
+  helpfulCount: number;
   status: QuestionStatus;
   answeredAt: Date | null;
   doctorIndex: number | null;
@@ -621,6 +622,7 @@ export function buildAskDoctorQuestions(): AskDoctorQuestionSeed[] {
           : null,
       submitterName: isAnonymous ? null : name,
       isAnonymous,
+      helpfulCount: status === QuestionStatus.ANSWERED ? 3 + (i % 47) : 0,
       status,
       answeredAt,
       doctorIndex,

@@ -2,10 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+import { isAxiosError } from "axios";
 import { cn } from "@/lib/utils";
+import { api } from "@/lib/api";
 
-type ViewState = "form" | "success" | "expired";
+type ViewState = "loading" | "form" | "success" | "expired";
 type AlertType = "error" | "success" | "warning" | null;
 
 const PW_HINTS: Record<number, string> = {
@@ -32,6 +35,12 @@ function getPasswordScore(pw: string) {
   return score;
 }
 
+function formatCountdown(totalSecs: number) {
+  const m = Math.floor(totalSecs / 60);
+  const s = totalSecs % 60;
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
 const REQ_ITEMS = [
   { dot: "8+", text: "At least 8 characters long" },
   { dot: "Aa", text: "Mix of uppercase and lowercase letters" },
@@ -42,18 +51,20 @@ const REQ_ITEMS = [
 
 export function ResetPasswordForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token") ?? "";
+
   const expiryTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const redirectTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const [view, setView] = useState<ViewState>("form");
+  const [view, setView] = useState<ViewState>("loading");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPw1, setShowPw1] = useState(false);
   const [showPw2, setShowPw2] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
   const [alertType, setAlertType] = useState<AlertType>(null);
-  const [expiryDisplay, setExpiryDisplay] = useState("14:59");
+  const [expiryDisplay, setExpiryDisplay] = useState("59:59");
   const [expiryWarning, setExpiryWarning] = useState(false);
   const [redirectSecs, setRedirectSecs] = useState(5);
 
@@ -75,29 +86,99 @@ export function ResetPasswordForm() {
   }, []);
 
   const showExpired = useCallback(() => {
+    if (expiryTimerRef.current) clearInterval(expiryTimerRef.current);
     setView("expired");
   }, []);
 
-  useEffect(() => {
-    let totalSecs = 15 * 60 - 1;
+  const startExpiryCountdown = useCallback(
+    (expiresAt: string) => {
+      if (expiryTimerRef.current) clearInterval(expiryTimerRef.current);
 
-    expiryTimerRef.current = setInterval(() => {
-      if (totalSecs <= 0) {
-        if (expiryTimerRef.current) clearInterval(expiryTimerRef.current);
-        showExpired();
+      const tick = () => {
+        const remainingSecs = Math.max(0, Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000));
+        if (remainingSecs <= 0) {
+          showExpired();
+          return;
+        }
+        setExpiryDisplay(formatCountdown(remainingSecs));
+        setExpiryWarning(remainingSecs < 120);
+      };
+
+      tick();
+      expiryTimerRef.current = setInterval(tick, 1000);
+    },
+    [showExpired],
+  );
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: async (payload: { token: string; password: string; confirmPassword: string }) => {
+      const { data } = await api.post<{ message: string }>("/auth/reset-password", payload);
+      return data;
+    },
+    onSuccess: () => {
+      if (expiryTimerRef.current) clearInterval(expiryTimerRef.current);
+      setView("success");
+    },
+    onError: (err) => {
+      if (isAxiosError(err)) {
+        const message = err.response?.data?.message;
+        if (Array.isArray(message)) {
+          showAlert(message.join(", "), "error");
+          return;
+        }
+        if (typeof message === "string" && message) {
+          if (message.toLowerCase().includes("expired") || message.toLowerCase().includes("invalid")) {
+            showExpired();
+            return;
+          }
+          showAlert(message, "error");
+          return;
+        }
+        if (!err.response) {
+          showAlert("Cannot reach the server. Make sure the backend is running on port 4000.", "error");
+          return;
+        }
+      }
+      showAlert("Something went wrong. Please try again.", "error");
+    },
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function validateToken() {
+      if (!token.trim()) {
+        setView("expired");
         return;
       }
-      totalSecs--;
-      const m = Math.floor(totalSecs / 60);
-      const s = totalSecs % 60;
-      setExpiryDisplay(`${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`);
-      if (totalSecs < 120) setExpiryWarning(true);
-    }, 1000);
+
+      try {
+        const { data } = await api.get<{ valid: boolean; expiresAt?: string }>(
+          "/auth/reset-password/validate",
+          { params: { token } },
+        );
+
+        if (cancelled) return;
+
+        if (!data.valid || !data.expiresAt) {
+          setView("expired");
+          return;
+        }
+
+        setView("form");
+        startExpiryCountdown(data.expiresAt);
+      } catch {
+        if (!cancelled) setView("expired");
+      }
+    }
+
+    void validateToken();
 
     return () => {
+      cancelled = true;
       if (expiryTimerRef.current) clearInterval(expiryTimerRef.current);
     };
-  }, [showExpired]);
+  }, [token, startExpiryCountdown]);
 
   useEffect(() => {
     if (view !== "success") return;
@@ -107,7 +188,6 @@ export function ResetPasswordForm() {
       setRedirectSecs((prev) => {
         if (prev <= 1) {
           if (redirectTimerRef.current) clearInterval(redirectTimerRef.current);
-          router.push("/login");
           return 0;
         }
         return prev - 1;
@@ -117,11 +197,19 @@ export function ResetPasswordForm() {
     return () => {
       if (redirectTimerRef.current) clearInterval(redirectTimerRef.current);
     };
-  }, [view, router]);
+  }, [view]);
+
+  useEffect(() => {
+    if (view === "success" && redirectSecs === 0) {
+      router.push("/login");
+    }
+  }, [view, redirectSecs, router]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Enter" && view === "form" && !submitting) handleReset();
+      if (e.key === "Enter" && view === "form" && !resetPasswordMutation.isPending) {
+        void handleReset();
+      }
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
@@ -137,7 +225,7 @@ export function ResetPasswordForm() {
 
   const match = getMatchIndicator();
 
-  function handleReset() {
+  async function handleReset() {
     if (!password) {
       showAlert("⚠️ Please enter a new password.", "error");
       return;
@@ -166,14 +254,16 @@ export function ResetPasswordForm() {
       showAlert("⚠️ Passwords do not match.", "error");
       return;
     }
+    if (!token.trim()) {
+      showExpired();
+      return;
+    }
 
-    setSubmitting(true);
-    if (expiryTimerRef.current) clearInterval(expiryTimerRef.current);
-
-    setTimeout(() => {
-      setView("success");
-      setSubmitting(false);
-    }, 2000);
+    await resetPasswordMutation.mutateAsync({
+      token,
+      password,
+      confirmPassword,
+    });
   }
 
   return (
@@ -211,6 +301,12 @@ export function ResetPasswordForm() {
 
       <div className="page-right">
         <div className="page-card">
+          {view === "loading" && (
+            <div style={{ textAlign: "center", padding: "40px 0" }}>
+              <span className="spinner" style={{ borderColor: "rgba(26,86,160,.2)", borderTopColor: "var(--blue)" }} />
+            </div>
+          )}
+
           {view === "form" && (
             <div id="formState">
               <div className="card-icon">🛡️</div>
@@ -304,10 +400,10 @@ export function ResetPasswordForm() {
               <button
                 type="button"
                 className="submit-btn"
-                disabled={submitting}
-                onClick={handleReset}
+                disabled={resetPasswordMutation.isPending}
+                onClick={() => void handleReset()}
               >
-                {submitting ? (
+                {resetPasswordMutation.isPending ? (
                   <>
                     <span className="spinner" />
                     Updating…
@@ -325,7 +421,7 @@ export function ResetPasswordForm() {
               </div>
 
               <div className="security-box">
-                🔒 This is a one-time secure link. Once used, it will expire immediately. MedAuthority staff will never
+                🔒 This is a one-time secure link. Once used, it will expire immediately. DrInsight staff will never
                 contact you asking for your password.
               </div>
             </div>
@@ -336,7 +432,7 @@ export function ResetPasswordForm() {
               <div className="success-check">✓</div>
               <div className="success-title">Password Updated!</div>
               <p className="success-msg">
-                Your MedAuthority password has been reset successfully. You can now sign in with your new password.
+                Your DrInsight password has been reset successfully. You can now sign in with your new password.
               </p>
               <div className="redirect-bar">
                 <span>🔄</span>

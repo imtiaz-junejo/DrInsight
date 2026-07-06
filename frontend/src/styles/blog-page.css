@@ -37,27 +37,6 @@
   list-style: none;
 }
 
-.blog-page .breadcrumb {
-  background: var(--gray-50);
-  border-bottom: 1px solid var(--gray-200);
-  padding: 8px 18px;
-}
-
-.blog-page .breadcrumb-inner {
-  max-width: 1200px;
-  margin: auto;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 0.74rem;
-  color: var(--gray-400);
-}
-
-.blog-page .breadcrumb-inner span {
-  color: var(--blue);
-  font-weight: 500;
-}
-
 .blog-page .page-hero {
   background: linear-gradient(135deg, var(--blue-dark), var(--blue) 55%, var(--teal));
   color: #fff;
@@ -457,6 +436,8 @@
   transition: var(--transition);
   cursor: pointer;
   background: #fff;
+  text-decoration: none;
+  color: inherit;
 }
 
 .blog-page .trending-item:hover {
@@ -775,6 +756,9 @@
   gap: 10px;
   cursor: pointer;
   transition: var(--transition);
+  width: 100%;
+  text-align: left;
+  font: inherit;
 }
 
 .blog-page .cat-tile:hover {

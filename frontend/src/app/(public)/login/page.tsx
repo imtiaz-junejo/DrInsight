@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import { AuthLeftPanel } from "@/components/auth/AuthLeftPanel";
 import { LoginForm } from "@/components/auth/LoginForm";
-import { Breadcrumb } from "@/components/layout/Breadcrumb";
 
 export const metadata = {
   title: "Login — DrInsight",
@@ -10,9 +9,7 @@ export const metadata = {
 
 export default function LoginPage() {
   return (
-    <>
-      <Breadcrumb items={[{ label: "Login" }]} />
-      <div className="grid min-h-[calc(100vh-112px)] lg:grid-cols-2">
+    <div className="grid min-h-[calc(100vh-112px)] lg:grid-cols-2">
         <AuthLeftPanel
           eyebrow="PATIENT & DOCTOR PORTAL"
           title={
@@ -36,6 +33,5 @@ export default function LoginPage() {
           </Suspense>
         </div>
       </div>
-    </>
   );
 }

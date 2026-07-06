@@ -1,9 +1,9 @@
 import { EditorialPolicyContent } from "./EditorialPolicyContent";
 
 export const metadata = {
-  title: "Editorial Policy — MedAuthority",
+  title: "Editorial Policy — DrInsight",
   description:
-    "MedAuthority editorial policy — our commitment to accurate, evidence-based, clinically reviewed medical content written by qualified professionals.",
+    "DrInsight editorial policy — our commitment to accurate, evidence-based, clinically reviewed medical content written by qualified professionals.",
 };
 
 export default function EditorialPolicyPage() {

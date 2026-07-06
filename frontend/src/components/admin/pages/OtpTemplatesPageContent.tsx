@@ -42,10 +42,10 @@ export function OtpTemplatesPageContent() {
             <input type="number" defaultValue={60} />
           </FormItem>
           <FormItem label="Email OTP Message Template" full>
-            <textarea defaultValue="Your MedAuthority verification code is: {{otp_code}}. This code expires in 10 minutes. If you did not request this, please ignore this email." />
+            <textarea defaultValue="Your DrInsight verification code is: {{otp_code}}. This code expires in 10 minutes. If you did not request this, please ignore this email." />
           </FormItem>
           <FormItem label="SMS OTP Message Template" full>
-            <textarea defaultValue="MedAuthority code: {{otp_code}} (valid 10 mins). Do not share this code with anyone." />
+            <textarea defaultValue="DrInsight code: {{otp_code}} (valid 10 mins). Do not share this code with anyone." />
           </FormItem>
         </FormGrid>
       </AdminPanel>

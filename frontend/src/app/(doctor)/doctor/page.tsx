@@ -3,7 +3,7 @@ import { doctorPageMeta } from "@/config/doctor-nav";
 import { DashboardPageContent } from "@/components/doctor/pages/DashboardPageContent";
 
 export const metadata: Metadata = {
-  title: `${doctorPageMeta.dashboard[0]} — MedAuthority`,
+  title: `${doctorPageMeta.dashboard[0]} — DrInsight`,
   description: doctorPageMeta.dashboard[1],
 };
 

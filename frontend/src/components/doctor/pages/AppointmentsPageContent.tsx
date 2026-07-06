@@ -117,6 +117,7 @@ export function AppointmentsPageContent() {
                 <th>Type</th>
                 <th>Date</th>
                 <th>Duration</th>
+                <th>Payment</th>
                 <th>Status</th>
                 <th>Notes</th>
               </tr>
@@ -124,13 +125,13 @@ export function AppointmentsPageContent() {
             <tbody>
               {appointmentsQuery.isLoading ? (
                 <tr>
-                  <td colSpan={6} style={{ textAlign: "center", color: "var(--gray-400)", padding: 24 }}>
+                  <td colSpan={7} style={{ textAlign: "center", color: "var(--gray-400)", padding: 24 }}>
                     Loading...
                   </td>
                 </tr>
               ) : pastAppointments.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={{ textAlign: "center", color: "var(--gray-400)", padding: 24 }}>
+                  <td colSpan={7} style={{ textAlign: "center", color: "var(--gray-400)", padding: 24 }}>
                     No past consultations
                   </td>
                 </tr>
@@ -147,6 +148,19 @@ export function AppointmentsPageContent() {
                       </td>
                       <td>{formatDate(appt.scheduledAt)}</td>
                       <td>{appt.durationMinutes} min</td>
+                      <td>
+                        <span className={`st-chip ${appt.payment?.status === "SUCCEEDED" ? "st-active" : appt.payment?.status === "REFUNDED" ? "st-refund" : "st-pending"}`}>
+                          {appt.payment?.status === "SUCCEEDED"
+                            ? "Paid"
+                            : appt.payment?.status === "REFUNDED"
+                              ? "Refunded"
+                              : appt.payment?.status === "FAILED"
+                                ? "Failed"
+                                : appt.payment?.status === "CANCELLED"
+                                  ? "Cancelled"
+                                  : "Pending"}
+                        </span>
+                      </td>
                       <td>
                         <span className="st-chip st-active">
                           {appt.status === "COMPLETED" ? "✓ Completed" : appt.status}

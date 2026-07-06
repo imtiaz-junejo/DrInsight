@@ -5,7 +5,7 @@ import { AuditLogPageContent } from "@/components/admin/pages/AuditLogPageConten
 const routeId = "audit-log" as const;
 
 export const metadata: Metadata = {
-  title: `${adminPageMeta[routeId][0]} — MedAuthority Admin`,
+  title: `${adminPageMeta[routeId][0]} — DrInsight Admin`,
   description: adminPageMeta[routeId][1],
 };
 

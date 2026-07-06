@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Create Account — MedAuthority</title>
+<title>Create Account — DrInsight</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -256,7 +256,7 @@ footer{background:var(--gray-900);color:#94a3b8}
   <div class="top-bar-inner">
     <div class="top-bar-left">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      Emergency: 911 | Medical Helpline: +1 (800) MED-HELP
+      Emergency: 911 | Medical Helpline: +92 335 354 5545
     </div>
     <div class="top-bar-right">
       <a href="about.html">About</a>
@@ -271,7 +271,7 @@ footer{background:var(--gray-900);color:#94a3b8}
   <div class="nav-inner">
     <a href="index.html" class="nav-logo">
       <div class="nav-logo-icon">✚</div>
-      <span class="nav-logo-text">MedAuthority</span>
+      <span class="nav-logo-text">DrInsight</span>
     </a>
     <div class="nav-links">
       <a href="index.html">Home</a>
@@ -353,7 +353,7 @@ footer{background:var(--gray-900);color:#94a3b8}
       <!-- ======= STEP 1 ======= -->
       <div id="step1">
         <h2 class="step-title">Create Your Account</h2>
-        <p class="step-subtitle">Choose how you'll be using MedAuthority</p>
+        <p class="step-subtitle">Choose how you'll be using DrInsight</p>
 
         <div class="type-grid">
           <div class="type-card" id="cardPatient" onclick="selectType('patient')">
@@ -659,7 +659,7 @@ footer{background:var(--gray-900);color:#94a3b8}
         <div class="success-state">
           <div class="success-icon">✅</div>
           <h3 class="success-h3">Account Created Successfully!</h3>
-          <p class="success-para" id="successMsg">Welcome to MedAuthority! We've sent a verification email to your inbox.</p>
+          <p class="success-para" id="successMsg">Welcome to DrInsight! We've sent a verification email to your inbox.</p>
           <a href="dashboard.html" class="success-btn">Go to My Dashboard →</a>
           <span class="resend-link">Didn't receive the email? Resend verification</span>
         </div>
@@ -676,7 +676,7 @@ footer{background:var(--gray-900);color:#94a3b8}
       <div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
           <div style="width:32px;height:32px;border-radius:7px;background:linear-gradient(135deg,var(--blue-dark),var(--teal));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700">✚</div>
-          <span class="footer-logo-text">MedAuthority</span>
+          <span class="footer-logo-text">DrInsight</span>
         </div>
         <p class="footer-brand-desc">Evidence-based medical information, health tools, and expert doctor consultations — reviewed and approved by licensed physicians.</p>
         <div class="footer-badges">
@@ -722,11 +722,11 @@ footer{background:var(--gray-900);color:#94a3b8}
       </div>
       <div>
         <div class="footer-col-title">Contact Information</div>
-        <div class="footer-contact-item"><span class="icon">📞</span>+1 (800) MED-HELP (633-4357)</div>
-        <div class="footer-contact-item"><span class="icon">📧</span>contact@medauthority.com</div>
+        <div class="footer-contact-item"><span class="icon">📞</span>+92 335 354 5545</div>
+        <div class="footer-contact-item"><span class="icon">📧</span>contact@drinsight.org</div>
         <div class="footer-contact-item"><span class="icon">📍</span>123 Medical Plaza, Suite 400, New York, NY 10001, USA</div>
         <div class="footer-contact-item"><span class="icon">🕐</span>Mon–Fri: 8AM–8PM | Sat: 9AM–5PM</div>
-        <div class="footer-contact-item"><span class="icon">📱</span><span class="wa">WhatsApp: +1 (800) 633-4357</span></div>
+        <div class="footer-contact-item"><span class="icon">📱</span><span class="wa">WhatsApp: +92 335 354 5545</span></div>
       </div>
       <div>
         <div class="footer-col-title">Expert Health Insights</div>
@@ -738,7 +738,7 @@ footer{background:var(--gray-900);color:#94a3b8}
     </div>
   </div>
   <div class="footer-bottom">
-    <span>© 2026 MedAuthority. All rights reserved. | This platform provides educational health information only — not a substitute for professional medical advice.</span>
+    <span>© 2026 DrInsight. All rights reserved. | This platform provides educational health information only — not a substitute for professional medical advice.</span>
     <div class="footer-bottom-links">
       <a href="#">Privacy Policy</a>
       <a href="#">Terms of Service</a>
@@ -930,7 +930,7 @@ function submitForm(){
   document.getElementById('successMsg').textContent=
     accountType==='physician'
       ? "Welcome! Your account is under review. We'll verify your credentials within 24–48 hours and notify you by email."
-      : "Welcome to MedAuthority! We've sent a verification email to your inbox.";
+      : "Welcome to DrInsight! We've sent a verification email to your inbox.";
   document.getElementById('successState').style.display='block';
   updateStepBar(5);
 }

@@ -51,6 +51,7 @@ export class AppointmentsService {
         include: {
           doctor: { include: { user: { select: { firstName: true, lastName: true, avatarUrl: true } } } },
           patient: { include: { user: { select: { firstName: true, lastName: true, avatarUrl: true } } } },
+          payment: { select: { status: true, amountCents: true, currency: true } },
         },
         orderBy: { scheduledAt: 'desc' },
       }),

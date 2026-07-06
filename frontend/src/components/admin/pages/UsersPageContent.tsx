@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   AdminButton,
   FilterPills,
@@ -12,25 +12,29 @@ import {
 import { formatRelativeTime, userRoleChip, userStatusChip } from "@/lib/admin-utils";
 import { useAdminUiStore } from "@/store/admin-ui.store";
 import {
-  usePendingUsers,
+  useAdminUsers,
   usePlatformStats,
   useUpdateUserStatus,
 } from "@/services/admin-api-hooks";
 
-// TODO: connect GET /users list when backend endpoint exists
 export function UsersPageContent() {
   const showToast = useAdminUiStore((s) => s.showToast);
   const [filterIndex, setFilterIndex] = useState(0);
   const statsQuery = usePlatformStats();
-  const pendingQuery = usePendingUsers();
   const updateStatus = useUpdateUserStatus();
 
+  const roleParam = useMemo(() => {
+    if (filterIndex === 1) return "PATIENT";
+    if (filterIndex === 2) return "DOCTOR";
+    if (filterIndex === 3) return "ADMIN";
+    return undefined;
+  }, [filterIndex]);
+
+  const usersQuery = useAdminUsers({ role: roleParam, limit: 100 });
   const stats = statsQuery.data;
-  const users = pendingQuery.data ?? [];
+  const users = usersQuery.data?.data ?? [];
+
   const filtered = users.filter((user) => {
-    if (filterIndex === 1) return user.role === "PATIENT";
-    if (filterIndex === 2) return user.role === "DOCTOR";
-    if (filterIndex === 3) return user.role === "ADMIN";
     if (filterIndex === 4) return user.status === "SUSPENDED";
     return true;
   });
@@ -45,7 +49,6 @@ export function UsersPageContent() {
       <StatusChip key={`${user.id}-s`} label={status.label} className={status.className} />,
       formatRelativeTime(user.createdAt),
       <div key={`${user.id}-a`} className="btn-row">
-        <AdminButton onClick={() => showToast("Opening profile...")}>View</AdminButton>
         {user.status === "PENDING" && user.role === "DOCTOR" ? (
           <AdminButton
             variant="green"
@@ -63,6 +66,15 @@ export function UsersPageContent() {
             }}
           >
             Reactivate
+          </AdminButton>
+        ) : user.status !== "ACTIVE" ? (
+          <AdminButton
+            variant="green"
+            onClick={() => {
+              updateStatus.mutate({ id: user.id, status: "ACTIVE" }, { onSuccess: () => showToast("User activated") });
+            }}
+          >
+            Activate
           </AdminButton>
         ) : (
           <AdminButton
@@ -85,14 +97,14 @@ export function UsersPageContent() {
           {
             ic: "ic1",
             icon: "👥",
-            num: stats ? String((stats.patientCount ?? 0) + (stats.doctorCount ?? 0)) : "—",
+            num: stats ? String(stats.userCount ?? (stats.patientCount + stats.doctorCount + (stats.adminCount ?? 0))) : "—",
             label: "Total Users",
-            tag: "Partial data",
+            tag: "Live data",
             tagClass: "tt-b",
           },
           { ic: "ic2", icon: "🧑‍🤝‍🧑", num: stats ? String(stats.patientCount) : "—", label: "Patients", tag: "Platform stats", tagClass: "tt-g" },
           { ic: "ic3", icon: "👨‍⚕️", num: stats ? String(stats.doctorCount) : "—", label: "Doctors", tag: "Platform stats", tagClass: "tt-a" },
-          { ic: "ic4", icon: "🛡️", num: "—", label: "Admins/Staff", tag: "No API", tagClass: "tt-b" },
+          { ic: "ic4", icon: "🛡️", num: stats ? String(stats.adminCount ?? 0) : "—", label: "Admins/Staff", tag: "Platform stats", tagClass: "tt-b" },
         ]}
       />
       <FilterPills
@@ -102,19 +114,11 @@ export function UsersPageContent() {
       />
       <PanelTable
         title="All Users"
-        actions={
-          <>
-            <AdminButton variant="primary" onClick={() => showToast("Opening add-user form...")}>
-              + Add User
-            </AdminButton>
-            <AdminButton onClick={() => showToast("Exporting CSV...")}>⬇ Export</AdminButton>
-          </>
-        }
         headers={["User", "Role", "Email", "Status", "Joined", "Actions"]}
         rows={rows}
-        loading={pendingQuery.isLoading}
-        pagerInfo={`Showing ${rows.length} pending users — TODO: full user list API`}
-        emptyMessage="No users match filter — only pending users available via API"
+        loading={usersQuery.isLoading}
+        pagerInfo={`Showing ${rows.length} of ${usersQuery.data?.meta.total ?? rows.length} users`}
+        emptyMessage="No users match filter"
       />
     </>
   );

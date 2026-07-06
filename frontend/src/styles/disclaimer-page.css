@@ -53,31 +53,6 @@
   transition: width 0.1s;
 }
 
-.disclaimer-page .breadcrumb {
-  background: var(--gray-50);
-  border-bottom: 1px solid var(--gray-200);
-  padding: 8px 18px;
-}
-
-.disclaimer-page .breadcrumb-inner {
-  max-width: 1200px;
-  margin: auto;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.72rem;
-  color: var(--gray-400);
-}
-
-.disclaimer-page .breadcrumb-inner a:hover {
-  color: var(--blue);
-}
-
-.disclaimer-page .breadcrumb-inner span {
-  color: var(--blue);
-  font-weight: 500;
-}
-
 .disclaimer-page .critical-banner {
   background: linear-gradient(135deg, #7f1d1d, #991b1b, #dc2626);
   color: #fff;

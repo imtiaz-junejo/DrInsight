@@ -486,6 +486,11 @@
   margin-bottom: 14px;
 }
 
+.register-page .social-grid button {
+  height: 44px;
+  border-radius: 5px;
+}
+
 .register-page .social-btn {
   display: flex;
   align-items: center;

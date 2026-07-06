@@ -4,7 +4,7 @@ import { DoctorShell } from "@/components/doctor/shell/DoctorShell";
 import "@/styles/doctor-dashboard.css";
 
 export const metadata: Metadata = {
-  title: "Doctor Dashboard — MedAuthority",
+  title: "Doctor Dashboard — DrInsight",
   robots: { index: false, follow: false },
 };
 

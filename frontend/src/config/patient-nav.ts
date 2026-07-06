@@ -18,6 +18,7 @@ export const patientNav: PatientNavGroup[] = [
     items: [
       { id: "dashboard", ico: "📊", name: "Overview", href: "/patient" },
       { id: "consultations", ico: "📅", name: "My Consultations", badge: "2", badgeClass: "sb-r", href: "/patient/consultations" },
+      { id: "payments", ico: "💳", name: "Payment History", href: "/patient/payments" },
       { id: "health", ico: "❤️", name: "Health Metrics", href: "/patient/health" },
     ],
   },
@@ -40,6 +41,7 @@ export const patientNav: PatientNavGroup[] = [
 export const patientPageMeta: Record<string, [string, string]> = {
   dashboard: ["Overview", "Your health activity and upcoming care at a glance"],
   consultations: ["My Consultations", "Upcoming and past doctor consultations"],
+  payments: ["Payment History", "Your consultation payments, receipts, and invoices"],
   health: ["Health Metrics", "Vitals, health scores, and tool history"],
   questions: ["My Questions", "Questions submitted to our medical team"],
   articles: ["Saved Articles", "Articles you've bookmarked for reading"],

@@ -62,12 +62,6 @@ export function TermsConditionsPageClient() {
         <div className="progress-fill" style={{ width: `${progress}%` }} />
       </div>
 
-      <div className="breadcrumb">
-        <div className="bc">
-          🏠 <Link href="/">Home</Link> › <span>Terms & Conditions</span>
-        </div>
-      </div>
-
       <div className="page-hero">
         <div className="hero-inner">
           <h1>⚖️ Terms & Conditions</h1>
@@ -146,10 +140,10 @@ export function TermsConditionsPageClient() {
             </div>
             <div className="prose">
               <p>
-                By accessing or using MedAuthority (the &quot;Platform&quot;), you agree to be legally bound by these
+                By accessing or using DrInsight (the &quot;Platform&quot;), you agree to be legally bound by these
                 Terms & Conditions (&quot;Terms&quot;), our Privacy Policy, and our Disclaimer. If you do not agree, you
                 must immediately stop using the platform. These Terms constitute a legally binding agreement between you
-                (&quot;User&quot;) and MedAuthority Inc. (&quot;we,&quot; &quot;us,&quot; &quot;our&quot;).
+                (&quot;User&quot;) and DrInsight (&quot;we,&quot; &quot;us,&quot; &quot;our&quot;).
               </p>
             </div>
             <div className="callout c-blue">
@@ -191,7 +185,7 @@ export function TermsConditionsPageClient() {
                 <strong>Account Registration:</strong> You agree to provide accurate, current, and complete information
                 during registration. You are responsible for maintaining the confidentiality of your password. Notify us
                 immediately of any unauthorized access at{" "}
-                <a href="mailto:security@medauthority.com">security@medauthority.com</a>. One person may not maintain
+                <a href="mailto:security@drinsight.org">security@drinsight.org</a>. One person may not maintain
                 multiple accounts. Accounts are non-transferable.
               </p>
             </div>
@@ -246,7 +240,7 @@ export function TermsConditionsPageClient() {
             <div className="prose">
               <p>
                 All content on this platform — including articles, blog posts, medical illustrations, infographics,
-                videos, logos, graphics, UI design, and code — is the exclusive intellectual property of MedAuthority
+                videos, logos, graphics, UI design, and code — is the exclusive intellectual property of DrInsight
                 Inc. or its licensed contributors. Protected under copyright law, trademark law, database rights, and
                 moral rights of authors.
               </p>
@@ -278,10 +272,10 @@ export function TermsConditionsPageClient() {
               <ul>
                 <li>
                   Reprint or syndication requests:{" "}
-                  <a href="mailto:licensing@medauthority.com">licensing@medauthority.com</a>
+                  <a href="mailto:licensing@drinsight.org">licensing@drinsight.org</a>
                 </li>
                 <li>
-                  To report copyright infringement: <a href="mailto:dmca@medauthority.com">dmca@medauthority.com</a>
+                  To report copyright infringement: <a href="mailto:dmca@drinsight.org">dmca@drinsight.org</a>
                 </li>
                 <li>
                   Include: your contact info, description of the work, URL of infringing content, and statement of good
@@ -338,7 +332,7 @@ export function TermsConditionsPageClient() {
             </div>
             <div className="prose">
               <p>
-                By submitting any content to the platform, you grant MedAuthority Inc. a worldwide, royalty-free,
+                By submitting any content to the platform, you grant DrInsight a worldwide, royalty-free,
                 non-exclusive, perpetual license to use, display, reproduce, and distribute that content. You retain
                 ownership of your original content.
               </p>
@@ -481,7 +475,7 @@ export function TermsConditionsPageClient() {
                 <li>We do not endorse advertised products or services</li>
                 <li>
                   For advertising inquiries:{" "}
-                  <a href="mailto:advertise@medauthority.com">advertise@medauthority.com</a>
+                  <a href="mailto:advertise@drinsight.org">advertise@drinsight.org</a>
                 </li>
               </ul>
             </div>
@@ -502,7 +496,7 @@ export function TermsConditionsPageClient() {
             </div>
             <div className="callout c-red">
               <div className="ch">⚖️ Limitation of Liability</div>
-              <p>To the maximum extent permitted by law, MedAuthority Inc. shall not be liable for:</p>
+              <p>To the maximum extent permitted by law, DrInsight shall not be liable for:</p>
             </div>
             <div className="liab-list">
               <div className="liab-item">
@@ -528,7 +522,7 @@ export function TermsConditionsPageClient() {
             </div>
             <div className="prose">
               <p>
-                <strong>Maximum Liability Cap:</strong> Maximum liability of MedAuthority Inc. to any user shall not
+                <strong>Maximum Liability Cap:</strong> Maximum liability of DrInsight to any user shall not
                 exceed the amount paid by that user to the platform in the preceding 12 months, or $100, whichever is
                 greater.
               </p>
@@ -543,7 +537,7 @@ export function TermsConditionsPageClient() {
             <div className="callout c-red">
               <div className="ch">⚖️ User Indemnification Obligation</div>
               <p>
-                You agree to indemnify, defend, and hold harmless MedAuthority Inc., its officers, directors, employees,
+                You agree to indemnify, defend, and hold harmless DrInsight, its officers, directors, employees,
                 authors, reviewers, and agents from any claims, damages, losses, or expenses (including legal fees)
                 arising from:
               </p>
@@ -579,14 +573,14 @@ export function TermsConditionsPageClient() {
                 <li>Content you authored may remain published per the Author Agreement</li>
                 <li>
                   You may appeal termination by emailing:{" "}
-                  <a href="mailto:appeals@medauthority.com">appeals@medauthority.com</a>
+                  <a href="mailto:appeals@drinsight.org">appeals@drinsight.org</a>
                 </li>
               </ul>
             </div>
             <div className="prose">
               <p>
                 You may terminate your account at any time by using the account deletion option in Settings or emailing{" "}
-                <a href="mailto:accounts@medauthority.com">accounts@medauthority.com</a>.
+                <a href="mailto:accounts@drinsight.org">accounts@drinsight.org</a>.
               </p>
             </div>
           </div>
@@ -606,7 +600,7 @@ export function TermsConditionsPageClient() {
                 <li>If unresolved within 30 days, disputes shall be submitted to binding arbitration</li>
                 <li>
                   <strong>Class action waiver:</strong> You waive any right to participate in class-action lawsuits
-                  against MedAuthority Inc.
+                  against DrInsight
                 </li>
                 <li>Courts of New York, USA shall have exclusive jurisdiction for matters not subject to arbitration</li>
                 <li>
@@ -632,7 +626,7 @@ export function TermsConditionsPageClient() {
                 <li>Alt text on all images and medical illustrations</li>
                 <li>
                   To report an accessibility issue:{" "}
-                  <a href="mailto:accessibility@medauthority.com">accessibility@medauthority.com</a>
+                  <a href="mailto:accessibility@drinsight.org">accessibility@drinsight.org</a>
                 </li>
               </ul>
             </div>
@@ -716,33 +710,33 @@ export function TermsConditionsPageClient() {
             <div className="contact-grid">
               <div className="contact-card">
                 <h4>⚖️ Legal & Terms Inquiries</h4>
-                <a href="mailto:legal@medauthority.com">legal@medauthority.com</a>
+                <a href="mailto:legal@drinsight.org">legal@drinsight.org</a>
                 <p>All legal and terms-related enquiries</p>
               </div>
               <div className="contact-card">
                 <h4>©️ Copyright / DMCA</h4>
-                <a href="mailto:dmca@medauthority.com">dmca@medauthority.com</a>
+                <a href="mailto:dmca@drinsight.org">dmca@drinsight.org</a>
                 <p>Copyright infringement reports</p>
               </div>
               <div className="contact-card">
                 <h4>👤 Account Issues</h4>
-                <a href="mailto:accounts@medauthority.com">accounts@medauthority.com</a>
+                <a href="mailto:accounts@drinsight.org">accounts@drinsight.org</a>
                 <p>Account deletion, suspension appeals</p>
               </div>
               <div className="contact-card">
                 <h4>📣 Advertising</h4>
-                <a href="mailto:advertise@medauthority.com">advertise@medauthority.com</a>
+                <a href="mailto:advertise@drinsight.org">advertise@drinsight.org</a>
                 <p>Partnership and advertising inquiries</p>
               </div>
               <div className="contact-card">
                 <h4>✉️ General Contact</h4>
-                <a href="mailto:contact@medauthority.com">contact@medauthority.com</a>
+                <a href="mailto:contact@drinsight.org">contact@drinsight.org</a>
                 <p>All other enquiries</p>
               </div>
               <div className="contact-card">
                 <h4>📍 Mailing Address</h4>
                 <p>
-                  MedAuthority Inc.
+                  DrInsight
                   <br />
                   123 Medical Plaza, Suite 400
                   <br />

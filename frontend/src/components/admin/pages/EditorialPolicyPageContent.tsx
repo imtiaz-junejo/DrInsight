@@ -43,7 +43,7 @@ export function EditorialPolicyPageContent() {
             <input defaultValue="Editorial Policy" />
           </FormItem>
           <FormItem label="Hero Subtitle" full>
-            <textarea defaultValue="MedAuthority is committed to providing accurate, evidence-based medical information reviewed by licensed healthcare professionals." />
+            <textarea defaultValue="DrInsight is committed to providing accurate, evidence-based medical information reviewed by licensed healthcare professionals." />
           </FormItem>
           <FormItem label="Last Updated Date">
             <input type="date" defaultValue="2026-06-01" />

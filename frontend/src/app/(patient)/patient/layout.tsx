@@ -4,7 +4,7 @@ import { PatientShell } from "@/components/patient/shell/PatientShell";
 import "@/styles/patient-dashboard.css";
 
 export const metadata: Metadata = {
-  title: "Patient Dashboard — MedAuthority",
+  title: "Patient Dashboard — DrInsight",
   robots: { index: false, follow: false },
 };
 

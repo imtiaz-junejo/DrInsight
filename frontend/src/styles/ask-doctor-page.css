@@ -35,36 +35,6 @@
   text-decoration: none;
 }
 
-.ask-doctor-page .breadcrumb {
-  background: var(--gray-50);
-  border-bottom: 1px solid var(--gray-200);
-  padding: 8px 18px;
-}
-
-.ask-doctor-page .breadcrumb-inner {
-  max-width: 1200px;
-  margin: auto;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 0.74rem;
-  color: var(--gray-400);
-}
-
-.ask-doctor-page .breadcrumb-inner a {
-  color: var(--gray-400);
-  transition: var(--transition);
-}
-
-.ask-doctor-page .breadcrumb-inner a:hover {
-  color: var(--blue);
-}
-
-.ask-doctor-page .breadcrumb-inner span.current {
-  color: var(--blue);
-  font-weight: 500;
-}
-
 .ask-doctor-page .page-hero {
   background: linear-gradient(135deg, var(--blue-dark), var(--blue) 55%, var(--teal));
   color: #fff;

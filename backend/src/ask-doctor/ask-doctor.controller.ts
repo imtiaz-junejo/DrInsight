@@ -27,6 +27,12 @@ export class AskDoctorController {
   }
 
   @Public()
+  @Get('categories')
+  getCategories() {
+    return this.askDoctorService.getCategories();
+  }
+
+  @Public()
   @Post()
   submit(
     @Body()
@@ -38,6 +44,12 @@ export class AskDoctorController {
     },
   ) {
     return this.askDoctorService.submit(body);
+  }
+
+  @Public()
+  @Post(':id/helpful')
+  markHelpful(@Param('id') id: string) {
+    return this.askDoctorService.markHelpful(id);
   }
 
   @Get('pending')

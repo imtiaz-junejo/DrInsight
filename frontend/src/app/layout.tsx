@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, DM_Sans } from "next/font/google";
 import { Providers } from "@/components/providers/Providers";
 import "./globals.css";
+import "@/styles/responsive.css";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -19,6 +20,18 @@ export const metadata: Metadata = {
   title: "DrInsight – Trusted Medical Information & Consultations",
   description:
     "Evidence-based medical information, health tools, and expert doctor consultations. Your trusted healthcare partner.",
+  icons: {
+    icon: [
+      { url: "/assets/logo/favicons/favicon-16x16.png?v=3", sizes: "16x16", type: "image/png" },
+      { url: "/assets/logo/favicons/favicon-32x32.png?v=3", sizes: "32x32", type: "image/png" },
+      { url: "/assets/logo/favicons/favicon-48x48.png?v=3", sizes: "48x48", type: "image/png" },
+    ],
+    shortcut: "/assets/logo/favicons/favicon-32x32.png?v=3",
+    apple: [
+      { url: "/assets/logo/favicons/favicon-180x180.png?v=3", sizes: "180x180", type: "image/png" },
+    ],
+  },
+  manifest: "/assets/logo/favicons/site.webmanifest?v=3",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

@@ -1,0 +1,390 @@
+/*
+ * Shared responsive layer — preserves desktop (1024px+) layouts.
+ * Mobile: 320–767px | Tablet: 768–1023px | Desktop: 1024px+
+ */
+
+html {
+  overflow-x: clip;
+}
+
+body {
+  overflow-x: clip;
+  min-width: 320px;
+}
+
+img,
+video,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Scrollable tables on small screens */
+.table-scroll,
+.tbl-wrap,
+.table-wrap,
+.overflow-table {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Sidebar backdrop (dashboards) */
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  z-index: 250;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.sidebar-backdrop.visible {
+  display: block;
+}
+
+/* Dashboard sidebar toggle — hidden on desktop */
+.dash-sidebar-toggle,
+.admin-root .mob-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1.5px solid var(--gray-200, #e2e8f0);
+  border-radius: 10px;
+  background: #fff;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* ─── Tablet + Mobile (max 1023px) ─── */
+@media (max-width: 1023px) {
+  .dash-sidebar-toggle,
+  .admin-root .mob-toggle {
+    display: inline-flex;
+  }
+
+  /* Admin drawer */
+  .admin-root .app {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-root .sidebar {
+    position: fixed;
+    left: -260px;
+    top: 0;
+    width: 250px;
+    z-index: 300;
+    transition: left 0.25s ease;
+    height: 100vh;
+  }
+
+  .admin-root .sidebar.open {
+    left: 0;
+  }
+
+  .doctor-root .dash-main,
+  .patient-root .dash-main,
+  .admin-root .content {
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  .admin-root .topbar {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .admin-root .tb-right {
+    flex-wrap: wrap;
+  }
+
+  .admin-root .tb-search input {
+    width: min(140px, 100%);
+  }
+
+  .admin-root .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin-root .grid2,
+  .admin-root .form-grid,
+  .admin-root .kv-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Doctor + Patient drawer */
+  .doctor-root .dash-grid,
+  .patient-root .dash-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .doctor-root .dash-sidebar,
+  .patient-root .dash-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: min(300px, 88vw);
+    max-height: 100vh;
+    overflow-y: auto;
+    z-index: 300;
+    transform: translateX(-105%);
+    transition: transform 0.25s ease;
+    border-radius: 0;
+    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.2);
+  }
+
+  .doctor-root .dash-sidebar.open,
+  .patient-root .dash-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .doctor-root .dash-header-inner,
+  .patient-root .dash-header-inner {
+    align-items: flex-start;
+  }
+
+  .doctor-root .dash-body,
+  .patient-root .dash-body {
+    padding: 0 16px;
+    margin: 20px auto;
+  }
+
+  .doctor-root .stats-row,
+  .patient-root .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .doctor-root .g21,
+  .doctor-root .g21-dr,
+  .doctor-root .g13,
+  .doctor-root .g2,
+  .doctor-root .g3,
+  .patient-root .g21,
+  .patient-root .g21-dr,
+  .patient-root .g13,
+  .patient-root .g2,
+  .patient-root .g3 {
+    grid-template-columns: 1fr;
+  }
+
+  .doctor-root .footer-grid,
+  .patient-root .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+
+  /* Public site padding */
+  nav .mx-auto {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  /* Shared page hero tightening */
+  .about-page .page-hero,
+  .contact-page .page-hero,
+  .blog-page .page-hero,
+  .doctors-page .page-hero,
+  .ask-doctor-page .page-hero,
+  .health-tools-page .page-hero,
+  .faq-page .page-hero,
+  .sitemap-page .page-hero,
+  .book-consultation-page .page-hero {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .about-page .page-hero-inner,
+  .contact-page .hero-inner,
+  .blog-page .page-hero-inner,
+  .doctors-page .page-hero-inner,
+  .ask-doctor-page .page-hero-inner,
+  .health-tools-page .page-hero-inner,
+  .faq-page .page-hero-inner,
+  .sitemap-page .page-hero-inner {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .founder-inner,
+  .about-page .mv-grid,
+  .about-page .trust-grid,
+  .about-page .editorial-inner,
+  .about-page .patient-inner {
+    grid-template-columns: 1fr !important;
+  }
+
+  .contact-page .main-section {
+    grid-template-columns: 1fr;
+  }
+
+  .health-tools-page .tools-nav {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+
+  .health-tools-page .tool-tab {
+    flex-shrink: 0;
+  }
+}
+
+/* ─── Mobile (max 767px) ─── */
+@media (max-width: 767px) {
+  .register-page .register-layout,
+  .forgot-password-page .fp-layout,
+  .reset-password-page .rp-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  .register-page .register-form-wrap,
+  .forgot-password-page .fp-card,
+  .reset-password-page .rp-card {
+    padding: 24px 16px;
+  }
+
+  .admin-root .stats-row {
+    grid-template-columns: 1fr;
+  }
+
+  .doctor-root .stats-row,
+  .patient-root .stats-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .doctor-root .footer-grid,
+  .patient-root .footer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .doctor-root .footer-bottom,
+  .patient-root .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .doctor-root .form-row,
+  .patient-root .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-page .contact-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-page .subject-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .contact-page .subj-tab {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .health-tools-page .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .health-tools-page .tools-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ask-doctor-page .qa-grid,
+  .ask-doctor-page .spec-grid,
+  .blog-page .blog-grid,
+  .blog-page .trending-grid,
+  .doctors-page .doctors-grid,
+  .doctors-page .filters-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .doctors-page .filters-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .book-consultation-page .booking-layout,
+  .book-consultation-page .steps-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .site-footer .footer-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .site-footer .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  /* TopBar emergency line wraps cleanly */
+  .topbar-emergency-short {
+    display: none;
+  }
+
+  .toast,
+  .doctor-root .toast,
+  .patient-root .toast,
+  .admin-root .toast {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    max-width: none;
+  }
+}
+
+/* ─── Desktop (min 1024px) — lock admin sidebar visible ─── */
+@media (min-width: 1024px) {
+  .admin-root .app {
+    grid-template-columns: 250px 1fr;
+  }
+
+  .admin-root .sidebar {
+    position: sticky;
+    left: auto;
+    top: 0;
+    width: auto;
+    transform: none;
+  }
+
+  .admin-root .mob-toggle {
+    display: none !important;
+  }
+
+  .doctor-root .dash-grid,
+  .patient-root .dash-grid {
+    grid-template-columns: 282px 1fr;
+  }
+
+  .doctor-root .dash-sidebar,
+  .patient-root .dash-sidebar {
+    position: sticky;
+    top: 88px;
+    transform: none;
+    width: auto;
+    border-radius: var(--radius-lg, 20px);
+  }
+
+  .dash-sidebar-toggle {
+    display: none !important;
+  }
+
+  .sidebar-backdrop.visible {
+    display: none !important;
+  }
+
+  .doctor-root .dash-main,
+  .patient-root .dash-main {
+    min-width: 0;
+  }
+}

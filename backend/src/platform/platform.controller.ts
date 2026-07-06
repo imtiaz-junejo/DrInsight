@@ -13,4 +13,16 @@ export class PlatformController {
   getStats() {
     return this.platformService.getPublicStats();
   }
+
+  @Public()
+  @Get('contact')
+  getContact() {
+    return this.platformService.getSiteSettings();
+  }
+
+  @Public()
+  @Get('hospitals')
+  getHospitals() {
+    return this.platformService.getFeaturedHospitals();
+  }
 }

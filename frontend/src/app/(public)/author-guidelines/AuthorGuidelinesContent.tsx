@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import "@/styles/author-guidelines-page.css";
+import { formatStatCount } from "@/lib/data-mappers";
+import { usePlatformStats, useTopBlogAuthors } from "@/services/api-hooks";
 
 const TOC = [
   { id: "s1", num: "1", label: "Why Write for Us" },
@@ -21,15 +23,15 @@ const TOC = [
   { id: "s14", num: "14", label: "Contact & Support" },
 ];
 
-const WHY_CARDS = [
-  { icon: "📢", title: "Massive Reach", text: "Your articles reach 500K+ monthly readers across 50+ countries worldwide." },
-  { icon: "🎓", title: "CPD/CME Credit", text: "Receive a CPD/CME recognition letter for each published article on request." },
-  { icon: "🏅", title: "Author Profile", text: "A full, verified author bio page showcasing your credentials and publications." },
-  { icon: "💰", title: "Paid Opportunities", text: "Honorarium paid per published article for qualified medical authors." },
-  { icon: "🌍", title: "Fight Misinformation", text: "Help counter harmful medical misinformation with clinically accurate content." },
-  { icon: "🔗", title: "Portfolio Building", text: "Published articles are DOI-linked and citable for academic and professional portfolios." },
-  { icon: "🤝", title: "Editorial Support", text: "Dedicated editorial team assists you throughout the writing and review process." },
-  { icon: "📊", title: "Analytics Access", text: "See how many readers your articles reach, their engagement, and ratings." },
+const WHY_CARD_TEMPLATES = [
+  { icon: "📢", title: "Massive Reach", key: "reach" as const },
+  { icon: "🎓", title: "CPD/CME Credit", key: "cpd" as const },
+  { icon: "🏅", title: "Author Profile", key: "profile" as const },
+  { icon: "💰", title: "Paid Opportunities", key: "paid" as const },
+  { icon: "🌍", title: "Fight Misinformation", key: "misinfo" as const },
+  { icon: "🔗", title: "Portfolio Building", key: "portfolio" as const },
+  { icon: "🤝", title: "Editorial Support", key: "support" as const },
+  { icon: "📊", title: "Analytics Access", key: "analytics" as const },
 ];
 
 const CONTENT_TYPES = [
@@ -42,7 +44,7 @@ const CONTENT_TYPES = [
 ];
 
 const CHECKLIST = [
-  { strong: "Topic approval:", text: <>Confirm your topic with our Editorial team before writing — many topics are already covered or assigned. Email: <span style={{ color: "var(--blue)", fontWeight: 600 }}>authors@medauthority.com</span></> },
+  { strong: "Topic approval:", text: <>Confirm your topic with our Editorial team before writing — many topics are already covered or assigned. Email: <span style={{ color: "var(--blue)", fontWeight: 600 }}>authors@drinsight.org</span></> },
   { strong: "Scope check:", text: "Confirm the article falls within your recognised specialty or professional scope" },
   { strong: "Source gathering:", text: "Identify minimum 5 peer-reviewed sources from the last 10 years (preferably last 5 years) before writing" },
   { strong: "COI self-check:", text: "Identify any financial, professional, or personal conflicts of interest related to the topic" },
@@ -53,7 +55,7 @@ const CHECKLIST = [
 ];
 
 const SUBMISSION_STEPS = [
-  { num: "1", title: "✉️ Topic Proposal", badge: "First step", badgeClass: "sb-blue", text: <>Email your proposed topic to <strong style={{ color: "var(--blue)" }}>authors@medauthority.com</strong> with a 2–3 sentence outline. Receive approval or feedback within 3–5 business days before writing.</> },
+  { num: "1", title: "✉️ Topic Proposal", badge: "First step", badgeClass: "sb-blue", text: <>Email your proposed topic to <strong style={{ color: "var(--blue)" }}>authors@drinsight.org</strong> with a 2–3 sentence outline. Receive approval or feedback within 3–5 business days before writing.</> },
   { num: "2", title: "📋 Author Brief Received", text: "Receive your detailed author brief — including target audience, required word count, source requirements, safe messaging guidance if applicable, COI disclosure form, and submission deadline." },
   { num: "3", title: "✍️ Write Your Article", badge: "You are here", badgeClass: "sb-blue", text: "Write using the required structure for your article type. Submit as a Google Doc or Word document (.docx). Include all inline citations. Complete and attach the COI disclosure form." },
   { num: "4", title: "🖊️ Editorial Pre-Screen", text: "Our editorial team reviews your submission within 3–5 business days for structure, completeness, source quality, and style guide compliance. Returned with feedback if pre-screen fails." },
@@ -73,11 +75,11 @@ const COI_ITEMS = [
 ];
 
 const CONTACTS = [
-  { title: "✍️ New Author Applications", email: "authors@medauthority.com", note: "Apply to join our author network. Response within 3–5 business days." },
-  { title: "📋 Topic Proposals & Briefs", email: "editorial@medauthority.com", note: "Submit topic ideas or request a writing brief. Response within 3–5 business days." },
-  { title: "📤 Article Submissions", email: "submissions@medauthority.com", note: "Submit completed articles for editorial pre-screen and peer review." },
-  { title: "💰 Payments & Contracts", email: "payments@medauthority.com", note: "Queries about honoraria, author agreements, and CPD/CME letters." },
-  { title: "📝 Corrections & Updates", email: "corrections@medauthority.com", note: "Request corrections or updates to your published articles." },
+  { title: "✍️ New Author Applications", email: "authors@drinsight.org", note: "Apply to join our author network. Response within 3–5 business days." },
+  { title: "📋 Topic Proposals & Briefs", email: "editorial@drinsight.org", note: "Submit topic ideas or request a writing brief. Response within 3–5 business days." },
+  { title: "📤 Article Submissions", email: "submissions@drinsight.org", note: "Submit completed articles for editorial pre-screen and peer review." },
+  { title: "💰 Payments & Contracts", email: "payments@drinsight.org", note: "Queries about honoraria, author agreements, and CPD/CME letters." },
+  { title: "📝 Corrections & Updates", email: "corrections@drinsight.org", note: "Request corrections or updates to your published articles." },
 ];
 
 function Accordion({ id, title, open, onToggle, children }: { id: string; title: string; open: boolean; onToggle: (id: string) => void; children: React.ReactNode }) {
@@ -93,6 +95,27 @@ function Accordion({ id, title, open, onToggle, children }: { id: string; title:
 }
 
 export function AuthorGuidelinesContent() {
+  const { data: stats } = usePlatformStats();
+  const { data: topAuthors } = useTopBlogAuthors();
+  const authorCount = topAuthors?.length ?? stats?.doctorCount;
+
+  const whyCards = useMemo(() => {
+    const reachText = stats
+      ? `Your articles reach ${formatStatCount(stats.patientsServed ?? stats.patientCount)} patients across ${stats.countryCount ?? "—"} countries on our platform.`
+      : "Your articles reach patients across our verified medical platform.";
+    const texts: Record<(typeof WHY_CARD_TEMPLATES)[number]["key"], string> = {
+      reach: reachText,
+      cpd: "Receive a CPD/CME recognition letter for each published article on request.",
+      profile: "A full, verified author bio page showcasing your credentials and publications.",
+      paid: "Honorarium paid per published article for qualified medical authors.",
+      misinfo: "Help counter harmful medical misinformation with clinically accurate content.",
+      portfolio: "Published articles are citable for academic and professional portfolios.",
+      support: "Dedicated editorial team assists you throughout the writing and review process.",
+      analytics: "See how many readers your articles reach, their engagement, and ratings.",
+    };
+    return WHY_CARD_TEMPLATES.map((card) => ({ ...card, text: texts[card.key] }));
+  }, [stats]);
+
   const [progress, setProgress] = useState(0);
   const [activeSection, setActiveSection] = useState("s1");
   const [toast, setToast] = useState("");
@@ -139,16 +162,6 @@ export function AuthorGuidelinesContent() {
         <div className="progress-fill" style={{ width: `${progress}%` }} />
       </div>
 
-      <div className="breadcrumb">
-        <div className="breadcrumb-inner">
-          <Link href="/">🏠 Home</Link>
-          <span>›</span>
-          <Link href="/editorial-policy">Editorial</Link>
-          <span>›</span>
-          <span className="current">Author Guidelines</span>
-        </div>
-      </div>
-
       <div className="page-hero">
         <div className="page-hero-inner">
           <div className="page-eyebrow">✍️ CONTRIBUTE TO MEDAUTHORITY</div>
@@ -156,7 +169,7 @@ export function AuthorGuidelinesContent() {
             Author <span>Guidelines</span>
           </h1>
           <p>
-            Everything you need to know about writing for MedAuthority — from qualification standards and submission
+            Everything you need to know about writing for DrInsight — from qualification standards and submission
             requirements to style guides and editorial standards.
           </p>
           <div className="hero-meta-row">
@@ -206,17 +219,17 @@ export function AuthorGuidelinesContent() {
         <main className="content-area">
           <section className="content-section" id="s1">
             <div className="section-title">
-              <div className="section-num">1</div>Why Write for MedAuthority
+              <div className="section-num">1</div>Why Write for DrInsight
             </div>
             <div className="prose">
               <p>
-                MedAuthority reaches <strong>over 500,000 patients, caregivers, and healthcare professionals</strong> every
+                DrInsight reaches <strong>over 500,000 patients, caregivers, and healthcare professionals</strong> every
                 month. By contributing to our platform, you help us fulfil our mission of making accurate, evidence-based
                 medical information accessible to everyone — regardless of geography, income, or background.
               </p>
             </div>
             <div className="card-grid-4">
-              {WHY_CARDS.map((card) => (
+              {whyCards.map((card) => (
                 <div key={card.title} className="info-card">
                   <div className="card-icon">{card.icon}</div>
                   <h4>{card.title}</h4>
@@ -232,7 +245,7 @@ export function AuthorGuidelinesContent() {
             </div>
             <div className="prose">
               <p>
-                MedAuthority welcomes contributions from qualified healthcare professionals and health science experts. We
+                DrInsight welcomes contributions from qualified healthcare professionals and health science experts. We
                 have three contributor categories, each with specific eligibility requirements.
               </p>
             </div>
@@ -312,7 +325,7 @@ export function AuthorGuidelinesContent() {
               <ul>
                 <li>All credentials verified by Editorial team before first publication</li>
                 <li>Annual re-verification of licensure status for all active authors</li>
-                <li>Authors must notify MedAuthority immediately if licensure is suspended or revoked</li>
+                <li>Authors must notify DrInsight immediately if licensure is suspended or revoked</li>
                 <li>Verified credentials are publicly displayed on your author bio page with a verification badge</li>
               </ul>
             </div>
@@ -567,10 +580,12 @@ export function AuthorGuidelinesContent() {
               <div className="section-num green">10</div>Apply to Become an Author
             </div>
             <div className="apply-cta">
-              <h3>Start Writing for MedAuthority</h3>
+              <h3>Start Writing for DrInsight</h3>
               <p>
-                Join our network of 200+ verified medical authors contributing to the most trusted medical platform in the
-                region. Your expertise can help hundreds of thousands of patients make better health decisions.
+                Join our network of {authorCount ? formatStatCount(authorCount) : "—"} verified medical authors
+                contributing to the most trusted medical platform in the region. Your expertise can help{" "}
+                {stats ? formatStatCount(stats.patientsServed ?? stats.patientCount) : "—"} patients make better health
+                decisions.
               </p>
               <div className="apply-steps-row">
                 {["Submit Application Online", "Verification of Credentials", "Complete Orientation Module", "Sign Author Agreement", "Submit Your First Article"].map((label, i) => (
@@ -584,8 +599,8 @@ export function AuthorGuidelinesContent() {
                 <button type="button" className="btn-apply" onClick={() => showToast("Opening application form...")}>
                   ✍️ Apply to Become an Author →
                 </button>
-                <a href="mailto:authors@medauthority.com" className="btn-apply-ghost">
-                  📧 authors@medauthority.com
+                <a href="mailto:authors@drinsight.org" className="btn-apply-ghost">
+                  📧 authors@drinsight.org
                 </a>
               </div>
             </div>
@@ -612,8 +627,8 @@ export function AuthorGuidelinesContent() {
                 <div className="callout-head">📋 License & Rights</div>
                 <ul>
                   <li>Authors <strong>retain ownership</strong> of their original content</li>
-                  <li>By submitting, authors grant MedAuthority a <strong>worldwide, royalty-free, non-exclusive licence</strong> to publish, display, and distribute the content</li>
-                  <li>MedAuthority may edit content for clarity, length, and style guide compliance</li>
+                  <li>By submitting, authors grant DrInsight a <strong>worldwide, royalty-free, non-exclusive licence</strong> to publish, display, and distribute the content</li>
+                  <li>DrInsight may edit content for clarity, length, and style guide compliance</li>
                   <li>Authors will be notified of any <strong>substantial editorial changes</strong> before publication</li>
                   <li>Content may be <strong>unpublished</strong> if it becomes clinically outdated or inaccurate — authors are notified</li>
                   <li>Authors may request <strong>retraction of their content</strong> with written justification</li>
@@ -719,7 +734,7 @@ export function AuthorGuidelinesContent() {
               <div className="contact-card">
                 <h4>📍 Mailing Address</h4>
                 <p style={{ color: "var(--gray-700)", fontSize: ".84rem", lineHeight: 1.6, marginTop: 0 }}>
-                  MedAuthority Inc.<br />123 Medical Plaza, Suite 400<br />New York, NY 10001, USA
+                  DrInsight<br />123 Medical Plaza, Suite 400<br />New York, NY 10001, USA
                 </p>
               </div>
             </div>

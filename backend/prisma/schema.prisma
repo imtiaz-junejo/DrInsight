@@ -9,7 +9,7 @@ datasource db {
 model User {
   id                String              @id @default(cuid())
   email             String              @unique
-  passwordHash      String
+  passwordHash      String?
   firstName         String
   lastName          String
   role              UserRole            @default(PATIENT)
@@ -24,14 +24,31 @@ model User {
   answeredQuestions AskDoctorQuestion[] @relation("AnsweredBy")
   blogPosts         BlogPost[]
   doctorProfile     DoctorProfile?
+  oauthAccounts     OAuthAccount[]
   sentMessages      Message[]           @relation("SentMessages")
   notifications     Notification[]
-  patientProfile    PatientProfile?
-  refreshTokens     RefreshToken[]
+  patientProfile       PatientProfile?
+  refreshTokens        RefreshToken[]
+  passwordResetTokens  PasswordResetToken[]
 
   @@index([email])
   @@index([role])
   @@map("users")
+}
+
+model OAuthAccount {
+  id         String        @id @default(cuid())
+  provider   OAuthProvider
+  providerId String
+  userId     String
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerId])
+  @@unique([provider, userId])
+  @@index([userId])
+  @@map("oauth_accounts")
 }
 
 model RefreshToken {
@@ -48,32 +65,74 @@ model RefreshToken {
   @@map("refresh_tokens")
 }
 
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("password_reset_tokens")
+}
+
 model DoctorProfile {
-  id              String             @id @default(cuid())
-  userId          String             @unique
-  specialty       String
-  subSpecialty    String?
-  licenseNumber   String             @unique
-  bio             String?
-  experienceYears Int                @default(0)
-  consultationFee Decimal            @default(0) @db.Decimal(10, 2)
-  rating          Float              @default(0)
-  reviewCount     Int                @default(0)
-  availability    DoctorAvailability @default(OFFLINE)
-  languages       String[]           @default([])
-  education       String?
-  hospital        String?
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
-  appointments    Appointment[]      @relation("DoctorAppointments")
-  bookingDrafts   BookingDraft[]
-  conversations   Conversation[]     @relation("DoctorConversations")
-  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  prescriptions   Prescription[]     @relation("DoctorPrescriptions")
-  reviews         Review[]
+  id                    String             @id @default(cuid())
+  userId                String             @unique
+  specialty             String
+  subSpecialty          String?
+  licenseNumber         String             @unique
+  bio                   String?
+  bioFull               String?
+  credentials           String?
+  professionalTitle     String?
+  experienceYears       Int                @default(0)
+  consultationFee       Decimal            @default(0) @db.Decimal(10, 2)
+  rating                Float              @default(0)
+  reviewCount           Int                @default(0)
+  patientsTreated       Int                @default(0)
+  successRate           Float?
+  responseTime          String?
+  availability          DoctorAvailability @default(OFFLINE)
+  languages             String[]           @default([])
+  expertise             String[]           @default([])
+  services              String[]           @default([])
+  researchTags          String[]           @default([])
+  education             String?
+  educationHistory      Json?
+  certifications        Json?
+  publications          Json?
+  awards                Json?
+  speakingEngagements   Json?
+  weeklySchedule        Json?
+  hospital              String?
+  city                  String?
+  country               String?            @default("Pakistan")
+  gender                String?
+  address               String?
+  coverImageUrl         String?
+  linkedinUrl           String?
+  twitterUrl            String?
+  platformRole          String?
+  editorialBoard        Boolean            @default(false)
+  medicalReviewerFor    String?
+  conflictOfInterest    String?
+  credentialsVerifiedAt DateTime?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  appointments          Appointment[]      @relation("DoctorAppointments")
+  bookingDrafts         BookingDraft[]
+  conversations         Conversation[]     @relation("DoctorConversations")
+  user                  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prescriptions         Prescription[]     @relation("DoctorPrescriptions")
+  reviews               Review[]
 
   @@index([specialty])
   @@index([availability])
+  @@index([city])
   @@map("doctor_profiles")
 }
 
@@ -154,23 +213,37 @@ model BookingDraft {
 }
 
 model Payment {
-  id               String        @id @default(cuid())
-  bookingDraftId   String        @unique
-  appointmentId    String?       @unique
-  provider         String        @default("stripe")
-  providerIntentId String        @unique
-  clientSecret     String
-  amountCents      Int
-  currency         String        @default("usd")
-  status           PaymentStatus @default(REQUIRES_PAYMENT_METHOD)
-  metadata         Json?
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  confirmedAt      DateTime?
-  appointment      Appointment?  @relation(fields: [appointmentId], references: [id])
-  bookingDraft     BookingDraft  @relation(fields: [bookingDraftId], references: [id])
+  id                    String        @id @default(cuid())
+  bookingDraftId        String        @unique
+  appointmentId         String?       @unique
+  patientId             String?
+  doctorId              String?
+  provider              String        @default("stripe")
+  providerIntentId      String        @unique
+  stripeChargeId        String?
+  clientSecret          String
+  amountCents           Int
+  consultationFeeCents  Int           @default(0)
+  platformFeeCents      Int           @default(500)
+  taxCents              Int           @default(0)
+  currency              String        @default("usd")
+  status                PaymentStatus @default(REQUIRES_PAYMENT_METHOD)
+  paymentMethod         String?
+  receiptUrl            String?
+  invoiceNumber         String?       @unique
+  billingName           String?
+  billingEmail          String?
+  billingCountry        String?
+  metadata              Json?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  confirmedAt           DateTime?
+  appointment           Appointment?  @relation(fields: [appointmentId], references: [id])
+  bookingDraft          BookingDraft  @relation(fields: [bookingDraftId], references: [id])
 
   @@index([status])
+  @@index([patientId])
+  @@index([doctorId])
   @@map("payments")
 }
 
@@ -311,6 +384,7 @@ model AskDoctorQuestion {
   answeredById  String?
   submitterName String?
   isAnonymous   Boolean        @default(false)
+  helpfulCount  Int            @default(0)
   status        QuestionStatus @default(PENDING)
   createdAt     DateTime       @default(now())
   answeredAt    DateTime?
@@ -340,6 +414,64 @@ model NewsletterSubscriber {
   createdAt DateTime @default(now())
 
   @@map("newsletter_subscribers")
+}
+
+model SiteSettings {
+  id              String   @id @default("default")
+  contactPhone    String
+  contactEmail    String
+  contactWhatsapp String?
+  addressLine1    String?
+  addressLine2    String?
+  city            String?
+  country         String   @default("Pakistan")
+  businessHours   Json?
+  updatedAt       DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
+model TrustedPartner {
+  id           String   @id @default(cuid())
+  companyName  String
+  websiteUrl   String?
+  description  String?
+  logoUrl      String?
+  displayOrder Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([isActive, displayOrder])
+  @@map("trusted_partners")
+}
+
+model FounderMessage {
+  id                String   @id @default("default")
+  founderName       String
+  designation       String
+  imageUrl          String?
+  headline          String
+  messageHtml       String   @db.Text
+  signatureImageUrl String?
+  videoUrl          String?
+  isActive          Boolean  @default(true)
+  eyebrow           String?
+  subline           String?
+  badgeText         String?
+  credentials       Json?
+  tags              String[] @default([])
+  signatureName     String?
+  signatureTitle    String?
+  locationLine      String?
+  updatedAt         DateTime @updatedAt
+
+  @@map("founder_messages")
+}
+
+enum OAuthProvider {
+  GOOGLE
+  FACEBOOK
 }
 
 enum UserRole {
@@ -426,4 +558,5 @@ enum PaymentStatus {
   SUCCEEDED
   FAILED
   CANCELLED
+  REFUNDED
 }

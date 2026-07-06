@@ -57,36 +57,6 @@
   transition: width 0.1s linear;
 }
 
-.author-guidelines-page .breadcrumb {
-  background: var(--gray-50);
-  border-bottom: 1px solid var(--gray-200);
-  padding: 10px 24px;
-}
-
-.author-guidelines-page .breadcrumb-inner {
-  max-width: 1240px;
-  margin: auto;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 0.8rem;
-  color: var(--gray-400);
-}
-
-.author-guidelines-page .breadcrumb-inner a {
-  color: var(--gray-400);
-  transition: var(--transition);
-}
-
-.author-guidelines-page .breadcrumb-inner a:hover {
-  color: var(--blue);
-}
-
-.author-guidelines-page .breadcrumb-inner .current {
-  color: var(--blue);
-  font-weight: 600;
-}
-
 .author-guidelines-page .page-hero {
   background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue) 55%, var(--teal) 100%);
   color: #fff;

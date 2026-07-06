@@ -181,6 +181,10 @@ async function upsertAskDoctorQuestions(
     });
 
     if (existing) {
+      await prisma.askDoctorQuestion.update({
+        where: { id: existing.id },
+        data: { helpfulCount: item.helpfulCount },
+      });
       skipped += 1;
       continue;
     }
@@ -192,6 +196,7 @@ async function upsertAskDoctorQuestions(
         answer: item.answer,
         submitterName: item.submitterName,
         isAnonymous: item.isAnonymous,
+        helpfulCount: item.helpfulCount,
         status: item.status,
         answeredAt: item.answeredAt,
         answeredById:

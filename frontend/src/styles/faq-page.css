@@ -133,31 +133,6 @@
   background: var(--blue-dark);
 }
 
-.faq-page .breadcrumb {
-  background: var(--gray-50);
-  border-bottom: 1px solid var(--gray-200);
-  padding: 12px 24px;
-}
-
-.faq-page .breadcrumb-inner {
-  max-width: 1240px;
-  margin: auto;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.82rem;
-  color: var(--gray-400);
-}
-
-.faq-page .breadcrumb-inner a {
-  color: var(--blue);
-  transition: var(--transition);
-}
-
-.faq-page .breadcrumb-inner a:hover {
-  color: var(--blue-dark);
-}
-
 .faq-page .faq-layout {
   max-width: 1240px;
   margin: auto;

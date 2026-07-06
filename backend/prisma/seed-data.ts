@@ -340,7 +340,292 @@ export function doctorBio(
   experienceYears: number,
   hospital: string,
 ): string {
-  return `Dr. ${firstName} ${lastName} is a ${specialty.toLowerCase()} specialist based in ${city} with ${experienceYears} years of clinical experience. Currently affiliated with ${hospital}, Dr. ${lastName} provides evidence-based care for patients across Pakistan through in-person and telemedicine consultations. Fluent in multiple regional languages, they focus on accessible, patient-centered treatment aligned with PMDC standards.`;
+  return `Dr. ${firstName} ${lastName} is a board-certified ${specialty.toLowerCase()} specialist at ${hospital} with ${experienceYears} years of clinical experience. Based in ${city}, Dr. ${lastName} provides evidence-based care through in-person and telemedicine consultations and is recognised for patient-centred, guideline-driven practice.`;
+}
+
+export function doctorBioFull(
+  firstName: string,
+  lastName: string,
+  specialty: string,
+  city: string,
+  experienceYears: number,
+  hospital: string,
+  university: string,
+  subSpecialty: string,
+): string {
+  return [
+    `Dr. ${lastName}'s passion for ${specialty.toLowerCase()} developed during medical training, when early specialist intervention transformed patient outcomes. After graduating from ${university}, Dr. ${lastName} completed postgraduate training and fellowship work focused on ${subSpecialty.toLowerCase()}.`,
+    `Clinical philosophy centres on a patient-first, evidence-led approach — complex conditions are best managed through rigorous science, compassionate communication, and shared decision-making with patients and families.`,
+    `At ${hospital} in ${city}, Dr. ${lastName} leads outpatient and telemedicine clinics, mentors junior clinicians, and contributes peer-reviewed educational content for DrInsight. Over ${experienceYears} years in practice, the focus remains accessible, high-quality care aligned with PMDC standards.`,
+    `Beyond clinical work, Dr. ${lastName} is committed to community health education and continuing medical education for colleagues across Pakistan.`,
+  ].join('\n\n');
+}
+
+export type EducationHistoryItem = {
+  year: string;
+  title: string;
+  institution: string;
+  icon: string;
+};
+
+export type CertificationItem = {
+  title: string;
+  subtitle: string;
+  icon: string;
+};
+
+export type PublicationItem = {
+  journal: string;
+  title: string;
+  year: number;
+  citations: number;
+  doi?: string;
+  pubmedUrl?: string;
+};
+
+export type AwardItem = {
+  title: string;
+  organization: string;
+  year: string;
+  icon: string;
+};
+
+export type SpeakingItem = {
+  title: string;
+  venue: string;
+  type: 'conference' | 'lecture' | 'webinar';
+  year: string;
+};
+
+export type ScheduleDay = {
+  day: string;
+  time: string;
+  available: boolean;
+};
+
+const SPECIALTY_EXPERTISE: Record<string, string[]> = {
+  Cardiology: ['Interventional Cardiology', 'Heart Failure', 'Hypertension', 'Preventive Cardiology', 'ECG Interpretation', 'Coronary Artery Disease'],
+  Dermatology: ['Acne & Rosacea', 'Psoriasis', 'Cosmetic Dermatology', 'Skin Cancer Screening', 'Pediatric Dermatology', 'Hair Disorders'],
+  Neurology: ['Headache Medicine', 'Stroke Medicine', 'Epilepsy', 'Movement Disorders', 'Neuro-Oncology', 'Medication Overuse Headache'],
+  Orthopedics: ['Sports Medicine', 'Joint Replacement', 'Spine Surgery', 'Fracture Care', 'Arthroscopy', 'Trauma Orthopedics'],
+  Pediatrics: ['Neonatology', 'Childhood Immunisation', 'Growth & Development', 'Pediatric Infectious Disease', 'Asthma in Children', 'Nutrition'],
+  Gynecology: ['Obstetrics', 'Reproductive Endocrinology', 'High-Risk Pregnancy', 'Menstrual Disorders', 'Family Planning', 'Menopause Care'],
+  'General Medicine': ['Diabetology', 'Hypertension', 'Infectious Diseases', 'Preventive Medicine', 'Metabolic Syndrome', 'Primary Care'],
+  Psychiatry: ['Anxiety Disorders', 'Depression', 'Child Psychiatry', 'Addiction Psychiatry', 'Sleep Disorders', 'Cognitive Behavioural Therapy'],
+  ENT: ['Otology', 'Rhinology', 'Sinus Disease', 'Hearing Loss', 'Tonsil & Adenoid Care', 'Head & Neck Surgery'],
+  Ophthalmology: ['Cataract Surgery', 'Glaucoma', 'Retina', 'Pediatric Ophthalmology', 'Refractive Errors', 'Diabetic Eye Disease'],
+  Urology: ['Kidney Stones', 'Prostate Health', 'Andrology', 'Urinary Tract Infections', 'Urologic Oncology', 'Pediatric Urology'],
+  Gastroenterology: ['Hepatology', 'IBD', 'Endoscopy', 'GERD', 'Peptic Ulcer Disease', 'Liver Disease'],
+  Pulmonology: ['Asthma', 'COPD', 'Sleep Medicine', 'Critical Care', 'Tuberculosis', 'Interstitial Lung Disease'],
+  Nephrology: ['Chronic Kidney Disease', 'Dialysis', 'Hypertension Nephrology', 'Electrolyte Disorders', 'Transplant Nephrology', 'AKI'],
+  Endocrinology: ['Diabetes', 'Thyroid Disorders', 'Metabolic Medicine', 'Osteoporosis', 'Obesity Medicine', 'Adrenal Disorders'],
+  Oncology: ['Medical Oncology', 'Chemotherapy', 'Cancer Screening', 'Palliative Care', 'Hematologic Malignancies', 'Immunotherapy'],
+  Rheumatology: ['Rheumatoid Arthritis', 'Lupus', 'Osteoporosis', 'Gout', 'Autoimmune Disorders', 'Vasculitis'],
+  'General Surgery': ['Laparoscopic Surgery', 'Hernia Repair', 'Gallbladder Surgery', 'Trauma Surgery', 'Breast Surgery', 'Appendectomy'],
+  'Plastic Surgery': ['Reconstructive Surgery', 'Burn Care', 'Hand Surgery', 'Cosmetic Procedures', 'Wound Care', 'Scar Revision'],
+  'Family Medicine': ['Primary Care', 'Geriatric Care', 'Preventive Medicine', 'Chronic Disease Management', 'Health Screening', 'Vaccination'],
+};
+
+export function buildDoctorBioProfile(input: {
+  index: number;
+  firstName: string;
+  lastName: string;
+  specialty: string;
+  subSpecialty: string;
+  city: string;
+  hospital: string;
+  university: string;
+  experienceYears: number;
+  licenseNumber: string;
+  gender: string;
+}) {
+  const {
+    index: i,
+    firstName,
+    lastName,
+    specialty,
+    subSpecialty,
+    city,
+    hospital,
+    university,
+    experienceYears,
+    licenseNumber,
+    gender,
+  } = input;
+
+  const gradYear = new Date().getFullYear() - experienceYears - 6;
+  const mdYear = gradYear + 3;
+  const fellowshipYear = mdYear + 2;
+  const boardYear = fellowshipYear + 1;
+
+  const expertiseBase = SPECIALTY_EXPERTISE[specialty] ?? [
+    specialty,
+    subSpecialty,
+    'Evidence-Based Medicine',
+    'Patient Education',
+    'Telemedicine',
+    'Chronic Disease Management',
+  ];
+  const expertise = [...new Set([subSpecialty, ...expertiseBase])].slice(0, 10);
+
+  const educationHistory: EducationHistoryItem[] = [
+    {
+      year: String(gradYear),
+      title: 'MBBS — Medicine & Surgery',
+      institution: `${university} · First Class Honours`,
+      icon: '🎓',
+    },
+    {
+      year: String(mdYear),
+      title: `FCPS — ${specialty}`,
+      institution: `College of Physicians & Surgeons Pakistan · ${city}`,
+      icon: '🏥',
+    },
+    {
+      year: String(fellowshipYear),
+      title: `Fellowship — ${subSpecialty}`,
+      institution: hospital,
+      icon: '🔬',
+    },
+    {
+      year: String(boardYear),
+      title: 'PMDC Registration & Specialist Recognition',
+      institution: `Pakistan Medical & Dental Council · ${licenseNumber}`,
+      icon: '📋',
+    },
+  ];
+
+  const certifications: CertificationItem[] = [
+    {
+      title: 'College of Physicians & Surgeons Pakistan (CPSP)',
+      subtitle: `FCPS (${specialty}) · ${mdYear}`,
+      icon: '🏥',
+    },
+    {
+      title: 'Pakistan Medical & Dental Council',
+      subtitle: `Active License · ${licenseNumber}`,
+      icon: '✓',
+    },
+    {
+      title: `${specialty} Society of Pakistan`,
+      subtitle: `Fellow Member · ${boardYear}–present`,
+      icon: '🧠',
+    },
+    {
+      title: 'Pakistan Medical Association',
+      subtitle: `Member · ${gradYear + 1}–present`,
+      icon: '🌍',
+    },
+  ];
+
+  const publications: PublicationItem[] = [
+    {
+      journal: `Journal of ${specialty} Practice · ${boardYear + 4}`,
+      title: `Clinical Outcomes in ${subSpecialty}: A Multi-Centre Observational Study from Pakistan`,
+      year: boardYear + 4,
+      citations: 20 + (i % 80),
+      doi: `10.1000/j.${specialty.toLowerCase().replace(/\s+/g, '')}.${boardYear + 4}.${1000 + i}`,
+    },
+    {
+      journal: `Pakistan Journal of Medical Sciences · ${boardYear + 2}`,
+      title: `Evidence-Based Approaches to ${expertise[0]} in Outpatient Settings`,
+      year: boardYear + 2,
+      citations: 12 + (i % 50),
+      doi: `10.12669/pjms.${boardYear + 2}.${2000 + i}`,
+    },
+    {
+      journal: `South Asian Medical Review · ${boardYear}`,
+      title: `Telemedicine Delivery of ${specialty} Care: Lessons from ${city}`,
+      year: boardYear,
+      citations: 8 + (i % 40),
+    },
+  ];
+
+  const awards: AwardItem[] = [
+    {
+      title: `Excellence in ${specialty} Award`,
+      organization: 'Pakistan Medical Association',
+      year: String(boardYear + 5),
+      icon: '🥇',
+    },
+    {
+      title: 'Outstanding Clinical Educator',
+      organization: hospital,
+      year: String(boardYear + 3),
+      icon: '🌟',
+    },
+    {
+      title: 'Community Health Service Award',
+      organization: `${city} Health Directorate`,
+      year: String(boardYear + 1),
+      icon: '🎖️',
+    },
+  ];
+
+  const speakingEngagements: SpeakingItem[] = [
+    {
+      title: `Keynote: Advances in ${subSpecialty}`,
+      venue: `Annual ${specialty} Conference, ${city}`,
+      type: 'conference',
+      year: String(boardYear + 5),
+    },
+    {
+      title: `Grand Rounds: Approach to Complex ${specialty} Cases`,
+      venue: hospital,
+      type: 'lecture',
+      year: String(boardYear + 4),
+    },
+    {
+      title: `CME Webinar: ${expertise[0]} — Practical Updates`,
+      venue: 'DrInsight CME Series',
+      type: 'webinar',
+      year: String(boardYear + 3),
+    },
+  ];
+
+  const weeklySchedule: ScheduleDay[] = [
+    { day: 'Monday', time: '9:00 AM – 5:00 PM (PKT)', available: true },
+    { day: 'Tuesday', time: '9:00 AM – 5:00 PM (PKT)', available: true },
+    { day: 'Wednesday', time: '9:00 AM – 1:00 PM (PKT)', available: true },
+    { day: 'Thursday', time: '9:00 AM – 5:00 PM (PKT)', available: true },
+    { day: 'Friday', time: '9:00 AM – 12:00 PM (PKT)', available: true },
+    { day: 'Saturday', time: 'Not Available', available: false },
+    { day: 'Sunday', time: 'Not Available', available: false },
+  ];
+
+  const credentials = pick(['MBBS · FCPS', 'MBBS · MD · FCPS', 'MBBS · FCPS · MRCP'], i);
+  const patientsTreated = 80 + (i * 37) % 900;
+  const successRate = Math.round((92 + (i % 8) + (i % 3) * 0.1) * 10) / 10;
+  const responseHours = [2, 4, 6, 8, 12][i % 5];
+
+  return {
+    credentials,
+    professionalTitle: `Consultant ${specialty}`,
+    bioFull: doctorBioFull(firstName, lastName, specialty, city, experienceYears, hospital, university, subSpecialty),
+    expertise,
+    services: expertise.slice(0, 5),
+    researchTags: expertise.slice(0, 6),
+    educationHistory,
+    certifications,
+    publications,
+    awards,
+    speakingEngagements,
+    weeklySchedule,
+    city,
+    country: 'Pakistan',
+    gender,
+    address: `${hospital}, ${city}, Pakistan`,
+    patientsTreated,
+    successRate,
+    responseTime: `Typically within ${responseHours} hours`,
+    linkedinUrl: `https://www.linkedin.com/in/dr-${firstName.toLowerCase()}-${lastName.toLowerCase()}-${i}`,
+    twitterUrl: `https://twitter.com/Dr${firstName}${lastName.charAt(0)}${i}`,
+    platformRole: i % 5 === 0 ? `${specialty} Section Editor` : `${specialty} Contributing Author`,
+    editorialBoard: i % 5 === 0,
+    medicalReviewerFor: `${specialty}, ${subSpecialty}`,
+    conflictOfInterest: `Dr. ${firstName} ${lastName} declares no financial conflicts of interest related to any articles authored or reviewed on DrInsight. No commercial relationships with pharmaceutical companies, medical device manufacturers, or supplement companies relevant to published content.`,
+    credentialsVerifiedAt: new Date(Date.UTC(2026, 5, 1 + (i % 20))),
+  };
 }
 
 export function doctorStatus(index: number): UserStatus {

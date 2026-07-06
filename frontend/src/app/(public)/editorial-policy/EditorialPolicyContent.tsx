@@ -80,12 +80,12 @@ const TEAM = [
 ];
 
 const CONTACTS = [
-  { title: "✉️ General Editorial", email: "editorial@medauthority.com", note: "General editorial enquiries" },
-  { title: "🔍 Corrections & Inaccuracies", email: "corrections@medauthority.com", note: "Report inaccurate content" },
-  { title: "✍️ Author Applications", email: "authors@medauthority.com", note: "Join as a medical author" },
-  { title: "🔬 Reviewer Applications", email: "reviewers@medauthority.com", note: "Join as a medical reviewer" },
-  { title: "📣 Sponsored Content", email: "partnerships@medauthority.com", note: "Partnership & advertising enquiries" },
-  { title: "🧠 Safe Messaging", email: "safemessaging@medauthority.com", note: "Safe messaging concerns" },
+  { title: "✉️ General Editorial", email: "editorial@drinsight.org", note: "General editorial enquiries" },
+  { title: "🔍 Corrections & Inaccuracies", email: "corrections@drinsight.org", note: "Report inaccurate content" },
+  { title: "✍️ Author Applications", email: "authors@drinsight.org", note: "Join as a medical author" },
+  { title: "🔬 Reviewer Applications", email: "reviewers@drinsight.org", note: "Join as a medical reviewer" },
+  { title: "📣 Sponsored Content", email: "partnerships@drinsight.org", note: "Partnership & advertising enquiries" },
+  { title: "🧠 Safe Messaging", email: "safemessaging@drinsight.org", note: "Safe messaging concerns" },
 ];
 
 function Accordion({ id, title, open, onToggle, children }: { id: string; title: string; open: boolean; onToggle: (id: string) => void; children: React.ReactNode }) {
@@ -142,12 +142,6 @@ export function EditorialPolicyContent() {
         <div className="progress-fill" style={{ width: `${progress}%` }} />
       </div>
 
-      <div className="breadcrumb">
-        <div className="bc">
-          🏠 <Link href="/">Home</Link> › <span>Editorial Policy</span>
-        </div>
-      </div>
-
       <div className="page-hero">
         <div className="hero-inner">
           <h1>📋 Editorial Policy</h1>
@@ -180,7 +174,7 @@ export function EditorialPolicyContent() {
         <div className="mission-inner">
           <h2>🏥 Our Editorial Mission</h2>
           <p>
-            MedAuthority is committed to being the most trusted source of medical information for patients, caregivers,
+            DrInsight is committed to being the most trusted source of medical information for patients, caregivers,
             and healthcare professionals. Every piece of content we publish undergoes a rigorous multi-stage editorial
             process — from expert authorship and peer review to fact-checking and post-publication monitoring. We believe
             that accurate medical information saves lives, and we treat every article with that responsibility in mind.
@@ -220,7 +214,7 @@ export function EditorialPolicyContent() {
             </div>
             <div className="box box-g">
               <div className="bh">✅ What We Are</div>
-              <p>MedAuthority is a medically led, editorially independent health information platform. We publish content designed to educate, inform, and empower — never to alarm, mislead, or promote commercial interests.</p>
+              <p>DrInsight is a medically led, editorially independent health information platform. We publish content designed to educate, inform, and empower — never to alarm, mislead, or promote commercial interests.</p>
             </div>
             <div className="box box-r">
               <div className="bh">🚫 What We Are NOT</div>
@@ -237,7 +231,7 @@ export function EditorialPolicyContent() {
             <div className="sec-title"><div className="sn">2</div>Editorial Independence</div>
             <div className="box box-b">
               <div className="bh">⚖️ Absolute Editorial Independence — Non-Negotiable</div>
-              <p>MedAuthority maintains a strict firewall between editorial and commercial operations. Editorial decisions are made exclusively by our Editorial Board and medical team. The following parties have <strong>zero influence</strong> over editorial content:</p>
+              <p>DrInsight maintains a strict firewall between editorial and commercial operations. Editorial decisions are made exclusively by our Editorial Board and medical team. The following parties have <strong>zero influence</strong> over editorial content:</p>
               <ul>
                 <li>Advertisers and sponsors</li>
                 <li>Pharmaceutical companies</li>
@@ -295,7 +289,7 @@ export function EditorialPolicyContent() {
               <ul>
                 <li>Credential verification by Editorial team before first publication</li>
                 <li>Annual re-verification of licensure status</li>
-                <li>Authors must notify MedAuthority immediately if licensure is suspended or revoked</li>
+                <li>Authors must notify DrInsight immediately if licensure is suspended or revoked</li>
                 <li>Credentials published on author bio page with verification badge</li>
               </ul>
             </div>
@@ -597,7 +591,7 @@ export function EditorialPolicyContent() {
               <p>Full article removal when content is fundamentally flawed or clinically unsafe. A retraction notice is published at the original URL. If author misconduct is identified, the matter is reported to relevant professional regulatory bodies. All retractions are permanently logged in editorial records.</p>
             </div>
             <div className="prose">
-              <p>📧 To report a correction: <strong>corrections@medauthority.com</strong> · Response commitment: within 5 business days</p>
+              <p>📧 To report a correction: <strong>corrections@drinsight.org</strong> · Response commitment: within 5 business days</p>
             </div>
           </div>
 

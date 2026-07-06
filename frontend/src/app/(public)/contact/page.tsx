@@ -1,9 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type CSSProperties } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import "@/styles/contact-page.css";
-import { useContactSubmit, useNewsletterSubscribe } from "@/services/api-hooks";
+import {
+  formatSiteAddress,
+  isOpenNow,
+  mapsHref,
+  parseBusinessHours,
+  phoneHref,
+  weekdayName,
+  whatsappHref,
+} from "@/lib/contact-utils";
+import { useContactSubmit, useNewsletterSubscribe, usePlatformStats, useSiteContact } from "@/services/api-hooks";
 
 const SUBJECT_TABS = [
   "General Enquiry",
@@ -16,11 +25,11 @@ const SUBJECT_TABS = [
 ];
 
 const COUNTRIES = [
+  "Pakistan",
   "United States",
   "United Kingdom",
   "Canada",
   "Australia",
-  "Pakistan",
   "India",
   "UAE",
   "Saudi Arabia",
@@ -43,98 +52,34 @@ type ContactCard = {
   badge: { text: string; bg?: string; color?: string };
 };
 
-const CONTACT_CARDS: ContactCard[] = [
-  {
-    icon: "📞",
-    iconBg: "#e8f0fb",
-    title: "Phone",
-    desc: "Speak directly with our support team",
-    links: [
-      { text: "+1 (800) MED-HELP", href: "tel:+18006334357" },
-      { text: "+1 (800) 633-4357", href: "tel:+18006334357", style: { marginTop: 3 } },
-    ],
-    badge: { text: "Mon–Fri 8AM–8PM", bg: undefined, color: undefined },
-  },
-  {
-    icon: "📱",
-    iconBg: "#dcfce7",
-    title: "WhatsApp",
-    desc: "Message us on WhatsApp anytime",
-    links: [{ text: "+1 (800) 633-4357", href: "https://wa.me/18006334357", color: "#25d366" }],
-    badge: { text: "24/7 Available", bg: "#dcfce7", color: "#166534" },
-  },
-  {
-    icon: "✉️",
-    iconBg: "#fef3c7",
-    title: "Email",
-    desc: "Send us your queries by email",
-    links: [
-      { text: "contact@medauthority.com", href: "mailto:contact@medauthority.com" },
-      {
-        text: "support@medauthority.com",
-        href: "mailto:support@medauthority.com",
-        style: { marginTop: 3, fontSize: ".74rem" },
-      },
-    ],
-    badge: { text: "Reply within 2–4 hrs", bg: "#fef3c7", color: "#92400e" },
-  },
-  {
-    icon: "💬",
-    iconBg: "#fce7f3",
-    title: "Live Chat",
-    desc: "Chat with a support agent instantly",
-    links: [{ text: "Start Chat →", href: "#" }],
-    badge: { text: "Mon–Sat 8AM–10PM", bg: "#fce7f3", color: "#9d174d" },
-  },
-  {
-    icon: "📍",
-    iconBg: "#ede9fe",
-    title: "Visit Us",
-    desc: "123 Medical Plaza, Suite 400",
-    links: [
-      { text: "New York, NY 10001", href: "#" },
-      { text: "Get Directions →", href: "https://maps.google.com/?q=123+Medical+Plaza+New+York+NY+10001", style: { fontSize: ".74rem", marginTop: 3 } },
-    ],
-    badge: { text: "By appointment only", bg: "#ede9fe", color: "#5b21b6" },
-  },
-];
-
-const BUSINESS_HOURS = [
-  { day: "Monday", time: "8:00 AM – 8:00 PM", today: false, closed: false },
-  { day: "Tuesday ⭐", time: "8:00 AM – 8:00 PM", today: true, closed: false },
-  { day: "Wednesday", time: "8:00 AM – 8:00 PM", today: false, closed: false },
-  { day: "Thursday", time: "8:00 AM – 8:00 PM", today: false, closed: false },
-  { day: "Friday", time: "8:00 AM – 6:00 PM", today: false, closed: false },
-  { day: "Saturday", time: "9:00 AM – 5:00 PM", today: false, closed: false },
-  { day: "Sunday", time: "Closed", today: false, closed: true },
-];
-
-const FAQ_ITEMS = [
-  {
-    q: "How quickly will I receive a response?",
-    a: "Email enquiries are typically answered within 2–4 hours during business hours (Mon–Fri, 8AM–8PM EST). WhatsApp messages are answered within 1 hour. Phone calls are answered immediately during office hours. After-hours messages receive a response on the next business day.",
-  },
-  {
-    q: "Can I contact you in a language other than English?",
-    a: "Yes — our support team speaks English, Spanish, French, Arabic, Urdu, Hindi, and Mandarin. Please mention your preferred language in your message and we will assign a representative who speaks your language.",
-  },
-  {
-    q: "How do I cancel or reschedule a consultation?",
-    a: "You can cancel or reschedule via your patient portal, by emailing support@medauthority.com with your booking reference, or by calling our helpline. Free rescheduling is available up to 2 hours before your appointment. Full refunds are issued for cancellations made 24+ hours in advance.",
-  },
-  {
-    q: "I'm a doctor — how do I join MedAuthority's panel?",
-    a: "We welcome board-certified physicians to join our platform. Please email partnerships@medauthority.com with your CV, medical licence, board certification details, and a brief statement of interest. Our medical director reviews all applications within 5 business days.",
-  },
-  {
-    q: "How do I report a technical issue with the platform?",
-    a: 'Select "Technical Issue" in the contact form above and describe the problem in detail — include your browser, device, and a screenshot if possible. Our technical team typically resolves reported issues within 24 hours. For urgent issues during a live consultation, call our helpline immediately.',
-  },
-  {
-    q: "Do you offer media interviews or expert quotes?",
-    a: "Yes — Dr. Javed Kumbhar and our specialist team are available for media interviews, expert quotes, and health commentary. Please contact media@medauthority.com with your publication details, deadline, and topic. We typically respond to media enquiries within 4 hours.",
-  },
-];
+function buildFaqItems(contactEmail: string) {
+  return [
+    {
+      q: "How quickly will I receive a response?",
+      a: `Email enquiries are typically answered within 2–4 hours during business hours (Mon–Fri, 8AM–8PM PKT). WhatsApp messages are answered within 1 hour. Phone calls are answered immediately during office hours. After-hours messages receive a response on the next business day.`,
+    },
+    {
+      q: "Can I contact you in a language other than English?",
+      a: "Yes — our support team speaks English, Urdu, and other regional languages. Please mention your preferred language in your message and we will assign a representative who speaks your language.",
+    },
+    {
+      q: "How do I cancel or reschedule a consultation?",
+      a: `You can cancel or reschedule via your patient portal, by emailing ${contactEmail} with your booking reference, or by calling our helpline. Free rescheduling is available up to 2 hours before your appointment. Full refunds are issued for cancellations made 24+ hours in advance.`,
+    },
+    {
+      q: "I'm a doctor — how do I join DrInsight's panel?",
+      a: `We welcome board-certified physicians to join our platform. Please email ${contactEmail} with your CV, medical licence, board certification details, and a brief statement of interest. Our medical director reviews all applications within 5 business days.`,
+    },
+    {
+      q: "How do I report a technical issue with the platform?",
+      a: 'Select "Technical Issue" in the contact form above and describe the problem in detail — include your browser, device, and a screenshot if possible. Our technical team typically resolves reported issues within 24 hours. For urgent issues during a live consultation, call our helpline immediately.',
+    },
+    {
+      q: "Do you offer media interviews or expert quotes?",
+      a: `Yes — our specialist team is available for media interviews, expert quotes, and health commentary. Please contact ${contactEmail} with your publication details, deadline, and topic. We typically respond to media enquiries within 4 hours.`,
+    },
+  ];
+}
 
 const SOCIAL_BTNS = [
   { icon: "𝕏", title: "Twitter / X" },
@@ -152,6 +97,65 @@ function generateRefNum() {
 export default function ContactPage() {
   const contactSubmit = useContactSubmit();
   const newsletterSubscribe = useNewsletterSubscribe();
+  const { data: contact } = useSiteContact();
+  const { data: stats } = usePlatformStats();
+
+  const businessHours = useMemo(() => parseBusinessHours(contact?.businessHours), [contact?.businessHours]);
+  const today = weekdayName();
+  const openNow = isOpenNow(businessHours);
+  const contactEmail = contact?.contactEmail ?? "contact@drinsight.org";
+  const faqItems = useMemo(() => buildFaqItems(contactEmail), [contactEmail]);
+
+  const contactCards = useMemo<ContactCard[]>(() => {
+    if (!contact) return [];
+    const address = formatSiteAddress(contact);
+    const whatsapp = contact.contactWhatsapp ?? contact.contactPhone;
+    return [
+      {
+        icon: "📞",
+        iconBg: "#e8f0fb",
+        title: "Phone",
+        desc: "Speak directly with our support team",
+        links: [{ text: contact.contactPhone, href: phoneHref(contact.contactPhone) }],
+        badge: { text: "Mon–Fri 8AM–8PM" },
+      },
+      {
+        icon: "📱",
+        iconBg: "#dcfce7",
+        title: "WhatsApp",
+        desc: "Message us on WhatsApp anytime",
+        links: [{ text: whatsapp, href: whatsappHref(whatsapp), color: "#25d366" }],
+        badge: { text: "24/7 Available", bg: "#dcfce7", color: "#166534" },
+      },
+      {
+        icon: "✉️",
+        iconBg: "#fef3c7",
+        title: "Email",
+        desc: "Send us your queries by email",
+        links: [{ text: contact.contactEmail, href: `mailto:${contact.contactEmail}` }],
+        badge: { text: "Reply within 2–4 hrs", bg: "#fef3c7", color: "#92400e" },
+      },
+      {
+        icon: "💬",
+        iconBg: "#fce7f3",
+        title: "Live Chat",
+        desc: "Send a message through our contact form",
+        links: [{ text: "Start Message →", href: "#contact-form" }],
+        badge: { text: "Mon–Sat 8AM–10PM", bg: "#fce7f3", color: "#9d174d" },
+      },
+      {
+        icon: "📍",
+        iconBg: "#ede9fe",
+        title: "Visit Us",
+        desc: contact.addressLine1 ?? address,
+        links: [
+          { text: [contact.city, contact.country].filter(Boolean).join(", "), href: mapsHref(contact) },
+          { text: "Get Directions →", href: mapsHref(contact), style: { fontSize: ".74rem", marginTop: 3 } },
+        ],
+        badge: { text: "By appointment only", bg: "#ede9fe", color: "#5b21b6" },
+      },
+    ];
+  }, [contact]);
 
   const [activeSubject, setActiveSubject] = useState("General Enquiry");
   const [subject, setSubject] = useState("General Enquiry");
@@ -159,7 +163,7 @@ export default function ContactPage() {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [country, setCountry] = useState("United States");
+  const [country, setCountry] = useState("Pakistan");
   const [message, setMessage] = useState("");
   const [newsletter, setNewsletter] = useState(false);
   const [privacy, setPrivacy] = useState(false);
@@ -204,7 +208,7 @@ export default function ContactPage() {
     setLastName("");
     setEmail("");
     setPhone("");
-    setCountry("United States");
+    setCountry("Pakistan");
     setMessage("");
     setNewsletter(false);
     setPrivacy(false);
@@ -219,12 +223,6 @@ export default function ContactPage() {
 
   return (
     <div className="contact-page">
-      <div className="breadcrumb">
-        <div className="bc-inner">
-          🏠 <Link href="/">Home</Link> › <span>Contact Us</span>
-        </div>
-      </div>
-
       <div className="page-hero">
         <div className="hero-inner">
           <div className="eyebrow">Get in Touch</div>
@@ -236,7 +234,9 @@ export default function ContactPage() {
           <div className="hero-pills">
             <div className="hero-pill">⚡ Response within 2 hours</div>
             <div className="hero-pill">📞 Phone & WhatsApp available</div>
-            <div className="hero-pill">🌍 Available in 12 languages</div>
+            <div className="hero-pill">
+              🌍 {stats?.countryCount ?? "—"} countries · {stats?.specialtyCount ?? "—"} specialties
+            </div>
           </div>
         </div>
       </div>
@@ -245,7 +245,7 @@ export default function ContactPage() {
         <div className="emg-banner">
           <span style={{ fontSize: "1.5rem" }}>🚨</span>
           <div>
-            <strong>Medical Emergency? Call 911 immediately.</strong>
+            <strong>Medical Emergency? Call 115 (Pakistan) or your local emergency number immediately.</strong>
             <p>For urgent medical queries outside office hours, use our 24/7 Ask the Doctor service.</p>
           </div>
           <Link href="/ask-doctor" className="emg-btn">
@@ -256,7 +256,7 @@ export default function ContactPage() {
 
       <div className="contact-cards-section">
         <div className="contact-cards">
-          {CONTACT_CARDS.map((card) => (
+          {contactCards.map((card) => (
             <div key={card.title} className="contact-card">
               <div className="cc-icon" style={{ background: card.iconBg }}>
                 {card.icon}
@@ -418,7 +418,7 @@ export default function ContactPage() {
                   <Link href="/privacy-policy" className="privacy-link">
                     Privacy Policy
                   </Link>{" "}
-                  and consent to MedAuthority processing my data *
+                  and consent to DrInsight processing my data *
                 </label>
               </div>
               <button
@@ -461,11 +461,7 @@ export default function ContactPage() {
               </div>
               <div>
                 <h4>Head Office</h4>
-                <p>
-                  123 Medical Plaza, Suite 400
-                  <br />
-                  New York, NY 10001, USA
-                </p>
+                <p>{contact ? formatSiteAddress(contact) : "—"}</p>
               </div>
             </div>
             <div className="info-item">
@@ -474,11 +470,11 @@ export default function ContactPage() {
               </div>
               <div>
                 <h4>Phone Numbers</h4>
-                <a href="tel:+18006334357">+1 (800) MED-HELP (633-4357)</a>
-                <br />
-                <a href="tel:+18005551234" style={{ fontSize: ".74rem" }}>
-                  +1 (800) 555-1234 (International)
-                </a>
+                {contact ? (
+                  <a href={phoneHref(contact.contactPhone)}>{contact.contactPhone}</a>
+                ) : (
+                  "—"
+                )}
               </div>
             </div>
             <div className="info-item">
@@ -487,15 +483,11 @@ export default function ContactPage() {
               </div>
               <div>
                 <h4>Email Addresses</h4>
-                <a href="mailto:contact@medauthority.com">contact@medauthority.com</a>
-                <br />
-                <a href="mailto:support@medauthority.com" style={{ fontSize: ".74rem" }}>
-                  support@medauthority.com
-                </a>
-                <br />
-                <a href="mailto:media@medauthority.com" style={{ fontSize: ".74rem" }}>
-                  media@medauthority.com
-                </a>
+                {contact ? (
+                  <a href={`mailto:${contact.contactEmail}`}>{contact.contactEmail}</a>
+                ) : (
+                  "—"
+                )}
               </div>
             </div>
             <div className="info-item">
@@ -504,56 +496,67 @@ export default function ContactPage() {
               </div>
               <div>
                 <h4>WhatsApp</h4>
-                <a href="https://wa.me/18006334357" style={{ color: "#25d366", fontWeight: 600 }}>
-                  +1 (800) 633-4357
-                </a>
+                {contact ? (
+                  <a
+                    href={whatsappHref(contact.contactWhatsapp ?? contact.contactPhone)}
+                    style={{ color: "#25d366", fontWeight: 600 }}
+                  >
+                    {contact.contactWhatsapp ?? contact.contactPhone}
+                  </a>
+                ) : (
+                  "—"
+                )}
                 <p style={{ fontSize: ".72rem", marginTop: 2 }}>Available 24/7 for non-emergency queries</p>
               </div>
             </div>
-            <a href="https://wa.me/18006334357" className="whatsapp-btn">
-              <span>💬</span> Chat on WhatsApp
-            </a>
+            {contact && (
+              <a href={whatsappHref(contact.contactWhatsapp ?? contact.contactPhone)} className="whatsapp-btn">
+                <span>💬</span> Chat on WhatsApp
+              </a>
+            )}
           </div>
 
           <div className="sidebar-card">
             <h3>🕐 Business Hours</h3>
             <div className="open-now">
               <div className="open-dot" />
-              Open Now
+              {openNow ? "Open Now" : "Closed Now"}
             </div>
             <div className="hours-grid">
-              {BUSINESS_HOURS.map((row) => (
-                <div
-                  key={row.day}
-                  className={`hours-row${row.today ? " today" : ""}${row.closed ? " closed" : ""}`}
-                >
-                  <span className="day">{row.day}</span>
-                  <span className="time" style={row.closed ? { color: "var(--gray-400)" } : undefined}>
-                    {row.time}
-                  </span>
-                </div>
-              ))}
+              {businessHours.map((row) => {
+                const isToday = row.day.startsWith(today);
+                return (
+                  <div
+                    key={row.day}
+                    className={`hours-row${isToday ? " today" : ""}${row.closed ? " closed" : ""}`}
+                  >
+                    <span className="day">
+                      {row.day}
+                      {isToday ? " ⭐" : ""}
+                    </span>
+                    <span className="time" style={row.closed ? { color: "var(--gray-400)" } : undefined}>
+                      {row.hours}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
             <p className="hours-note">
-              All times in Eastern Standard Time (EST). Online consultations available outside office hours.
+              All times in Pakistan Standard Time (PKT). Online consultations available outside office hours.
             </p>
           </div>
 
           <div className="sidebar-card map-card">
             <h3>🗺️ Find Us</h3>
             <a
-              href="https://maps.google.com/?q=123+Medical+Plaza+New+York+NY+10001"
+              href={contact ? mapsHref(contact) : "#"}
               target="_blank"
               rel="noopener noreferrer"
               className="map-placeholder"
             >
               <div className="map-pin">📍</div>
-              <h4>MedAuthority HQ</h4>
-              <p>
-                123 Medical Plaza, Suite 400
-                <br />
-                New York, NY 10001
-              </p>
+              <h4>DrInsight HQ</h4>
+              <p>{contact ? formatSiteAddress(contact) : "—"}</p>
               <span className="directions-btn">Get Directions →</span>
             </a>
             <p className="map-note">
@@ -573,7 +576,9 @@ export default function ContactPage() {
                 </div>
               ))}
             </div>
-            <p className="social-note">@MedAuthority · 120K followers across all platforms</p>
+            <p className="social-note">
+              @DrInsight · {stats ? `${stats.newsletterCount ?? 0} newsletter subscribers` : "Follow us online"}
+            </p>
           </div>
         </div>
       </div>
@@ -583,7 +588,7 @@ export default function ContactPage() {
         <h2>Frequently Asked Contact Questions</h2>
         <p>Quick answers to the most common questions about reaching our team</p>
         <div className="faq-grid">
-          {FAQ_ITEMS.map((item, i) => (
+          {faqItems.map((item, i) => (
             <div
               key={item.q}
               className={`faq-item${openFaq === i ? " open" : ""}`}

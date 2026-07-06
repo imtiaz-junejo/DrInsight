@@ -23,9 +23,10 @@ export function DoctorSidebar() {
   const setAvailability = useDoctorUiStore((s) => s.setAvailability);
   const showToast = useDoctorUiStore((s) => s.showToast);
   const setMobileSidebarOpen = useDoctorUiStore((s) => s.setMobileSidebarOpen);
+  const mobileSidebarOpen = useDoctorUiStore((s) => s.mobileSidebarOpen);
 
   const initials = getInitials(user?.firstName, user?.lastName);
-  const fullName = `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim() || "Dr. Javed Kumbhar";
+  const fullName = `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim() || "Doctor";
 
   const handleAvailability = (value: DoctorAvailability) => {
     setAvailability(value);
@@ -40,7 +41,7 @@ export function DoctorSidebar() {
   };
 
   return (
-    <aside className="dash-sidebar">
+    <aside className={`dash-sidebar${mobileSidebarOpen ? " open" : ""}`}>
       <div className="sidebar-profile">
         <div className="sidebar-avatar-ring">
           <div className="sidebar-avatar">{initials}</div>

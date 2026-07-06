@@ -1,46 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { FloatingInput } from "@/components/ui/floating-input";
+import { AuthSocialButtons } from "@/components/auth/AuthSocialButtons";
 import { Logo } from "@/components/layout/Logo";
 import { isAxiosError } from "axios";
 import { api } from "@/lib/api";
+import { clearOAuthLoadingProvider, resolvePostLoginPath, startOAuth, type OAuthProviderName } from "@/lib/oauth";
 import { useAuthStore, type AuthUser } from "@/store/auth.store";
-
-function dashboardForRole(role: AuthUser["role"]) {
-  if (role === "DOCTOR") return "/doctor";
-  if (role === "ADMIN") return "/admin";
-  return "/patient";
-}
-
-function requiredRoleForPath(path: string): AuthUser["role"] | null {
-  if (path.startsWith("/admin")) return "ADMIN";
-  if (path.startsWith("/doctor")) return "DOCTOR";
-  if (path.startsWith("/patient")) return "PATIENT";
-  return null;
-}
-
-function resolvePostLoginPath(role: AuthUser["role"], redirect: string | null): string {
-  if (!redirect || !redirect.startsWith("/") || redirect.startsWith("//")) {
-    return dashboardForRole(role);
-  }
-  const neededRole = requiredRoleForPath(redirect);
-  if (neededRole && neededRole !== role) {
-    return dashboardForRole(role);
-  }
-  return redirect;
-}
 
 export function LoginForm() {
   const searchParams = useSearchParams();
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [oauthLoading, setOauthLoading] = useState<OAuthProviderName | null>(null);
   const setAuth = useAuthStore((state) => state.setAuth);
+
+  useEffect(() => {
+    clearOAuthLoadingProvider();
+    setOauthLoading(null);
+
+    const oauthError = searchParams.get("error");
+    if (oauthError) {
+      setError(oauthError);
+      setSuccess("");
+    }
+  }, [searchParams]);
   const loginMutation = useMutation({
     mutationFn: async (payload: { email: string; password: string }) => {
       const { data } = await api.post<{
@@ -105,8 +95,15 @@ export function LoginForm() {
     loginMutation.mutate({ email, password });
   }
 
+  function handleOAuth(provider: OAuthProviderName) {
+    setError("");
+    setSuccess("");
+    setOauthLoading(provider);
+    startOAuth(provider, searchParams.get("redirect"));
+  }
+
   return (
-    <div className="w-full max-w-[440px] rounded-[20px] border border-gray-200 bg-white p-10 shadow-[var(--shadow-lg)] md:p-11">
+    <div className="w-full max-w-[440px] rounded-[20px] border border-gray-200 bg-white p-6 shadow-[var(--shadow-lg)] sm:p-10 lg:p-11">
       <div className="mb-6 flex justify-center">
         <Logo />
       </div>
@@ -124,17 +121,12 @@ export function LoginForm() {
         </div>
       )}
 
-      <div className="mb-5 grid grid-cols-2 gap-2.5">
-        {["Google", "Facebook"].map((provider) => (
-          <button
-            key={provider}
-            type="button"
-            className="flex items-center justify-center gap-2 rounded-[10px] border-[1.5px] border-gray-200 bg-white px-4 py-2.5 text-[.88rem] font-semibold text-gray-700 transition hover:border-blue hover:bg-blue-light hover:text-blue"
-          >
-            {provider}
-          </button>
-        ))}
-      </div>
+      <AuthSocialButtons
+        className="mb-5"
+        onOAuth={handleOAuth}
+        oauthLoading={oauthLoading}
+        disabled={loginMutation.isPending}
+      />
 
       <div className="mb-5 flex items-center gap-3 text-[.8rem] text-gray-400">
         <div className="h-px flex-1 bg-gray-200" />
@@ -143,44 +135,27 @@ export function LoginForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="mb-1.5 block text-[.84rem] font-semibold text-gray-700">Email Address</label>
-          <div className="relative">
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[.9rem]">✉️</span>
-            <Input name="email" type="email" placeholder="you@example.com" className="pl-10" />
-          </div>
-        </div>
+        <FloatingInput name="email" type="email" label="Email Address" autoComplete="email" />
 
-        <div>
-          <label className="mb-1.5 flex items-center justify-between text-[.84rem] font-semibold text-gray-700">
-            Password
-            <Link href="/forgot-password" className="text-[.82rem] font-semibold text-blue">
-              Forgot password?
-            </Link>
+        <FloatingInput
+          name="password"
+          type={showPw ? "text" : "password"}
+          label="Password"
+          autoComplete="current-password"
+          showPasswordToggle
+          passwordVisible={showPw}
+          onPasswordToggle={() => setShowPw(!showPw)}
+        />
+
+        <div className="flex items-center justify-between gap-3">
+          <label className="flex items-center gap-2 text-[.70rem] text-gray-600">
+            <input type="checkbox" className="h-4 w-4 accent-blue" />
+            Keep me signed in for 30 days
           </label>
-          <div className="relative">
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[.9rem]">🔒</span>
-            <Input
-              name="password"
-              type={showPw ? "text" : "password"}
-              placeholder="Your password"
-              className="pr-10 pl-10"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPw(!showPw)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[.9rem]"
-              aria-label="Toggle password visibility"
-            >
-              {showPw ? "🙈" : "👁️"}
-            </button>
-          </div>
+          <Link href="/forgot-password" className="shrink-0 text-[.82rem] font-semibold text-blue">
+            Forgot password?
+          </Link>
         </div>
-
-        <label className="flex items-center gap-2 text-[.84rem] text-gray-600">
-          <input type="checkbox" className="h-4 w-4 accent-blue" />
-          Keep me signed in for 30 days
-        </label>
 
         <Button type="submit" size="full" disabled={loginMutation.isPending}>
           {loginMutation.isPending ? "Signing in..." : "Sign In to My Account →"}

@@ -1,5 +1,28 @@
-import { IsEmail, IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsOptional,
+  IsString,
+  Matches,
+  MinLength,
+  Validate,
+  ValidationArguments,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+} from 'class-validator';
 import { UserRole } from '@prisma/client';
+
+@ValidatorConstraint({ name: 'MatchPassword', async: false })
+export class MatchPasswordConstraint implements ValidatorConstraintInterface {
+  validate(confirmPassword: string, args: ValidationArguments) {
+    const obj = args.object as ResetPasswordDto;
+    return confirmPassword === obj.password;
+  }
+
+  defaultMessage() {
+    return 'Passwords do not match';
+  }
+}
 
 export class LoginDto {
   @IsEmail()
@@ -56,5 +79,12 @@ export class ResetPasswordDto {
 
   @IsString()
   @MinLength(8)
+  @Matches(/[A-Z]/, { message: 'Password must contain at least one uppercase letter' })
+  @Matches(/[0-9]/, { message: 'Password must contain at least one number' })
+  @Matches(/[^A-Za-z0-9]/, { message: 'Password must contain at least one special character' })
   password: string;
+
+  @IsString()
+  @Validate(MatchPasswordConstraint)
+  confirmPassword: string;
 }

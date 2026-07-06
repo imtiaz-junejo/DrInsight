@@ -3,32 +3,17 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import "@/styles/about-page.css";
-import { formatStatCount, mapDoctorProfile, specialtyEmoji } from "@/lib/data-mappers";
-import { useDoctors, usePlatformStats } from "@/services/api-hooks";
+import { formatStatCount, getInitials, mapDoctorProfile, specialtyEmoji } from "@/lib/data-mappers";
+import { useDoctors, useFounderMessage, usePlatformStats, useRecentReviews, useTrustedPartners } from "@/services/api-hooks";
 
 const BG_CLASSES = ["bg1", "bg2", "bg3", "bg4", "bg5", "bg6"];
-
-const PARTNERS = [
-  { icon: "💊", name: "PharmaCare", badge: "Pharma", badgeClass: "badge-pharma" },
-  { icon: "🔬", name: "BioResearch Labs", badge: "Research", badgeClass: "badge-research" },
-  { icon: "🩻", name: "DiagnoScan", badge: "Diagnostics", badgeClass: "badge-diagnostics" },
-  { icon: "🏥", name: "GlobalHealth Network", badge: "Hospital", badgeClass: "badge-hospital" },
-  { icon: "🤖", name: "MedAI Solutions", badge: "Tech", badgeClass: "badge-tech" },
-  { icon: "🛡️", name: "HealthShield", badge: "Insurance", badgeClass: "badge-insurance" },
-  { icon: "🌿", name: "WellnessFirst", badge: "Wellness", badgeClass: "badge-wellness" },
-  { icon: "📡", name: "TelemedConnect", badge: "Tech", badgeClass: "badge-tech" },
-  { icon: "🧬", name: "GenomicsCo", badge: "Research", badgeClass: "badge-research" },
-  { icon: "❤️", name: "CardioLink", badge: "Hospital", badgeClass: "badge-hospital" },
-  { icon: "💉", name: "VaxGlobal", badge: "Pharma", badgeClass: "badge-pharma" },
-  { icon: "🧠", name: "NeuroPath", badge: "Diagnostics", badgeClass: "badge-diagnostics" },
-];
 
 const TRUST_CARDS = [
   { icon: "🩺", title: "Board-Certified Physicians", text: "Every doctor on our platform is fully licensed, board-certified, and verified. No exceptions. Patient safety is never compromised." },
   { icon: "🔬", title: "Evidence-Based Content", text: "All articles, tools, and answers are grounded in peer-reviewed research, clinical guidelines, and the latest medical literature." },
   { icon: "🔄", title: "Regularly Updated", text: "Medical knowledge evolves. Our editorial team reviews and updates all content quarterly — or immediately when new guidelines emerge." },
   { icon: "🛡️", title: "HIPAA & GDPR Compliant", text: "Your personal and medical data is protected under the strictest privacy laws. We never sell or share your information with third parties." },
-  { icon: "🌐", title: "Globally Accessible", text: "Available in 12 languages with doctors across 30+ specialties serving patients in over 50 countries around the world." },
+  { icon: "🌐", title: "Globally Accessible", text: "Doctors across multiple specialties serve patients in countries worldwide through our digital health platform." },
   { icon: "💬", title: "Transparent & Accountable", text: "We clearly disclose our editorial process, funding sources, and medical review policies. No hidden agendas or conflicts of interest." },
 ];
 
@@ -54,27 +39,6 @@ const PATIENT_VALUES = [
   { icon: "🌱", title: "Empowerment", text: "We educate patients to make confident health decisions." },
 ];
 
-const TESTIMONIALS = [
-  {
-    quote:
-      "For the first time, I felt like I actually understood my diagnosis. Dr. Mitchell explained everything clearly and patiently. Life-changing experience.",
-    initials: "MJ",
-    name: "Maria J. — Cardiology Patient",
-  },
-  {
-    quote:
-      "The health tools helped me catch pre-diabetes early. I'm now managing it with diet alone, thanks to this platform. Truly grateful.",
-    initials: "DK",
-    name: "David K. — Endocrinology Patient",
-  },
-  {
-    quote:
-      "As someone with health anxiety, having access to verified information stopped me from spiraling with Dr. Google. Absolute game changer.",
-    initials: "SR",
-    name: "Sofia R. — Mental Health Patient",
-  },
-];
-
 const ACCREDITATIONS = [
   { icon: "🛡️", label: "HIPAA", sub: "Compliant" },
   { icon: "🇪🇺", label: "GDPR", sub: "Compliant" },
@@ -84,28 +48,42 @@ const ACCREDITATIONS = [
   { icon: "⭐", label: "HONcode", sub: "Certified" },
 ];
 
-const FOUNDER_CREDENTIALS = [
-  { icon: "🎓", text: "MBBS, MD — Internal Medicine" },
-  { icon: "🏥", text: "20+ Years Clinical Experience" },
-  { icon: "📋", text: "Board Certified — AMA & USMLE" },
-  { icon: "🔬", text: "Former Chief of Medicine, NYU" },
-  { icon: "📚", text: "40+ Peer-Reviewed Publications" },
-  { icon: "🌍", text: "WHO Advisory Panel Member" },
-];
-
 export function AboutPageContent() {
   const { data: stats } = usePlatformStats();
   const { data: doctorsData, isLoading } = useDoctors({ limit: 4 });
+  const { data: founderMessage, isLoading: founderLoading } = useFounderMessage();
+  const { data: trustedPartners, isLoading: partnersLoading } = useTrustedPartners();
+  const { data: reviews } = useRecentReviews(3);
 
   const heroPills = useMemo(
     () => [
       "🏥 Founded 2018",
-      `👨‍⚕️ ${stats ? formatStatCount(stats.doctorCount) : "200+"} Doctors`,
-      "🌍 50+ Countries",
-      "🛡️ HIPAA Compliant",
+      `👨‍⚕️ ${stats ? formatStatCount(stats.doctorCount) : "—"} Doctors`,
+      `🌍 ${stats?.specialtyCount ?? "—"} Specialties`,
+      stats?.countryCount ? `🗺️ ${stats.countryCount} Countries` : "🛡️ HIPAA Compliant",
     ],
     [stats],
   );
+
+  const testimonials = useMemo(
+    () =>
+      (reviews ?? []).map((review) => {
+        const patientName = review.patient?.user
+          ? `${review.patient.user.firstName} ${review.patient.user.lastName}`
+          : "Verified Patient";
+        const specialty = review.doctor?.specialty ?? "Patient";
+        return {
+          quote: review.comment ?? "Excellent care and clear medical guidance.",
+          initials: getInitials(review.patient?.user?.firstName, review.patient?.user?.lastName) || "VP",
+          name: `${patientName} — ${specialty}`,
+        };
+      }),
+    [reviews],
+  );
+
+  const founderCredentials = founderMessage?.credentials ?? [];
+  const founderTags = founderMessage?.tags ?? [];
+  const partners = trustedPartners ?? [];
 
   const doctors = useMemo(() => {
     return (doctorsData?.data ?? []).map((d, i) => {
@@ -125,18 +103,12 @@ export function AboutPageContent() {
 
   return (
     <div className="about-page">
-      <div className="breadcrumb">
-        <div className="breadcrumb-inner">
-          🏠 <Link href="/">Home</Link> › <span>About Us</span>
-        </div>
-      </div>
-
       <div className="page-hero">
         <div className="page-hero-inner">
           <div className="eyebrow-hero">Our Story</div>
           <h1>Dedicated to Evidence-Based Medicine & Patient Trust</h1>
           <p>
-            MedAuthority was founded with a single mission — to make trusted, doctor-verified medical information
+            DrInsight was founded with a single mission — to make trusted, doctor-verified medical information
             accessible to everyone, everywhere, at any time.
           </p>
           <div className="hero-pills">
@@ -179,73 +151,93 @@ export function AboutPageContent() {
         </div>
       </section>
 
-      <div className="founder-section">
-        <div className="founder-inner">
-          <div className="founder-left">
-            <div className="founder-avatar-wrap">
-              <div className="founder-avatar">👨‍⚕️</div>
-              <div className="founder-badge">✓ Verified MD</div>
-            </div>
-            <div className="founder-name">Dr. Javed Kumbhar</div>
-            <div className="founder-title">Founder & Medical Director</div>
-            <div className="founder-sub">MedAuthority — Est. 2018</div>
-            <div className="founder-credentials">
-              {FOUNDER_CREDENTIALS.map((cred) => (
-                <div key={cred.text} className="cred-item">
-                  <span>{cred.icon}</span>
-                  {cred.text}
+      {founderMessage ? (
+        <div className="founder-section">
+          <div className="founder-inner">
+            <div className="founder-left">
+              <div className="founder-avatar-wrap">
+                <div className="founder-avatar">
+                  {founderMessage.imageUrl ? (
+                    <img
+                      src={founderMessage.imageUrl}
+                      alt={founderMessage.founderName}
+                      style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}
+                    />
+                  ) : (
+                    "👨‍⚕️"
+                  )}
                 </div>
-              ))}
+                {founderMessage.badgeText ? <div className="founder-badge">{founderMessage.badgeText}</div> : null}
+              </div>
+              <div className="founder-name">{founderMessage.founderName}</div>
+              <div className="founder-title">{founderMessage.designation}</div>
+              {founderMessage.subline ? <div className="founder-sub">{founderMessage.subline}</div> : null}
+              <div className="founder-credentials">
+                {founderCredentials.length > 0 ? (
+                  founderCredentials.map((cred) => (
+                    <div key={cred.text} className="cred-item">
+                      <span>{cred.icon}</span>
+                      {cred.text}
+                    </div>
+                  ))
+                ) : (
+                  <div className="cred-item">
+                    <span>🩺</span>
+                    Credentials coming soon
+                  </div>
+                )}
+              </div>
+              {founderTags.length > 0 ? (
+                <div className="founder-tags" style={{ marginTop: 16, justifyContent: "center" }}>
+                  {founderTags.map((tag) => (
+                    <span key={tag} className="founder-tag">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
             </div>
-            <div className="founder-tags" style={{ marginTop: 16, justifyContent: "center" }}>
-              {["Internal Medicine", "Preventive Health", "Digital Health", "Medical Education"].map((tag) => (
-                <span key={tag} className="founder-tag">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </div>
 
-          <div className="founder-right">
-            <div className="founder-message">
-              <div className="eyebrow">A Message from Our Founder</div>
-              <div className="founder-quote-mark">&quot;</div>
-              <h2>Building a Platform Where Every Patient Deserves the Truth</h2>
-              <p>
-                When I began my medical career over two decades ago, I was struck by one consistent challenge: patients were
-                leaving consultations confused, overwhelmed, or misinformed — not because their doctors lacked expertise, but
-                because the healthcare system lacked accessibility and clarity.
-              </p>
-              <p>
-                I founded <strong>MedAuthority</strong> in 2018 with a simple conviction — that{" "}
-                <strong>accurate, evidence-based medical information should be a right, not a privilege.</strong> Every person,
-                regardless of their location, income, or background, deserves access to the kind of trusted guidance that only a
-                good doctor can provide.
-              </p>
-              <p>
-                What started as a small team of passionate physicians has grown into a platform trusted by over{" "}
-                <strong>{stats ? formatStatCount(stats.patientCount) : "500,000"} patients across 50 countries.</strong> Our doctors don&apos;t just answer questions — they
-                empower patients to make confident, informed decisions about their health. Every article is reviewed. Every tool
-                is validated. Every consultation is held to the highest clinical standard.
-              </p>
-              <p>
-                We are not just a website. We are a movement toward a healthier, better-informed world. And we are only just
-                beginning.
-              </p>
-              <div className="founder-signature">
-                <div className="sig-icon">✚</div>
-                <div className="sig-text">
-                  <strong>Dr. Javed Kumbhar</strong>
-                  <span>MBBS, MD — Founder & Medical Director, MedAuthority</span>
-                  <span style={{ fontSize: "0.74rem", color: "var(--blue)", marginTop: 2, display: "block" }}>
-                    📍 New York, USA &nbsp;|&nbsp; 🌐 medauthority.com
-                  </span>
+            <div className="founder-right">
+              <div className="founder-message">
+                <div className="eyebrow">{founderMessage.eyebrow ?? "A Message from Our Founder"}</div>
+                <div className="founder-quote-mark">&quot;</div>
+                <h2>{founderMessage.headline}</h2>
+                <div dangerouslySetInnerHTML={{ __html: founderMessage.messageHtml }} />
+                {founderMessage.videoUrl ? (
+                  <div style={{ marginTop: 20 }}>
+                    <a href={founderMessage.videoUrl} target="_blank" rel="noopener noreferrer" className="btn-blue">
+                      ▶ Watch Founder Video
+                    </a>
+                  </div>
+                ) : null}
+                <div className="founder-signature">
+                  {founderMessage.signatureImageUrl ? (
+                    <img
+                      src={founderMessage.signatureImageUrl}
+                      alt="Signature"
+                      style={{ height: 48, objectFit: "contain" }}
+                    />
+                  ) : (
+                    <div className="sig-icon">✚</div>
+                  )}
+                  <div className="sig-text">
+                    <strong>{founderMessage.signatureName ?? founderMessage.founderName}</strong>
+                    {founderMessage.signatureTitle ? <span>{founderMessage.signatureTitle}</span> : null}
+                    {founderMessage.locationLine ? (
+                      <span style={{ fontSize: "0.74rem", color: "var(--blue)", marginTop: 2, display: "block" }}>
+                        {founderMessage.locationLine}
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      ) : founderLoading ? (
+        <p style={{ textAlign: "center", color: "var(--gray-500)", padding: "48px 20px" }}>Loading founder message...</p>
+      ) : null}
 
       <section>
         <div className="section-inner">
@@ -286,8 +278,8 @@ export function AboutPageContent() {
             <p style={{ textAlign: "center", color: "var(--gray-500)" }}>No doctors available yet.</p>
           )}
           <div style={{ textAlign: "center", marginTop: 28 }}>
-            <Link href="/doctors" className="btn-blue">
-              View All {stats ? formatStatCount(stats.doctorCount) : "200+"} Doctors →
+            <Link href="/our-doctors" className="btn-blue">
+              View All {stats ? formatStatCount(stats.doctorCount) : "—"} Doctors →
             </Link>
           </div>
         </div>
@@ -298,7 +290,7 @@ export function AboutPageContent() {
           <div className="stat-item">
             <strong>{stats ? formatStatCount(stats.patientCount) : "—"}</strong>
             <span>Patients Served</span>
-            <p>Across 50+ countries</p>
+            <p>Across {stats?.countryCount ?? "—"} countries</p>
           </div>
           <div className="stat-item">
             <strong>{stats ? formatStatCount(stats.doctorCount) : "—"}</strong>
@@ -330,15 +322,32 @@ export function AboutPageContent() {
           </div>
         </div>
         <div className="marquee-track-wrap">
-          <div className="marquee-track">
-            {[...PARTNERS, ...PARTNERS].map((partner, i) => (
-              <div key={`${partner.name}-${i}`} className="partner-tile">
-                <span className="partner-tile-icon">{partner.icon}</span>
-                <span className="partner-tile-name">{partner.name}</span>
-                <span className={`partner-badge ${partner.badgeClass}`}>{partner.badge}</span>
-              </div>
-            ))}
-          </div>
+          {partnersLoading ? (
+            <p style={{ textAlign: "center", color: "var(--gray-500)" }}>Loading partners...</p>
+          ) : partners.length > 0 ? (
+            <div className="marquee-track">
+              {[...partners, ...partners].map((partner, i) => (
+                <div key={`${partner.id}-${i}`} className="partner-tile">
+                  {partner.logoUrl ? (
+                    <img
+                      src={partner.logoUrl}
+                      alt={partner.companyName}
+                      className="partner-tile-icon"
+                      style={{ width: 40, height: 40, objectFit: "contain" }}
+                    />
+                  ) : (
+                    <span className="partner-tile-icon">🤝</span>
+                  )}
+                  <span className="partner-tile-name">{partner.companyName}</span>
+                  {partner.description ? (
+                    <span className="partner-badge badge-hospital">{partner.description}</span>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p style={{ textAlign: "center", color: "var(--gray-500)" }}>No partners to display yet.</p>
+          )}
         </div>
       </section>
 
@@ -346,7 +355,7 @@ export function AboutPageContent() {
         <div className="section-inner">
           <div className="section-header">
             <div className="eyebrow">Why Choose Us</div>
-            <h2>Why Patients Trust MedAuthority</h2>
+            <h2>Why Patients Trust DrInsight</h2>
             <p>We hold ourselves to the highest standards of medical accuracy, ethics, and patient-centered care.</p>
           </div>
           <div className="trust-grid">
@@ -368,7 +377,7 @@ export function AboutPageContent() {
               <div className="eyebrow">Our Standards</div>
               <h2>Editorial Guidelines & Medical Review Process</h2>
               <p>
-                Every piece of content on MedAuthority passes through a rigorous multi-step medical review process before it
+                Every piece of content on DrInsight passes through a rigorous multi-step medical review process before it
                 reaches you. We follow the highest journalistic and clinical standards.
               </p>
               <p>
@@ -430,18 +439,22 @@ export function AboutPageContent() {
             </div>
             <div className="patient-card">
               <h3>💬 What Patients Say About Us</h3>
-              {TESTIMONIALS.map((t) => (
-                <div key={t.initials} className="t-mini">
-                  <p>&ldquo;{t.quote}&rdquo;</p>
-                  <div className="t-mini-author">
-                    <div className="t-avatar">{t.initials}</div>
-                    <div>
-                      <div className="t-name">{t.name}</div>
-                      <div style={{ fontSize: "0.66rem", color: "var(--gray-400)" }}>★★★★★ Verified Patient</div>
+              {testimonials.length > 0 ? (
+                testimonials.map((t) => (
+                  <div key={t.initials + t.name} className="t-mini">
+                    <p>&ldquo;{t.quote}&rdquo;</p>
+                    <div className="t-mini-author">
+                      <div className="t-avatar">{t.initials}</div>
+                      <div>
+                        <div className="t-name">{t.name}</div>
+                        <div style={{ fontSize: "0.66rem", color: "var(--gray-400)" }}>★★★★★ Verified Patient</div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p style={{ color: "var(--gray-500)" }}>No patient reviews yet.</p>
+              )}
             </div>
           </div>
         </div>
@@ -468,7 +481,7 @@ export function AboutPageContent() {
           Get Started Today
         </div>
         <h2>Ready to Take Control of Your Health?</h2>
-        <p>Join {stats ? formatStatCount(stats.patientCount) : "500,000+"} patients who trust MedAuthority for accurate medical information and expert consultations.</p>
+        <p>Join {stats ? formatStatCount(stats.patientsServed ?? stats.patientCount) : "—"} patients who trust DrInsight for accurate medical information and expert consultations.</p>
         <div className="cta-btns">
           <Link href="/book-consultation" className="btn-primary">
             📅 Book a Consultation

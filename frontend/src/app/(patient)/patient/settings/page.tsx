@@ -5,7 +5,7 @@ import { SettingsPageContent } from "@/components/patient/pages/SettingsPageCont
 const routeId = "settings" as const;
 
 export const metadata: Metadata = {
-  title: `${patientPageMeta[routeId][0]} — MedAuthority`,
+  title: `${patientPageMeta[routeId][0]} — DrInsight`,
   description: patientPageMeta[routeId][1],
 };
 

@@ -5,7 +5,7 @@ import { BlogPostsPageContent } from "@/components/admin/pages/BlogPostsPageCont
 const routeId = "blog-posts" as const;
 
 export const metadata: Metadata = {
-  title: `${adminPageMeta[routeId][0]} — MedAuthority Admin`,
+  title: `${adminPageMeta[routeId][0]} — DrInsight Admin`,
   description: adminPageMeta[routeId][1],
 };
 

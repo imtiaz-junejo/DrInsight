@@ -1,0 +1,31 @@
+-- AlterTable
+ALTER TABLE "doctor_profiles" ADD COLUMN     "bioFull" TEXT,
+ADD COLUMN     "credentials" TEXT,
+ADD COLUMN     "professionalTitle" TEXT,
+ADD COLUMN     "patientsTreated" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "successRate" DOUBLE PRECISION,
+ADD COLUMN     "responseTime" TEXT,
+ADD COLUMN     "expertise" TEXT[] DEFAULT ARRAY[]::TEXT[],
+ADD COLUMN     "services" TEXT[] DEFAULT ARRAY[]::TEXT[],
+ADD COLUMN     "researchTags" TEXT[] DEFAULT ARRAY[]::TEXT[],
+ADD COLUMN     "educationHistory" JSONB,
+ADD COLUMN     "certifications" JSONB,
+ADD COLUMN     "publications" JSONB,
+ADD COLUMN     "awards" JSONB,
+ADD COLUMN     "speakingEngagements" JSONB,
+ADD COLUMN     "weeklySchedule" JSONB,
+ADD COLUMN     "city" TEXT,
+ADD COLUMN     "country" TEXT DEFAULT 'Pakistan',
+ADD COLUMN     "gender" TEXT,
+ADD COLUMN     "address" TEXT,
+ADD COLUMN     "coverImageUrl" TEXT,
+ADD COLUMN     "linkedinUrl" TEXT,
+ADD COLUMN     "twitterUrl" TEXT,
+ADD COLUMN     "platformRole" TEXT,
+ADD COLUMN     "editorialBoard" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "medicalReviewerFor" TEXT,
+ADD COLUMN     "conflictOfInterest" TEXT,
+ADD COLUMN     "credentialsVerifiedAt" TIMESTAMP(3);
+
+-- CreateIndex
+CREATE INDEX "doctor_profiles_city_idx" ON "doctor_profiles"("city");

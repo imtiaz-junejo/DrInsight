@@ -23,6 +23,7 @@ import {
   SEED_DOMAIN,
   SEED_PASSWORD,
   avatarUrl,
+  buildDoctorBioProfile,
   consultationFeePkr,
   dateOfBirth,
   doctorAvailability,
@@ -40,6 +41,8 @@ import {
 import { seedContentPhase } from './seed-content';
 import { seedFinalizePhase } from './seed-finalize';
 import { seedOperationalPhase } from './seed-operational';
+import { seedSiteSettings } from './seed-site-settings';
+import { seedAboutContent } from './seed-about';
 import { assertDevelopmentEnvironment } from './seed-shared';
 
 const prisma = createPrismaClient();
@@ -179,23 +182,39 @@ async function seedUsers(passwordHash: string) {
 async function seedDoctorProfiles(doctorUsers: Array<{ id: string; firstName: string; lastName: string; email: string }>) {
   const profiles = doctorUsers.map((user, index) => {
     const i = index + 1;
+    const { gender } = personName(i, UserRole.DOCTOR);
     const cityInfo = pick(PAKISTANI_CITIES, i);
     const specialtyInfo = pick(MEDICAL_SPECIALTIES, i);
     const subSpecialty = pick(specialtyInfo.subSpecialties, i);
     const experienceYears = 3 + (i % 28);
     const hospital = pick(PAKISTANI_HOSPITALS, i);
-    const education = `${pick(PAKISTANI_MEDICAL_UNIVERSITIES, i)} — MBBS, FCPS (${specialtyInfo.specialty})`;
+    const university = pick(PAKISTANI_MEDICAL_UNIVERSITIES, i);
+    const education = `${university} — MBBS, FCPS (${specialtyInfo.specialty})`;
     const languageCount = 2 + (i % 4);
     const languages = pickMany(ALL_PAKISTANI_LANGUAGES, languageCount, i);
     const rating = Math.round((3.6 + (i % 14) * 0.1) * 10) / 10;
     const reviewCount = 12 + (i * 17) % 480;
     const availability = doctorAvailability(i);
+    const licenseNumber = pmdcLicenseNumber(i, cityInfo.code);
+    const bioProfile = buildDoctorBioProfile({
+      index: i,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      specialty: specialtyInfo.specialty,
+      subSpecialty,
+      city: cityInfo.city,
+      hospital,
+      university,
+      experienceYears,
+      licenseNumber,
+      gender,
+    });
 
     return {
       userId: user.id,
       specialty: specialtyInfo.specialty,
       subSpecialty,
-      licenseNumber: pmdcLicenseNumber(i, cityInfo.code),
+      licenseNumber,
       bio: doctorBio(user.firstName, user.lastName, specialtyInfo.specialty, cityInfo.city, experienceYears, hospital),
       experienceYears,
       consultationFee: new Prisma.Decimal(consultationFeePkr(i)),
@@ -205,6 +224,7 @@ async function seedDoctorProfiles(doctorUsers: Array<{ id: string; firstName: st
       languages,
       education,
       hospital,
+      ...bioProfile,
     };
   });
 
@@ -351,6 +371,9 @@ async function main() {
       `Unexpected user counts: admins=${admins.length}, doctors=${doctors.length}, patients=${patients.length}`,
     );
   }
+
+  await seedSiteSettings(prisma);
+  await seedAboutContent(prisma);
 
   const contentStats = await seedContentPhase(prisma);
   const operationalStats = await seedOperationalPhase(prisma);

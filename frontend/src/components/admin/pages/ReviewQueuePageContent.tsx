@@ -1,24 +1,57 @@
 "use client";
 
-import { PanelTable, StatCardRow } from "@/components/admin/ui/AdminPrimitives";
+import { PanelTable, StatCardRow, StatusChip } from "@/components/admin/ui/AdminPrimitives";
 import { formatNumber } from "@/lib/admin-utils";
+import { formatDate, formatRelativeTime } from "@/lib/data-mappers";
 import { useAdminBlogPosts } from "@/services/admin-api-hooks";
 
-// TODO: connect article review queue API when backend supports draft/review workflow
 export function ReviewQueuePageContent() {
-  const postsQuery = useAdminBlogPosts({ limit: 5 });
+  const draftQuery = useAdminBlogPosts({ limit: 50, status: "DRAFT" });
+  const publishedQuery = useAdminBlogPosts({ limit: 1, status: "PUBLISHED" });
+  const drafts = draftQuery.data?.data ?? [];
+
+  const rows = drafts.map((post) => [
+    post.title,
+    post.author ? `${post.author.firstName} ${post.author.lastName}` : "—",
+    post.category?.name ?? "—",
+    "Unassigned",
+    post.createdAt ? formatRelativeTime(post.createdAt) : post.publishedAt ? formatDate(post.publishedAt) : "—",
+    <StatusChip key={post.id} label="Draft" className="sc-pend" />,
+    "Awaiting review",
+  ]);
 
   return (
     <>
       <StatCardRow
         items={[
-          { ic: "ic1", icon: "🔬", num: "0", label: "Awaiting Review", tag: "No API", tagClass: "tt-a" },
-          { ic: "ic2", icon: "⏱️", num: "—", label: "Avg Days in Queue", tag: "Target: 7 days", tagClass: "tt-g" },
-          { ic: "ic3", icon: "🔄", num: "0", label: "Revisions Pending", tag: "From authors", tagClass: "tt-b" },
+          {
+            ic: "ic1",
+            icon: "🔬",
+            num: draftQuery.isLoading ? "—" : formatNumber(draftQuery.data?.meta.total ?? drafts.length),
+            label: "Awaiting Review",
+            tag: "Draft posts",
+            tagClass: "tt-a",
+          },
+          {
+            ic: "ic2",
+            icon: "⏱️",
+            num: String(drafts.length),
+            label: "In Queue Now",
+            tag: "Live data",
+            tagClass: "tt-g",
+          },
+          {
+            ic: "ic3",
+            icon: "🔄",
+            num: formatNumber(drafts.filter((p) => p.status === "DRAFT").length),
+            label: "Revisions Pending",
+            tag: "From authors",
+            tagClass: "tt-b",
+          },
           {
             ic: "ic4",
             icon: "✅",
-            num: formatNumber(postsQuery.data?.meta.total ?? 0),
+            num: formatNumber(publishedQuery.data?.meta.total ?? 0),
             label: "Approved (All Time)",
             tag: "Published posts",
             tagClass: "tt-g",
@@ -28,8 +61,9 @@ export function ReviewQueuePageContent() {
       <PanelTable
         title="🔬 Articles Awaiting Medical Review"
         headers={["Article", "Author", "Specialty", "Assigned Reviewer", "Days Waiting", "Status", "Actions"]}
-        rows={[]}
-        emptyMessage="No articles in review queue — TODO: review queue API"
+        rows={rows}
+        loading={draftQuery.isLoading}
+        emptyMessage="No articles in review queue"
       />
     </>
   );

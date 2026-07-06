@@ -38,7 +38,7 @@ export function AdminSidebar() {
       <div className="sb-logo">
         <div className="sb-logo-ic">✚</div>
         <div>
-          <div className="sb-logo-txt">MedAuthority</div>
+          <div className="sb-logo-txt">DrInsight</div>
           <div className="sb-logo-sub">Admin Panel</div>
         </div>
       </div>

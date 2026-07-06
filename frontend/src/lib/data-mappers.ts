@@ -153,37 +153,60 @@ export interface MappedDoctorCard {
   init: string;
   name: string;
   spec: string;
+  specialtyName: string;
   specLabel: string;
   cred: string;
   inst: string;
+  city: string;
+  country: string;
+  countryKey: string;
   countryLabel: string;
   exp: number;
   rating: number;
   reviews: number;
+  articles: number;
   online: boolean;
+  available: boolean;
+  verified: boolean;
+  avatarUrl?: string | null;
+  languages: string[];
   bg: string;
   tags: string[];
   fee: number;
+  weeklySchedule?: DoctorProfile["weeklySchedule"];
 }
 
 export function mapDoctorProfile(d: DoctorProfile): MappedDoctorCard {
   const emoji = specialtyEmoji(d.specialty);
+  const country = d.country ?? "Pakistan";
+  const city = d.city ?? "";
+  const countryKey = country.toLowerCase();
   return {
     id: d.id,
     init: getInitials(d.user?.firstName, d.user?.lastName),
     name: doctorFullName(d.user),
     spec: d.specialty.toLowerCase(),
+    specialtyName: d.specialty,
     specLabel: `${emoji} ${d.specialty}${d.subSpecialty ? ` · ${d.subSpecialty}` : ""}`,
-    cred: d.education ?? "MBBS, FCPS",
+    cred: d.credentials ?? d.education ?? d.professionalTitle ?? "Board Certified",
     inst: d.hospital ?? "Private Practice",
-    countryLabel: d.hospital ? `🏥 ${d.hospital}` : "🇵🇰 Pakistan",
+    city,
+    country,
+    countryKey,
+    countryLabel: city ? `📍 ${city}, ${country}` : `📍 ${country}`,
     exp: d.experienceYears,
     rating: d.rating,
     reviews: d.reviewCount,
-    online: d.user?.isOnline ?? d.availability === "ONLINE",
+    articles: d.articleCount ?? d.articleStats?.count ?? 0,
+    online: d.user?.isOnline === true || d.availability === "AVAILABLE",
+    available: d.availability === "AVAILABLE",
+    verified: !!d.credentialsVerifiedAt,
+    avatarUrl: d.user?.avatarUrl,
+    languages: d.languages ?? [],
     bg: gradientForId(d.id),
-    tags: d.languages?.slice(0, 3) ?? [],
-    fee: typeof d.consultationFee === "string" ? parseFloat(d.consultationFee) : d.consultationFee,
+    tags: (d.languages?.length ? d.languages : d.expertise ?? []).slice(0, 3),
+    fee: typeof d.consultationFee === "string" ? parseFloat(d.consultationFee) : Number(d.consultationFee) || 0,
+    weeklySchedule: d.weeklySchedule,
   };
 }
 

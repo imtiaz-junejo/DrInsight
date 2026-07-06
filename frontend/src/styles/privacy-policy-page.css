@@ -53,31 +53,6 @@
   transition: width 0.1s;
 }
 
-.privacy-policy-page .breadcrumb {
-  background: var(--gray-50);
-  border-bottom: 1px solid var(--gray-200);
-  padding: 8px 18px;
-}
-
-.privacy-policy-page .breadcrumb-inner {
-  max-width: 1200px;
-  margin: auto;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.72rem;
-  color: var(--gray-400);
-}
-
-.privacy-policy-page .breadcrumb-inner a:hover {
-  color: var(--blue);
-}
-
-.privacy-policy-page .breadcrumb-inner span {
-  color: var(--blue);
-  font-weight: 500;
-}
-
 .privacy-policy-page .page-hero {
   background: linear-gradient(135deg, var(--blue-dark), var(--blue) 55%, var(--teal));
   color: #fff;

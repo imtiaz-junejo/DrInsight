@@ -115,7 +115,7 @@ export const FAQ_SECTIONS: FaqSection[] = [
         answer: (
           <>
             <p>
-              Absolutely. Every physician on MedAuthority undergoes a rigorous credentialing process before joining our
+              Absolutely. Every physician on DrInsight undergoes a rigorous credentialing process before joining our
               platform. All doctors are:
             </p>
             <ul>
@@ -174,11 +174,11 @@ export const FAQ_SECTIONS: FaqSection[] = [
     items: [
       {
         id: "health-tools-free",
-        question: "Are the health tools on MedAuthority free to use?",
+        question: "Are the health tools on DrInsight free to use?",
         answer: (
           <>
             <p>
-              Yes — all 15+ health tools and calculators on MedAuthority are completely <strong>free to use</strong>{" "}
+              Yes — all 15+ health tools and calculators on DrInsight are completely <strong>free to use</strong>{" "}
               with no account required. Our tools include BMI calculator, pregnancy due-date calculator, diabetes risk
               assessor, blood pressure tracker, calorie estimator, and more.
             </p>
@@ -274,11 +274,11 @@ export const FAQ_SECTIONS: FaqSection[] = [
     items: [
       {
         id: "privacy-hipaa",
-        question: "Is MedAuthority HIPAA compliant?",
+        question: "Is DrInsight HIPAA compliant?",
         answer: (
           <>
             <p>
-              Yes. MedAuthority is fully compliant with the{" "}
+              Yes. DrInsight is fully compliant with the{" "}
               <strong>Health Insurance Portability and Accountability Act (HIPAA)</strong>. All protected health
               information (PHI) is encrypted in transit and at rest, access is strictly role-based, and all partners
               and vendors handling PHI sign Business Associate Agreements (BAAs).
@@ -302,7 +302,7 @@ export const FAQ_SECTIONS: FaqSection[] = [
             <ul>
               <li>You (via your secure account)</li>
               <li>The doctor(s) involved in your specific consultation</li>
-              <li>Authorised MedAuthority staff for platform operations (under strict data access controls)</li>
+              <li>Authorised DrInsight staff for platform operations (under strict data access controls)</li>
             </ul>
             <p>
               We never sell, rent, or share your personal health information with advertisers or third parties for
@@ -338,7 +338,7 @@ export const FAQ_SECTIONS: FaqSection[] = [
             <p>
               Yes. You have the right to request deletion of your account and all associated personal data at any time.
               To submit a deletion request, go to <em>Account Settings → Privacy → Delete My Account</em>, or contact us
-              at <a href="mailto:privacy@medauthority.com">privacy@medauthority.com</a>.
+              at <a href="mailto:privacy@drinsight.org">privacy@drinsight.org</a>.
             </p>
             <p>
               Please note that certain data may be retained for legally required periods (e.g. medical records for 7
@@ -432,7 +432,7 @@ export const FAQ_SECTIONS: FaqSection[] = [
             </ul>
             <p>
               All fees are displayed clearly before you confirm your booking. There are no hidden charges. You can also
-              subscribe to a <a href="#">MedAuthority Care Plan</a> for reduced per-consultation rates.
+              subscribe to a <a href="#">DrInsight Care Plan</a> for reduced per-consultation rates.
             </p>
           </>
         ),
@@ -447,7 +447,7 @@ export const FAQ_SECTIONS: FaqSection[] = [
               telemedicine visits following regulatory changes that expanded telehealth access.
             </p>
             <p>
-              We recommend checking with your insurer directly. MedAuthority provides an itemised receipt and
+              We recommend checking with your insurer directly. DrInsight provides an itemised receipt and
               consultation summary after every appointment that you can submit to your insurer for potential
               reimbursement. We do not directly bill insurance at this time but are working to add this feature.
             </p>
@@ -469,7 +469,7 @@ export const FAQ_SECTIONS: FaqSection[] = [
             </ul>
             <p>
               Refunds are processed within 3–5 business days to your original payment method. For disputes or special
-              circumstances, contact <a href="mailto:billing@medauthority.com">billing@medauthority.com</a>. See our
+              circumstances, contact <a href="mailto:billing@drinsight.org">billing@drinsight.org</a>. See our
               full <Link href="/terms-conditions">Terms &amp; Conditions</Link> for the complete refund policy.
             </p>
           </>
@@ -481,7 +481,7 @@ export const FAQ_SECTIONS: FaqSection[] = [
         answer: (
           <>
             <p>
-              Yes. MedAuthority Care Plans offer discounted consultation rates, priority booking, and unlimited access to
+              Yes. DrInsight Care Plans offer discounted consultation rates, priority booking, and unlimited access to
               premium health tools. Plans are available monthly or annually. Current options include:
             </p>
             <ul>
@@ -520,7 +520,7 @@ export const FAQ_SECTIONS: FaqSection[] = [
     items: [
       {
         id: "medical-content-authors",
-        question: "Who writes and reviews the medical articles on MedAuthority?",
+        question: "Who writes and reviews the medical articles on DrInsight?",
         answer: (
           <>
             <p>
@@ -560,7 +560,7 @@ export const FAQ_SECTIONS: FaqSection[] = [
       },
       {
         id: "medical-content-trust",
-        question: "Can I trust the information on MedAuthority for medical decisions?",
+        question: "Can I trust the information on DrInsight for medical decisions?",
         answer: (
           <>
             <p>
@@ -578,11 +578,11 @@ export const FAQ_SECTIONS: FaqSection[] = [
       },
       {
         id: "medical-content-sponsored",
-        question: "Does MedAuthority accept sponsored content or paid promotions?",
+        question: "Does DrInsight accept sponsored content or paid promotions?",
         answer: (
           <>
             <p>
-              MedAuthority maintains strict editorial independence. We do not allow pharmaceutical companies, device
+              DrInsight maintains strict editorial independence. We do not allow pharmaceutical companies, device
               manufacturers, or other commercial interests to influence our medical content or tool outputs.
             </p>
             <p>
@@ -616,7 +616,7 @@ export const FAQ_SECTIONS: FaqSection[] = [
     items: [
       {
         id: "account-required",
-        question: "Do I need an account to use MedAuthority?",
+        question: "Do I need an account to use DrInsight?",
         answer: (
           <>
             <p>
@@ -645,7 +645,7 @@ export const FAQ_SECTIONS: FaqSection[] = [
             </p>
             <p>
               If you don&apos;t receive the email, check your spam folder or contact{" "}
-              <a href="mailto:support@medauthority.com">support@medauthority.com</a>.
+              <a href="mailto:support@drinsight.org">support@drinsight.org</a>.
             </p>
           </>
         ),

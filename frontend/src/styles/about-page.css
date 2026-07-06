@@ -33,31 +33,6 @@
   text-decoration: none;
 }
 
-.about-page .breadcrumb {
-  background: var(--gray-50);
-  border-bottom: 1px solid var(--gray-200);
-  padding: 10px 20px;
-}
-
-.about-page .breadcrumb-inner {
-  max-width: 1240px;
-  margin: auto;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.78rem;
-  color: var(--gray-400);
-}
-
-.about-page .breadcrumb-inner a:hover {
-  color: var(--blue);
-}
-
-.about-page .breadcrumb-inner span {
-  color: var(--blue);
-  font-weight: 500;
-}
-
 .about-page .page-hero {
   background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue) 55%, var(--teal) 100%);
   color: #fff;

@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 export const metadata = {
-  title: "Book a Doctor Consultation — MedAuthority",
+  title: "Book a Doctor Consultation — DrInsight",
   description:
     "Choose your specialty, select a doctor, pick a time, and get expert medical care — video, phone, or chat. Same-day appointments available.",
 };

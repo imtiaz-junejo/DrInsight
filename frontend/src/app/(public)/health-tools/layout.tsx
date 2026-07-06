@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Health Tools & Calculators — MedAuthority",
+  title: "Health Tools & Calculators — DrInsight",
   description:
     "15+ free, medically reviewed health calculators — BMI, BMR, calorie needs, heart rate zones, pregnancy due date, diabetes risk, and more.",
 };

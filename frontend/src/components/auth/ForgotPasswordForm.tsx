@@ -2,7 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useMutation } from "@tanstack/react-query";
+import { isAxiosError } from "axios";
 import { cn } from "@/lib/utils";
+import { CONTACT_PHONE } from "@/lib/site-contact";
+import { api } from "@/lib/api";
 
 type Method = "email" | "sms";
 type AlertType = "error" | "success" | "info" | null;
@@ -38,7 +42,6 @@ export function ForgotPasswordForm() {
   const [method, setMethod] = useState<Method>("email");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [submitting, setSubmitting] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
   const [alertType, setAlertType] = useState<AlertType>(null);
   const [successTarget, setSuccessTarget] = useState("");
@@ -57,11 +60,52 @@ export function ForgotPasswordForm() {
     }
   }, []);
 
+  const forgotPasswordMutation = useMutation({
+    mutationFn: async (payload: { email: string }) => {
+      const { data } = await api.post<{ message: string }>("/auth/forgot-password", payload);
+      return data;
+    },
+    onError: (err) => {
+      if (isAxiosError(err)) {
+        const message = err.response?.data?.message;
+        const status = err.response?.status;
+
+        if (Array.isArray(message)) {
+          showAlert(message.join(", "), "error");
+          return;
+        }
+        if (typeof message === "string" && message) {
+          showAlert(message, "error");
+          return;
+        }
+        if (!err.response) {
+          showAlert("Cannot reach the server. Make sure the backend is running on port 4000.", "error");
+          return;
+        }
+        if (status === 500 || status === 502 || status === 503) {
+          showAlert("Unable to send the reset email right now. Please try again later.", "error");
+          return;
+        }
+      }
+      showAlert("Something went wrong. Please try again.", "error");
+    },
+  });
+
   const selectMethod = useCallback((next: Method) => {
     setMethod(next);
   }, []);
 
-  const handleForgotPassword = useCallback(() => {
+  const submitEmailReset = useCallback(
+    async (trimmedEmail: string) => {
+      await forgotPasswordMutation.mutateAsync({ email: trimmedEmail });
+      setSuccessTarget(trimmedEmail);
+      setSuccessIsSms(false);
+      setView("success");
+    },
+    [forgotPasswordMutation],
+  );
+
+  const handleForgotPassword = useCallback(async () => {
     if (method === "email") {
       const trimmed = email.trim();
       if (!trimmed) {
@@ -74,13 +118,11 @@ export function ForgotPasswordForm() {
         return;
       }
 
-      setSubmitting(true);
-      setTimeout(() => {
-        setSuccessTarget(trimmed);
-        setSuccessIsSms(false);
-        setView("success");
-        setSubmitting(false);
-      }, 1800);
+      try {
+        await submitEmailReset(trimmed);
+      } catch {
+        // Error handled in mutation onError
+      }
     } else {
       const trimmed = phone.trim();
       if (!trimmed) {
@@ -92,18 +134,21 @@ export function ForgotPasswordForm() {
         return;
       }
 
-      setSubmitting(true);
-      setTimeout(() => {
-        setSuccessTarget(trimmed);
-        setSuccessIsSms(true);
-        setView("success");
-        setSubmitting(false);
-      }, 1800);
+      showAlert("ℹ️ SMS password reset is not available yet. Please use email instead.", "info");
     }
-  }, [method, email, phone, showAlert]);
+  }, [method, email, phone, showAlert, submitEmailReset]);
 
-  const startResend = useCallback(() => {
-    if (resendCooldown) return;
+  const startResend = useCallback(async () => {
+    if (resendCooldown || successIsSms) return;
+
+    const trimmed = successTarget.trim();
+    if (!trimmed) return;
+
+    try {
+      await submitEmailReset(trimmed);
+    } catch {
+      return;
+    }
 
     setResendCooldown(true);
     setResendSecs(60);
@@ -119,17 +164,17 @@ export function ForgotPasswordForm() {
         return prev - 1;
       });
     }, 1000);
-  }, [resendCooldown, showAlert]);
+  }, [resendCooldown, successIsSms, successTarget, showAlert, submitEmailReset]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Enter" && view === "form" && !submitting) {
-        handleForgotPassword();
+      if (e.key === "Enter" && view === "form" && !forgotPasswordMutation.isPending) {
+        void handleForgotPassword();
       }
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [view, submitting, handleForgotPassword]);
+  }, [view, forgotPasswordMutation.isPending, handleForgotPassword]);
 
   useEffect(() => {
     return () => {
@@ -138,6 +183,7 @@ export function ForgotPasswordForm() {
   }, []);
 
   const submitLabel = method === "email" ? "Send Reset Link →" : "Send OTP →";
+  const submitting = forgotPasswordMutation.isPending;
 
   return (
     <div className="page-wrap">
@@ -222,7 +268,7 @@ export function ForgotPasswordForm() {
                       onChange={(e) => setEmail(e.target.value)}
                     />
                   </div>
-                  <div className="form-hint">Enter the email address linked to your MedAuthority account.</div>
+                  <div className="form-hint">Enter the email address linked to your DrInsight account.</div>
                 </div>
               ) : (
                 <div className="form-group">
@@ -232,19 +278,19 @@ export function ForgotPasswordForm() {
                     <input
                       type="tel"
                       className="form-input"
-                      placeholder="+1 (800) 000-0000"
+                      placeholder={CONTACT_PHONE}
                       autoComplete="tel"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                     />
                   </div>
                   <div className="form-hint">
-                    Enter the mobile number linked to your MedAuthority account. Standard rates may apply.
+                    Enter the mobile number linked to your DrInsight account. Standard rates may apply.
                   </div>
                 </div>
               )}
 
-              <button type="button" className="submit-btn" disabled={submitting} onClick={handleForgotPassword}>
+              <button type="button" className="submit-btn" disabled={submitting} onClick={() => void handleForgotPassword()}>
                 {submitting ? (
                   <>
                     <span className="spinner" />
@@ -261,11 +307,11 @@ export function ForgotPasswordForm() {
                 Remember your password? <Link href="/login">&nbsp;Sign in here</Link>
               </div>
               <div className="back-link" style={{ marginBottom: 20 }}>
-                New to MedAuthority? <Link href="/register">&nbsp;Create a free account</Link>
+                New to DrInsight? <Link href="/register">&nbsp;Create a free account</Link>
               </div>
 
               <div className="security-box">
-                🔒 Password reset links are single-use and expire after 15 minutes. MedAuthority staff will never ask
+                🔒 Password reset links are single-use and expire after 15 minutes. DrInsight staff will never ask
                 for your password via phone or email.
               </div>
             </div>
@@ -299,18 +345,20 @@ export function ForgotPasswordForm() {
               <Link href="/login" className="submit-btn" style={{ marginBottom: 12, textDecoration: "none" }}>
                 ← Back to Login
               </Link>
-              <div className="resend-note">
-                Didn&apos;t receive it? &nbsp;
-                {resendCooldown ? (
-                  <span className="countdown">
-                    Resend in <span className="countdown-num">{resendSecs}</span>s
-                  </span>
-                ) : (
-                  <button type="button" onClick={startResend}>
-                    Resend link
-                  </button>
-                )}
-              </div>
+              {!successIsSms && (
+                <div className="resend-note">
+                  Didn&apos;t receive it? &nbsp;
+                  {resendCooldown ? (
+                    <span className="countdown">
+                      Resend in <span className="countdown-num">{resendSecs}</span>s
+                    </span>
+                  ) : (
+                    <button type="button" onClick={() => void startResend()}>
+                      Resend link
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>

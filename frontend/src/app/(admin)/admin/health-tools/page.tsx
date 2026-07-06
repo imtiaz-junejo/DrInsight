@@ -5,7 +5,7 @@ import { HealthToolsPageContent } from "@/components/admin/pages/HealthToolsPage
 const routeId = "health-tools" as const;
 
 export const metadata: Metadata = {
-  title: `${adminPageMeta[routeId][0]} — MedAuthority Admin`,
+  title: `${adminPageMeta[routeId][0]} — DrInsight Admin`,
   description: adminPageMeta[routeId][1],
 };
 

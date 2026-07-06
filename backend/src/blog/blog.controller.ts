@@ -19,7 +19,7 @@ export class BlogController {
     @Query('category') category?: string,
     @Query('search') search?: string,
     @Query('authorId') authorId?: string,
-    @Query('status') status?: BlogStatus,
+    @Query('sort') sort?: 'recent' | 'popular',
   ) {
     return this.blogService.findAll({
       page: +page! || 1,
@@ -27,7 +27,31 @@ export class BlogController {
       category,
       search,
       authorId,
-      status,
+      status: BlogStatus.PUBLISHED,
+      sort,
+    });
+  }
+
+  @Get('manage')
+  @ApiBearerAuth()
+  @Roles(UserRole.ADMIN, UserRole.DOCTOR)
+  findAllManage(
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('category') category?: string,
+    @Query('search') search?: string,
+    @Query('authorId') authorId?: string,
+    @Query('status') status?: BlogStatus | 'ALL',
+    @Query('sort') sort?: 'recent' | 'popular',
+  ) {
+    return this.blogService.findAll({
+      page: +page! || 1,
+      limit: +limit! || 12,
+      category,
+      search,
+      authorId,
+      status: status || 'ALL',
+      sort,
     });
   }
 
@@ -35,6 +59,18 @@ export class BlogController {
   @Get('categories')
   getCategories() {
     return this.blogService.getCategories();
+  }
+
+  @Public()
+  @Get('popular')
+  getPopular(@Query('limit') limit?: number) {
+    return this.blogService.getPopular(+limit! || 5);
+  }
+
+  @Public()
+  @Get('top-authors')
+  getTopAuthors(@Query('limit') limit?: number) {
+    return this.blogService.getTopAuthors(+limit! || 5);
   }
 
   @Public()

@@ -7,8 +7,8 @@ import "@/styles/not-found-page.css";
 
 const QUICK_LINKS = [
   { href: "/", icon: "🏠", bg: "var(--blue-light)", title: "Home Page", sub: "Return to the main page" },
-  { href: "/blog", icon: "📰", bg: "#eff6ff", title: "Medical Articles", sub: "Browse 600+ health guides" },
-  { href: "/doctors", icon: "👨‍⚕️", bg: "#f0fdf4", title: "Our Doctors", sub: "Meet our 200+ specialists" },
+  { href: "/blog", icon: "📰", bg: "#eff6ff", title: "Medical Articles", sub: "Browse doctor-written health guides" },
+  { href: "/our-doctors", icon: "👨‍⚕️", bg: "#f0fdf4", title: "Our Doctors", sub: "Meet our verified specialists" },
   { href: "/book-consultation", icon: "📅", bg: "#fffbeb", title: "Book Consultation", sub: "Video, phone, or chat" },
   { href: "/ask-doctor", icon: "❓", bg: "#f5f3ff", title: "Ask a Doctor", sub: "Get expert answers free" },
   { href: "/health-tools", icon: "🔧", bg: "#f0fdff", title: "Health Tools", sub: "BMI, heart risk & more" },
@@ -84,7 +84,7 @@ export function NotFoundContent() {
         </div>
 
         <div className="error-content">
-          <div className="error-badge">⚕️ MedAuthority — Page Not Found</div>
+          <div className="error-badge">⚕️ DrInsight — Page Not Found</div>
 
           <div className="error-code">
             <div className="code-num">4</div>

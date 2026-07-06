@@ -5,7 +5,7 @@ import { AppointmentsPageContent } from "@/components/doctor/pages/AppointmentsP
 const routeId = "appointments" as const;
 
 export const metadata: Metadata = {
-  title: `${doctorPageMeta[routeId][0]} — MedAuthority`,
+  title: `${doctorPageMeta[routeId][0]} — DrInsight`,
   description: doctorPageMeta[routeId][1],
 };
 

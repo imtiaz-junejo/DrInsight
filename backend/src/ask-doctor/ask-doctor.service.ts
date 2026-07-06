@@ -2,6 +2,16 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { QuestionStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
+const answeredBySelect = {
+  firstName: true,
+  lastName: true,
+  role: true,
+  avatarUrl: true,
+  doctorProfile: {
+    select: { specialty: true, credentials: true },
+  },
+} as const;
+
 @Injectable()
 export class AskDoctorService {
   constructor(private prisma: PrismaService) {}
@@ -29,7 +39,7 @@ export class AskDoctorService {
         take: limit,
         orderBy: { answeredAt: 'desc' },
         include: {
-          answeredBy: { select: { firstName: true, lastName: true, role: true } },
+          answeredBy: { select: answeredBySelect },
         },
       }),
       this.prisma.askDoctorQuestion.count({ where }),
@@ -88,8 +98,33 @@ export class AskDoctorService {
         answeredAt: new Date(),
       },
       include: {
-        answeredBy: { select: { firstName: true, lastName: true, role: true } },
+        answeredBy: { select: answeredBySelect },
       },
+    });
+  }
+
+  async getCategories() {
+    const groups = await this.prisma.askDoctorQuestion.groupBy({
+      by: ['category'],
+      where: { status: QuestionStatus.ANSWERED },
+      _count: { _all: true },
+      orderBy: { _count: { category: 'desc' } },
+    });
+
+    return groups.map((g) => ({
+      name: g.category,
+      count: g._count._all,
+    }));
+  }
+
+  async markHelpful(questionId: string) {
+    const question = await this.prisma.askDoctorQuestion.findUnique({ where: { id: questionId } });
+    if (!question) throw new NotFoundException('Question not found');
+
+    return this.prisma.askDoctorQuestion.update({
+      where: { id: questionId },
+      data: { helpfulCount: { increment: 1 } },
+      select: { id: true, helpfulCount: true },
     });
   }
 

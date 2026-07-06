@@ -5,7 +5,7 @@ import { ConsultRequestsPageContent } from "@/components/admin/pages/ConsultRequ
 const routeId = "consult-requests" as const;
 
 export const metadata: Metadata = {
-  title: `${adminPageMeta[routeId][0]} — MedAuthority Admin`,
+  title: `${adminPageMeta[routeId][0]} — DrInsight Admin`,
   description: adminPageMeta[routeId][1],
 };
 

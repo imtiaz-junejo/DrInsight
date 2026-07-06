@@ -31,27 +31,6 @@
   text-decoration: none;
 }
 
-.health-tools-page .breadcrumb {
-  background: var(--gray-50);
-  border-bottom: 1px solid var(--gray-200);
-  padding: 8px 18px;
-}
-
-.health-tools-page .breadcrumb-inner {
-  max-width: 1200px;
-  margin: auto;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 0.74rem;
-  color: var(--gray-400);
-}
-
-.health-tools-page .breadcrumb-inner span {
-  color: var(--blue);
-  font-weight: 500;
-}
-
 .health-tools-page .page-hero {
   background: linear-gradient(135deg, var(--blue-dark), var(--blue) 55%, var(--teal));
   color: #fff;
@@ -636,6 +615,30 @@
   font-family: inherit;
   display: inline-block;
   text-decoration: none;
+}
+
+@media (max-width: 1023px) {
+  .health-tools-page .tools-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .health-tools-page .form-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .health-tools-page .page-hero h1 {
+    font-size: clamp(1.6rem, 5vw, 2.2rem);
+  }
+}
+
+@media (max-width: 767px) {
+  .health-tools-page .tools-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .health-tools-page .form-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 720px) {

@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { useState } from "react";
 import "@/styles/health-tools-page.css";
+import { HEALTH_TOOL_COUNT } from "@/config/health-tools";
+import { formatStatCount } from "@/lib/data-mappers";
+import { usePlatformStats } from "@/services/api-hooks";
 import {
   calcBMI,
   calcBMR,
@@ -97,6 +100,7 @@ function ToolHeader({
 }
 
 export default function HealthToolsPage() {
+  const { data: stats } = usePlatformStats();
   const [activeTab, setActiveTab] = useState(0);
   const [bfSex, setBfSex] = useState("");
   const [phqScores, setPhqScores] = useState<number[]>(Array(9).fill(0));
@@ -127,19 +131,14 @@ export default function HealthToolsPage() {
 
   return (
     <div className="health-tools-page">
-      <div className="breadcrumb">
-        <div className="breadcrumb-inner">
-          🏠 <Link href="/">Home</Link> › <span>Health Tools</span>
-        </div>
-      </div>
-
       <div className="page-hero">
         <div className="page-hero-inner">
           <div className="eyebrow">Free Medical Calculators</div>
           <h1>Your Personal Health Tools Hub</h1>
           <p>
-            15+ evidence-based, medically reviewed health calculators — designed by our physicians to help you
-            understand and monitor your health metrics.
+            {HEALTH_TOOL_COUNT} evidence-based, medically reviewed health calculators — designed by our{" "}
+            {stats ? formatStatCount(stats.doctorCount) : "—"} physicians to help you understand and monitor your
+            health metrics.
           </p>
           <div className="hero-pills">
             {HERO_PILLS.map((pill) => (

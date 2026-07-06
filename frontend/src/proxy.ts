@@ -8,6 +8,11 @@ const roleRoutes = [
 
 const guestOnlyRoutes = ["/login", "/register", "/forgot-password", "/reset-password"];
 
+/** Match `/doctor` and `/doctor/...` but not `/doctors` or `/our-doctors`. */
+function matchesPathPrefix(pathname: string, prefix: string) {
+  return pathname === prefix || pathname.startsWith(`${prefix}/`);
+}
+
 type JwtPayload = {
   sub: string;
   role: "PATIENT" | "DOCTOR" | "ADMIN";
@@ -75,7 +80,7 @@ export async function proxy(request: NextRequest) {
   const session = await verifyJwt(token);
   const role = session?.role;
 
-  const protectedRoute = roleRoutes.find((route) => pathname.startsWith(route.prefix));
+  const protectedRoute = roleRoutes.find((route) => matchesPathPrefix(pathname, route.prefix));
 
   if (protectedRoute) {
     if (!session || !role) {
@@ -87,9 +92,19 @@ export async function proxy(request: NextRequest) {
     if (role !== protectedRoute.role) {
       return NextResponse.redirect(new URL(dashboardForRole(role), request.url));
     }
+
+    return NextResponse.next();
   }
 
-  if (session && role && guestOnlyRoutes.some((route) => pathname.startsWith(route))) {
+  if (session && role && guestOnlyRoutes.some((route) => matchesPathPrefix(pathname, route))) {
+    return NextResponse.redirect(new URL(dashboardForRole(role), request.url));
+  }
+
+  // Admin is a fully isolated area: once logged in, an admin must never see
+  // the public site (or any other role's dashboard). Every route above this
+  // point is either an /admin/* route (returned early) or a guest-only auth
+  // route (handled above), so anything reaching here is a public route.
+  if (session && role === "ADMIN") {
     return NextResponse.redirect(new URL(dashboardForRole(role), request.url));
   }
 
@@ -97,5 +112,8 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/patient/:path*", "/doctor/:path*", "/admin/:path*", "/login", "/register", "/forgot-password", "/reset-password"],
+  // Run on every route except Next.js internals and static files, so admin
+  // isolation and role-based redirects are enforced across the whole app,
+  // not just the previously hard-coded dashboard/auth paths.
+  matcher: ["/((?!_next/|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|map|woff|woff2|ttf)$).*)"],
 };

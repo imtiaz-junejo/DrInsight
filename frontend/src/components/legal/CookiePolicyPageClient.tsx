@@ -271,12 +271,6 @@ export function CookiePolicyPageClient() {
         </div>
       </div>
 
-      <div className="breadcrumb">
-        <div className="bc">
-          🏠 <Link href="/">Home</Link> › <span>Cookie Policy</span>
-        </div>
-      </div>
-
       <div className="page-hero">
         <div className="hero-inner">
           <h1>🍪 Cookie Policy</h1>
@@ -364,7 +358,7 @@ export function CookiePolicyPageClient() {
             <div className="cookie-flow">
               <div className="flow-step">
                 <div>🌐</div>
-                <span>You visit MedAuthority</span>
+                <span>You visit DrInsight</span>
               </div>
               <div className="flow-arrow">→</div>
               <div className="flow-step">
@@ -550,7 +544,7 @@ export function CookiePolicyPageClient() {
                       <code>session_id</code>
                     </td>
                     <td>
-                      <span className="provider-tag">MedAuthority</span>
+                      <span className="provider-tag">DrInsight</span>
                     </td>
                     <td>Maintains your login session</td>
                     <td>Session</td>
@@ -560,7 +554,7 @@ export function CookiePolicyPageClient() {
                       <code>csrf_token</code>
                     </td>
                     <td>
-                      <span className="provider-tag">MedAuthority</span>
+                      <span className="provider-tag">DrInsight</span>
                     </td>
                     <td>Prevents cross-site request forgery</td>
                     <td>Session</td>
@@ -570,7 +564,7 @@ export function CookiePolicyPageClient() {
                       <code>cookie_consent</code>
                     </td>
                     <td>
-                      <span className="provider-tag">MedAuthority</span>
+                      <span className="provider-tag">DrInsight</span>
                     </td>
                     <td>Stores your cookie preferences</td>
                     <td>12 months</td>
@@ -580,7 +574,7 @@ export function CookiePolicyPageClient() {
                       <code>lang_pref</code>
                     </td>
                     <td>
-                      <span className="provider-tag">MedAuthority</span>
+                      <span className="provider-tag">DrInsight</span>
                     </td>
                     <td>Remembers your language selection</td>
                     <td>12 months</td>
@@ -590,7 +584,7 @@ export function CookiePolicyPageClient() {
                       <code>acc_settings</code>
                     </td>
                     <td>
-                      <span className="provider-tag">MedAuthority</span>
+                      <span className="provider-tag">DrInsight</span>
                     </td>
                     <td>Saves accessibility preferences (font size, contrast)</td>
                     <td>12 months</td>
@@ -600,7 +594,7 @@ export function CookiePolicyPageClient() {
                       <code>load_balancer</code>
                     </td>
                     <td>
-                      <span className="provider-tag">MedAuthority</span>
+                      <span className="provider-tag">DrInsight</span>
                     </td>
                     <td>Routes traffic for site performance</td>
                     <td>Session</td>
@@ -713,7 +707,7 @@ export function CookiePolicyPageClient() {
                       <code>font_size</code>
                     </td>
                     <td>
-                      <span className="provider-tag">MedAuthority</span>
+                      <span className="provider-tag">DrInsight</span>
                     </td>
                     <td>Remembers font size preference</td>
                     <td>6 months</td>
@@ -723,7 +717,7 @@ export function CookiePolicyPageClient() {
                       <code>dark_mode</code>
                     </td>
                     <td>
-                      <span className="provider-tag">MedAuthority</span>
+                      <span className="provider-tag">DrInsight</span>
                     </td>
                     <td>Saves dark/light mode setting</td>
                     <td>6 months</td>
@@ -733,7 +727,7 @@ export function CookiePolicyPageClient() {
                       <code>bookmarks</code>
                     </td>
                     <td>
-                      <span className="provider-tag">MedAuthority</span>
+                      <span className="provider-tag">DrInsight</span>
                     </td>
                     <td>Stores saved/bookmarked articles</td>
                     <td>12 months</td>
@@ -743,7 +737,7 @@ export function CookiePolicyPageClient() {
                       <code>newsletter_dismissed</code>
                     </td>
                     <td>
-                      <span className="provider-tag">MedAuthority</span>
+                      <span className="provider-tag">DrInsight</span>
                     </td>
                     <td>Prevents repeated newsletter popup</td>
                     <td>30 days</td>
@@ -753,7 +747,7 @@ export function CookiePolicyPageClient() {
                       <code>specialty_pref</code>
                     </td>
                     <td>
-                      <span className="provider-tag">MedAuthority</span>
+                      <span className="provider-tag">DrInsight</span>
                     </td>
                     <td>Saves preferred specialty filters</td>
                     <td>6 months</td>
@@ -1243,7 +1237,7 @@ export function CookiePolicyPageClient() {
             </div>
             <div className="prose">
               <p>
-                If you use the MedAuthority mobile application, this section applies. Mobile apps may use device
+                If you use the DrInsight mobile application, this section applies. Mobile apps may use device
                 identifiers (IDFA on iOS, GAID on Android) instead of traditional cookies, app analytics tools (Firebase
                 Analytics), and push notification tokens (only with explicit permission).
               </p>
@@ -1320,18 +1314,18 @@ export function CookiePolicyPageClient() {
             <div className="contact-grid">
               <div className="contact-card">
                 <h4>🍪 Cookie Enquiries</h4>
-                <a href="#">privacy@medauthority.com</a>
+                <a href="#">privacy@drinsight.org</a>
                 <p>For cookie questions or to request active cookie list</p>
               </div>
               <div className="contact-card">
                 <h4>🛡️ Data Protection Officer</h4>
-                <a href="#">dpo@medauthority.com</a>
+                <a href="#">dpo@drinsight.org</a>
                 <p>For GDPR-related data concerns</p>
               </div>
               <div className="contact-card">
                 <h4>📍 Mailing Address</h4>
                 <p>
-                  MedAuthority Inc.
+                  DrInsight
                   <br />
                   123 Medical Plaza, Suite 400
                   <br />

@@ -2,14 +2,13 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Breadcrumb } from "@/components/layout/Breadcrumb";
 import { Button } from "@/components/ui/button";
-import { useBlogPost, useBlogPosts } from "@/services/api-hooks";
+import { doctorFullName, getInitials, specialtyEmoji } from "@/lib/data-mappers";
+import { useBlogPost } from "@/services/api-hooks";
 
 export default function BlogArticlePage() {
   const params = useParams<{ slug: string }>();
   const postQuery = useBlogPost(params.slug);
-  const relatedQuery = useBlogPosts({ limit: 3 });
   const post = postQuery.data;
 
   if (postQuery.isLoading) {
@@ -20,17 +19,15 @@ export default function BlogArticlePage() {
     return <div className="px-6 py-20 text-center text-red">Article not found.</div>;
   }
 
-  const authorName = post.author
-    ? `Dr. ${post.author.firstName} ${post.author.lastName}`
-    : "DrInsight Editorial Team";
+  const authorName = post.author ? doctorFullName(post.author) : "DrInsight Editorial Team";
   const authorInitials = post.author
-    ? `${post.author.firstName?.[0] || "D"}${post.author.lastName?.[0] || "I"}`
+    ? getInitials(post.author.firstName, post.author.lastName)
     : "DI";
+  const authorSpecialty = post.author?.doctorProfile?.specialty;
+  const relatedPosts = post.relatedPosts ?? [];
 
   return (
     <>
-      <Breadcrumb items={[{ label: "Blog", href: "/blog" }, { label: post.category?.name || "Article" }]} />
-
       <article className="mx-auto max-w-[820px] px-6 py-12">
         <div className="mb-4 text-[.72rem] font-bold uppercase tracking-widest text-blue">
           {post.category?.name || "Medical Article"}
@@ -46,19 +43,30 @@ export default function BlogArticlePage() {
             >
               {authorInitials}
             </div>
-            <span className="font-semibold text-gray-800">{authorName}</span>
+            <div>
+              <span className="font-semibold text-gray-800">{authorName}</span>
+              {authorSpecialty && (
+                <div className="text-[.72rem] text-gray-400">{authorSpecialty}</div>
+              )}
+            </div>
           </div>
           <span>·</span>
           <span>{post.readTimeMinutes} min read</span>
           <span>·</span>
           <span>{post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : "Published"}</span>
+          {typeof post.viewCount === "number" && (
+            <>
+              <span>·</span>
+              <span>{post.viewCount.toLocaleString()} views</span>
+            </>
+          )}
           <span className="rounded-full bg-[#ecfdf5] px-2.5 py-0.5 text-[.72rem] font-semibold text-green">
             ✓ Medically Reviewed
           </span>
         </div>
 
         <div className="mb-10 flex h-[280px] items-center justify-center rounded-[20px] bg-gradient-to-br from-blue-light to-[#dbeafe] text-7xl">
-          🩺
+          {specialtyEmoji(post.category?.name ?? "")}
         </div>
 
         <div className="prose prose-gray max-w-none space-y-5 text-[.95rem] leading-relaxed text-gray-700">
@@ -84,17 +92,24 @@ export default function BlogArticlePage() {
         <div className="mx-auto max-w-[1240px]">
           <h2 className="font-display mb-6 text-xl font-bold text-gray-900">Related Articles</h2>
           <div className="grid gap-5 sm:grid-cols-3">
-            {(relatedQuery.data?.data ?? [])
-              .filter((item) => item.slug !== post.slug)
-              .map((item) => (
-                <Link key={item.slug} href={`/blog/${item.slug}`} className="rounded-[20px] border border-gray-200 bg-white p-5 transition hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]">
-                  <div className="mb-3 text-4xl">🩺</div>
+            {relatedPosts.length > 0 ? (
+              relatedPosts.map((item) => (
+                <Link
+                  key={item.slug}
+                  href={`/blog/${item.slug}`}
+                  className="rounded-[20px] border border-gray-200 bg-white p-5 transition hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]"
+                >
+                  <div className="mb-3 text-4xl">{specialtyEmoji(item.category?.name ?? "")}</div>
                   <div className="mb-1 text-[.68rem] font-bold uppercase text-blue">
                     {item.category?.name || "Medical"}
                   </div>
                   <h3 className="font-display text-[.9rem] font-semibold leading-snug text-gray-900">{item.title}</h3>
+                  <p className="mt-2 text-[.78rem] text-gray-500">{doctorFullName(item.author)}</p>
                 </Link>
-              ))}
+              ))
+            ) : (
+              <p className="text-gray-500">No related articles found.</p>
+            )}
           </div>
         </div>
       </section>

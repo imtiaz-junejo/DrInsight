@@ -37,27 +37,6 @@
   list-style: none;
 }
 
-.contact-page .breadcrumb {
-  background: var(--gray-50);
-  border-bottom: 1px solid var(--gray-200);
-  padding: 8px 18px;
-}
-
-.contact-page .bc-inner {
-  max-width: 1200px;
-  margin: auto;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 0.74rem;
-  color: var(--gray-400);
-}
-
-.contact-page .bc-inner span {
-  color: var(--blue);
-  font-weight: 500;
-}
-
 .contact-page .page-hero {
   background: linear-gradient(135deg, var(--blue-dark), var(--blue) 55%, var(--teal));
   color: #fff;

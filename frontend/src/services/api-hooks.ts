@@ -8,21 +8,137 @@ export interface Paginated<T> {
   meta: { total: number; page: number; limit: number; totalPages: number };
 }
 
+export interface DoctorEducationItem {
+  year: string;
+  title: string;
+  institution: string;
+  icon?: string;
+}
+
+export interface DoctorCertificationItem {
+  title: string;
+  subtitle: string;
+  icon?: string;
+}
+
+export interface DoctorPublicationItem {
+  journal: string;
+  title: string;
+  year: number;
+  citations?: number;
+  doi?: string;
+  pubmedUrl?: string;
+}
+
+export interface DoctorAwardItem {
+  title: string;
+  organization: string;
+  year: string;
+  icon?: string;
+}
+
+export interface DoctorSpeakingItem {
+  title: string;
+  venue: string;
+  type: "conference" | "lecture" | "webinar" | string;
+  year: string;
+}
+
+export interface DoctorScheduleDay {
+  day: string;
+  time: string;
+  available: boolean;
+}
+
+export interface DoctorArticleSummary {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  coverImageUrl?: string | null;
+  readTimeMinutes: number;
+  viewCount: number;
+  publishedAt?: string | null;
+  tags?: string[];
+  category?: { id?: string; name: string; slug: string };
+}
+
+export interface DoctorReviewItem {
+  id: string;
+  rating: number;
+  comment?: string | null;
+  createdAt: string;
+  patient?: {
+    user?: { firstName: string; lastName: string; avatarUrl?: string | null };
+  };
+  appointment?: { consultationType?: string; reason?: string | null } | null;
+}
+
+export interface RelatedDoctorSummary {
+  id: string;
+  specialty: string;
+  subSpecialty?: string | null;
+  rating: number;
+  reviewCount: number;
+  hospital?: string | null;
+  city?: string | null;
+  country?: string | null;
+  experienceYears: number;
+  user?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatarUrl?: string | null;
+    isOnline?: boolean;
+  };
+}
+
 export interface DoctorProfile {
   id: string;
   specialty: string;
   subSpecialty?: string | null;
   bio?: string | null;
+  bioFull?: string | null;
+  credentials?: string | null;
+  professionalTitle?: string | null;
   education?: string | null;
   licenseNumber?: string;
   experienceYears: number;
   consultationFee: string | number;
+  consultationFees?: { video: number; phone: number; chat: number };
   rating: number;
   reviewCount: number;
+  patientsTreated?: number;
+  consultationCount?: number;
+  articleCount?: number;
+  successRate?: number | null;
+  responseTime?: string | null;
   availability: string;
   languages: string[];
+  expertise?: string[];
+  services?: string[];
+  researchTags?: string[];
+  educationHistory?: DoctorEducationItem[] | null;
+  certifications?: DoctorCertificationItem[] | null;
+  publications?: DoctorPublicationItem[] | null;
+  awards?: DoctorAwardItem[] | null;
+  speakingEngagements?: DoctorSpeakingItem[] | null;
+  weeklySchedule?: DoctorScheduleDay[] | null;
   hospital?: string | null;
+  city?: string | null;
+  country?: string | null;
+  gender?: string | null;
+  address?: string | null;
+  coverImageUrl?: string | null;
+  linkedinUrl?: string | null;
+  twitterUrl?: string | null;
+  platformRole?: string | null;
+  editorialBoard?: boolean;
+  medicalReviewerFor?: string | null;
+  conflictOfInterest?: string | null;
+  credentialsVerifiedAt?: string | null;
   createdAt?: string;
+  updatedAt?: string;
   user?: {
     id: string;
     firstName: string;
@@ -31,7 +147,14 @@ export interface DoctorProfile {
     isOnline?: boolean;
     email?: string;
     phone?: string | null;
+    createdAt?: string;
   };
+  reviews?: DoctorReviewItem[];
+  ratingDistribution?: Record<1 | 2 | 3 | 4 | 5, number> | { 1: number; 2: number; 3: number; 4: number; 5: number };
+  articles?: DoctorArticleSummary[];
+  articleStats?: { count: number; totalViews: number; avgReadTimeMinutes: number };
+  relatedDoctors?: RelatedDoctorSummary[];
+  similarSpecialists?: RelatedDoctorSummary[];
 }
 
 export interface BlogPost {
@@ -40,10 +163,38 @@ export interface BlogPost {
   slug: string;
   excerpt: string;
   content?: string;
-  category?: { name: string; slug: string };
-  author?: { firstName: string; lastName: string; avatarUrl?: string | null };
+  category?: { id?: string; name: string; slug: string };
+  author?: {
+    id?: string;
+    firstName: string;
+    lastName: string;
+    avatarUrl?: string | null;
+    role?: string;
+    doctorProfile?: { specialty?: string | null; hospital?: string | null; credentials?: string | null } | null;
+  };
   readTimeMinutes: number;
+  viewCount?: number;
   publishedAt?: string | null;
+  relatedPosts?: BlogPost[];
+}
+
+export interface BlogCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  postCount?: number;
+}
+
+export interface BlogAuthorSummary {
+  id: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl?: string | null;
+  specialty?: string | null;
+  platformRole?: string | null;
+  articleCount: number;
+  totalViews: number;
 }
 
 export interface Appointment {
@@ -55,6 +206,7 @@ export interface Appointment {
   reason?: string | null;
   notes?: string | null;
   meetingRoomId?: string | null;
+  payment?: { status: string; amountCents?: number; currency?: string } | null;
   doctor?: DoctorProfile;
   patient?: {
     user?: { firstName: string; lastName: string; avatarUrl?: string | null };
@@ -81,7 +233,14 @@ export function useDoctorSpecialties() {
   });
 }
 
-export function useBlogPosts(params: { search?: string; category?: string; page?: number; limit?: number }) {
+export function useBlogPosts(params: {
+  search?: string;
+  category?: string;
+  page?: number;
+  limit?: number;
+  status?: string;
+  sort?: "recent" | "popular";
+}) {
   return useQuery({
     queryKey: ["blog", params],
     queryFn: async () => {
@@ -95,7 +254,27 @@ export function useBlogCategories() {
   return useQuery({
     queryKey: ["blog-categories"],
     queryFn: async () => {
-      const { data } = await api.get<Array<{ id: string; name: string; slug: string }>>("/blog/categories");
+      const { data } = await api.get<BlogCategory[]>("/blog/categories");
+      return data;
+    },
+  });
+}
+
+export function usePopularBlogPosts(limit = 5) {
+  return useQuery({
+    queryKey: ["blog-popular", limit],
+    queryFn: async () => {
+      const { data } = await api.get<BlogPost[]>("/blog/popular", { params: { limit } });
+      return data;
+    },
+  });
+}
+
+export function useTopBlogAuthors(limit = 5) {
+  return useQuery({
+    queryKey: ["blog-top-authors", limit],
+    queryFn: async () => {
+      const { data } = await api.get<BlogAuthorSummary[]>("/blog/top-authors", { params: { limit } });
       return data;
     },
   });
@@ -151,10 +330,62 @@ export function useCreateBookingDraft() {
 
 export function useCreatePaymentIntent() {
   return useMutation({
-    mutationFn: async (bookingDraftId: string) => {
-      const { data } = await api.post("/payments/intents", { bookingDraftId });
-      return data as { id: string; providerIntentId: string; clientSecret: string; amountCents: number };
+    mutationFn: async (payload: {
+      bookingDraftId: string;
+      billingName?: string;
+      billingEmail?: string;
+      billingCountry?: string;
+    }) => {
+      const { data } = await api.post("/payments/intents", payload);
+      return data as {
+        id: string;
+        providerIntentId: string;
+        clientSecret: string;
+        amountCents: number;
+        consultationFeeCents?: number;
+        platformFeeCents?: number;
+        taxCents?: number;
+      };
     },
+  });
+}
+
+export function useVerifyPayment() {
+  return useMutation({
+    mutationFn: async (providerIntentId: string) => {
+      const { data } = await api.post(`/payments/intents/${providerIntentId}/verify`);
+      return data as {
+        appointmentId?: string;
+        status?: string;
+        providerIntentId?: string;
+      };
+    },
+  });
+}
+
+export function usePaymentConfirmation(appointmentId: string) {
+  return useQuery({
+    queryKey: ["payment-confirmation", appointmentId],
+    queryFn: async () => {
+      const { data } = await api.get(`/payments/confirmation/${appointmentId}`);
+      return data as {
+        appointmentId: string;
+        doctor: string;
+        specialty: string;
+        patient: string;
+        scheduledAt: string;
+        consultationType: string;
+        status: string;
+        amountPaid: number;
+        currency: string;
+        paymentStatus: string;
+        transactionId: string | null;
+        receiptUrl: string | null;
+        invoiceNumber: string | null;
+        paymentId: string | null;
+      };
+    },
+    enabled: !!appointmentId,
   });
 }
 
@@ -184,13 +415,57 @@ export function useDoctor(id: string) {
 
 export interface PlatformStats {
   doctorCount: number;
+  verifiedDoctorCount?: number;
+  activeDoctorCount?: number;
   blogCount: number;
   patientCount: number;
+  userCount?: number;
+  adminCount?: number;
   answeredQuestions: number;
+  pendingQuestions?: number;
   averageRating: number;
   appointmentCount?: number;
+  completedAppointments?: number;
+  pendingAppointments?: number;
+  cancelledAppointments?: number;
+  appointmentsLast30Days?: number;
   reviewCount?: number;
   specialtyCount?: number;
+  prescriptionCount?: number;
+  paymentCount?: number;
+  revenueCents?: number;
+  revenueLast30DaysCents?: number;
+  paymentsLast30Days?: number;
+  notificationCount?: number;
+  messageCount?: number;
+  newsletterCount?: number;
+  contactCount?: number;
+  patientsServed?: number;
+  countryCount?: number;
+  hospitalCount?: number;
+}
+
+export interface BusinessHour {
+  day: string;
+  hours: string;
+  closed: boolean;
+}
+
+export interface SiteSettings {
+  contactPhone: string;
+  contactEmail: string;
+  contactWhatsapp?: string | null;
+  addressLine1?: string | null;
+  addressLine2?: string | null;
+  city?: string | null;
+  country: string;
+  businessHours?: BusinessHour[] | null;
+}
+
+export interface FeaturedHospital {
+  name: string;
+  city: string | null;
+  specialty: string;
 }
 
 export function usePlatformStats() {
@@ -210,10 +485,17 @@ export interface AskDoctorQuestion {
   answer?: string | null;
   status: string;
   isAnonymous: boolean;
+  helpfulCount?: number;
   submitterName?: string | null;
   createdAt: string;
   answeredAt?: string | null;
-  answeredBy?: { firstName: string; lastName: string; role: string } | null;
+  answeredBy?: {
+    firstName: string;
+    lastName: string;
+    role: string;
+    avatarUrl?: string | null;
+    doctorProfile?: { specialty?: string | null; credentials?: string | null } | null;
+  } | null;
 }
 
 export function useAskDoctorQuestions(params: { page?: number; limit?: number; category?: string; search?: string }) {
@@ -221,6 +503,16 @@ export function useAskDoctorQuestions(params: { page?: number; limit?: number; c
     queryKey: ["ask-doctor", params],
     queryFn: async () => {
       const { data } = await api.get<Paginated<AskDoctorQuestion>>("/ask-doctor", { params });
+      return data;
+    },
+  });
+}
+
+export function useAskDoctorCategories() {
+  return useQuery({
+    queryKey: ["ask-doctor-categories"],
+    queryFn: async () => {
+      const { data } = await api.get<Array<{ name: string; count: number }>>("/ask-doctor/categories");
       return data;
     },
   });
@@ -235,7 +527,21 @@ export function useSubmitQuestion() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ask-doctor"] });
+      queryClient.invalidateQueries({ queryKey: ["ask-doctor-categories"] });
       queryClient.invalidateQueries({ queryKey: ["platform-stats"] });
+    },
+  });
+}
+
+export function useMarkQuestionHelpful() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data } = await api.post<{ id: string; helpfulCount: number }>(`/ask-doctor/${id}/helpful`);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["ask-doctor"] });
     },
   });
 }
@@ -259,6 +565,26 @@ export function useRecentReviews(limit = 6) {
   });
 }
 
+export function useSiteContact() {
+  return useQuery({
+    queryKey: ["site-contact"],
+    queryFn: async () => {
+      const { data } = await api.get<SiteSettings>("/platform/contact");
+      return data;
+    },
+  });
+}
+
+export function useFeaturedHospitals() {
+  return useQuery({
+    queryKey: ["featured-hospitals"],
+    queryFn: async () => {
+      const { data } = await api.get<FeaturedHospital[]>("/platform/hospitals");
+      return data;
+    },
+  });
+}
+
 export function useContactSubmit() {
   return useMutation({
     mutationFn: async (body: { name: string; email: string; subject: string; message: string }) => {
@@ -272,6 +598,54 @@ export function useNewsletterSubscribe() {
   return useMutation({
     mutationFn: async (email: string) => {
       const { data } = await api.post("/contact/newsletter", { email });
+      return data;
+    },
+  });
+}
+
+export interface PublicTrustedPartner {
+  id: string;
+  companyName: string;
+  websiteUrl?: string | null;
+  description?: string | null;
+  logoUrl?: string | null;
+  displayOrder: number;
+}
+
+export interface PublicFounderMessage {
+  id: string;
+  founderName: string;
+  designation: string;
+  imageUrl?: string | null;
+  headline: string;
+  messageHtml: string;
+  signatureImageUrl?: string | null;
+  videoUrl?: string | null;
+  eyebrow?: string | null;
+  subline?: string | null;
+  badgeText?: string | null;
+  credentials?: Array<{ icon: string; text: string }> | null;
+  tags: string[];
+  signatureName?: string | null;
+  signatureTitle?: string | null;
+  locationLine?: string | null;
+}
+
+export function useTrustedPartners() {
+  return useQuery({
+    queryKey: ["trusted-partners"],
+    queryFn: async () => {
+      const { data } = await api.get<PublicTrustedPartner[]>("/about/partners");
+      return data;
+    },
+  });
+}
+
+export function useFounderMessage() {
+  return useQuery({
+    queryKey: ["founder-message"],
+    queryFn: async () => {
+      const { data } = await api.get<PublicFounderMessage | null>("/about/founder");
       return data;
     },
   });

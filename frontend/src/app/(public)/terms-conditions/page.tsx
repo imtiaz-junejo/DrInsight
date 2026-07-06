@@ -3,9 +3,9 @@ import "@/styles/terms-conditions-page.css";
 import { TermsConditionsPageClient } from "@/components/legal/TermsConditionsPageClient";
 
 export const metadata: Metadata = {
-  title: "Terms & Conditions — MedAuthority",
+  title: "Terms & Conditions — DrInsight",
   description:
-    "Terms and conditions for using MedAuthority. Please read carefully before using our platform.",
+    "Terms and conditions for using DrInsight. Please read carefully before using our platform.",
 };
 
 export default function TermsConditionsPage() {

@@ -33,6 +33,7 @@ export const adminNav: AdminNavGroup[] = [
     lbl: "Consultation Management",
     items: [
       { id: "appointments", ico: "📅", name: "Appointments", href: "/admin/appointments" },
+      { id: "payments", ico: "💳", name: "Payments", href: "/admin/payments" },
       { id: "consult-requests", ico: "📥", name: "Consultation Requests", badge: "7", href: "/admin/consult-requests" },
       { id: "prescriptions", ico: "💊", name: "Prescriptions", href: "/admin/prescriptions" },
     ],
@@ -75,6 +76,13 @@ export const adminNav: AdminNavGroup[] = [
     ],
   },
   {
+    lbl: "About Page",
+    items: [
+      { id: "trusted-partners", ico: "🤝", name: "Trusted Partners", href: "/admin/trusted-partners" },
+      { id: "founders-message", ico: "🩺", name: "Founder's Message", href: "/admin/founders-message" },
+    ],
+  },
+  {
     lbl: "Analytics",
     items: [
       { id: "traffic-analytics", ico: "📈", name: "Traffic Analytics", href: "/admin/traffic-analytics" },
@@ -92,6 +100,7 @@ export const adminPageMeta: Record<string, [string, string]> = {
   patients: ["Patients", "View and manage patient accounts and health profiles"],
   roles: ["Roles & Permissions", "Configure access levels for Admin, Doctor, and Patient roles"],
   appointments: ["Appointments", "All scheduled consultations across the platform"],
+  payments: ["Payments Management", "Platform payments, refunds, and revenue analytics"],
   "consult-requests": ["Consultation Requests", "New consultation bookings awaiting confirmation"],
   prescriptions: ["Prescriptions", "Prescriptions issued by physicians"],
   "blog-posts": ["Blog Posts", "Manage all published, draft, and scheduled articles"],
@@ -111,6 +120,8 @@ export const adminPageMeta: Record<string, [string, string]> = {
   faqs: ["FAQs", "Manage frequently asked questions"],
   "contact-inquiries": ["Contact Inquiries", "Messages submitted through the contact form"],
   "seo-settings": ["SEO Settings", "Manage meta titles, descriptions, and permalinks for all pages"],
+  "trusted-partners": ["Trusted Partners & Affiliates", "Add, edit, or remove the partner tiles shown on the About page"],
+  "founders-message": ["Founder's Message", "Edit every part of the “A Message from Our Founder” section on the About page"],
   "traffic-analytics": ["Traffic Analytics", "Website traffic, page views, and visitor insights"],
   "consultation-analytics": ["Consultation Analytics", "Appointment volume, completion rates, and specialties"],
   "revenue-analytics": ["Revenue Analytics", "Platform revenue, payouts, and earnings breakdown"],

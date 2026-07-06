@@ -8,20 +8,18 @@ import {
   formatStatCount,
   getInitials,
   gradientForId,
+  specialtyEmoji,
 } from "@/lib/data-mappers";
 import {
+  useAskDoctorCategories,
   useAskDoctorQuestions,
+  useDoctorSpecialties,
+  useMarkQuestionHelpful,
   usePlatformStats,
   useSubmitQuestion,
   type AskDoctorQuestion,
 } from "@/services/api-hooks";
-import {
-  CAT_FILTERS,
-  FAQ_ITEMS,
-  FORM_CATEGORIES,
-  HERO_PILLS,
-  SPECIALTIES,
-} from "./questions";
+import { FAQ_ITEMS, HERO_PILLS } from "./constants";
 
 type MappedQA = {
   id: string;
@@ -43,11 +41,12 @@ type MappedQA = {
 };
 
 function mapQuestion(q: AskDoctorQuestion): MappedQA {
+  const specialty = q.answeredBy?.doctorProfile?.specialty ?? q.category;
   return {
     id: q.id,
     cat: q.category.toLowerCase(),
     catLabel: q.category,
-    searchKeywords: `${q.question} ${q.answer ?? ""}`,
+    searchKeywords: `${q.question} ${q.answer ?? ""} ${specialty}`,
     time: formatDate(q.answeredAt ?? q.createdAt),
     anonymous: q.isAnonymous,
     question: q.question,
@@ -55,10 +54,10 @@ function mapQuestion(q: AskDoctorQuestion): MappedQA {
       initials: getInitials(q.answeredBy?.firstName, q.answeredBy?.lastName),
       avatarBg: gradientForId(q.id),
       name: q.answeredBy ? doctorFullName(q.answeredBy) : "DrInsight Medical Team",
-      specialty: q.answeredBy?.role ?? q.category,
+      specialty,
     },
     answerHtml: q.answer ?? "<p>Our medical team is reviewing this question.</p>",
-    helpfulCount: 0,
+    helpfulCount: q.helpfulCount ?? 0,
     tags: [q.category],
   };
 }
@@ -138,19 +137,39 @@ export default function AskDoctorPage() {
 
   const { data: stats } = usePlatformStats();
   const { data: questionsData, isLoading } = useAskDoctorQuestions({ limit: 50 });
+  const { data: categories } = useAskDoctorCategories();
+  const { data: specialties } = useDoctorSpecialties();
   const submitQuestion = useSubmitQuestion();
+  const markHelpful = useMarkQuestionHelpful();
 
   const qaItems = useMemo(
     () => (questionsData?.data ?? []).map(mapQuestion),
     [questionsData],
   );
 
+  const categoryFilters = useMemo(
+    () => [
+      { val: "all", label: "All Categories" },
+      ...(categories ?? []).map((c) => ({
+        val: c.name.toLowerCase(),
+        label: `${c.name} (${c.count})`,
+      })),
+    ],
+    [categories],
+  );
+
+  const formCategories = useMemo(() => {
+    const fromQuestions = (categories ?? []).map((c) => c.name);
+    const fromSpecialties = (specialties ?? []).map((s) => s.name);
+    return Array.from(new Set([...fromQuestions, ...fromSpecialties])).sort();
+  }, [categories, specialties]);
+
   const heroStats = useMemo(
     () => [
       { num: stats ? formatStatCount(stats.answeredQuestions) : "—", label: "Questions Answered" },
       { num: stats ? formatStatCount(stats.doctorCount) : "—", label: "Specialist Doctors" },
-      { num: "24–48h", label: "Response Time" },
-      { num: "100%", label: "Free Service" },
+      { num: stats ? formatStatCount(stats.pendingQuestions ?? 0) : "—", label: "Awaiting Answers" },
+      { num: stats ? formatStatCount(stats.specialtyCount ?? 0) : "—", label: "Specialties" },
     ],
     [stats],
   );
@@ -165,9 +184,17 @@ export default function AskDoctorPage() {
     });
   }, [search, activeFilter, qaItems]);
 
-  const incrementHelpful = useCallback((id: string) => {
-    setHelpfulCounts((prev) => ({ ...prev, [id]: (prev[id] ?? 0) + 1 }));
-  }, []);
+  const incrementHelpful = useCallback(
+    (id: string, current: number) => {
+      if (helpfulCounts[id] !== undefined && helpfulCounts[id] > current) return;
+      markHelpful.mutate(id, {
+        onSuccess: (data) => {
+          setHelpfulCounts((prev) => ({ ...prev, [id]: data.helpfulCount }));
+        },
+      });
+    },
+    [helpfulCounts, markHelpful],
+  );
 
   const toggleAnon = (checked: boolean) => {
     setAnonymous(checked);
@@ -215,21 +242,13 @@ export default function AskDoctorPage() {
 
   return (
     <div className="ask-doctor-page">
-      <div className="breadcrumb">
-        <div className="breadcrumb-inner">
-          <Link href="/">🏠 Home</Link>
-          <span>›</span>
-          <span className="current">Ask the Doctor</span>
-        </div>
-      </div>
-
       <div className="page-hero">
         <div className="page-hero-inner">
           <div className="eyebrow">Free Medical Q&A</div>
           <h1>Ask a Board-Certified Doctor — Free</h1>
           <p>
             Submit your health question and receive a personalised, medically reviewed answer from one of our{" "}
-            {stats ? formatStatCount(stats.doctorCount) : "200+"} specialist physicians.
+            {stats ? formatStatCount(stats.doctorCount) : "—"} specialist physicians.
           </p>
           <div className="hero-stats">
             {heroStats.map(({ num, label }) => (
@@ -255,7 +274,7 @@ export default function AskDoctorPage() {
             <div className="section-eyebrow">Browse Questions</div>
             <div className="section-title">Featured Answered Questions</div>
             <div className="section-sub">
-              Browse {stats ? formatStatCount(stats.answeredQuestions) : "5,000+"} questions answered by our specialist doctors. Use the search and filters to find answers
+              Browse {stats ? formatStatCount(stats.answeredQuestions) : "—"} questions answered by our specialist doctors. Use the search and filters to find answers
               relevant to you.
             </div>
 
@@ -270,7 +289,7 @@ export default function AskDoctorPage() {
             </div>
 
             <div className="cat-filters">
-              {CAT_FILTERS.map(({ val, label }) => (
+              {categoryFilters.map(({ val, label }) => (
                 <button
                   key={val}
                   type="button"
@@ -291,7 +310,7 @@ export default function AskDoctorPage() {
                     key={item.id}
                     item={item}
                     helpfulCount={helpfulCounts[item.id] ?? item.helpfulCount}
-                    onLike={() => incrementHelpful(item.id)}
+                    onLike={() => incrementHelpful(item.id, item.helpfulCount)}
                   />
                 ))
               ) : (
@@ -307,8 +326,7 @@ export default function AskDoctorPage() {
             <div className="ask-form-card">
               <h3>💬 Submit Your Question</h3>
               <p>
-                Get a free, personalised answer from one of our {stats ? formatStatCount(stats.doctorCount) : "200+"} board-certified specialist doctors within 24–48
-                hours.
+                Get a free, personalised answer from one of our {stats ? formatStatCount(stats.doctorCount) : "—"} board-certified specialist doctors.
               </p>
 
               {!submitted ? (
@@ -347,7 +365,7 @@ export default function AskDoctorPage() {
                     <label htmlFor="ask-cat">Medical Category</label>
                     <select id="ask-cat" value={category} onChange={(e) => setCategory(e.target.value)}>
                       <option value="">Select a specialty...</option>
-                      {FORM_CATEGORIES.map((cat) => (
+                      {formCategories.map((cat) => (
                         <option key={cat} value={cat}>
                           {cat}
                         </option>
@@ -415,10 +433,19 @@ export default function AskDoctorPage() {
           <h2>Browse by Medical Specialty</h2>
           <p>Find questions answered by specialists in your area of health concern</p>
           <div className="spec-grid">
-            {SPECIALTIES.map(({ icon, label }) => (
-              <div key={label} className="spec-item" role="button" tabIndex={0}>
-                <div className="spec-ico">{icon}</div>
-                <span>{label}</span>
+            {(specialties ?? []).map((s) => (
+              <div
+                key={s.name}
+                className="spec-item"
+                role="button"
+                tabIndex={0}
+                onClick={() => setActiveFilter(s.name.toLowerCase())}
+                onKeyDown={(e) => e.key === "Enter" && setActiveFilter(s.name.toLowerCase())}
+              >
+                <div className="spec-ico">{specialtyEmoji(s.name)}</div>
+                <span>
+                  {s.name} ({s.count})
+                </span>
               </div>
             ))}
           </div>

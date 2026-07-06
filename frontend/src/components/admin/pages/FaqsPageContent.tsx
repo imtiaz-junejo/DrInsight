@@ -9,7 +9,7 @@ import {
 import { useAdminUiStore } from "@/store/admin-ui.store";
 
 const faqs = [
-  ["How does MedAuthority review medical content?", "Editorial"],
+  ["How does DrInsight review medical content?", "Editorial"],
   ["How do I book a consultation?", "Consultations"],
   ["Is my health data secure?", "Privacy & Security"],
   ["How do I become a contributing author?", "Authors"],

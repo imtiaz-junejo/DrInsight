@@ -3,8 +3,8 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import "@/styles/sitemap-page.css";
-import { doctorFullName, specialtyEmoji } from "@/lib/data-mappers";
-import { useBlogCategories, useDoctors } from "@/services/api-hooks";
+import { doctorFullName, formatStatCount, specialtyEmoji } from "@/lib/data-mappers";
+import { useBlogCategories, useDoctors, usePlatformStats } from "@/services/api-hooks";
 
 type Category = "all" | "public" | "content" | "editorial" | "legal" | "auth" | "dashboard";
 
@@ -24,14 +24,14 @@ interface SmItemData {
   tags: SmTag[];
 }
 
-const FILTERS: { cat: Category; label: string }[] = [
-  { cat: "all", label: "All (26)" },
-  { cat: "public", label: "🌐 Public (11)" },
-  { cat: "content", label: "📰 Content (3)" },
-  { cat: "editorial", label: "📋 Editorial (3)" },
-  { cat: "legal", label: "⚖️ Legal (4)" },
-  { cat: "auth", label: "🔐 Auth (4)" },
-  { cat: "dashboard", label: "📊 Dashboards (1)" },
+const FILTER_CATEGORIES: { cat: Category; labelPrefix: string }[] = [
+  { cat: "all", labelPrefix: "All" },
+  { cat: "public", labelPrefix: "🌐 Public" },
+  { cat: "content", labelPrefix: "📰 Content" },
+  { cat: "editorial", labelPrefix: "📋 Editorial" },
+  { cat: "legal", labelPrefix: "⚖️ Legal" },
+  { cat: "auth", labelPrefix: "🔐 Auth" },
+  { cat: "dashboard", labelPrefix: "📊 Dashboards" },
 ];
 
 const CATEGORY_COLORS = ["#fef2f2", "#f5f3ff", "#f0fdf4", "#eff6ff", "#fffbeb", "#ecfdf5"];
@@ -116,15 +116,44 @@ export function SitemapPageContent() {
 
   const doctorsQuery = useDoctors({ limit: 8 });
   const categoriesQuery = useBlogCategories();
+  const { data: stats } = usePlatformStats();
   const featuredDoctors = doctorsQuery.data?.data ?? [];
   const articleCategories = categoriesQuery.data ?? [];
+
+  const staticPageCounts = useMemo(
+    () => ({
+      public: 7 + 3 + 2,
+      content: 3,
+      editorial: 3,
+      legal: 4,
+      auth: 4,
+      dashboard: 9 + 10 + 1,
+    }),
+    [],
+  );
+
+  const totalStaticPages = useMemo(
+    () => Object.values(staticPageCounts).reduce((sum, count) => sum + count, 0),
+    [staticPageCounts],
+  );
+
+  const filters = useMemo(
+    () =>
+      FILTER_CATEGORIES.map(({ cat, labelPrefix }) => {
+        const count = cat === "all" ? totalStaticPages : staticPageCounts[cat];
+        return { cat, label: `${labelPrefix} (${count})` };
+      }),
+    [staticPageCounts, totalStaticPages],
+  );
+
+  const blogCountLabel = stats ? formatStatCount(stats.blogCount) : "—";
 
   const specialtyCards = useMemo(
     () =>
       articleCategories.slice(0, 8).map((cat, i) => ({
         icon: specialtyEmoji(cat.name),
         name: cat.name,
-        count: "Articles",
+        count: `${cat.postCount ?? 0} articles`,
         url: `/blog?category=${cat.slug}`,
         bg: CATEGORY_COLORS[i % CATEGORY_COLORS.length],
       })),
@@ -152,7 +181,7 @@ export function SitemapPageContent() {
         "Core Pages Main public-facing pages Home About Us Contact FAQ Health Tools Ask the Doctor Book Consultation / /about /contact /faq /health-tools /ask-the-doctor /book-consultation",
       ),
       doctors: getSectionSearchText(
-        "Doctor Directory Find book specialists Doctors Directory Doctor Profile Bio Book with a Doctor Featured Doctors Dr. Kumbhar Dr. Mitchell Dr. Okafor Dr. Sharma Dr. Chen Dr. Rivera Dr. Hassan /doctors /doctors/dr- /book-consultation?doctor=",
+        "Doctor Directory Find book specialists Doctors Directory Doctor Profile Bio Book with a Doctor Featured Doctors Dr. Kumbhar Dr. Mitchell Dr. Okafor Dr. Sharma Dr. Chen Dr. Rivera Dr. Hassan /our-doctors /our-doctors/dr- /book-consultation?doctor=",
       ),
       content: getSectionSearchText(
         "Content Pages Articles blog authors Blog Listing Single Article Author Bio Page Article Categories Cardiology Neurology Endocrinology Mental Health Pediatrics Nutrition /blog /articles/ /authors/",
@@ -227,15 +256,22 @@ export function SitemapPageContent() {
   ];
 
   const doctorDirItems: SmItemData[] = [
-    { href: "/doctors", priority: "high", dotColor: "var(--green)", title: "👥 Doctors Directory", url: "/doctors", tags: [{ type: "done", label: "✓ Live" }] },
-    { href: "/doctors", priority: "high", dotColor: "var(--amber)", title: "👤 Doctor Profile / Bio", url: "/doctors/dr-[name]-[specialty]", tags: [{ type: "dynamic", label: "Dynamic" }] },
+    { href: "/our-doctors", priority: "high", dotColor: "var(--green)", title: "👥 Doctors Directory", url: "/our-doctors", tags: [{ type: "done", label: "✓ Live" }] },
+    { href: "/our-doctors", priority: "high", dotColor: "var(--amber)", title: "👤 Doctor Profile / Bio", url: "/our-doctors/dr-[name]-[specialty]", tags: [{ type: "dynamic", label: "Dynamic" }] },
     { href: "/book-consultation", priority: "med", dotColor: "var(--green)", title: "📅 Book with a Doctor", url: "/book-consultation?doctor=[slug]", tags: [{ type: "dynamic", label: "Dynamic" }] },
   ];
 
   const contentItems: SmItemData[] = [
     { href: "/blog", priority: "high", dotColor: "var(--green)", title: "📰 Blog Listing", url: "/blog", tags: [{ type: "done", label: "✓ Live" }] },
-    { href: "/blog", priority: "high", dotColor: "var(--amber)", title: "📄 Single Article", url: "/articles/[specialty]/[slug]", tags: [{ type: "dynamic", label: "Dynamic · 600+ pages" }] },
-    { href: "/doctors", priority: "med", dotColor: "var(--amber)", title: "🖊️ Author Bio Page", url: "/authors/[author-slug]", tags: [{ type: "dynamic", label: "Dynamic" }] },
+    {
+      href: "/blog",
+      priority: "high",
+      dotColor: "var(--amber)",
+      title: "📄 Single Article",
+      url: "/articles/[specialty]/[slug]",
+      tags: [{ type: "dynamic", label: `Dynamic · ${blogCountLabel} pages` }],
+    },
+    { href: "/blog", priority: "med", dotColor: "var(--amber)", title: "🖊️ Author Bio Page", url: "/authors/[author-slug]", tags: [{ type: "dynamic", label: "Dynamic" }] },
   ];
 
   const editorialItems: SmItemData[] = [
@@ -293,39 +329,31 @@ export function SitemapPageContent() {
 
   return (
     <div className="sitemap-page">
-      <div className="breadcrumb">
-        <div className="breadcrumb-inner">
-          <Link href="/">🏠 Home</Link>
-          <span>›</span>
-          <span className="current">Sitemap</span>
-        </div>
-      </div>
-
       <div className="page-hero">
         <div className="page-hero-inner">
           <div className="page-eyebrow">🗺️ SITE NAVIGATION</div>
           <h1>
-            MedAuthority <span>Sitemap</span>
+            DrInsight <span>Sitemap</span>
           </h1>
           <p>
-            A complete directory of every page on MedAuthority — from health articles and doctor profiles to
+            A complete directory of every page on DrInsight — from health articles and doctor profiles to
             dashboards and legal policies.
           </p>
           <div className="hero-stats">
             <div className="hs">
-              <strong>26</strong>
-              <span>Total Pages</span>
+              <strong>{totalStaticPages}</strong>
+              <span>Static Routes</span>
             </div>
             <div className="hs">
-              <strong>600+</strong>
+              <strong>{blogCountLabel}</strong>
               <span>Articles</span>
             </div>
             <div className="hs">
-              <strong>8</strong>
+              <strong>{stats?.specialtyCount ?? "—"}</strong>
               <span>Specialties</span>
             </div>
             <div className="hs">
-              <strong>7</strong>
+              <strong>{stats ? formatStatCount(stats.doctorCount) : "—"}</strong>
               <span>Doctor Profiles</span>
             </div>
           </div>
@@ -344,7 +372,7 @@ export function SitemapPageContent() {
             />
           </div>
           <div className="sm-filter">
-            {FILTERS.map(({ cat, label }) => (
+            {filters.map(({ cat, label }) => (
               <button
                 key={cat}
                 type="button"
@@ -363,7 +391,7 @@ export function SitemapPageContent() {
               </>
             ) : (
               <>
-                Showing <strong>26</strong> of <strong>26</strong> pages
+                Showing <strong>{totalStaticPages}</strong> of <strong>{totalStaticPages}</strong> static routes
               </>
             )}
           </div>
@@ -375,21 +403,21 @@ export function SitemapPageContent() {
           <div className="lu-left">
             <div className="lu-dot" />
             <span>
-              Sitemap last updated: <strong>June 14, 2026</strong> · All 26 pages live · Version 2.0
+              Sitemap last updated: <strong>{new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</strong> · All {totalStaticPages} static routes live
             </span>
           </div>
           <div className="lu-right">
             <button
               type="button"
               className="lu-btn"
-              onClick={() => showToast("XML sitemap: medauthority.com/sitemap.xml")}
+              onClick={() => showToast("XML sitemap: drinsight.org/sitemap.xml")}
             >
               📄 XML Sitemap
             </button>
             <button
               type="button"
               className="lu-btn"
-              onClick={() => showToast("Robots.txt: medauthority.com/robots.txt")}
+              onClick={() => showToast("Robots.txt: drinsight.org/robots.txt")}
             >
               🤖 robots.txt
             </button>
@@ -432,7 +460,7 @@ export function SitemapPageContent() {
                 {featuredDoctors.map((doc) => (
                   <Link
                     key={doc.id}
-                    href={`/doctors/${doc.id}`}
+                    href={`/our-doctors/${doc.id}`}
                     className="sm-pill"
                   >
                     {doctorFullName(doc.user)}
@@ -613,7 +641,7 @@ export function SitemapPageContent() {
           <div className="xml-cta-left">
             <h3>🤖 Looking for the XML Sitemap?</h3>
             <p>
-              Our machine-readable XML sitemap is available for search engines and SEO tools. It includes all 26 public
+              Our machine-readable XML sitemap is available for search engines and SEO tools. It includes all public
               pages with last-modified dates and priority scores.
             </p>
           </div>
@@ -621,14 +649,14 @@ export function SitemapPageContent() {
             <button
               type="button"
               className="xml-btn primary"
-              onClick={() => showToast("Opening XML sitemap: medauthority.com/sitemap.xml")}
+              onClick={() => showToast("Opening XML sitemap: drinsight.org/sitemap.xml")}
             >
               📄 View XML Sitemap
             </button>
             <button
               type="button"
               className="xml-btn outline"
-              onClick={() => showToast("robots.txt: medauthority.com/robots.txt")}
+              onClick={() => showToast("robots.txt: drinsight.org/robots.txt")}
             >
               🤖 robots.txt
             </button>
@@ -637,7 +665,7 @@ export function SitemapPageContent() {
 
         <div className="section-heading">
           <h2>📰 Article Categories</h2>
-          <span className="sh-badge">600+ articles</span>
+          <span className="sh-badge">{blogCountLabel} articles</span>
         </div>
         <div className="specialty-grid">
           {specialtyCards.map(({ icon, name, count, url }) => (

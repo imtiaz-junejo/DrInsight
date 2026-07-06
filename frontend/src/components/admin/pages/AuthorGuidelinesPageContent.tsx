@@ -47,7 +47,7 @@ export function AuthorGuidelinesPageContent() {
             <input defaultValue="Author Guidelines" />
           </FormItem>
           <FormItem label="Hero Subtitle" full>
-            <textarea defaultValue="Everything you need to know about writing for MedAuthority — from qualification standards and submission requirements to style guides and editorial standards." />
+            <textarea defaultValue="Everything you need to know about writing for DrInsight — from qualification standards and submission requirements to style guides and editorial standards." />
           </FormItem>
           <FormItem label="Last Updated Date">
             <input type="date" defaultValue="2026-06-01" />

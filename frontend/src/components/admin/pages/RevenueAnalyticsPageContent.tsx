@@ -16,9 +16,9 @@ function formatCents(cents: number): string {
 }
 
 export function RevenueAnalyticsPageContent() {
-  const paymentsQuery = useAdminPayments();
+  const paymentsQuery = useAdminPayments({ limit: 100 });
   const statsQuery = usePlatformStats();
-  const payments = paymentsQuery.data ?? [];
+  const payments = paymentsQuery.data?.data ?? [];
 
   const totalCents = payments.reduce((sum, p) => sum + p.amountCents, 0);
 

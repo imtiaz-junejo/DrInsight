@@ -5,7 +5,7 @@ import { SubmitArticlePageContent } from "@/components/doctor/pages/SubmitArticl
 const routeId = "submit-article" as const;
 
 export const metadata: Metadata = {
-  title: `${doctorPageMeta[routeId][0]} — MedAuthority`,
+  title: `${doctorPageMeta[routeId][0]} — DrInsight`,
   description: doctorPageMeta[routeId][1],
 };
 

@@ -233,12 +233,6 @@ export default function PrivacyPolicyPageClient() {
         <div className="progress-fill" style={{ width: `${progress}%` }} />
       </div>
 
-      <div className="breadcrumb">
-        <div className="breadcrumb-inner">
-          🏠 <Link href="/">Home</Link> › <span>Privacy Policy</span>
-        </div>
-      </div>
-
       <div className="page-hero">
         <div className="hero-inner">
           <h1>🛡️ Privacy Policy</h1>
@@ -310,27 +304,27 @@ export default function PrivacyPolicyPageClient() {
               <div className="sec-num">1</div>Who We Are
             </div>
             <div className="callout c-blue">
-              <div className="ch">🏥 About MedAuthority</div>
+              <div className="ch">🏥 About DrInsight</div>
               <p>
-                MedAuthority is a medical education and health information website. We publish content written and
+                DrInsight is a medical education and health information website. We publish content written and
                 reviewed by qualified healthcare professionals. We do <strong>not</strong> provide medical diagnosis,
                 treatment, or prescriptions.
               </p>
             </div>
             <div className="prose">
               <p>
-                <strong>Company:</strong> MedAuthority Inc. &nbsp;|&nbsp; <strong>Registration:</strong>{" "}
+                <strong>Company:</strong> DrInsight &nbsp;|&nbsp; <strong>Registration:</strong>{" "}
                 #NY-2018-MED-4471
               </p>
               <p>
                 <strong>Registered Office:</strong> 123 Medical Plaza, Suite 400, New York, NY 10001, USA
               </p>
               <p>
-                <strong>Data Controller:</strong> MedAuthority Inc.
+                <strong>Data Controller:</strong> DrInsight
               </p>
               <p>
                 <strong>Data Protection Officer (DPO):</strong> Dr. Javed Kumbhar —{" "}
-                <a href="mailto:privacy@medauthority.com">privacy@medauthority.com</a>
+                <a href="mailto:privacy@drinsight.org">privacy@drinsight.org</a>
               </p>
             </div>
           </div>
@@ -395,7 +389,7 @@ export default function PrivacyPolicyPageClient() {
               <div className="ch">🌍 Note for Non-EU Users</div>
               <p>
                 Even if GDPR does not apply to you directly, we apply these same data protection standards globally to
-                all users of MedAuthority.
+                all users of DrInsight.
               </p>
             </div>
           </div>
@@ -604,7 +598,7 @@ export default function PrivacyPolicyPageClient() {
               <div className="ch">📬 How to Exercise Your Rights</div>
               <ul>
                 <li>
-                  Email: <a href="mailto:privacy@medauthority.com">privacy@medauthority.com</a>
+                  Email: <a href="mailto:privacy@drinsight.org">privacy@drinsight.org</a>
                 </li>
                 <li>
                   Response time: Within <strong>30 days</strong>
@@ -636,7 +630,7 @@ export default function PrivacyPolicyPageClient() {
                 </li>
                 <li>
                   Parents or guardians may contact us at{" "}
-                  <a href="mailto:privacy@medauthority.com">privacy@medauthority.com</a>
+                  <a href="mailto:privacy@drinsight.org">privacy@drinsight.org</a>
                 </li>
                 <li>
                   Medical content is written for adult healthcare professionals and informed adult readers
@@ -755,23 +749,23 @@ export default function PrivacyPolicyPageClient() {
             <div className="contact-grid">
               <div className="contact-card">
                 <h4>🛡️ Data Protection Officer</h4>
-                <a href="mailto:privacy@medauthority.com">privacy@medauthority.com</a>
+                <a href="mailto:privacy@drinsight.org">privacy@drinsight.org</a>
                 <p>All privacy & data requests</p>
               </div>
               <div className="contact-card">
                 <h4>✉️ General Inquiries</h4>
-                <a href="mailto:contact@medauthority.com">contact@medauthority.com</a>
+                <a href="mailto:contact@drinsight.org">contact@drinsight.org</a>
                 <p>All general enquiries</p>
               </div>
               <div className="contact-card">
                 <h4>⚖️ Legal Department</h4>
-                <a href="mailto:legal@medauthority.com">legal@medauthority.com</a>
+                <a href="mailto:legal@drinsight.org">legal@drinsight.org</a>
                 <p>Legal and compliance matters</p>
               </div>
               <div className="contact-card">
                 <h4>📍 Mailing Address</h4>
                 <p>
-                  MedAuthority Inc.
+                  DrInsight
                   <br />
                   123 Medical Plaza, Suite 400
                   <br />

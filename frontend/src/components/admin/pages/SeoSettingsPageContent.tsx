@@ -10,14 +10,14 @@ import {
 import { useAdminUiStore } from "@/store/admin-ui.store";
 
 const pages = [
-  ["Homepage", "/", "MedAuthority — Trusted, Doctor-Reviewed Medical Information", "54"],
-  ["About Us", "/about", "About MedAuthority — Our Mission, Doctors & Editorial Standards", "62"],
-  ["Blog", "/blog", "Medical Health Articles — Expert Doctor-Written Guides | MedAuthority", "70"],
-  ["Health Tools", "/health-tools", "Free Health Tools & Medical Calculators | MedAuthority", "54"],
-  ["Book Consultation", "/book-consultation", "Book an Online Doctor Consultation — Video, Phone or Chat | MedAuthority", "72"],
-  ["Ask a Doctor", "/ask-doctor", "Ask a Doctor Online — Get Answers from Real Specialists | MedAuthority", "70"],
-  ["Editorial Policy", "/editorial-policy", "Editorial Policy — How We Ensure Medical Accuracy | MedAuthority", "65"],
-  ["Author Guidelines", "/author-guidelines", "Author Guidelines — Write Medical Articles for MedAuthority", "60"],
+  ["Homepage", "/", "DrInsight — Trusted, Doctor-Reviewed Medical Information", "54"],
+  ["About Us", "/about", "About DrInsight — Our Mission, Doctors & Editorial Standards", "62"],
+  ["Blog", "/blog", "Medical Health Articles — Expert Doctor-Written Guides | DrInsight", "70"],
+  ["Health Tools", "/health-tools", "Free Health Tools & Medical Calculators | DrInsight", "54"],
+  ["Book Consultation", "/book-consultation", "Book an Online Doctor Consultation — Video, Phone or Chat | DrInsight", "72"],
+  ["Ask a Doctor", "/ask-doctor", "Ask a Doctor Online — Get Answers from Real Specialists | DrInsight", "70"],
+  ["Editorial Policy", "/editorial-policy", "Editorial Policy — How We Ensure Medical Accuracy | DrInsight", "65"],
+  ["Author Guidelines", "/author-guidelines", "Author Guidelines — Write Medical Articles for DrInsight", "60"],
 ];
 
 // TODO: connect SEO settings CMS API when backend exists
@@ -85,7 +85,7 @@ export function SeoSettingsPageContent() {
       >
         <FormGrid>
           <FormItem label="Default Meta Title Suffix" full>
-            <input defaultValue=" | MedAuthority" />
+            <input defaultValue=" | DrInsight" />
           </FormItem>
           <FormItem label="Default Meta Description" full>
             <textarea defaultValue="Evidence-based medical information reviewed by board-certified physicians." />
@@ -94,7 +94,7 @@ export function SeoSettingsPageContent() {
             <input defaultValue="Connected ✓" disabled />
           </FormItem>
           <FormItem label="XML Sitemap URL">
-            <input defaultValue="https://medauthority.com/sitemap.xml" disabled />
+            <input defaultValue="https://drinsight.org/sitemap.xml" disabled />
           </FormItem>
         </FormGrid>
       </AdminPanel>

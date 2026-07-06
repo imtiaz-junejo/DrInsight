@@ -5,7 +5,7 @@ import { EmailTemplatesPageContent } from "@/components/admin/pages/EmailTemplat
 const routeId = "email-templates" as const;
 
 export const metadata: Metadata = {
-  title: `${adminPageMeta[routeId][0]} — MedAuthority Admin`,
+  title: `${adminPageMeta[routeId][0]} — DrInsight Admin`,
   description: adminPageMeta[routeId][1],
 };
 

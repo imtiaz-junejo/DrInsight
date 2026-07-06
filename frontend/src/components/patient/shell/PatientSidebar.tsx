@@ -18,6 +18,7 @@ export function PatientSidebar() {
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const showToast = usePatientUiStore((s) => s.showToast);
   const setMobileSidebarOpen = usePatientUiStore((s) => s.setMobileSidebarOpen);
+  const mobileSidebarOpen = usePatientUiStore((s) => s.mobileSidebarOpen);
   const profileQuery = useAuthProfile();
   const appointmentsQuery = usePatientAppointments({ limit: 50 });
 
@@ -38,7 +39,7 @@ export function PatientSidebar() {
   };
 
   return (
-    <aside className="dash-sidebar">
+    <aside className={`dash-sidebar${mobileSidebarOpen ? " open" : ""}`}>
       <div className="sidebar-profile">
         <div className="sidebar-avatar-ring">
           <div className="sidebar-avatar">{initials}</div>

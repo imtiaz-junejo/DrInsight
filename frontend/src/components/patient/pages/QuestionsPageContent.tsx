@@ -34,7 +34,7 @@ export function QuestionsPageContent() {
           lineHeight: 1.5,
         }}
       >
-        <strong>Public Q&amp;A:</strong> Questions and answers on MedAuthority are shared publicly. Your personal question history is not shown here — browse answered questions from the community below.
+        <strong>Public Q&amp;A:</strong> Questions and answers on DrInsight are shared publicly. Your personal question history is not shown here — browse answered questions from the community below.
       </div>
 
       <DashCard title="💬 Answered Questions">

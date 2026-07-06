@@ -1,6 +1,14 @@
-import Image from "next/image";
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 import "@/styles/site-footer.css";
+import { phoneHref, whatsappHref } from "@/lib/contact-utils";
+import { CONTACT_PHONE } from "@/lib/site-contact";
+import { useNewsletterSubscribe } from "@/services/api-hooks";
+
+const CONTACT_EMAIL = "contact@drinsight.org";
+const BUSINESS_HOURS = "Mon–Fri: 8AM–8PM | Sat: 9AM–5PM";
 
 const QUICK_LINKS = [
   { href: "/", label: "Home" },
@@ -32,6 +40,7 @@ const BOTTOM_LINKS = [
   { href: "/terms-conditions", label: "Terms of Service" },
   { href: "/disclaimer", label: "Medical Disclaimer" },
   { href: "/cookie-policy", label: "Cookie Policy" },
+  { href: "/faq", label: "FAQs" },
   { href: "/sitemap", label: "Sitemap" },
 ] as const;
 
@@ -79,21 +88,35 @@ function ClockIcon() {
 }
 
 export function Footer() {
+  const newsletter = useNewsletterSubscribe();
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+
+  const handleSubscribe = async () => {
+    if (!email.trim()) return;
+    try {
+      await newsletter.mutateAsync(email.trim());
+      setMessage("Subscribed successfully!");
+      setEmail("");
+    } catch {
+      setMessage("Subscription failed. Please try again.");
+    }
+  };
+
   return (
     <footer className="site-footer">
       <div className="footer-grid">
         <div className="footer-brand">
           <div className="logo" style={{ marginBottom: 14 }}>
-            <Image
-              src="/logo.png"
-              alt="The Dr Insight"
-              width={200}
-              height={52}
+            <img
+              src="/assets/logo/footer-logo.png"
+              alt="DrInsight"
               style={{
-                height: 52,
-                width: "auto",
+                maxWidth: 220,
+                width: "100%",
+                height: "auto",
+                objectFit: "contain",
                 display: "block",
-                filter: "brightness(0) invert(1)",
               }}
             />
           </div>
@@ -140,11 +163,11 @@ export function Footer() {
           <h4>Contact Information</h4>
           <div className="footer-contact-item">
             <PhoneIcon />
-            +92 335 354 5545
+            <a href={phoneHref(CONTACT_PHONE)}>{CONTACT_PHONE}</a>
           </div>
           <div className="footer-contact-item">
             <EmailIcon />
-            contact@drinsight.org
+            <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
           </div>
           <div className="footer-contact-item">
             <LocationIcon />
@@ -156,10 +179,13 @@ export function Footer() {
           </div>
           <div className="footer-contact-item">
             <ClockIcon />
-            Mon–Fri: 8AM–8PM | Sat: 9AM–5PM
+            {BUSINESS_HOURS}
           </div>
           <div className="footer-contact-item" style={{ color: "#25d366" }}>
-            📱 WhatsApp: +92 335 354 5545
+            📱 WhatsApp:{" "}
+            <a href={whatsappHref(CONTACT_PHONE)} style={{ color: "#25d366" }}>
+              {CONTACT_PHONE}
+            </a>
           </div>
         </div>
 
@@ -169,8 +195,19 @@ export function Footer() {
             Get weekly medical tips and health news from our specialists.
           </p>
           <div className="footer-subscribe">
-            <input type="email" placeholder="Your email address" aria-label="Email address" />
-            <button type="button">Subscribe Free →</button>
+            <input
+              type="email"
+              placeholder="Your email address"
+              aria-label="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <button type="button" onClick={handleSubscribe} disabled={newsletter.isPending}>
+              {newsletter.isPending ? "Subscribing..." : "Subscribe Free →"}
+            </button>
+            {message && (
+              <p style={{ fontSize: "0.72rem", color: "#475569", marginTop: 8 }}>{message}</p>
+            )}
             <p style={{ fontSize: "0.72rem", color: "#475569", marginTop: 8 }}>
               🔒 GDPR compliant. Unsubscribe anytime.
             </p>
@@ -180,9 +217,9 @@ export function Footer() {
 
       <div className="footer-bottom">
         <div>
-          <p>© 2026 The Dr Insight. All rights reserved.</p>
+          <p>© 2026 DrInsight. All rights reserved.</p>
           <p style={{ marginTop: 4, fontSize: "0.75rem", color: "#475569" }}>
-            ⚕️ The content on The Dr Insight is for informational purposes only and is not a substitute for
+            ⚕️ The content on DrInsight is for informational purposes only and is not a substitute for
             professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider for
             medical decisions.
           </p>

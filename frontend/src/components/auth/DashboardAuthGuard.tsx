@@ -11,10 +11,15 @@ function rolePath(role: string) {
   return "/";
 }
 
+/** Match `/doctor` and `/doctor/...` but not `/doctors` or `/our-doctors`. */
+function matchesPathPrefix(pathname: string, prefix: string) {
+  return pathname === prefix || pathname.startsWith(`${prefix}/`);
+}
+
 function requiredRole(pathname: string) {
-  if (pathname.startsWith("/patient")) return "PATIENT";
-  if (pathname.startsWith("/doctor")) return "DOCTOR";
-  if (pathname.startsWith("/admin")) return "ADMIN";
+  if (matchesPathPrefix(pathname, "/patient")) return "PATIENT";
+  if (matchesPathPrefix(pathname, "/doctor")) return "DOCTOR";
+  if (matchesPathPrefix(pathname, "/admin")) return "ADMIN";
   return null;
 }
 

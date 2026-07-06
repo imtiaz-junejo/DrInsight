@@ -41,7 +41,7 @@ export function HomePageContent() {
   const blogPosts = blogData?.data.map(mapBlogPostToCard) ?? [];
 
   const heroStats = [
-    [stats ? formatStatCount(stats.patientCount) : "—", "Patients Served"],
+    [stats ? formatStatCount(stats.patientsServed ?? stats.patientCount) : "—", "Patients Served"],
     [stats ? formatStatCount(stats.doctorCount) : "—", "Specialist Doctors"],
     [stats ? `${stats.averageRating.toFixed(1)}★` : "—", "Avg. Rating"],
   ];
@@ -60,11 +60,11 @@ export function HomePageContent() {
 
   return (
     <>
-      <section className="hero-pattern relative overflow-hidden bg-gradient-to-br from-blue-dark via-blue to-teal px-6 py-20 text-white md:py-[90px]">
-        <div className="relative mx-auto grid max-w-[1240px] items-center gap-12 md:grid-cols-2 md:gap-[60px]">
+      <section className="hero-pattern relative overflow-hidden bg-gradient-to-br from-blue-dark via-blue to-teal px-4 py-16 text-white sm:px-6 sm:py-20 lg:py-[90px]">
+        <div className="relative mx-auto grid max-w-[1240px] items-center gap-10 lg:grid-cols-2 lg:gap-[60px]">
           <div>
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-4 py-1.5 text-[.8rem] font-semibold tracking-wide backdrop-blur-sm">
-              <span>🏥</span> TRUSTED BY {stats ? formatStatCount(stats.patientCount) : "500K+"} PATIENTS WORLDWIDE
+              <span>🏥</span> TRUSTED BY {stats ? formatStatCount(stats.patientsServed ?? stats.patientCount) : "—"} PATIENTS WORLDWIDE
             </div>
             <h1 className="font-display text-[clamp(2rem,4vw,3.2rem)] font-bold leading-tight">
               Your Trusted Partner in <span className="text-[#93c5fd]">Medical Excellence</span> & Health
@@ -92,12 +92,12 @@ export function HomePageContent() {
             </div>
           </div>
 
-          <div className="hidden flex-col gap-4 md:flex">
+          <div className="hidden flex-col gap-4 lg:flex">
             <div className="grid grid-cols-2 gap-3.5">
               {[
-                ["🩺", "Expert Doctors", `${stats ? formatStatCount(stats.doctorCount) : "200+"} specialists across all major fields`],
-                ["🔬", "Health Tools", "15+ free medical calculators"],
-                ["💊", "Medical Blog", `${stats ? formatStatCount(stats.blogCount) : "1,000+"} reviewed articles`],
+                ["🩺", "Expert Doctors", `${stats ? formatStatCount(stats.doctorCount) : "—"} specialists across all major fields`],
+                ["🔬", "Health Tools", `${tools.length} free medical calculators`],
+                ["💊", "Medical Blog", `${stats ? formatStatCount(stats.blogCount) : "—"} reviewed articles`],
                 ["🛡️", "Privacy First", "HIPAA & GDPR compliant"],
               ].map(([icon, title, desc]) => (
                 <div
@@ -127,8 +127,8 @@ export function HomePageContent() {
         </div>
       </section>
 
-      <div className="bg-white px-6">
-        <div className="relative z-10 mx-auto -mt-10 flex max-w-[1240px] flex-wrap items-center gap-3.5 rounded-xl border-[1.5px] border-[#fecaca] bg-[#fef2f2] p-4 md:p-5">
+      <div className="bg-white px-4 sm:px-6">
+        <div className="relative z-10 mx-auto -mt-10 flex max-w-[1240px] flex-wrap items-center gap-3.5 rounded-xl border-[1.5px] border-[#fecaca] bg-[#fef2f2] p-4 sm:px-6 lg:p-5">
           <span className="text-2xl">🚨</span>
           <div className="flex-1">
             <strong className="text-red">Medical Emergency? Call 911 immediately.</strong>
@@ -142,7 +142,7 @@ export function HomePageContent() {
         </div>
       </div>
 
-      <section className="px-6 py-20">
+      <section className="px-4 py-16 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-[1240px]">
           <div className="mb-13 text-center">
             <div className="mb-2.5 text-[.78rem] font-bold uppercase tracking-widest text-blue">Our Specialties</div>
@@ -161,7 +161,7 @@ export function HomePageContent() {
               {specialties.map((s) => (
                 <Link
                   key={s.name}
-                  href="/doctors"
+                  href="/our-doctors"
                   className="group cursor-pointer rounded-xl border-[1.5px] border-gray-200 bg-white p-6 text-center transition hover:-translate-y-1 hover:border-blue hover:shadow-[var(--shadow-lg)]"
                 >
                   <div className="mx-auto mb-3 flex h-[52px] w-[52px] items-center justify-center rounded-[14px] bg-blue-light text-2xl transition group-hover:bg-blue group-hover:text-white">
@@ -182,7 +182,7 @@ export function HomePageContent() {
         </div>
       </section>
 
-      <section className="bg-gray-50 px-6 py-20">
+      <section className="bg-gray-50 px-4 py-16 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-[1240px]">
           <div className="mb-13 text-center">
             <div className="mb-2.5 text-[.78rem] font-bold uppercase tracking-widest text-blue">Free Health Tools</div>
@@ -213,13 +213,13 @@ export function HomePageContent() {
           </div>
           <div className="mt-9 text-center">
             <Button asChild className="inline-flex w-auto">
-              <Link href="/health-tools">Explore All 15+ Health Tools →</Link>
+              <Link href="/health-tools">Explore All {tools.length} Health Tools →</Link>
             </Button>
           </div>
         </div>
       </section>
 
-      <section className="px-6 py-20">
+      <section className="px-4 py-16 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-[1240px]">
           <div className="mb-13 text-center">
             <div className="mb-2.5 text-[.78rem] font-bold uppercase tracking-widest text-blue">Medical Blog</div>
@@ -273,8 +273,8 @@ export function HomePageContent() {
         </div>
       </section>
 
-      <section className="bg-gradient-to-br from-[#f0f7ff] to-[#e8f4fd] px-6 py-20">
-        <div className="mx-auto grid max-w-[1240px] items-center gap-12 md:grid-cols-2 md:gap-[60px]">
+      <section className="bg-gradient-to-br from-[#f0f7ff] to-[#e8f4fd] px-4 py-16 sm:px-6 sm:py-20">
+        <div className="mx-auto grid max-w-[1240px] items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:gap-[60px]">
           <div>
             <div className="mb-2.5 text-[.78rem] font-bold uppercase tracking-widest text-blue">Ask the Doctor</div>
             <h2 className="font-display text-[clamp(1.7rem,3vw,2.3rem)] font-bold leading-tight text-gray-900">
@@ -289,7 +289,7 @@ export function HomePageContent() {
                 ["👨‍⚕️", "Answers from board-certified specialists"],
                 ["🔒", "Anonymous submissions available"],
                 ["⚡", "Typical response within 24–48 hours"],
-                ["📚", `Browse ${stats ? formatStatCount(stats.answeredQuestions) : "5,000+"} previously answered questions`],
+                ["📚", `Browse ${stats ? formatStatCount(stats.answeredQuestions) : "—"} previously answered questions`],
               ].map(([icon, text]) => (
                 <div key={text as string} className="flex items-center gap-3 text-[.9rem] text-gray-700">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-light text-sm">
@@ -306,7 +306,7 @@ export function HomePageContent() {
           <div className="rounded-[20px] border border-gray-200 bg-white p-8 shadow-[var(--shadow-lg)]">
             <h3 className="font-display text-[1.3rem] font-bold">Ask Your Question</h3>
             <p className="mb-5 text-[.85rem] text-gray-600">
-              Get a free answer from one of our {stats ? formatStatCount(stats.doctorCount) : "200+"} specialist doctors
+              Get a free answer from one of our {stats ? formatStatCount(stats.doctorCount) : "—"} specialist doctors
             </p>
             <form action="/ask-doctor" className="space-y-4">
               <div>
@@ -320,13 +320,15 @@ export function HomePageContent() {
               </div>
               <div>
                 <label className="mb-1.5 block text-[.82rem] font-semibold text-gray-700">Medical Category</label>
-                <select className="w-full rounded-lg border-[1.5px] border-gray-200 px-3.5 py-2.5 text-[.88rem] focus:border-blue focus:outline-none">
-                  <option>Select a category...</option>
-                  <option>General Medicine</option>
-                  <option>Cardiology</option>
-                  <option>Neurology</option>
-                  <option>Dermatology</option>
-                  <option>Mental Health</option>
+                <select className="w-full rounded-lg border-[1.5px] border-gray-200 px-3.5 py-2.5 text-[.88rem] focus:border-blue focus:outline-none" defaultValue="">
+                  <option value="" disabled>
+                    Select a category...
+                  </option>
+                  {(specialties ?? []).map((s) => (
+                    <option key={s.name} value={s.name}>
+                      {s.name}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div>
@@ -348,7 +350,7 @@ export function HomePageContent() {
         </div>
       </section>
 
-      <section className="bg-gradient-to-br from-blue-dark to-blue px-6 py-20 text-center text-white">
+      <section className="bg-gradient-to-br from-blue-dark to-blue px-4 py-16 text-center text-white sm:px-6 sm:py-20">
         <div className="mb-2.5 text-[.78rem] font-bold uppercase tracking-widest text-[#93c5fd]">
           Virtual & In-Person Consultations
         </div>
@@ -374,7 +376,7 @@ export function HomePageContent() {
         </div>
       </section>
 
-      <section className="px-6 py-20">
+      <section className="px-4 py-16 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-[1240px]">
           <div className="mb-13 text-center">
             <div className="mb-2.5 text-[.78rem] font-bold uppercase tracking-widest text-blue">Patient Stories</div>
@@ -432,7 +434,7 @@ export function HomePageContent() {
         </div>
       </section>
 
-      <section className="border-t border-gray-200 bg-gray-50 px-6 py-20">
+      <section className="border-t border-gray-200 bg-gray-50 px-4 py-16 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-[600px] text-center">
           <h2 className="font-display text-[clamp(1.6rem,3vw,2.2rem)] font-bold">Stay Informed, Stay Healthy</h2>
           <p className="my-3 text-gray-600">
@@ -456,7 +458,7 @@ export function HomePageContent() {
         </div>
       </section>
 
-      <div className="bg-blue-dark px-6 py-10 text-white">
+      <div className="bg-blue-dark px-4 py-10 text-white sm:px-6">
         <div className="mx-auto grid max-w-[1240px] grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-3">
           {[
             ["/health-tools#bmi", "⚖️", "BMI Calculator"],
