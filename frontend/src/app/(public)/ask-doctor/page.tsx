@@ -41,7 +41,7 @@ export default function AskDoctorPage() {
       { num: stats ? formatStatCount(stats.answeredQuestions) : "—", label: "Questions Answered" },
       { num: stats ? formatStatCount(stats.doctorCount) : "—", label: "Specialist Doctors" },
       { num: stats ? formatStatCount(stats.pendingQuestions ?? 0) : "—", label: "Awaiting Answers" },
-      { num: stats ? formatStatCount(stats.specialtyCount ?? 0) : "—", label: "Specialties" },
+      { num: "100%", label: "Free Service" },
     ],
     [stats],
   );
@@ -132,117 +132,124 @@ export default function AskDoctorPage() {
 
       <div className="main-wrap">
         <div className="two-col">
-          <div ref={qaFeedRef}>
+          <div ref={qaFeedRef} className="questions-col">
             <BrowseQuestionsSection
               answeredCount={stats?.answeredQuestions}
               activeCategory={browseCategory}
             />
           </div>
 
-          <div>
-            <div className="ask-form-card">
-              <h3>💬 Submit Your Question</h3>
-              <p>
-                Get a free, personalised answer from one of our{" "}
-                {stats ? formatStatCount(stats.doctorCount) : "—"} board-certified specialist doctors.
-              </p>
+          <aside className="sidebar-col" aria-label="Submit your question">
+            <div className="ask-form-card bg-gray-200">
+              <div className="ask-form-card-header">
+                <h3>💬 Submit Your Question</h3>
+                <p>
+                  Get a free, personalised answer from one of our{" "}
+                  {stats ? formatStatCount(stats.doctorCount) : "—"} board-certified specialist doctors.
+                </p>
+              </div>
 
-              {!submitted ? (
-                <div id="ask-form">
-                  <div className="form-group">
-                    <label htmlFor="ask-name">Your Name</label>
-                    <input
-                      type="text"
-                      id="ask-name"
-                      placeholder={anonymous ? "Submitted anonymously" : "Leave blank to submit anonymously"}
-                      value={name}
-                      disabled={anonymous}
-                      onChange={(e) => setName(e.target.value)}
-                    />
+              <div className="ask-form-card-body">
+                {!submitted ? (
+                  <div id="ask-form">
+                    <div className="form-group">
+                      <label htmlFor="ask-name">Your Name</label>
+                      <input
+                        type="text"
+                        id="ask-name"
+                        className="border-gray-300"
+                        placeholder={anonymous ? "Submitted anonymously" : "Leave blank to submit anonymously"}
+                        value={name}
+                        disabled={anonymous}
+                        onChange={(e) => setName(e.target.value)}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="ask-email">Email Address</label>
+                      <input
+                        type="email"
+                        id="ask-email"
+                        className="border-gray-300"
+                        placeholder="For answer notification (optional)"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                      />
+                    </div>
+                    <label className="anon-check">
+                      <input
+                        type="checkbox"
+                        id="ask-anon"
+                        checked={anonymous}
+                        onChange={(e) => toggleAnon(e.target.checked)}
+                      />
+                      🔒 Submit anonymously — your name won&apos;t be displayed
+                    </label>
+                    <div className="form-group">
+                      <label htmlFor="ask-cat">Medical Category</label>
+                      <select id="ask-cat" className="border-gray-300" value={category} onChange={(e) => setCategory(e.target.value)}>
+                        <option value="">Select a specialty...</option>
+                        {formCategories.map((cat) => (
+                          <option key={cat} value={cat}>
+                            {cat}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="ask-q">Your Question</label>
+                      <textarea
+                        id="ask-q"
+                        className="border-gray-300"
+                        placeholder="Describe your symptoms, health concern, or medical question in as much detail as possible. Include your age, sex, and any relevant medical history..."
+                        value={question}
+                        onChange={(e) => setQuestion(e.target.value)}
+                      />
+                      <div className="char-count">{question.length} / 1000 characters</div>
+                    </div>
+                    <button
+                      type="button"
+                      className="submit-btn"
+                      onClick={handleSubmit}
+                      disabled={submitQuestion.isPending}
+                    >
+                      {submitQuestion.isPending ? "Submitting..." : "✉️ Submit Question Free"}
+                    </button>
+                    <div className="disclaimer">
+                      ⚠️ This service is for informational purposes only and does not replace professional medical advice,
+                      diagnosis, or treatment. For emergencies, call 911.
+                    </div>
                   </div>
-                  <div className="form-group">
-                    <label htmlFor="ask-email">Email Address</label>
-                    <input
-                      type="email"
-                      id="ask-email"
-                      placeholder="For answer notification (optional)"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
+                ) : (
+                  <div className="success-msg" id="success-msg">
+                    <div style={{ fontSize: "2rem", marginBottom: 8 }}>✅</div>
+                    <h4>Question Submitted Successfully!</h4>
+                    <p>
+                      Our doctors will review your question and respond within 24–48 hours. You&apos;ll receive a
+                      notification at your email address.
+                    </p>
+                    <button type="button" className="success-reset-btn" onClick={resetForm}>
+                      Ask Another Question
+                    </button>
                   </div>
-                  <label className="anon-check">
-                    <input
-                      type="checkbox"
-                      id="ask-anon"
-                      checked={anonymous}
-                      onChange={(e) => toggleAnon(e.target.checked)}
-                    />
-                    🔒 Submit anonymously — your name won&apos;t be displayed
-                  </label>
-                  <div className="form-group">
-                    <label htmlFor="ask-cat">Medical Category</label>
-                    <select id="ask-cat" value={category} onChange={(e) => setCategory(e.target.value)}>
-                      <option value="">Select a specialty...</option>
-                      {formCategories.map((cat) => (
-                        <option key={cat} value={cat}>
-                          {cat}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="ask-q">Your Question</label>
-                    <textarea
-                      id="ask-q"
-                      placeholder="Describe your symptoms, health concern, or medical question in as much detail as possible. Include your age, sex, and any relevant medical history..."
-                      value={question}
-                      onChange={(e) => setQuestion(e.target.value)}
-                    />
-                    <div className="char-count">{question.length} / 1000 characters</div>
-                  </div>
-                  <button
-                    type="button"
-                    className="submit-btn"
-                    onClick={handleSubmit}
-                    disabled={submitQuestion.isPending}
-                  >
-                    {submitQuestion.isPending ? "Submitting..." : "✉️ Submit Question Free"}
-                  </button>
-                  <div className="disclaimer">
-                    ⚠️ This service is for informational purposes only and does not replace professional medical advice,
-                    diagnosis, or treatment. For emergencies, call 911.
-                  </div>
-                </div>
-              ) : (
-                <div className="success-msg" id="success-msg">
-                  <div style={{ fontSize: "2rem", marginBottom: 8 }}>✅</div>
-                  <h4>Question Submitted Successfully!</h4>
-                  <p>
-                    Our doctors will review your question and respond within 24–48 hours. You&apos;ll receive a
-                    notification at your email address.
-                  </p>
-                  <button type="button" className="success-reset-btn" onClick={resetForm}>
-                    Ask Another Question
-                  </button>
-                </div>
-              )}
+                )}
 
-              <div className="trust-row">
-                <div className="trust-item">
-                  <div>👨‍⚕️</div>
-                  <span>Board-certified doctors only</span>
-                </div>
-                <div className="trust-item">
-                  <div>🔒</div>
-                  <span>Anonymous option</span>
-                </div>
-                <div className="trust-item">
-                  <div>⚡</div>
-                  <span>24–48h response</span>
+                <div className="trust-row">
+                  <div className="trust-item">
+                    <div>👨‍⚕️</div>
+                    <span>Board-certified doctors only</span>
+                  </div>
+                  <div className="trust-item">
+                    <div>🔒</div>
+                    <span>Anonymous option</span>
+                  </div>
+                  <div className="trust-item">
+                    <div>⚡</div>
+                    <span>24–48h response</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </aside>
         </div>
       </div>
 

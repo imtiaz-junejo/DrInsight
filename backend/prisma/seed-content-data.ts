@@ -17,14 +17,14 @@ export const CONTACT_COUNT = 100;
 
 export const BLOG_CATEGORIES = [
   {
+    name: 'Cardiology',
+    slug: 'cardiology',
+    description: 'Cardiovascular prevention, hypertension, and heart disease awareness in Pakistan.',
+  },
+  {
     name: 'General Health',
     slug: 'general-health',
     description: 'Everyday wellness, preventive care, and health literacy for Pakistani households.',
-  },
-  {
-    name: 'Heart Health',
-    slug: 'heart-health',
-    description: 'Cardiovascular prevention, hypertension, and heart disease awareness in Pakistan.',
   },
   {
     name: 'Diabetes',
@@ -88,7 +88,7 @@ const COVER_IMAGES: Record<string, string[]> = {
     'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80',
     'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&q=80',
   ],
-  'heart-health': [
+  cardiology: [
     'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&q=80',
     'https://images.unsplash.com/photo-1628348068343-c6a8489622a9?w=800&q=80',
   ],
@@ -151,7 +151,7 @@ const BLOG_TITLE_TEMPLATES: Record<string, string[]> = {
     'Health Screenings by Age: A Guide for Adults in Pakistan',
     'Why Regular Blood Pressure Monitoring Matters at Home',
   ],
-  'heart-health': [
+  cardiology: [
     'Hypertension in Pakistan: Why It Is Called the Silent Killer',
     'Heart-Healthy Diet Tips Using Everyday Pakistani Foods',
     'Recognizing Heart Attack Symptoms Early: What Families Should Know',
@@ -356,7 +356,7 @@ function buildExcerpt(title: string, categoryName: string, index: number): strin
 function buildTags(categorySlug: string, index: number): string[] {
   const baseTags: Record<string, string[]> = {
     'general-health': ['preventive care', 'primary care', 'Pakistan health', 'wellness'],
-    'heart-health': ['hypertension', 'cardiology', 'heart disease', 'Pakistan'],
+    cardiology: ['hypertension', 'cardiology', 'heart disease', 'Pakistan'],
     diabetes: ['type 2 diabetes', 'blood sugar', 'HbA1c', 'South Asia'],
     'womens-health': ['women health', 'pregnancy', 'PCOS', 'Pakistan'],
     'mens-health': ['men health', 'prostate', 'screening', 'Pakistan'],

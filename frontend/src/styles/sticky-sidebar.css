@@ -1,0 +1,66 @@
+/**
+ * Shared sticky sidebar layout — used on Ask the Doctor and Blog pages.
+ * Parent page must set --sticky-nav-height and --sticky-gap (optional).
+ */
+.sticky-sidebar-layout {
+  align-items: stretch;
+}
+
+.sticky-sidebar-main,
+.sticky-sidebar-col {
+  min-width: 0;
+}
+
+.sticky-sidebar-col {
+  align-self: stretch;
+}
+
+.sticky-sidebar-panel {
+  position: sticky;
+  top: var(--sticky-top, 92px);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - var(--sticky-top, 92px) - 16px);
+  border: 1px solid var(--gray-300, #d1d5db);
+  border-radius: 16px;
+  padding: 18px 16px 16px;
+  box-shadow:
+    0 10px 15px -3px rgba(15, 23, 42, 0.08),
+    0 4px 6px -4px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+}
+
+.sticky-sidebar-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-gutter: stable;
+}
+
+.sticky-sidebar-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.sticky-sidebar-scroll::-webkit-scrollbar-thumb {
+  background: var(--gray-300, #d1d5db);
+  border-radius: 4px;
+}
+
+@media (max-width: 960px) {
+  .sticky-sidebar-col {
+    order: -1;
+  }
+
+  .sticky-sidebar-panel {
+    position: static;
+    top: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .sticky-sidebar-scroll {
+    overflow: visible;
+    padding-right: 0;
+  }
+}

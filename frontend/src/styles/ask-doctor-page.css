@@ -12,6 +12,7 @@
   --gray-50: #f8fafc;
   --gray-100: #f1f5f9;
   --gray-200: #e2e8f0;
+  --gray-300: #d1d5db;
   --gray-400: #94a3b8;
   --gray-500: #64748b;
   --gray-600: #475569;
@@ -23,6 +24,9 @@
   --radius: 12px;
   --radius-lg: 18px;
   --transition: all 0.2s ease;
+  --ask-nav-height: 70px;
+  --ask-sticky-gap: 22px;
+  --ask-sticky-top: calc(var(--ask-nav-height) + var(--ask-sticky-gap));
   font-family: var(--font-body);
   font-size: 14px;
   line-height: 1.6;
@@ -134,7 +138,16 @@
   display: grid;
   grid-template-columns: 1fr 380px;
   gap: 32px;
-  align-items: start;
+  align-items: stretch;
+}
+
+.ask-doctor-page .questions-col {
+  min-width: 0;
+}
+
+.ask-doctor-page .sidebar-col {
+  min-width: 0;
+  align-self: stretch;
 }
 
 .ask-doctor-page .section-eyebrow {
@@ -657,12 +670,40 @@
 }
 
 .ask-doctor-page .ask-form-card {
-  background: #fff;
-  border: 1.5px solid var(--gray-200);
-  border-radius: var(--radius-lg);
-  padding: 28px;
   position: sticky;
-  top: 78px;
+  top: var(--ask-sticky-top);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - var(--ask-sticky-top) - 16px);
+  border: 1px solid var(--gray-300);
+  border-radius: 16px;
+  padding: 22px 20px 20px;
+  box-shadow:
+    0 10px 15px -3px rgba(15, 23, 42, 0.08),
+    0 4px 6px -4px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+}
+
+.ask-doctor-page .ask-form-card-header {
+  flex-shrink: 0;
+  margin-bottom: 16px;
+}
+
+.ask-doctor-page .ask-form-card-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-gutter: stable;
+}
+
+.ask-doctor-page .ask-form-card-body::-webkit-scrollbar {
+  width: 5px;
+}
+
+.ask-doctor-page .ask-form-card-body::-webkit-scrollbar-thumb {
+  background: var(--gray-300);
+  border-radius: 4px;
 }
 
 .ask-doctor-page .ask-form-card h3 {
@@ -673,6 +714,13 @@
   margin-bottom: 5px;
 }
 
+.ask-doctor-page .ask-form-card-header > p {
+  font-size: 0.78rem;
+  color: var(--gray-600);
+  margin-bottom: 0;
+  line-height: 1.6;
+}
+
 .ask-doctor-page .ask-form-card > p {
   font-size: 0.78rem;
   color: var(--gray-600);
@@ -681,7 +729,7 @@
 }
 
 .ask-doctor-page .form-group {
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .ask-doctor-page .form-group label {
@@ -689,7 +737,7 @@
   font-size: 0.72rem;
   font-weight: 700;
   color: var(--gray-600);
-  margin-bottom: 5px;
+  margin-bottom: 4px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -698,14 +746,25 @@
 .ask-doctor-page .form-group select,
 .ask-doctor-page .form-group textarea {
   width: 100%;
-  padding: 9px 12px;
-  border: 1.5px solid var(--gray-200);
-  border-radius: 8px;
+  padding: 0 12px;
+  border: 1px solid var(--gray-300);
+  border-radius: 10px;
   font-size: 0.84rem;
   color: var(--gray-800);
   background: #fff;
-  transition: var(--transition);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   font-family: inherit;
+}
+
+.ask-doctor-page .form-group input,
+.ask-doctor-page .form-group select {
+  height: 40px;
+}
+
+.ask-doctor-page .form-group input::placeholder,
+.ask-doctor-page .form-group textarea::placeholder {
+  color: var(--gray-400);
+  opacity: 1;
 }
 
 .ask-doctor-page .form-group input:focus,
@@ -713,7 +772,7 @@
 .ask-doctor-page .form-group textarea:focus {
   outline: none;
   border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(26, 86, 160, 0.08);
+  box-shadow: 0 0 0 3px rgba(26, 86, 160, 0.14);
 }
 
 .ask-doctor-page .form-group input:disabled {
@@ -724,6 +783,7 @@
 .ask-doctor-page .form-group textarea {
   resize: vertical;
   min-height: 100px;
+  padding: 10px 12px;
   line-height: 1.6;
 }
 
@@ -819,8 +879,9 @@
 .ask-doctor-page .trust-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-top: 20px;
+  gap: 10px;
+  margin-top: 16px;
+  flex-shrink: 0;
 }
 
 .ask-doctor-page .trust-item {
@@ -1091,8 +1152,20 @@
     grid-template-columns: 1fr;
   }
 
+  .ask-doctor-page .sidebar-col {
+    order: -1;
+  }
+
   .ask-doctor-page .ask-form-card {
     position: static;
+    top: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .ask-doctor-page .ask-form-card-body {
+    overflow: visible;
+    padding-right: 0;
   }
 
   .ask-doctor-page .trust-row {

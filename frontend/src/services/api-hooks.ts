@@ -175,6 +175,7 @@ export interface BlogPost {
   readTimeMinutes: number;
   viewCount?: number;
   publishedAt?: string | null;
+  featured?: boolean;
   relatedPosts?: BlogPost[];
 }
 
@@ -233,20 +234,24 @@ export function useDoctorSpecialties() {
   });
 }
 
-export function useBlogPosts(params: {
-  search?: string;
-  category?: string;
-  page?: number;
-  limit?: number;
-  status?: string;
-  sort?: "recent" | "popular";
-}) {
+export function useBlogPosts(
+  params: {
+    search?: string;
+    category?: string;
+    page?: number;
+    limit?: number;
+    status?: string;
+    sort?: "recent" | "popular" | "mixed";
+  },
+  options?: { enabled?: boolean },
+) {
   return useQuery({
     queryKey: ["blog", params],
     queryFn: async () => {
       const { data } = await api.get<Paginated<BlogPost>>("/blog", { params });
       return data;
     },
+    enabled: options?.enabled ?? true,
   });
 }
 

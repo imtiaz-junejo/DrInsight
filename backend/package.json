@@ -26,7 +26,8 @@
     "prisma:seed:featured": "ts-node --transpile-only prisma/seed-featured-blog-only.ts",
     "prisma:seed:about": "ts-node --transpile-only prisma/seed-about.ts",
     "prisma:seed:operational": "ts-node --transpile-only prisma/seed-operational.ts",
-    "prisma:seed:finalize": "ts-node --transpile-only prisma/seed-finalize.ts"
+    "prisma:seed:finalize": "ts-node --transpile-only prisma/seed-finalize.ts",
+    "prisma:merge-heart-health": "ts-node --transpile-only prisma/scripts/merge-heart-health-to-cardiology.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

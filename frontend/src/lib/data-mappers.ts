@@ -23,12 +23,17 @@ const SPECIALTY_EMOJI: Record<string, string> = {
   ENT: "👂",
   Pediatrics: "👶",
   Orthopedics: "🦴",
-  Dermatology: "🦷",
+  Dermatology: "✨",
+  "Skin Care": "🧴",
   "Internal Medicine": "🩺",
   Pulmonology: "🫁",
   Oncology: "🧬",
   Gastroenterology: "🔬",
   "General Medicine": "💊",
+  "General Health": "🏥",
+  "Dental Care": "🦷",
+  Fitness: "🏃",
+  "Men's Health": "👨‍⚕️",
 };
 
 export function getInitials(firstName?: string, lastName?: string): string {

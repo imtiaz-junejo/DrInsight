@@ -15,6 +15,7 @@ import {
 } from './seed-content-data';
 import { seedFeaturedBlogPosts } from './seed-featured-blog';
 import { assertDevelopmentEnvironment } from './seed-shared';
+import { mergeHeartHealthIntoCardiology } from './merge-heart-health';
 
 export type ContentSeedStats = {
   blogCategories: { created: number; updated: number; total: number };
@@ -84,6 +85,8 @@ async function resolveDoctors(prisma: PrismaClient) {
 async function upsertBlogCategories(prisma: PrismaClient) {
   let created = 0;
   let updated = 0;
+
+  await mergeHeartHealthIntoCardiology(prisma);
 
   for (const category of BLOG_CATEGORIES) {
     const existing = await prisma.blogCategory.findUnique({ where: { slug: category.slug } });

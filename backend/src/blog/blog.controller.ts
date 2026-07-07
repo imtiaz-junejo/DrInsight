@@ -19,7 +19,7 @@ export class BlogController {
     @Query('category') category?: string,
     @Query('search') search?: string,
     @Query('authorId') authorId?: string,
-    @Query('sort') sort?: 'recent' | 'popular',
+    @Query('sort') sort?: 'recent' | 'popular' | 'mixed',
   ) {
     return this.blogService.findAll({
       page: +page! || 1,

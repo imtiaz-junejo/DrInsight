@@ -1,6 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { BlogStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { interleavePostsByCategory, orderCategorySlugs } from './blog-mixed-order';
+
+const postInclude = {
+  category: true,
+  author: { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
+} as const;
 
 @Injectable()
 export class BlogService {
@@ -13,8 +19,14 @@ export class BlogService {
     search?: string;
     status?: BlogStatus | 'ALL';
     authorId?: string;
-    sort?: 'recent' | 'popular';
+    sort?: 'recent' | 'popular' | 'mixed';
   }) {
+    const useMixed = query.sort === 'mixed' && !query.category && !query.search;
+
+    if (useMixed) {
+      return this.findAllMixed(query);
+    }
+
     const page = query.page || 1;
     const limit = query.limit || 12;
     const skip = (page - 1) * limit;
@@ -41,14 +53,58 @@ export class BlogService {
         where,
         skip,
         take: limit,
-        include: {
-          category: true,
-          author: { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
-        },
+        include: postInclude,
         orderBy,
       }),
       this.prisma.blogPost.count({ where }),
     ]);
+
+    return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
+  }
+
+  private async findAllMixed(query: {
+    page?: number;
+    limit?: number;
+    status?: BlogStatus | 'ALL';
+    authorId?: string;
+  }) {
+    const page = query.page || 1;
+    const limit = query.limit || 12;
+    const needed = page * limit;
+
+    const where: Prisma.BlogPostWhereInput = {
+      ...(query.status && query.status !== 'ALL' ? { status: query.status } : {}),
+      ...(query.authorId && { authorId: query.authorId }),
+    };
+
+    const categories = await this.prisma.blogCategory.findMany({
+      where: { posts: { some: where } },
+      select: { slug: true },
+    });
+
+    const categoryOrder = orderCategorySlugs(categories.map((c) => c.slug));
+    const perCategory = Math.max(3, Math.ceil(needed / Math.max(categoryOrder.length, 1)) + 2);
+
+    const postsByCategory = await Promise.all(
+      categoryOrder.map((slug) =>
+        this.prisma.blogPost.findMany({
+          where: { ...where, category: { slug } },
+          take: perCategory,
+          orderBy: { publishedAt: 'desc' },
+          include: postInclude,
+        }),
+      ),
+    );
+
+    const buckets = new Map<string, (typeof postsByCategory)[number]>();
+    categoryOrder.forEach((slug, index) => {
+      buckets.set(slug, postsByCategory[index] ?? []);
+    });
+
+    const interleaved = interleavePostsByCategory(buckets, categoryOrder);
+    const skip = (page - 1) * limit;
+    const data = interleaved.slice(skip, skip + limit);
+    const total = await this.prisma.blogPost.count({ where });
 
     return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
   }

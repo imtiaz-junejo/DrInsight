@@ -1,20 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useRef, useState } from "react";
+import { Suspense, useMemo, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import "@/styles/blog-page.css";
+import { AllSpecialtiesSection } from "@/components/blog/AllSpecialtiesSection";
+import { BlogArticleCard, BlogArticleGridSkeleton } from "@/components/blog/BlogArticleCard";
+import { CategoryIcon } from "@/components/blog/CategoryIcon";
+import { FeaturedArticleCard } from "@/components/blog/FeaturedArticleCard";
+import { TrendingArticlesSection } from "@/components/blog/TrendingArticlesSection";
 import {
   SectionEyebrow,
   SectionHeading,
   SectionTitle,
 } from "@/components/public/section-heading";
 import {
+  ensureCategorySlugFirstInPosts,
+  getBlogCategoryVisuals,
+  resolveCardiologyHeroPost,
+  resolveCardiologySlug,
+  sortCategoriesWithCardiologyFirst,
+} from "@/lib/blog-category";
+import {
   doctorFullName,
   formatStatCount,
   getInitials,
   gradientForId,
-  mapBlogPostToCard,
-  specialtyEmoji,
 } from "@/lib/data-mappers";
 import {
   useBlogCategories,
@@ -25,14 +36,11 @@ import {
   useTopBlogAuthors,
 } from "@/services/api-hooks";
 
-function formatViews(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-  return String(n);
-}
+function BlogPageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const categoryParam = searchParams.get("category");
 
-export default function BlogPage() {
-  const [activeFilter, setActiveFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [newsletterEmail, setNewsletterEmail] = useState("");
@@ -41,54 +49,110 @@ export default function BlogPage() {
   const mainWrapRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const { data: stats } = usePlatformStats();
-  const { data: categories } = useBlogCategories();
-  const { data: postsData, isLoading } = useBlogPosts({
-    limit,
-    page: 1,
-    category: !isSearchMode && activeFilter !== "all" ? activeFilter : undefined,
-    search: isSearchMode && searchQuery.trim() ? searchQuery.trim() : undefined,
-  });
-  const { data: popularPosts } = usePopularBlogPosts(5);
-  const { data: topAuthors } = useTopBlogAuthors(5);
-  const newsletter = useNewsletterSubscribe();
+  const activeFilter = isSearchMode ? "all" : categoryParam ?? "all";
 
-  const filterPills = useMemo(
-    () => [
-      { id: "all", label: "All" },
-      ...(categories ?? []).map((c) => ({
-        id: c.slug,
-        label: `${specialtyEmoji(c.name)} ${c.name}`,
-      })),
-    ],
+  const { data: stats } = usePlatformStats();
+  const { data: categories, isLoading: categoriesLoading } = useBlogCategories();
+
+  const cardiologySlug = useMemo(
+    () => resolveCardiologySlug(categories),
     [categories],
   );
 
-  const blogPosts = useMemo(() => {
-    return (postsData?.data ?? []).map((post) => {
-      const card = mapBlogPostToCard(post);
-      return {
-        ...card,
-        cat: post.category?.slug ?? "all",
-        thumbBg: "#f0f7ff",
-        badgeBg: "#1a56a0",
-        catLabel: post.category?.name ?? "Health",
-        catColor: "#1a56a0",
-        readTime: card.read.replace(" read", ""),
-        views: post.viewCount ?? 0,
-      };
-    });
-  }, [postsData]);
+  const { data: cardioData, isLoading: cardioLoading } = useBlogPosts(
+    {
+      limit: 20,
+      page: 1,
+      category: cardiologySlug,
+      sort: "recent",
+    },
+    { enabled: !!cardiologySlug },
+  );
+  const { data: fallbackHeroData, isLoading: fallbackHeroLoading } = useBlogPosts({
+    limit: 1,
+    page: 1,
+    sort: "recent",
+  });
+  const listSort =
+    !isSearchMode && !categoryParam ? ("mixed" as const) : ("recent" as const);
 
-  const featured = blogPosts[0];
+  const { data: postsData, isLoading: postsLoading } = useBlogPosts({
+    limit,
+    page: 1,
+    category: !isSearchMode && categoryParam ? categoryParam : undefined,
+    search: isSearchMode && searchQuery.trim() ? searchQuery.trim() : undefined,
+    sort: listSort,
+  });
+  const { data: popularPosts, isLoading: popularLoading } = usePopularBlogPosts(5);
+  const { data: topAuthors } = useTopBlogAuthors(5);
+  const newsletter = useNewsletterSubscribe();
+
+  const heroPost = useMemo(
+    () => resolveCardiologyHeroPost(cardioData?.data, fallbackHeroData?.data?.[0]),
+    [cardioData, fallbackHeroData],
+  );
+
+  const heroLoading = useMemo(() => {
+    if (categoriesLoading) return true;
+    if (cardiologySlug) {
+      if (cardioLoading) return true;
+      if (!(cardioData?.data?.length ?? 0) && fallbackHeroLoading) return true;
+      return false;
+    }
+    return fallbackHeroLoading;
+  }, [
+    categoriesLoading,
+    cardiologySlug,
+    cardioLoading,
+    cardioData,
+    fallbackHeroLoading,
+  ]);
+
+  const activeCategory = useMemo(
+    () => (categoryParam ? categories?.find((c) => c.slug === categoryParam) : undefined),
+    [categories, categoryParam],
+  );
+
+  const filterPills = useMemo(
+    () => [
+      { id: "all", label: "All", categoryName: null as string | null },
+      ...sortCategoriesWithCardiologyFirst(categories ?? [], cardiologySlug).map((c) => ({
+        id: c.slug,
+        label: c.name,
+        categoryName: c.name,
+      })),
+    ],
+    [categories, cardiologySlug],
+  );
+
+  const gridPosts = useMemo(() => {
+    let posts = postsData?.data ?? [];
+    if (!isSearchMode && !categoryParam && heroPost) {
+      posts = posts.filter((p) => p.slug !== heroPost.slug);
+    }
+    if (!isSearchMode && !categoryParam) {
+      posts = ensureCategorySlugFirstInPosts(posts, cardiologySlug, {
+        supplementalPosts: cardioData?.data,
+        excludeSlug: heroPost?.slug,
+        maxLength: limit,
+      });
+    }
+    return posts;
+  }, [postsData, isSearchMode, categoryParam, heroPost, cardiologySlug, cardioData, limit]);
+
   const totalPosts = postsData?.meta.total ?? 0;
-  const hasMore = blogPosts.length < totalPosts;
+  const hasMore = (postsData?.data?.length ?? 0) < totalPosts;
 
   function filterPosts(cat: string) {
     setIsSearchMode(false);
     setSearchQuery("");
-    setActiveFilter(cat);
     setLimit(12);
+    if (cat === "all") {
+      router.replace("/blog", { scroll: false });
+    } else {
+      router.replace(`/blog?category=${encodeURIComponent(cat)}`, { scroll: false });
+    }
+    mainWrapRef.current?.scrollIntoView({ behavior: "smooth" });
   }
 
   function doSearch() {
@@ -96,8 +160,8 @@ export default function BlogPage() {
     if (!q.trim()) return;
     setSearchQuery(q);
     setIsSearchMode(true);
-    setActiveFilter("all");
     setLimit(12);
+    router.replace("/blog", { scroll: false });
     mainWrapRef.current?.scrollIntoView({ behavior: "smooth" });
   }
 
@@ -113,6 +177,18 @@ export default function BlogPage() {
     }
   }
 
+  const sectionTitle =
+    isSearchMode && searchQuery.trim()
+      ? `Results for "${searchQuery.trim()}"`
+      : "Recent Medical Insights";
+
+  const emptyMessage =
+    isSearchMode
+      ? "No articles match your search. Try different keywords."
+      : activeCategory
+        ? "No articles available in this specialty yet."
+        : "No articles match your search or filter. Try different keywords.";
+
   return (
     <div className="blog-page">
       <div className="page-hero">
@@ -121,14 +197,15 @@ export default function BlogPage() {
             <div className="eyebrow">Evidence-Based Medical Blog</div>
             <h1>Doctor-Written Health Articles You Can Trust</h1>
             <p>
-              {stats ? formatStatCount(stats.blogCount) : "—"} peer-reviewed articles across every medical specialty —
-              written and reviewed by board-certified physicians. No misinformation, ever.
+              {stats ? formatStatCount(stats.blogCount) : "—"} peer-reviewed articles across every medical
+              specialty — written and reviewed by board-certified physicians. No misinformation, ever.
             </p>
             <div className="hero-search">
               <input
                 ref={searchInputRef}
                 type="text"
                 id="hero-search"
+                className="bg-white"
                 placeholder="Search articles by condition, symptom, or specialty..."
                 defaultValue=""
                 onKeyDown={(e) => e.key === "Enter" && doSearch()}
@@ -157,94 +234,51 @@ export default function BlogPage() {
             </div>
           </div>
           <div>
-            {featured ? (
-              <Link href={`/blog/${featured.slug}`} className="featured-card">
-                <div className="featured-thumb">
-                  {featured.emoji}
-                  <div className="featured-badge">⭐ FEATURED</div>
-                </div>
-                <div className="featured-body">
-                  <div className="featured-cat">{featured.catLabel} · Latest</div>
-                  <h3>{featured.title}</h3>
-                  <div className="featured-meta">
-                    <span>{featured.author}</span> · <span>{featured.read}</span> · <span>{featured.date}</span>
-                  </div>
-                </div>
-              </Link>
-            ) : (
-              <div className="featured-card">
-                <div className="featured-body">
-                  <p style={{ color: "var(--gray-500)" }}>No featured article yet.</p>
-                </div>
-              </div>
-            )}
+            <FeaturedArticleCard post={heroPost} isLoading={heroLoading} />
           </div>
         </div>
       </div>
 
       <div className="main-wrap" ref={mainWrapRef}>
-        <div className="blog-layout">
-          <div>
+        <div className="blog-layout sticky-sidebar-layout">
+          <div className="articles-col sticky-sidebar-main">
             <SectionEyebrow className="section-eyebrow">Latest Articles</SectionEyebrow>
-            <SectionTitle as="div" className="section-title">
-              Recent Medical Insights
+            <SectionTitle as="div" className="section-title !text-2xl">
+              {sectionTitle}
             </SectionTitle>
 
             <div className="filter-bar" id="filter-bar">
               {filterPills.map((pill) => (
                 <div
                   key={pill.id}
-                  className={`filter-pill${!isSearchMode && activeFilter === pill.id ? " active" : ""}`}
+                  className={`filter-pill filter-pill--with-icon${!isSearchMode && activeFilter === pill.id ? " active" : ""}`}
                   onClick={() => filterPosts(pill.id)}
                   onKeyDown={(e) => e.key === "Enter" && filterPosts(pill.id)}
                   role="button"
                   tabIndex={0}
                 >
+                  {pill.categoryName && (
+                    <CategoryIcon categoryName={pill.categoryName} size={14} />
+                  )}
                   {pill.label}
                 </div>
               ))}
             </div>
 
             <div className="blog-grid" id="blog-grid">
-              {isLoading ? (
-                <p style={{ gridColumn: "1 / -1", textAlign: "center", color: "var(--gray-500)" }}>Loading articles...</p>
-              ) : blogPosts.length > 0 ? (
-                blogPosts.map((post) => (
-                  <Link key={post.slug} href={`/blog/${post.slug}`} className="blog-card" data-cat={post.cat}>
-                    <div className="blog-thumb" style={{ background: post.thumbBg }}>
-                      {post.emoji}
-                      <div className="blog-badge" style={{ background: post.badgeBg }}>
-                        {post.catLabel}
-                      </div>
-                    </div>
-                    <div className="blog-body">
-                      <div className="blog-cat-label" style={{ color: post.catColor }}>
-                        {post.catLabel}
-                      </div>
-                      <h3>{post.title}</h3>
-                      <p>{post.excerpt}</p>
-                      <div className="blog-footer">
-                        <div className="blog-meta-sm">
-                          <div className="author-dot" style={{ background: post.authorGradient }}>
-                            {post.authorInitials}
-                          </div>
-                          <span>{post.author}</span>
-                        </div>
-                        <div className="read-time">⏱ {post.readTime}</div>
-                        <span className="read-more-link">Read →</span>
-                      </div>
-                    </div>
-                  </Link>
-                ))
+              {postsLoading ? (
+                <BlogArticleGridSkeleton count={6} />
+              ) : gridPosts.length > 0 ? (
+                gridPosts.map((post) => <BlogArticleCard key={post.id} post={post} />)
               ) : (
                 <div className="no-results" id="no-results">
                   <div className="no-results-icon">🔍</div>
-                  <p>No articles match your search or filter. Try different keywords.</p>
+                  <p>{emptyMessage}</p>
                 </div>
               )}
             </div>
 
-            {hasMore && (
+            {hasMore && !postsLoading && (
               <div className="load-more-wrap">
                 <button type="button" className="load-more-btn" onClick={() => setLimit((n) => n + 12)}>
                   Load More Articles ↓
@@ -252,128 +286,115 @@ export default function BlogPage() {
               </div>
             )}
 
-            <div className="trending-section">
-              <SectionEyebrow className="section-eyebrow mt-9">Most Read This Week</SectionEyebrow>
-              <SectionTitle as="div" className="section-title">
-                Trending Articles
-              </SectionTitle>
-              <div className="trending-list">
-                {(popularPosts ?? []).map((item, i) => (
-                  <Link key={item.id} href={`/blog/${item.slug}`} className="trending-item">
-                    <div className="trending-num">{i + 1}</div>
-                    <div>
-                      <h4>{item.title}</h4>
-                      <span>
-                        {item.category?.name ?? "Health"} · {doctorFullName(item.author)} ·{" "}
-                        {formatViews(item.viewCount ?? 0)} views
-                      </span>
-                    </div>
-                  </Link>
-                ))}
-                {!popularPosts?.length && (
-                  <p style={{ color: "var(--gray-500)" }}>No trending articles yet.</p>
-                )}
-              </div>
-            </div>
+            <TrendingArticlesSection posts={popularPosts} isLoading={popularLoading} />
           </div>
 
-          <div>
-            <form className="subscribe-card" onSubmit={handleNewsletter}>
-              <h4>📬 Weekly Health Digest</h4>
-              <p>Get the week&apos;s best medical articles delivered every Monday.</p>
-              <input
-                type="email"
-                placeholder="Your email address"
-                value={newsletterEmail}
-                onChange={(e) => setNewsletterEmail(e.target.value)}
-                required
-              />
-              <button type="submit" disabled={newsletter.isPending}>
-                {newsletter.isPending ? "Subscribing..." : "Subscribe Free →"}
-              </button>
-              {newsletterMsg && <p className="subscribe-note">{newsletterMsg}</p>}
-              <p className="subscribe-note">🔒 No spam. Unsubscribe anytime.</p>
-            </form>
-
-            <div className="sidebar-card">
-              <h4>Top Author Doctors</h4>
-              {(topAuthors ?? []).map((doc) => (
-                <div key={doc.id} className="sidebar-doc">
-                  <div className="doc-av" style={{ background: gradientForId(doc.id) }}>
-                    {getInitials(doc.firstName, doc.lastName)}
-                  </div>
-                  <div>
-                    <div className="doc-name">{doctorFullName(doc)}</div>
-                    <div className="doc-spec">{doc.platformRole ?? doc.specialty ?? "Author"}</div>
-                    <div className="doc-count">{doc.articleCount} articles published</div>
-                  </div>
-                </div>
-              ))}
-              {!topAuthors?.length && <p style={{ color: "var(--gray-500)" }}>No authors yet.</p>}
-            </div>
-
-            <div className="sidebar-card">
-              <h4>Browse by Category</h4>
-              <div className="spec-tag-cloud">
-                {(categories ?? []).map((cat) => (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    className="spec-tag clinical"
-                    onClick={() => filterPosts(cat.slug)}
-                  >
-                    {cat.name} ({cat.postCount ?? 0})
+          <aside className="sticky-sidebar-col" aria-label="Blog sidebar">
+            <div className="sticky-sidebar-panel bg-gray-200">
+              <div className="sticky-sidebar-scroll">
+                <form className="subscribe-card" onSubmit={handleNewsletter}>
+                  <h4>📬 Weekly Health Digest</h4>
+                  <p>Get the week&apos;s best medical articles delivered every Monday.</p>
+                  <input
+                    type="email"
+                    className="border-gray-300"
+                    placeholder="Your email address"
+                    value={newsletterEmail}
+                    onChange={(e) => setNewsletterEmail(e.target.value)}
+                    required
+                  />
+                  <button type="submit" disabled={newsletter.isPending}>
+                    {newsletter.isPending ? "Subscribing..." : "Subscribe Free →"}
                   </button>
-                ))}
+                  {newsletterMsg && <p className="subscribe-note">{newsletterMsg}</p>}
+                  <p className="subscribe-note">🔒 No spam. Unsubscribe anytime.</p>
+                </form>
+
+                <div className="sidebar-card">
+                  <h4>Top Author Doctors</h4>
+                  {(topAuthors ?? []).map((doc) => (
+                    <div key={doc.id} className="sidebar-doc">
+                      <div className="doc-av" style={{ background: gradientForId(doc.id) }}>
+                        {getInitials(doc.firstName, doc.lastName)}
+                      </div>
+                      <div>
+                        <div className="doc-name">{doctorFullName(doc)}</div>
+                        <div className="doc-spec">{doc.platformRole ?? doc.specialty ?? "Author"}</div>
+                        <div className="doc-count">{doc.articleCount} articles published</div>
+                      </div>
+                    </div>
+                  ))}
+                  {!topAuthors?.length && <p style={{ color: "var(--gray-500)" }}>No authors yet.</p>}
+                </div>
+
+                <div className="sidebar-card">
+                  <h4>Browse by Specialty</h4>
+                  <div className="spec-tag-cloud">
+                    {(sortCategoriesWithCardiologyFirst(categories ?? [], cardiologySlug)).map((cat) => {
+                      const visuals = getBlogCategoryVisuals(cat.name);
+                      const isActive = !isSearchMode && activeFilter === cat.slug;
+                      return (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          className={`spec-tag spec-tag--accent ${visuals.specTagClass}${isActive ? " active" : ""}`}
+                          style={
+                            isActive
+                              ? {
+                                  borderColor: visuals.catColor,
+                                  color: visuals.catColor,
+                                  background: `${visuals.iconBg}`,
+                                }
+                              : undefined
+                          }
+                          onClick={() => filterPosts(cat.slug)}
+                        >
+                          {cat.name} ({cat.postCount ?? 0})
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="spec-legend">
+                    <span className="spec-legend-item" style={{ color: "var(--blue)" }}>
+                      <span className="spec-legend-dot" style={{ background: "var(--blue)" }} />
+                      Clinical
+                    </span>
+                    <span className="spec-legend-item" style={{ color: "var(--teal)" }}>
+                      <span className="spec-legend-dot" style={{ background: "var(--teal)" }} />
+                      Surgical
+                    </span>
+                    <span className="spec-legend-item" style={{ color: "var(--purple)" }}>
+                      <span className="spec-legend-dot" style={{ background: "var(--purple)" }} />
+                      Other
+                    </span>
+                  </div>
+                </div>
+
+                <div className="sidebar-card advice-card">
+                  <h4>🩺 Need Medical Advice?</h4>
+                  <p>
+                    Reading articles is a great start — but a doctor consultation gives you personalised
+                    guidance.
+                  </p>
+                  <Link href="/book-consultation" className="advice-btn-primary">
+                    📅 Book Consultation
+                  </Link>
+                  <Link href="/ask-doctor" className="advice-btn-secondary">
+                    💬 Ask a Doctor Free
+                  </Link>
+                </div>
               </div>
             </div>
-
-            <div className="sidebar-card advice-card">
-              <h4>🩺 Need Medical Advice?</h4>
-              <p>
-                Reading articles is a great start — but a doctor consultation gives you personalised guidance.
-              </p>
-              <Link href="/book-consultation" className="advice-btn-primary">
-                📅 Book Consultation
-              </Link>
-              <Link href="/ask-doctor" className="advice-btn-secondary">
-                💬 Ask a Doctor Free
-              </Link>
-            </div>
-          </div>
+          </aside>
         </div>
       </div>
 
-      <div className="cats-section">
-        <div className="cats-inner">
-          <SectionHeading
-            className="cats-section-header !mb-7 !text-left"
-            align="left"
-            eyebrow="All Categories"
-            title="Browse by Medical Category"
-            description="Explore our full library of doctor-written articles across every medical field"
-            descriptionClassName="!mx-0 !max-w-none"
-          />
-          <div className="cats-grid" id="cats-grid">
-            {(categories ?? []).map((cat) => (
-              <button
-                key={cat.id}
-                type="button"
-                className="cat-tile"
-                onClick={() => filterPosts(cat.slug)}
-              >
-                <div className="cat-tile-ico" style={{ background: "#f0f7ff" }}>
-                  {specialtyEmoji(cat.name)}
-                </div>
-                <div>
-                  <h4>{cat.name}</h4>
-                  <span>{cat.postCount ?? 0} articles</span>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+      <AllSpecialtiesSection
+        categories={categories}
+        activeCategorySlug={!isSearchMode ? categoryParam : null}
+        onSelectCategory={filterPosts}
+        isLoading={categoriesLoading}
+      />
 
       <div className="cta-band">
         <SectionHeading
@@ -398,5 +419,19 @@ export default function BlogPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function BlogPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="blog-page" style={{ padding: "48px 18px", textAlign: "center", color: "#475569" }}>
+          Loading blog...
+        </div>
+      }
+    >
+      <BlogPageContent />
+    </Suspense>
   );
 }
