@@ -62,6 +62,12 @@ export class BlogController {
   }
 
   @Public()
+  @Get('featured')
+  getFeatured(@Query('limit') limit?: number) {
+    return this.blogService.findFeatured(+limit! || 3);
+  }
+
+  @Public()
   @Get('popular')
   getPopular(@Query('limit') limit?: number) {
     return this.blogService.getPopular(+limit! || 5);

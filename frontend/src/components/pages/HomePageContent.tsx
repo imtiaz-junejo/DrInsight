@@ -8,32 +8,25 @@ import {
   getInitials,
   gradientForId,
   mapBlogPostToCard,
-  specialtyEmoji,
 } from "@/lib/data-mappers";
+import { HomeHealthToolsSection } from "@/components/pages/home/HomeHealthToolsSection";
+import { HOME_HEALTH_TOOLS } from "@/components/pages/home/health-tools-data";
+import { HomeSpecialtiesSection } from "@/components/pages/home/HomeSpecialtiesSection";
 import {
-  useBlogPosts,
   useDoctorSpecialties,
+  useFeaturedBlogPosts,
   useNewsletterSubscribe,
   usePlatformStats,
   useRecentReviews,
 } from "@/services/api-hooks";
 
-const tools = [
-  ["⚖️", "BMI Calculator", "Calculate your Body Mass Index and understand your healthy weight range.", "#bmi"],
-  ["🔥", "BMR Calculator", "Find your Basal Metabolic Rate to plan your nutrition effectively.", "#bmr"],
-  ["🍎", "Calorie Calculator", "Determine your daily caloric needs based on activity level and goals.", "#calories"],
-  ["💓", "Heart Rate Zones", "Calculate your target heart rate zones for optimal cardio training.", "#heartrate"],
-  ["🤰", "Pregnancy Due Date", "Calculate your estimated due date and track your pregnancy timeline.", "#pregnancy"],
-  ["🩸", "Diabetes Risk", "Assess your risk for Type 2 diabetes with our clinical screening tool.", "#diabetes"],
-  ["💧", "Water Intake", "Find your optimal daily water intake based on your body and activity.", "#water"],
-  ["🔎", "Symptom Checker", "Check your symptoms and get guidance on seeking medical care.", "#symptom"],
-];
+const tools = HOME_HEALTH_TOOLS;
 
 export function HomePageContent() {
   const { data: stats } = usePlatformStats();
-  const { data: blogData, isLoading: blogLoading } = useBlogPosts({ limit: 3 });
-  const { data: reviews, isLoading: reviewsLoading } = useRecentReviews(3);
-  const { data: specialties, isLoading: specialtiesLoading } = useDoctorSpecialties();
+  const { data: blogData, isLoading: blogLoading } = useFeaturedBlogPosts(3);
+  const { data: reviews, isLoading: reviewsLoading } = useRecentReviews(4);
+  const { data: specialties } = useDoctorSpecialties();
   const newsletter = useNewsletterSubscribe();
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [newsletterMsg, setNewsletterMsg] = useState("");
@@ -142,82 +135,9 @@ export function HomePageContent() {
         </div>
       </div>
 
-      <section className="px-4 py-16 sm:px-6 sm:py-20">
-        <div className="mx-auto max-w-[1240px]">
-          <div className="mb-13 text-center">
-            <div className="mb-2.5 text-[.78rem] font-bold uppercase tracking-widest text-blue">Our Specialties</div>
-            <h2 className="font-display text-[clamp(1.7rem,3vw,2.4rem)] font-bold leading-tight text-gray-900">
-              Expert Care Across All Medical Fields
-            </h2>
-            <p className="mx-auto mt-3.5 max-w-[600px] text-[.98rem] text-gray-600">
-              Browse our comprehensive range of medical specialties, each led by board-certified
-              specialists with decades of experience.
-            </p>
-          </div>
-          {specialtiesLoading ? (
-            <p className="text-center text-gray-500">Loading specialties...</p>
-          ) : specialties && specialties.length > 0 ? (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(170px,1fr))] gap-4">
-              {specialties.map((s) => (
-                <Link
-                  key={s.name}
-                  href="/our-doctors"
-                  className="group cursor-pointer rounded-xl border-[1.5px] border-gray-200 bg-white p-6 text-center transition hover:-translate-y-1 hover:border-blue hover:shadow-[var(--shadow-lg)]"
-                >
-                  <div className="mx-auto mb-3 flex h-[52px] w-[52px] items-center justify-center rounded-[14px] bg-blue-light text-2xl transition group-hover:bg-blue group-hover:text-white">
-                    {specialtyEmoji(s.name)}
-                  </div>
-                  <h3 className="text-[.88rem] font-semibold text-gray-800">{s.name}</h3>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <p className="text-center text-gray-500">No specialties available yet.</p>
-          )}
-          <div className="mt-7 text-center">
-            <Button asChild className="inline-flex w-auto">
-              <Link href="/blog">View All Specialties →</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+      <HomeSpecialtiesSection />
 
-      <section className="bg-gray-50 px-4 py-16 sm:px-6 sm:py-20">
-        <div className="mx-auto max-w-[1240px]">
-          <div className="mb-13 text-center">
-            <div className="mb-2.5 text-[.78rem] font-bold uppercase tracking-widest text-blue">Free Health Tools</div>
-            <h2 className="font-display text-[clamp(1.7rem,3vw,2.4rem)] font-bold leading-tight text-gray-900">
-              Calculate Your Health Metrics Instantly
-            </h2>
-            <p className="mx-auto mt-3.5 max-w-[600px] text-[.98rem] text-gray-600">
-              Use our evidence-based health calculators to monitor and understand your health. All
-              tools are medically reviewed.
-            </p>
-          </div>
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-5">
-            {tools.map(([icon, title, desc, hash]) => (
-              <Link
-                key={title as string}
-                href={`/health-tools${hash}`}
-                className="flex items-start gap-3.5 rounded-xl border border-gray-200 bg-white p-6 transition hover:-translate-y-0.5 hover:border-blue-mid hover:shadow-[var(--shadow-lg)]"
-              >
-                <div className="flex h-[46px] w-[46px] shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-light to-[#dbeafe] text-xl">
-                  {icon}
-                </div>
-                <div>
-                  <h3 className="text-[.9rem] font-semibold">{title}</h3>
-                  <p className="text-[.78rem] leading-snug text-gray-600">{desc}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-          <div className="mt-9 text-center">
-            <Button asChild className="inline-flex w-auto">
-              <Link href="/health-tools">Explore All {tools.length} Health Tools →</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+      <HomeHealthToolsSection />
 
       <section className="px-4 py-16 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-[1240px]">
@@ -303,7 +223,7 @@ export function HomePageContent() {
               <Link href="/ask-doctor">Browse All Questions →</Link>
             </Button>
           </div>
-          <div className="rounded-[20px] border border-gray-200 bg-white p-8 shadow-[var(--shadow-lg)]">
+          <div className="rounded-[20px] border border-gray-400 bg-white p-8 shadow-[var(--shadow-lg)]">
             <h3 className="font-display text-[1.3rem] font-bold">Ask Your Question</h3>
             <p className="mb-5 text-[.85rem] text-gray-600">
               Get a free answer from one of our {stats ? formatStatCount(stats.doctorCount) : "—"} specialist doctors
@@ -403,7 +323,7 @@ export function HomePageContent() {
                 return (
                   <div
                     key={r.id}
-                    className="rounded-[20px] border-[1.5px] border-gray-200 bg-white p-7 transition hover:shadow-[var(--shadow-lg)]"
+                    className="rounded-[20px] border-[1.5px] border-gray-400 bg-gray-200 p-7 shadow-lg"
                   >
                     <div className="mb-3.5 text-base text-amber">{"★".repeat(r.rating)}</div>
                     <p className="mb-4 text-[.88rem] italic leading-relaxed text-gray-600">
@@ -446,7 +366,7 @@ export function HomePageContent() {
               placeholder="Your email address"
               value={newsletterEmail}
               onChange={(e) => setNewsletterEmail(e.target.value)}
-              className="flex-1 rounded-[10px] border-[1.5px] border-gray-200 px-4 py-3 text-[.9rem] focus:border-blue focus:outline-none"
+              className="flex-1 rounded-[10px] border-[1.5px] border-gray-400 px-4 py-3 text-[.9rem] focus:border-blue focus:outline-none"
               required
             />
             <Button type="submit" className="whitespace-nowrap" disabled={newsletter.isPending}>

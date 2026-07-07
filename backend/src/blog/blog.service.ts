@@ -128,6 +128,23 @@ export class BlogService {
     });
   }
 
+  async findFeatured(limit = 3) {
+    const data = await this.prisma.blogPost.findMany({
+      where: { status: BlogStatus.PUBLISHED, featured: true },
+      take: limit,
+      orderBy: { featuredOrder: 'asc' },
+      include: {
+        category: true,
+        author: { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
+      },
+    });
+
+    return {
+      data,
+      meta: { total: data.length, page: 1, limit, totalPages: 1 },
+    };
+  }
+
   async getTopAuthors(limit = 5) {
     const groups = await this.prisma.blogPost.groupBy({
       by: ['authorId'],

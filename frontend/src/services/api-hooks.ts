@@ -250,6 +250,16 @@ export function useBlogPosts(params: {
   });
 }
 
+export function useFeaturedBlogPosts(limit = 3) {
+  return useQuery({
+    queryKey: ["blog", "featured", limit],
+    queryFn: async () => {
+      const { data } = await api.get<Paginated<BlogPost>>("/blog/featured", { params: { limit } });
+      return data;
+    },
+  });
+}
+
 export function useBlogCategories() {
   return useQuery({
     queryKey: ["blog-categories"],

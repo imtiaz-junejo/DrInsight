@@ -23,6 +23,8 @@
     "prisma:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
     "prisma:seed:content": "ts-node --transpile-only prisma/seed-content.ts",
+    "prisma:seed:featured": "ts-node --transpile-only prisma/seed-featured-blog-only.ts",
+    "prisma:seed:about": "ts-node --transpile-only prisma/seed-about.ts",
     "prisma:seed:operational": "ts-node --transpile-only prisma/seed-operational.ts",
     "prisma:seed:finalize": "ts-node --transpile-only prisma/seed-finalize.ts"
   },

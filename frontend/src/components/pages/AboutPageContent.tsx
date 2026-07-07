@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo } from "react";
 import "@/styles/about-page.css";
 import { formatStatCount, getInitials, mapDoctorProfile, specialtyEmoji } from "@/lib/data-mappers";
+import { resolvePartnerDisplay } from "@/lib/partner-category";
 import { useDoctors, useFounderMessage, usePlatformStats, useRecentReviews, useTrustedPartners } from "@/services/api-hooks";
 
 const BG_CLASSES = ["bg1", "bg2", "bg3", "bg4", "bg5", "bg6"];
@@ -50,7 +51,7 @@ const ACCREDITATIONS = [
 
 export function AboutPageContent() {
   const { data: stats } = usePlatformStats();
-  const { data: doctorsData, isLoading } = useDoctors({ limit: 4 });
+  const { data: doctorsData, isLoading } = useDoctors({ limit: 5 });
   const { data: founderMessage, isLoading: founderLoading } = useFounderMessage();
   const { data: trustedPartners, isLoading: partnersLoading } = useTrustedPartners();
   const { data: reviews } = useRecentReviews(3);
@@ -326,24 +327,16 @@ export function AboutPageContent() {
             <p style={{ textAlign: "center", color: "var(--gray-500)" }}>Loading partners...</p>
           ) : partners.length > 0 ? (
             <div className="marquee-track">
-              {[...partners, ...partners].map((partner, i) => (
+              {[...partners, ...partners].map((partner, i) => {
+                const { icon, badgeClass, badgeLabel } = resolvePartnerDisplay(partner);
+                return (
                 <div key={`${partner.id}-${i}`} className="partner-tile">
-                  {partner.logoUrl ? (
-                    <img
-                      src={partner.logoUrl}
-                      alt={partner.companyName}
-                      className="partner-tile-icon"
-                      style={{ width: 40, height: 40, objectFit: "contain" }}
-                    />
-                  ) : (
-                    <span className="partner-tile-icon">🤝</span>
-                  )}
+                  <span className="partner-tile-icon">{icon}</span>
                   <span className="partner-tile-name">{partner.companyName}</span>
-                  {partner.description ? (
-                    <span className="partner-badge badge-hospital">{partner.description}</span>
-                  ) : null}
+                  <span className={`partner-badge ${badgeClass}`}>{badgeLabel}</span>
                 </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <p style={{ textAlign: "center", color: "var(--gray-500)" }}>No partners to display yet.</p>
@@ -396,7 +389,7 @@ export function AboutPageContent() {
                 ))}
               </div>
             </div>
-            <div className="editorial-visual">
+            <div className="editorial-visual border border-gray-400">
               <h3>📋 Our Editorial Standards</h3>
               {GUIDELINES.map((item) => (
                 <div key={item.title} className="guideline-item">

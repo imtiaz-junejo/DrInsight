@@ -13,11 +13,13 @@ import {
   buildContactSubmissions,
   buildNewsletterEmails,
 } from './seed-content-data';
+import { seedFeaturedBlogPosts } from './seed-featured-blog';
 import { assertDevelopmentEnvironment } from './seed-shared';
 
 export type ContentSeedStats = {
   blogCategories: { created: number; updated: number; total: number };
   blogPosts: { created: number; updated: number; total: number };
+  featuredBlogPosts: { created: number; updated: number; total: number };
   askDoctorQuestions: { created: number; skipped: number; total: number };
   newsletterSubscribers: { created: number; updated: number; total: number };
   contactSubmissions: { created: number; skipped: number; total: number };
@@ -281,6 +283,7 @@ export async function seedContentPhase(prisma: PrismaClient): Promise<ContentSee
 
   const categoryResult = await upsertBlogCategories(prisma);
   const blogPostResult = await upsertBlogPosts(prisma, categoryResult.categories, authors);
+  const featuredBlogResult = await seedFeaturedBlogPosts(prisma);
   const askDoctorResult = await upsertAskDoctorQuestions(prisma, doctors);
   const newsletterResult = await upsertNewsletterSubscribers(prisma);
   const contactResult = await upsertContactSubmissions(prisma);
@@ -304,6 +307,7 @@ export async function seedContentPhase(prisma: PrismaClient): Promise<ContentSee
       total: categoryResult.total,
     },
     blogPosts: blogPostResult,
+    featuredBlogPosts: featuredBlogResult,
     askDoctorQuestions: askDoctorResult,
     newsletterSubscribers: newsletterResult,
     contactSubmissions: contactResult,

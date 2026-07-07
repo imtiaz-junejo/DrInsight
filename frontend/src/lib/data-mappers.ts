@@ -14,7 +14,7 @@ const GRADIENTS = [
 const SPECIALTY_EMOJI: Record<string, string> = {
   Cardiology: "❤️",
   Neurology: "🧠",
-  Endocrinology: "🦋",
+  Endocrinology: "🩸",
   Psychiatry: "🧠",
   Pediatrics: "👶",
   Orthopedics: "🦴",
