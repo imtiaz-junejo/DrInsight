@@ -1,12 +1,54 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { BlogStatus, Prisma } from '@prisma/client';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { BlogCommentStatus, BlogStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { interleavePostsByCategory, orderCategorySlugs } from './blog-mixed-order';
+import {
+  CreateBlogPostDto,
+  SubmitBlogCommentDto,
+  SubmitBlogFeedbackDto,
+  UpdateBlogPostDto,
+} from './dto/blog-post.dto';
+
+const authorSelect = {
+  id: true,
+  firstName: true,
+  lastName: true,
+  avatarUrl: true,
+  role: true,
+  doctorProfile: {
+    select: {
+      specialty: true,
+      subSpecialty: true,
+      hospital: true,
+      credentials: true,
+      professionalTitle: true,
+      experienceYears: true,
+      bio: true,
+      platformRole: true,
+      editorialBoard: true,
+    },
+  },
+} as const;
 
 const postInclude = {
   category: true,
   author: { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
 } as const;
+
+const postCardInclude = {
+  category: true,
+  author: { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
+} as const;
+
+function estimateReadTime(content: string): number {
+  const text = content.replace(/<[^>]+>/g, ' ');
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.ceil(words / 200));
+}
 
 @Injectable()
 export class BlogService {
@@ -109,48 +151,177 @@ export class BlogService {
     return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
   }
 
+  private async findRelatedPosts(post: {
+    id: string;
+    categoryId: string;
+    specialty: string | null;
+    tags: string[];
+    author: { doctorProfile: { specialty: string } | null } | null;
+  }) {
+    const publishedWhere: Prisma.BlogPostWhereInput = {
+      status: BlogStatus.PUBLISHED,
+      id: { not: post.id },
+    };
+
+    const specialty =
+      post.specialty ?? post.author?.doctorProfile?.specialty ?? null;
+
+    const relatedIds = new Set<string>();
+    const related: Awaited<ReturnType<typeof this.prisma.blogPost.findMany>> = [];
+
+    const pushUnique = (
+      items: Awaited<ReturnType<typeof this.prisma.blogPost.findMany>>,
+    ) => {
+      for (const item of items) {
+        if (!relatedIds.has(item.id) && related.length < 6) {
+          relatedIds.add(item.id);
+          related.push(item);
+        }
+      }
+    };
+
+    if (specialty) {
+      pushUnique(
+        await this.prisma.blogPost.findMany({
+          where: { ...publishedWhere, specialty },
+          take: 6,
+          orderBy: { publishedAt: 'desc' },
+          include: postCardInclude,
+        }),
+      );
+    }
+
+    if (related.length < 6) {
+      pushUnique(
+        await this.prisma.blogPost.findMany({
+          where: { ...publishedWhere, categoryId: post.categoryId },
+          take: 6,
+          orderBy: { publishedAt: 'desc' },
+          include: postCardInclude,
+        }),
+      );
+    }
+
+    if (related.length < 6 && post.tags.length > 0) {
+      pushUnique(
+        await this.prisma.blogPost.findMany({
+          where: {
+            ...publishedWhere,
+            tags: { hasSome: post.tags },
+          },
+          take: 6,
+          orderBy: { publishedAt: 'desc' },
+          include: postCardInclude,
+        }),
+      );
+    }
+
+    if (related.length < 6) {
+      pushUnique(
+        await this.prisma.blogPost.findMany({
+          where: publishedWhere,
+          take: 6,
+          orderBy: { publishedAt: 'desc' },
+          include: postCardInclude,
+        }),
+      );
+    }
+
+    return related;
+  }
+
+  private async findTrendingInSpecialty(specialty: string | null, excludeId: string, limit = 3) {
+    if (!specialty) return [];
+
+    return this.prisma.blogPost.findMany({
+      where: {
+        status: BlogStatus.PUBLISHED,
+        id: { not: excludeId },
+        OR: [{ specialty }, { author: { doctorProfile: { specialty } } }],
+      },
+      take: limit,
+      orderBy: { viewCount: 'desc' },
+      select: { id: true, title: true, slug: true, viewCount: true },
+    });
+  }
+
+  private async findPrevNext(post: { id: string; categoryId: string; publishedAt: Date | null }) {
+    if (!post.publishedAt) {
+      return { previousPost: null, nextPost: null };
+    }
+
+    const baseWhere = {
+      status: BlogStatus.PUBLISHED,
+      categoryId: post.categoryId,
+      id: { not: post.id },
+    };
+
+    const [previousPost, nextPost] = await Promise.all([
+      this.prisma.blogPost.findFirst({
+        where: { ...baseWhere, publishedAt: { lt: post.publishedAt } },
+        orderBy: { publishedAt: 'desc' },
+        select: { id: true, title: true, slug: true, readTimeMinutes: true },
+      }),
+      this.prisma.blogPost.findFirst({
+        where: { ...baseWhere, publishedAt: { gt: post.publishedAt } },
+        orderBy: { publishedAt: 'asc' },
+        select: { id: true, title: true, slug: true, readTimeMinutes: true },
+      }),
+    ]);
+
+    return { previousPost, nextPost };
+  }
+
   async findBySlug(slug: string) {
     const post = await this.prisma.blogPost.findUnique({
       where: { slug },
       include: {
         category: true,
-        author: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            avatarUrl: true,
-            role: true,
-            doctorProfile: {
-              select: { specialty: true, hospital: true, credentials: true },
-            },
-          },
+        author: { select: authorSelect },
+        reviewer: { select: authorSelect },
+        comments: {
+          where: { status: BlogCommentStatus.APPROVED, parentId: null },
+          orderBy: { createdAt: 'desc' },
+          take: 20,
         },
       },
     });
     if (!post) throw new NotFoundException('Blog post not found');
 
-    const [relatedPosts] = await Promise.all([
-      this.prisma.blogPost.findMany({
-        where: {
-          status: BlogStatus.PUBLISHED,
-          categoryId: post.categoryId,
-          id: { not: post.id },
-        },
-        take: 4,
-        orderBy: { publishedAt: 'desc' },
-        include: {
-          category: true,
-          author: { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
-        },
-      }),
-      this.prisma.blogPost.update({
-        where: { id: post.id },
-        data: { viewCount: { increment: 1 } },
-      }),
-    ]);
+    const specialty = post.specialty ?? post.author.doctorProfile?.specialty ?? post.category.name;
 
-    return { ...post, relatedPosts };
+    const [relatedPosts, trendingInSpecialty, { previousPost, nextPost }, authorArticleCount] =
+      await Promise.all([
+        this.findRelatedPosts({
+          id: post.id,
+          categoryId: post.categoryId,
+          specialty: post.specialty,
+          tags: post.tags,
+          author: post.author,
+        }),
+        this.findTrendingInSpecialty(specialty, post.id),
+        this.findPrevNext(post),
+        this.prisma.blogPost.count({
+          where: { authorId: post.authorId, status: BlogStatus.PUBLISHED },
+        }),
+        this.prisma.blogPost.update({
+          where: { id: post.id },
+          data: { viewCount: { increment: 1 } },
+        }),
+      ]);
+
+    const sidebarRelated = relatedPosts.slice(0, 3);
+
+    return {
+      ...post,
+      specialty,
+      authorArticleCount,
+      relatedPosts,
+      sidebarRelated,
+      trendingInSpecialty,
+      previousPost,
+      nextPost,
+    };
   }
 
   async getCategories() {
@@ -172,15 +343,32 @@ export class BlogService {
     }));
   }
 
+  async getPopularTags(limit = 20) {
+    const posts = await this.prisma.blogPost.findMany({
+      where: { status: BlogStatus.PUBLISHED },
+      select: { tags: true },
+    });
+
+    const counts = new Map<string, number>();
+    for (const post of posts) {
+      for (const tag of post.tags) {
+        const key = tag.toLowerCase();
+        counts.set(key, (counts.get(key) ?? 0) + 1);
+      }
+    }
+
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, limit)
+      .map(([tag, count]) => ({ tag, count }));
+  }
+
   async getPopular(limit = 5) {
     return this.prisma.blogPost.findMany({
       where: { status: BlogStatus.PUBLISHED },
       take: limit,
       orderBy: { viewCount: 'desc' },
-      include: {
-        category: true,
-        author: { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
-      },
+      include: postCardInclude,
     });
   }
 
@@ -189,10 +377,7 @@ export class BlogService {
       where: { status: BlogStatus.PUBLISHED, featured: true },
       take: limit,
       orderBy: { featuredOrder: 'asc' },
-      include: {
-        category: true,
-        author: { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
-      },
+      include: postCardInclude,
     });
 
     return {
@@ -244,23 +429,250 @@ export class BlogService {
       .filter(Boolean);
   }
 
-  async create(authorId: string, data: {
-    title: string;
-    slug: string;
-    excerpt: string;
-    content: string;
-    categoryId: string;
-    coverImageUrl?: string;
-    tags?: string[];
-    status?: BlogStatus;
-  }) {
+  private buildPostData(data: CreateBlogPostDto | UpdateBlogPostDto, isCreate = false) {
+    const readTimeMinutes =
+      data.content !== undefined
+        ? data.readTimeMinutes ?? estimateReadTime(data.content)
+        : data.readTimeMinutes;
+
+    const payload: Prisma.BlogPostUpdateInput = {
+      ...(data.title !== undefined && { title: data.title }),
+      ...(data.slug !== undefined && { slug: data.slug }),
+      ...(data.subtitle !== undefined && { subtitle: data.subtitle }),
+      ...(data.excerpt !== undefined && { excerpt: data.excerpt }),
+      ...(data.content !== undefined && { content: data.content }),
+      ...(data.coverImageUrl !== undefined && { coverImageUrl: data.coverImageUrl }),
+      ...(data.coverImageAlt !== undefined && { coverImageAlt: data.coverImageAlt }),
+      ...(data.coverImageCaption !== undefined && { coverImageCaption: data.coverImageCaption }),
+      ...(data.specialty !== undefined && { specialty: data.specialty }),
+      ...(data.tags !== undefined && { tags: data.tags }),
+      ...(data.summaryPoints !== undefined && { summaryPoints: data.summaryPoints }),
+      ...(data.keyTakeaways !== undefined && { keyTakeaways: data.keyTakeaways }),
+      ...(data.references !== undefined && { references: data.references }),
+      ...(data.glossary !== undefined && { glossary: data.glossary }),
+      ...(data.medicalDisclaimer !== undefined && { medicalDisclaimer: data.medicalDisclaimer }),
+      ...(data.peerReviewed !== undefined && { peerReviewed: data.peerReviewed }),
+      ...(data.seoTitle !== undefined && { seoTitle: data.seoTitle }),
+      ...(data.seoDescription !== undefined && { seoDescription: data.seoDescription }),
+      ...(data.metaKeywords !== undefined && { metaKeywords: data.metaKeywords }),
+      ...(data.canonicalUrl !== undefined && { canonicalUrl: data.canonicalUrl }),
+      ...(readTimeMinutes !== undefined && { readTimeMinutes }),
+      ...(data.featured !== undefined && { featured: data.featured }),
+      ...(data.lastReviewedAt !== undefined && {
+        lastReviewedAt: data.lastReviewedAt ? new Date(data.lastReviewedAt) : null,
+      }),
+      ...(data.publishedAt !== undefined && {
+        publishedAt: data.publishedAt ? new Date(data.publishedAt) : null,
+      }),
+    };
+
+    if (data.categoryId !== undefined) {
+      payload.category = { connect: { id: data.categoryId } };
+    }
+
+    if (data.reviewerId !== undefined) {
+      payload.reviewer = data.reviewerId
+        ? { connect: { id: data.reviewerId } }
+        : { disconnect: true };
+    }
+
+    if (data.status !== undefined) {
+      payload.status = data.status;
+      if (isCreate && data.status === BlogStatus.PUBLISHED && !data.publishedAt) {
+        payload.publishedAt = new Date();
+      }
+    }
+
+    return payload;
+  }
+
+  async create(authorId: string, data: CreateBlogPostDto) {
+    const readTimeMinutes = data.readTimeMinutes ?? estimateReadTime(data.content);
+
     return this.prisma.blogPost.create({
       data: {
-        ...data,
+        title: data.title,
+        slug: data.slug,
+        subtitle: data.subtitle,
+        excerpt: data.excerpt,
+        content: data.content,
+        coverImageUrl: data.coverImageUrl,
+        coverImageAlt: data.coverImageAlt,
+        coverImageCaption: data.coverImageCaption,
+        specialty: data.specialty,
+        tags: data.tags ?? [],
+        summaryPoints: data.summaryPoints ?? [],
+        keyTakeaways: data.keyTakeaways ?? [],
+        references: data.references ?? undefined,
+        glossary: data.glossary ?? undefined,
+        medicalDisclaimer: data.medicalDisclaimer,
+        peerReviewed: data.peerReviewed ?? false,
+        seoTitle: data.seoTitle,
+        seoDescription: data.seoDescription,
+        metaKeywords: data.metaKeywords ?? [],
+        canonicalUrl: data.canonicalUrl,
+        readTimeMinutes,
+        featured: data.featured ?? false,
+        status: data.status ?? BlogStatus.DRAFT,
+        publishedAt:
+          data.publishedAt
+            ? new Date(data.publishedAt)
+            : data.status === BlogStatus.PUBLISHED
+              ? new Date()
+              : null,
+        lastReviewedAt: data.lastReviewedAt ? new Date(data.lastReviewedAt) : null,
         authorId,
-        publishedAt: data.status === BlogStatus.PUBLISHED ? new Date() : null,
+        categoryId: data.categoryId,
+        reviewerId: data.reviewerId,
       },
       include: { category: true, author: true },
+    });
+  }
+
+  async update(slug: string, data: UpdateBlogPostDto) {
+    const existing = await this.prisma.blogPost.findUnique({ where: { slug } });
+    if (!existing) throw new NotFoundException('Blog post not found');
+
+    const payload = this.buildPostData(data);
+
+    if (
+      data.status === BlogStatus.PUBLISHED &&
+      !existing.publishedAt &&
+      data.publishedAt === undefined
+    ) {
+      payload.publishedAt = new Date();
+    }
+
+    return this.prisma.blogPost.update({
+      where: { slug },
+      data: payload,
+      include: { category: true, author: true },
+    });
+  }
+
+  async submitComment(slug: string, data: SubmitBlogCommentDto) {
+    const post = await this.prisma.blogPost.findUnique({ where: { slug } });
+    if (!post) throw new NotFoundException('Blog post not found');
+
+    return this.prisma.blogComment.create({
+      data: {
+        postId: post.id,
+        authorName: data.authorName,
+        authorEmail: data.authorEmail,
+        content: data.content,
+        parentId: data.parentId,
+        status: BlogCommentStatus.PENDING,
+      },
+    });
+  }
+
+  async submitFeedback(slug: string, data: SubmitBlogFeedbackDto, userId?: string) {
+    const post = await this.prisma.blogPost.findUnique({ where: { slug } });
+    if (!post) throw new NotFoundException('Blog post not found');
+
+    if (data.rating !== undefined) {
+      if (data.rating < 1 || data.rating > 5) {
+        throw new BadRequestException('Rating must be between 1 and 5');
+      }
+
+      const raterKey = userId
+        ? `user:${userId}`
+        : data.visitorKey?.trim()
+          ? `visitor:${data.visitorKey.trim()}`
+          : null;
+
+      if (!raterKey) {
+        throw new BadRequestException('visitorKey is required when not signed in');
+      }
+
+      const existing = await this.prisma.blogPostRating.findUnique({
+        where: { postId_raterKey: { postId: post.id, raterKey } },
+      });
+
+      if (existing?.rating === data.rating) {
+        return {
+          helpfulYes: post.helpfulYes,
+          helpfulNo: post.helpfulNo,
+          averageRating: post.averageRating,
+          ratingCount: post.ratingCount,
+        };
+      }
+
+      let newCount = post.ratingCount;
+      let newAverage: number;
+
+      if (existing) {
+        const currentTotal = (post.averageRating ?? 0) * post.ratingCount;
+        const newTotal = currentTotal - existing.rating + data.rating;
+        newAverage = post.ratingCount > 0 ? newTotal / post.ratingCount : data.rating;
+      } else {
+        const currentTotal = (post.averageRating ?? 0) * post.ratingCount;
+        newCount = post.ratingCount + 1;
+        newAverage = (currentTotal + data.rating) / newCount;
+      }
+
+      const [, updated] = await this.prisma.$transaction([
+        this.prisma.blogPostRating.upsert({
+          where: { postId_raterKey: { postId: post.id, raterKey } },
+          create: {
+            postId: post.id,
+            raterKey,
+            rating: data.rating,
+          },
+          update: {
+            rating: data.rating,
+          },
+        }),
+        this.prisma.blogPost.update({
+          where: { id: post.id },
+          data: {
+            ratingCount: newCount,
+            averageRating: newAverage,
+          },
+          select: {
+            helpfulYes: true,
+            helpfulNo: true,
+            averageRating: true,
+            ratingCount: true,
+          },
+        }),
+      ]);
+
+      return updated;
+    }
+
+    const updates: Prisma.BlogPostUpdateInput = {};
+
+    if (data.helpful === true) {
+      updates.helpfulYes = { increment: 1 };
+    } else if (data.helpful === false) {
+      updates.helpfulNo = { increment: 1 };
+    }
+
+    if (Object.keys(updates).length === 0) {
+      throw new BadRequestException('No feedback provided');
+    }
+
+    return this.prisma.blogPost.update({
+      where: { id: post.id },
+      data: updates,
+      select: {
+        helpfulYes: true,
+        helpfulNo: true,
+        averageRating: true,
+        ratingCount: true,
+      },
+    });
+  }
+
+  async incrementShareCount(slug: string) {
+    const post = await this.prisma.blogPost.findUnique({ where: { slug } });
+    if (!post) throw new NotFoundException('Blog post not found');
+
+    return this.prisma.blogPost.update({
+      where: { id: post.id },
+      data: { shareCount: { increment: 1 } },
+      select: { shareCount: true },
     });
   }
 }

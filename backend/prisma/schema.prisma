@@ -23,6 +23,7 @@ model User {
   updatedAt         DateTime            @updatedAt
   answeredQuestions AskDoctorQuestion[] @relation("AnsweredBy")
   blogPosts         BlogPost[]
+  reviewedBlogPosts BlogPost[]          @relation("BlogReviewer")
   doctorProfile     DoctorProfile?
   oauthAccounts     OAuthAccount[]
   sentMessages      Message[]           @relation("SentMessages")
@@ -260,32 +261,90 @@ model BlogCategory {
 }
 
 model BlogPost {
-  id              String       @id @default(cuid())
-  title           String
-  slug            String       @unique
-  excerpt         String
-  content         String
-  coverImageUrl   String?
-  categoryId      String
-  authorId        String
-  status          BlogStatus   @default(DRAFT)
-  readTimeMinutes Int          @default(5)
-  viewCount       Int          @default(0)
-  tags            String[]     @default([])
-  featured        Boolean      @default(false)
-  featuredOrder   Int?
-  publishedAt     DateTime?
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-  author          User         @relation(fields: [authorId], references: [id])
-  category        BlogCategory @relation(fields: [categoryId], references: [id])
+  id                String        @id @default(cuid())
+  title             String
+  slug              String        @unique
+  subtitle          String?
+  excerpt           String
+  content           String
+  coverImageUrl     String?
+  coverImageAlt     String?
+  coverImageCaption String?
+  categoryId        String
+  authorId          String
+  reviewerId        String?
+  specialty         String?
+  status            BlogStatus    @default(DRAFT)
+  readTimeMinutes   Int           @default(5)
+  viewCount         Int           @default(0)
+  shareCount        Int           @default(0)
+  tags              String[]      @default([])
+  summaryPoints     String[]      @default([])
+  keyTakeaways      String[]      @default([])
+  references        Json?
+  glossary          Json?
+  medicalDisclaimer String?
+  peerReviewed      Boolean       @default(false)
+  lastReviewedAt    DateTime?
+  seoTitle          String?
+  seoDescription    String?
+  metaKeywords      String[]      @default([])
+  canonicalUrl      String?
+  averageRating     Float?
+  ratingCount       Int           @default(0)
+  helpfulYes        Int           @default(0)
+  helpfulNo         Int           @default(0)
+  featured          Boolean       @default(false)
+  featuredOrder     Int?
+  publishedAt       DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  author            User          @relation(fields: [authorId], references: [id])
+  reviewer          User?         @relation("BlogReviewer", fields: [reviewerId], references: [id])
+  category          BlogCategory  @relation(fields: [categoryId], references: [id])
+  comments          BlogComment[]
+  ratings           BlogPostRating[]
 
   @@index([categoryId])
   @@index([authorId])
+  @@index([reviewerId])
   @@index([status])
   @@index([publishedAt])
   @@index([featured, featuredOrder])
+  @@index([specialty])
   @@map("blog_posts")
+}
+
+model BlogComment {
+  id                String            @id @default(cuid())
+  postId            String
+  authorName        String
+  authorEmail       String?
+  content           String
+  isVerifiedPatient Boolean           @default(false)
+  status            BlogCommentStatus @default(PENDING)
+  parentId          String?
+  createdAt         DateTime          @default(now())
+  post              BlogPost          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parent            BlogComment?      @relation("CommentReplies", fields: [parentId], references: [id])
+  replies           BlogComment[]     @relation("CommentReplies")
+
+  @@index([postId])
+  @@index([status])
+  @@map("blog_comments")
+}
+
+model BlogPostRating {
+  id        String   @id @default(cuid())
+  postId    String
+  raterKey  String
+  rating    Int
+  createdAt DateTime @default(now())
+  post      BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, raterKey])
+  @@index([postId])
+  @@map("blog_post_ratings")
 }
 
 model Conversation {
@@ -516,6 +575,12 @@ enum BlogStatus {
   DRAFT
   PUBLISHED
   ARCHIVED
+}
+
+enum BlogCommentStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 enum MessageType {

@@ -65,7 +65,13 @@ export class AuthService {
     }
 
     if (dto.role === UserRole.PATIENT) {
-      await this.prisma.patientProfile.create({ data: { userId: user.id } });
+      await this.prisma.patientProfile.create({
+        data: {
+          userId: user.id,
+          dateOfBirth: dto.dateOfBirth ? new Date(dto.dateOfBirth) : undefined,
+          gender: dto.gender?.trim() || undefined,
+        },
+      });
     }
 
     if (user.status !== UserStatus.ACTIVE) {
@@ -169,7 +175,21 @@ export class AuthService {
       },
     });
     if (!user) throw new UnauthorizedException();
-    return user;
+
+    const dateOfBirth = user.patientProfile?.dateOfBirth ?? null;
+    const gender = user.patientProfile?.gender ?? null;
+
+    return {
+      ...user,
+      dateOfBirth: dateOfBirth ? dateOfBirth.toISOString() : null,
+      gender,
+      patientProfile: user.patientProfile
+        ? {
+            ...user.patientProfile,
+            dateOfBirth: dateOfBirth ? dateOfBirth.toISOString() : null,
+          }
+        : null,
+    };
   }
 
   async createSessionForUser(userId: string) {

@@ -31,6 +31,7 @@ const FEATURED_AUTHORS = [
     subSpecialty: 'Interventional Cardiology',
     gender: 'Female',
     licenseNumber: 'FEATURED-CARD-001',
+    credentials: 'MBBS, FCPS (Cardiology)',
   },
   {
     email: `james.okafor@${SEED_DOMAIN}`,
@@ -40,6 +41,7 @@ const FEATURED_AUTHORS = [
     subSpecialty: 'Headache Medicine',
     gender: 'Male',
     licenseNumber: 'FEATURED-NEURO-001',
+    credentials: 'MBBS, MD, MRCP (Neurology)',
   },
   {
     email: `priya.sharma@${SEED_DOMAIN}`,
@@ -49,6 +51,19 @@ const FEATURED_AUTHORS = [
     subSpecialty: 'Diabetes & Metabolic Medicine',
     gender: 'Female',
     licenseNumber: 'FEATURED-ENDO-001',
+    credentials: 'MBBS, FCPS (Endocrinology)',
+  },
+  {
+    email: `javed.kumbhar@${SEED_DOMAIN}`,
+    firstName: 'Javed',
+    lastName: 'Kumbhar',
+    specialty: 'Internal Medicine',
+    subSpecialty: 'Medical Leadership',
+    gender: 'Male',
+    licenseNumber: 'FEATURED-IM-001',
+    credentials: 'MBBS, MD — Internal Medicine',
+    platformRole: 'Founder & Medical Director',
+    editorialBoard: true,
   },
 ] as const;
 
@@ -194,24 +209,64 @@ export const FEATURED_BLOG_POSTS = [
   {
     title: 'Understanding Migraine: Triggers, Treatments & Prevention',
     slug: 'understanding-migraine-triggers-treatments-prevention',
+    subtitle:
+      'From tension headaches to complex aura — a neurologist\'s comprehensive breakdown of one of the world\'s most disabling neurological conditions.',
     excerpt: 'A comprehensive guide to managing chronic migraines from a neurological perspective.',
     content: NEUROLOGY_CONTENT,
     coverImageUrl: 'https://images.unsplash.com/photo-1506126615695-1746f858f06f?w=800&q=80',
+    coverImageAlt: 'Illustration of migraine neural pathways',
+    coverImageCaption:
+      'Illustration of migraine neural pathways. Image credit: DrInsight Medical Illustration Team',
     categorySlug: 'neurology',
+    specialty: 'Neurology',
     authorEmail: `james.okafor@${SEED_DOMAIN}`,
-    readTimeMinutes: 7,
+    reviewerEmail: `javed.kumbhar@${SEED_DOMAIN}`,
+    readTimeMinutes: 8,
     featuredOrder: 2,
-    tags: [
-      'migraine',
-      'neurology',
-      'headache',
-      'chronic migraine',
-      'migraine triggers',
-      'migraine treatment',
-      'headache prevention',
+    tags: ['Neurology', 'Migraine', 'Headache Disorders', 'Chronic Pain', 'Triptans'],
+    summaryPoints: [
+      'The clinical definition and types of migraine (with and without aura)',
+      'How migraines are diagnosed using International Headache Society criteria',
+      'Evidence-based treatment options — acute, preventive, and emerging therapies',
+      'Identified triggers and how to manage them with a personalised action plan',
+      'When to seek urgent medical attention and red flag symptoms',
     ],
-    publishedAt: new Date('2026-05-25T10:00:00.000Z'),
-    viewCount: 1965,
+    keyTakeaways: [
+      'Migraine is a neurological disorder affecting 1 billion people — not simply a "bad headache"',
+      'Diagnosis is clinical, based on ICHD-3 criteria — no specific imaging or blood test exists',
+      'Triptans and CGRP gepants are first-line acute treatments; anti-CGRP mAbs are highly effective preventive options',
+      'Keeping a migraine diary is essential for identifying personal triggers and monitoring treatment response',
+      'Red flag features require immediate emergency evaluation — do not dismiss sudden severe headache',
+    ],
+    references: [
+      {
+        text: 'GBD 2023 Headache Collaborators. Global, regional, and national burden of migraine. Lancet Neurology, 2023.',
+        url: 'https://pubmed.ncbi.nlm.nih.gov/',
+      },
+      {
+        text: 'Headache Classification Committee of the IHS. The International Classification of Headache Disorders, 3rd edition. Cephalalgia, 2018.',
+        url: 'https://pubmed.ncbi.nlm.nih.gov/',
+      },
+      {
+        text: 'NICE Guidelines [NG150]: Headaches in over 12s: diagnosis and management, 2023.',
+        url: 'https://www.nice.org.uk/',
+      },
+    ],
+    glossary: [
+      { term: 'Aura', definition: 'Transient neurological symptoms that precede migraine headache' },
+      { term: 'CGRP', definition: 'Calcitonin Gene-Related Peptide — key target of newer migraine medications' },
+      { term: 'MOH', definition: 'Medication Overuse Headache from overuse of acute treatments' },
+    ],
+    peerReviewed: true,
+    lastReviewedAt: new Date('2026-06-01T10:00:00.000Z'),
+    seoTitle: 'Migraine Diagnosis & Treatment Guide | DrInsight',
+    seoDescription:
+      'Complete neurologist-reviewed guide to migraine types, triggers, diagnosis, and evidence-based treatments.',
+    metaKeywords: ['migraine', 'neurology', 'headache', 'triptans', 'CGRP'],
+    publishedAt: new Date('2026-05-28T10:00:00.000Z'),
+    viewCount: 24891,
+    averageRating: 4.8,
+    ratingCount: 2341,
   },
   {
     title: 'Managing Type 2 Diabetes: A Complete Lifestyle Guide',
@@ -286,13 +341,17 @@ async function upsertFeaturedAuthors(prisma: PrismaClient) {
         city: 'Karachi',
         country: 'Pakistan',
         gender: author.gender,
-        platformRole: 'Consultant Physician',
+        credentials: (author as { credentials?: string }).credentials ?? `MBBS, FCPS (${author.specialty})`,
+        platformRole: (author as { platformRole?: string }).platformRole ?? 'Consultant Physician',
+        editorialBoard: (author as { editorialBoard?: boolean }).editorialBoard ?? false,
       },
       update: {
         specialty: author.specialty,
         subSpecialty: author.subSpecialty,
         bio: `Board-certified ${author.specialty.toLowerCase()} specialist and medical author for DrInsight.`,
-        platformRole: 'Consultant Physician',
+        credentials: (author as { credentials?: string }).credentials,
+        platformRole: (author as { platformRole?: string }).platformRole ?? 'Consultant Physician',
+        editorialBoard: (author as { editorialBoard?: boolean }).editorialBoard ?? false,
       },
     });
 
@@ -343,17 +402,38 @@ export async function seedFeaturedBlogPosts(prisma: PrismaClient) {
 
     const existing = await prisma.blogPost.findUnique({ where: { slug: post.slug } });
 
+    const reviewerId =
+      'reviewerEmail' in post && post.reviewerEmail
+        ? authorByEmail.get(post.reviewerEmail)?.id
+        : undefined;
+
     const data = {
       title: post.title,
+      subtitle: 'subtitle' in post ? post.subtitle : undefined,
       excerpt: post.excerpt,
       content: post.content,
       coverImageUrl: post.coverImageUrl,
+      coverImageAlt: 'coverImageAlt' in post ? post.coverImageAlt : undefined,
+      coverImageCaption: 'coverImageCaption' in post ? post.coverImageCaption : undefined,
+      specialty: 'specialty' in post ? post.specialty : undefined,
       categoryId,
       authorId,
+      reviewerId,
       status: BlogStatus.PUBLISHED,
       readTimeMinutes: post.readTimeMinutes,
       viewCount: post.viewCount,
       tags: [...post.tags],
+      summaryPoints: 'summaryPoints' in post ? [...post.summaryPoints] : [],
+      keyTakeaways: 'keyTakeaways' in post ? [...post.keyTakeaways] : [],
+      references: 'references' in post ? post.references : undefined,
+      glossary: 'glossary' in post ? post.glossary : undefined,
+      peerReviewed: 'peerReviewed' in post ? post.peerReviewed : false,
+      lastReviewedAt: 'lastReviewedAt' in post ? post.lastReviewedAt : undefined,
+      seoTitle: 'seoTitle' in post ? post.seoTitle : undefined,
+      seoDescription: 'seoDescription' in post ? post.seoDescription : undefined,
+      metaKeywords: 'metaKeywords' in post ? [...post.metaKeywords] : [],
+      averageRating: 'averageRating' in post ? post.averageRating : undefined,
+      ratingCount: 'ratingCount' in post ? post.ratingCount : undefined,
       featured: true,
       featuredOrder: post.featuredOrder,
       publishedAt: post.publishedAt,

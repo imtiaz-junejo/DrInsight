@@ -56,6 +56,14 @@ export class RegisterDto {
 
   @IsOptional()
   @IsString()
+  dateOfBirth?: string;
+
+  @IsOptional()
+  @IsString()
+  gender?: string;
+
+  @IsOptional()
+  @IsString()
   specialty?: string;
 
   @IsOptional()
