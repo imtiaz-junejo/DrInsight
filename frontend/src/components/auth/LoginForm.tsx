@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { SectionTitle } from "@/components/public/section-heading";
 import { FloatingInput } from "@/components/ui/floating-input";
 import { AuthSocialButtons } from "@/components/auth/AuthSocialButtons";
 import { Logo } from "@/components/layout/Logo";
@@ -107,7 +108,7 @@ export function LoginForm() {
       <div className="mb-6 flex justify-center">
         <Logo />
       </div>
-      <h2 className="font-display text-center text-[1.55rem] font-bold text-gray-900">Welcome Back</h2>
+      <SectionTitle className="text-center">Welcome Back</SectionTitle>
       <p className="mb-6 text-center text-[.84rem] text-gray-500">Sign in to your patient or doctor account</p>
 
       {error && (

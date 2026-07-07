@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import "@/styles/sitemap-page.css";
+import { SectionTitle } from "@/components/public/section-heading";
 import { doctorFullName, formatStatCount, specialtyEmoji } from "@/lib/data-mappers";
 import { useBlogCategories, useDoctors, usePlatformStats } from "@/services/api-hooks";
 
@@ -664,7 +665,7 @@ export function SitemapPageContent() {
         </div>
 
         <div className="section-heading">
-          <h2>📰 Article Categories</h2>
+          <SectionTitle>📰 Article Categories</SectionTitle>
           <span className="sh-badge">{blogCountLabel} articles</span>
         </div>
         <div className="specialty-grid">

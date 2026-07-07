@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useState } from "react";
 import { DEFAULT_LINKS, PolicyFooterLinks } from "@/components/legal/PolicyFooterLinks";
+import { SectionTitle } from "@/components/public/section-heading";
 import { usePolicyPageScroll } from "@/hooks/usePolicyPageScroll";
 import "@/styles/disclaimer-page.css";
 
@@ -145,7 +146,7 @@ export default function DisclaimerPageClient() {
 
       <div className="critical-banner">
         <div className="cb-inner">
-          <h2>🚨 IMPORTANT MEDICAL NOTICE</h2>
+          <SectionTitle inverse>🚨 IMPORTANT MEDICAL NOTICE</SectionTitle>
           <p>
             The content published on DrInsight is intended for general informational and educational purposes only.
             It is <strong>not a substitute</strong> for professional medical advice, diagnosis, or treatment. Always

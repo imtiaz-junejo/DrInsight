@@ -66,9 +66,6 @@
 }
 
 .disclaimer-page .cb-inner h2 {
-  font-family: var(--font-display);
-  font-size: 1.1rem;
-  font-weight: 700;
   margin-bottom: 8px;
   display: flex;
   align-items: center;

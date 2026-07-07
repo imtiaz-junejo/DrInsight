@@ -3,6 +3,12 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import "@/styles/about-page.css";
+import {
+  SectionDescription,
+  SectionEyebrow,
+  SectionHeading,
+  SectionTitle,
+} from "@/components/public/section-heading";
 import { formatStatCount, getInitials, mapDoctorProfile, specialtyEmoji } from "@/lib/data-mappers";
 import { resolvePartnerDisplay } from "@/lib/partner-category";
 import { useDoctors, useFounderMessage, usePlatformStats, useRecentReviews, useTrustedPartners } from "@/services/api-hooks";
@@ -124,11 +130,12 @@ export function AboutPageContent() {
 
       <section>
         <div className="section-inner">
-          <div className="section-header">
-            <div className="eyebrow">Purpose & Direction</div>
-            <h2>Our Mission & Vision</h2>
-            <p>Every decision we make is guided by our commitment to patient welfare, scientific integrity, and medical excellence.</p>
-          </div>
+          <SectionHeading
+            className="section-header"
+            eyebrow="Purpose & Direction"
+            title="Our Mission & Vision"
+            description="Every decision we make is guided by our commitment to patient welfare, scientific integrity, and medical excellence."
+          />
           <div className="mv-grid">
             <div className="mv-card mission">
               <div className="mv-card-icon">🎯</div>
@@ -201,9 +208,11 @@ export function AboutPageContent() {
 
             <div className="founder-right">
               <div className="founder-message">
-                <div className="eyebrow">{founderMessage.eyebrow ?? "A Message from Our Founder"}</div>
+                <SectionEyebrow className="eyebrow">
+                  {founderMessage.eyebrow ?? "A Message from Our Founder"}
+                </SectionEyebrow>
                 <div className="founder-quote-mark">&quot;</div>
-                <h2>{founderMessage.headline}</h2>
+                <SectionTitle>{founderMessage.headline}</SectionTitle>
                 <div dangerouslySetInnerHTML={{ __html: founderMessage.messageHtml }} />
                 {founderMessage.videoUrl ? (
                   <div style={{ marginTop: 20 }}>
@@ -242,11 +251,12 @@ export function AboutPageContent() {
 
       <section>
         <div className="section-inner">
-          <div className="section-header">
-            <div className="eyebrow">Our Medical Team</div>
-            <h2>Meet Our Specialist Doctors</h2>
-            <p>A diverse team of board-certified physicians, surgeons, and specialists united by a passion for patient-centered care.</p>
-          </div>
+          <SectionHeading
+            className="section-header"
+            eyebrow="Our Medical Team"
+            title="Meet Our Specialist Doctors"
+            description="A diverse team of board-certified physicians, surgeons, and specialists united by a passion for patient-centered care."
+          />
           {isLoading ? (
             <p style={{ textAlign: "center", color: "var(--gray-500)" }}>Loading doctors...</p>
           ) : doctors.length > 0 ? (
@@ -313,14 +323,12 @@ export function AboutPageContent() {
 
       <section className="partners-section">
         <div className="section-inner">
-          <div className="section-header">
-            <div className="eyebrow">Trusted Partners & Affiliates</div>
-            <h2>Platforms & Resources We Work With</h2>
-            <p>
-              We collaborate with leading healthcare platforms, research institutions, and technology partners to deliver the
-              highest standard of medical care.
-            </p>
-          </div>
+          <SectionHeading
+            className="section-header"
+            eyebrow="Trusted Partners & Affiliates"
+            title="Platforms & Resources We Work With"
+            description="We collaborate with leading healthcare platforms, research institutions, and technology partners to deliver the highest standard of medical care."
+          />
         </div>
         <div className="marquee-track-wrap">
           {partnersLoading ? (
@@ -346,11 +354,12 @@ export function AboutPageContent() {
 
       <section>
         <div className="section-inner">
-          <div className="section-header">
-            <div className="eyebrow">Why Choose Us</div>
-            <h2>Why Patients Trust DrInsight</h2>
-            <p>We hold ourselves to the highest standards of medical accuracy, ethics, and patient-centered care.</p>
-          </div>
+          <SectionHeading
+            className="section-header"
+            eyebrow="Why Choose Us"
+            title="Why Patients Trust DrInsight"
+            description="We hold ourselves to the highest standards of medical accuracy, ethics, and patient-centered care."
+          />
           <div className="trust-grid">
             {TRUST_CARDS.map((card) => (
               <div key={card.title} className="trust-card">
@@ -367,12 +376,12 @@ export function AboutPageContent() {
         <div className="section-inner">
           <div className="editorial-inner">
             <div className="editorial-content">
-              <div className="eyebrow">Our Standards</div>
-              <h2>Editorial Guidelines & Medical Review Process</h2>
-              <p>
+              <SectionEyebrow className="eyebrow">Our Standards</SectionEyebrow>
+              <SectionTitle>Editorial Guidelines & Medical Review Process</SectionTitle>
+              <SectionDescription align="left">
                 Every piece of content on DrInsight passes through a rigorous multi-step medical review process before it
                 reaches you. We follow the highest journalistic and clinical standards.
-              </p>
+              </SectionDescription>
               <p>
                 Our editorial team includes medical writers, licensed physicians, and specialty reviewers who collaborate to
                 ensure accuracy, clarity, and patient safety.
@@ -409,13 +418,13 @@ export function AboutPageContent() {
         <div className="section-inner">
           <div className="patient-inner">
             <div className="patient-content">
-              <div className="eyebrow">Patient First</div>
-              <h2>Our Patient-Centered Approach</h2>
-              <p>
+              <SectionEyebrow className="eyebrow">Patient First</SectionEyebrow>
+              <SectionTitle>Our Patient-Centered Approach</SectionTitle>
+              <SectionDescription align="left">
                 Everything we build, write, and offer is designed around one question:{" "}
                 <strong>&quot;Does this truly help the patient?&quot;</strong> We believe that empowered patients make better
                 health decisions.
-              </p>
+              </SectionDescription>
               <p>
                 Our approach combines clinical excellence with compassionate communication — ensuring every patient feels heard,
                 respected, and well-informed at every step.
@@ -455,8 +464,10 @@ export function AboutPageContent() {
 
       <div className="accred-section">
         <div style={{ maxWidth: 1240, margin: "auto" }}>
-          <h2>Accreditations & Compliance</h2>
-          <p>Recognized by leading health organizations and compliant with all major medical data privacy regulations worldwide.</p>
+          <SectionTitle inverse>Accreditations & Compliance</SectionTitle>
+          <SectionDescription inverse>
+            Recognized by leading health organizations and compliant with all major medical data privacy regulations worldwide.
+          </SectionDescription>
           <div className="accred-badges">
             {ACCREDITATIONS.map((item) => (
               <div key={item.label} className="accred-badge">
@@ -470,11 +481,13 @@ export function AboutPageContent() {
       </div>
 
       <div className="about-cta">
-        <div className="eyebrow" style={{ color: "#93c5fd" }}>
+        <SectionEyebrow className="eyebrow" light>
           Get Started Today
-        </div>
-        <h2>Ready to Take Control of Your Health?</h2>
-        <p>Join {stats ? formatStatCount(stats.patientsServed ?? stats.patientCount) : "—"} patients who trust DrInsight for accurate medical information and expert consultations.</p>
+        </SectionEyebrow>
+        <SectionTitle inverse>Ready to Take Control of Your Health?</SectionTitle>
+        <SectionDescription inverse>
+          Join {stats ? formatStatCount(stats.patientsServed ?? stats.patientCount) : "—"} patients who trust DrInsight for accurate medical information and expert consultations.
+        </SectionDescription>
         <div className="cta-btns">
           <Link href="/book-consultation" className="btn-primary">
             📅 Book a Consultation

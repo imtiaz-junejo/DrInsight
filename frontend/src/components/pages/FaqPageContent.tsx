@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useState, type ReactElement, type ReactNode } from "react";
 import Link from "next/link";
 import { FAQ_CATEGORIES, FAQ_SECTIONS } from "@/components/pages/faq-data";
+import { SectionTitle } from "@/components/public/section-heading";
 import { CONTACT_PHONE, CONTACT_PHONE_TEL } from "@/lib/site-contact";
 import "@/styles/faq-page.css";
 
@@ -166,7 +167,7 @@ export function FaqPageContent() {
             <div key={section.category} className="faq-section" data-category={section.category}>
               <div className="section-title">
                 <div className="section-title-icon">{section.icon}</div>
-                <h2>{section.title}</h2>
+                <SectionTitle>{section.title}</SectionTitle>
                 <span className="faq-count-tag">{section.countLabel}</span>
               </div>
               <div className="accordion">
@@ -208,7 +209,7 @@ export function FaqPageContent() {
 
       <div className="still-questions-wrap">
         <div className="still-questions">
-          <h2>Still Have Questions?</h2>
+          <SectionTitle>Still Have Questions?</SectionTitle>
           <p>
             Our friendly support team is here to help. Reach out through any of the channels below and we&apos;ll get
             back to you quickly.

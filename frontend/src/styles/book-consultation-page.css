@@ -111,11 +111,7 @@
 }
 
 .book-consultation-page .booking-title {
-  font-size: clamp(1.5rem, 2.5vw, 2rem);
-  font-weight: 600;
-  color: var(--color-text-primary);
   margin-bottom: 6px;
-  line-height: 1.2;
 }
 
 .book-consultation-page .booking-subtitle {
@@ -1237,8 +1233,6 @@
 }
 
 .book-consultation-page .confirm-page h2 {
-  font-size: 1.5rem;
-  font-weight: 500;
   margin-bottom: 10px;
 }
 

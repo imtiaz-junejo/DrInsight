@@ -1,8 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import "@/styles/health-tools-page.css";
+import { CategorySection, CATEGORY_TAB } from "@/components/health-tools/CategorySection";
+import { CalculatorCard } from "@/components/health-tools/CalculatorCard";
+import { CalcButton } from "@/components/health-tools/CalcButton";
+import { CalculatorResultModal } from "@/components/health-tools/CalculatorResultModal";
+import {
+  buildBmiModal,
+  buildBmrModal,
+  buildBodyFatModal,
+  buildBpModal,
+  buildCalorieModal,
+  buildDiabetesModal,
+  buildHrModal,
+  buildIdealWeightModal,
+  buildKidneyModal,
+  buildOvulationModal,
+  buildPhqModal,
+  buildPregnancyModal,
+  buildSmokingModal,
+  buildSymptomModal,
+  buildWaterModal,
+} from "@/components/health-tools/build-tool-result";
+import type { HealthToolModalData } from "@/components/health-tools/types";
+import { SectionHeading } from "@/components/public/section-heading";
 import { HEALTH_TOOL_COUNT } from "@/config/health-tools";
 import { formatStatCount } from "@/lib/data-mappers";
 import { usePlatformStats } from "@/services/api-hooks";
@@ -22,19 +45,6 @@ import {
   calcSmoking,
   calcWater,
   checkSymptom,
-  type BmiResult,
-  type BmrResult,
-  type BodyFatResult,
-  type BpResult,
-  type CalorieResult,
-  type HrResult,
-  type IdealWeightResult,
-  type KidneyResult,
-  type OvulationResult,
-  type PregnancyResult,
-  type RiskResult,
-  type SmokingResult,
-  type WaterResult,
 } from "./calculators";
 
 const HERO_PILLS = ["✅ Medically Reviewed", "🆓 100% Free", "🔒 Private & Secure", "📱 Mobile Friendly"];
@@ -47,7 +57,7 @@ const TOOL_TABS = [
   "Women's Health",
   "Risk Assessment",
   "Mental Health",
-];
+] as const;
 
 const PHQ_QUESTIONS = [
   "Little interest or pleasure in doing things",
@@ -61,65 +71,36 @@ const PHQ_QUESTIONS = [
   "Thoughts that you would be better off dead or of hurting yourself",
 ];
 
-function RelatedTags({ tags }: { tags: string[] }) {
-  return (
-    <div className="related-tags">
-      {tags.map((tag) => (
-        <span key={tag} className="related-tag">
-          {tag}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-function Disclaimer({ text }: { text: string }) {
-  return <div className="disclaimer">{text}</div>;
-}
-
-function ToolHeader({
-  icon,
-  iconClass,
-  title,
-  desc,
-}: {
-  icon: string;
-  iconClass: string;
-  title: string;
-  desc: string;
-}) {
-  return (
-    <div className="tool-header">
-      <div className={`tool-ico ${iconClass}`}>{icon}</div>
-      <div className="tool-header-text">
-        <h3>{title}</h3>
-        <p>{desc}</p>
-      </div>
-    </div>
-  );
-}
-
 export default function HealthToolsPage() {
   const { data: stats } = usePlatformStats();
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState<number>(CATEGORY_TAB.BODY);
+  const [tabAnimKey, setTabAnimKey] = useState(0);
   const [bfSex, setBfSex] = useState("");
   const [phqScores, setPhqScores] = useState<number[]>(Array(9).fill(0));
+  const [modalResult, setModalResult] = useState<HealthToolModalData | null>(null);
+  const [loadingId, setLoadingId] = useState<string | null>(null);
 
-  const [bmiResult, setBmiResult] = useState<BmiResult | null>(null);
-  const [bmrResult, setBmrResult] = useState<BmrResult | null>(null);
-  const [bfResult, setBfResult] = useState<BodyFatResult | null>(null);
-  const [iwResult, setIwResult] = useState<IdealWeightResult | null>(null);
-  const [calResult, setCalResult] = useState<CalorieResult | null>(null);
-  const [waterResult, setWaterResult] = useState<WaterResult | null>(null);
-  const [hrResult, setHrResult] = useState<HrResult | null>(null);
-  const [bpResult, setBpResult] = useState<BpResult | null>(null);
-  const [pregResult, setPregResult] = useState<PregnancyResult | null>(null);
-  const [ovResult, setOvResult] = useState<OvulationResult | null>(null);
-  const [dbResult, setDbResult] = useState<RiskResult | null>(null);
-  const [smResult, setSmResult] = useState<SmokingResult | null>(null);
-  const [kdResult, setKdResult] = useState<KidneyResult | null>(null);
-  const [phqResult, setPhqResult] = useState<RiskResult | null>(null);
-  const [syResult, setSyResult] = useState<RiskResult | null>(null);
+  const handleTabChange = useCallback((index: number) => {
+    setActiveTab(index);
+    setTabAnimKey((k) => k + 1);
+  }, []);
+
+  const openResult = useCallback(async (toolId: string, build: () => HealthToolModalData | null) => {
+    setLoadingId(toolId);
+    await new Promise((r) => setTimeout(r, 280));
+    const data = build();
+    setLoadingId(null);
+    if (data) setModalResult(data);
+  }, []);
+
+  const handleCalculateAgain = useCallback((toolId: string) => {
+    requestAnimationFrame(() => {
+      const el = document.getElementById(toolId);
+      el?.scrollIntoView({ behavior: "smooth", block: "center" });
+      const input = el?.querySelector<HTMLElement>("input, select, button");
+      input?.focus();
+    });
+  }, []);
 
   function num(id: string, form: HTMLFormElement) {
     return Number((form.elements.namedItem(id) as HTMLInputElement).value);
@@ -151,47 +132,53 @@ export default function HealthToolsPage() {
       </div>
 
       <div className="tools-main">
-        <div className="section-header">
-          <div className="eyebrow-blue">Browse by Category</div>
-          <h2>All Health Tools & Calculators</h2>
-          <p>
-            Select a category below or scroll to explore all tools. Results are estimates — always consult your
-            doctor for medical decisions.
-          </p>
-        </div>
+        <SectionHeading
+          className="section-header"
+          eyebrow="Browse by Category"
+          title="All Health Tools & Calculators"
+          description="Select a category below or scroll to explore all tools. Results are estimates — always consult your doctor for medical decisions."
+        />
 
-        <div className="tools-nav">
+        <div className="tools-nav" role="tablist" aria-label="Health calculator categories">
           {TOOL_TABS.map((tab, i) => (
             <button
               key={tab}
               type="button"
+              role="tab"
+              aria-selected={activeTab === i}
               className={`tool-tab${activeTab === i ? " active" : ""}`}
-              onClick={() => setActiveTab(i)}
+              onClick={() => handleTabChange(i)}
             >
               {tab}
             </button>
           ))}
         </div>
 
-        {/* BODY & WEIGHT */}
-        <div className="category-title">⚖️ Body & Weight Tools</div>
-        <div className="category-subtitle">Calculate your key body composition metrics used by physicians worldwide</div>
-        <div className="tools-grid">
-          <div className="tool-panel" id="bmi">
-            <ToolHeader
-              icon="⚖️"
-              iconClass="blue"
-              title="BMI Calculator"
-              desc="Calculate your Body Mass Index to understand if your weight is in a healthy range for your height."
-            />
-            <div className="tool-body">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const f = e.currentTarget;
-                  setBmiResult(calcBMI(num("bmi-weight", f), num("bmi-height", f)));
-                }}
-              >
+        <CategorySection
+          tabIndex={CATEGORY_TAB.BODY}
+          activeTab={activeTab}
+          animationKey={tabAnimKey}
+          emoji="⚖️"
+          title="Body & Weight Tools"
+          subtitle="Calculate your key body composition metrics used by physicians worldwide"
+        >
+          <CalculatorCard
+            id="bmi"
+            icon="⚖️"
+            iconClass="blue"
+            title="BMI Calculator"
+            description="Calculate your Body Mass Index to understand if your weight is in a healthy range for your height."
+          >
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const f = e.currentTarget;
+                void openResult("bmi", () => {
+                  const result = calcBMI(num("bmi-weight", f), num("bmi-height", f));
+                  return result ? buildBmiModal(result) : null;
+                });
+              }}
+            >
                 <div className="form-row">
                   <div className="form-group">
                     <label htmlFor="bmi-weight">Weight (kg)</label>
@@ -216,43 +203,27 @@ export default function HealthToolsPage() {
                     </select>
                   </div>
                 </div>
-                <button type="submit" className="calc-btn">
-                  Calculate BMI
-                </button>
-              </form>
-              {bmiResult && (
-                <div className="result-box">
-                  <div className="result-label">Your BMI</div>
-                  <div className="result-value">{bmiResult.value}</div>
-                  <div className="result-sub">Category: {bmiResult.category}</div>
-                  <div className="result-bar">
-                    <div
-                      className="result-fill"
-                      style={{ width: `${bmiResult.barPct}%`, background: bmiResult.barColor }}
-                    />
-                  </div>
-                </div>
-              )}
-              <Disclaimer text="⚠️ BMI is a screening tool only, not a diagnostic measure. Consult your doctor for a full assessment." />
-              <RelatedTags tags={["Healthy Weight Guide", "Obesity & Health Risks", "Weight Loss Tips"]} />
-            </div>
-          </div>
+              <CalcButton loading={loadingId === "bmi"}>Calculate BMI</CalcButton>
+            </form>
+          </CalculatorCard>
 
-          <div className="tool-panel" id="bmr">
-            <ToolHeader
-              icon="🔥"
-              iconClass="teal"
-              title="BMR Calculator"
-              desc="Find your Basal Metabolic Rate — the number of calories your body needs at complete rest to maintain basic functions."
-            />
-            <div className="tool-body">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const f = e.currentTarget;
-                  setBmrResult(calcBMR(num("bmr-weight", f), num("bmr-height", f), num("bmr-age", f), str("bmr-sex", f), num("bmr-act", f)));
-                }}
-              >
+          <CalculatorCard
+            id="bmr"
+            icon="🔥"
+            iconClass="teal"
+            title="BMR Calculator"
+            description="Find your Basal Metabolic Rate — the number of calories your body needs at complete rest to maintain basic functions."
+          >
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const f = e.currentTarget;
+                void openResult("bmr", () => {
+                  const result = calcBMR(num("bmr-weight", f), num("bmr-height", f), num("bmr-age", f), str("bmr-sex", f), num("bmr-act", f));
+                  return result ? buildBmrModal(result) : null;
+                });
+              }}
+            >
                 <div className="form-row">
                   <div className="form-group">
                     <label htmlFor="bmr-weight">Weight (kg)</label>
@@ -289,39 +260,27 @@ export default function HealthToolsPage() {
                     </select>
                   </div>
                 </div>
-                <button type="submit" className="calc-btn">
-                  Calculate BMR & TDEE
-                </button>
-              </form>
-              {bmrResult && (
-                <div className="result-box">
-                  <div className="result-label">Basal Metabolic Rate (BMR)</div>
-                  <div className="result-value">{bmrResult.bmr} kcal/day</div>
-                  <div className="result-sub">Total Daily Energy Expenditure (TDEE): {bmrResult.tdee} kcal/day</div>
-                </div>
-              )}
-              <Disclaimer text="⚠️ These are estimates based on the Mifflin-St Jeor equation. Individual metabolism varies." />
-              <RelatedTags tags={["Nutrition Planning", "Weight Management"]} />
-            </div>
-          </div>
+              <CalcButton loading={loadingId === "bmr"}>Calculate BMR & TDEE</CalcButton>
+            </form>
+          </CalculatorCard>
 
-          <div className="tool-panel" id="bodyfat">
-            <ToolHeader
-              icon="📏"
-              iconClass="green"
-              title="Body Fat Calculator"
-              desc="Estimate your body fat percentage using the US Navy method based on circumference measurements."
-            />
-            <div className="tool-body">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const f = e.currentTarget;
-                  setBfResult(
-                    calcBodyFat(str("bf-sex", f), num("bf-height", f), num("bf-waist", f), num("bf-neck", f), num("bf-hip", f)),
-                  );
-                }}
-              >
+          <CalculatorCard
+            id="bodyfat"
+            icon="📏"
+            iconClass="green"
+            title="Body Fat Calculator"
+            description="Estimate your body fat percentage using the US Navy method based on circumference measurements."
+          >
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const f = e.currentTarget;
+                void openResult("bodyfat", () => {
+                  const result = calcBodyFat(str("bf-sex", f), num("bf-height", f), num("bf-waist", f), num("bf-neck", f), num("bf-hip", f));
+                  return result ? buildBodyFatModal(result) : null;
+                });
+              }}
+            >
                 <div className="form-row">
                   <div className="form-group">
                     <label htmlFor="bf-sex">Sex</label>
@@ -359,43 +318,27 @@ export default function HealthToolsPage() {
                     </div>
                   </div>
                 )}
-                <button type="submit" className="calc-btn">
-                  Calculate Body Fat %
-                </button>
-              </form>
-              {bfResult && (
-                <div className="result-box">
-                  <div className="result-label">Estimated Body Fat</div>
-                  <div className="result-value">{bfResult.value}%</div>
-                  <div className="result-sub">Category: {bfResult.category}</div>
-                  <div className="result-bar">
-                    <div
-                      className="result-fill"
-                      style={{ width: `${bfResult.barPct}%`, background: bfResult.barColor }}
-                    />
-                  </div>
-                </div>
-              )}
-              <Disclaimer text="⚠️ This is an estimate. DEXA scan or hydrostatic weighing are the gold standards for body fat measurement." />
-              <RelatedTags tags={["Healthy Body Composition", "Strength Training"]} />
-            </div>
-          </div>
+              <CalcButton loading={loadingId === "bodyfat"}>Calculate Body Fat %</CalcButton>
+            </form>
+          </CalculatorCard>
 
-          <div className="tool-panel" id="idealweight">
-            <ToolHeader
-              icon="🎯"
-              iconClass="purple"
-              title="Ideal Weight Calculator"
-              desc="Find your ideal body weight range using multiple clinical formulas (Hamwi, Devine, Robinson, Miller)."
-            />
-            <div className="tool-body">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const f = e.currentTarget;
-                  setIwResult(calcIdealWeight(num("iw-height", f), str("iw-sex", f)));
-                }}
-              >
+          <CalculatorCard
+            id="idealweight"
+            icon="🎯"
+            iconClass="purple"
+            title="Ideal Weight Calculator"
+            description="Find your ideal body weight range using multiple clinical formulas (Hamwi, Devine, Robinson, Miller)."
+          >
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const f = e.currentTarget;
+                void openResult("idealweight", () => {
+                  const result = calcIdealWeight(num("iw-height", f), str("iw-sex", f));
+                  return result ? buildIdealWeightModal(result) : null;
+                });
+              }}
+            >
                 <div className="form-row">
                   <div className="form-group">
                     <label htmlFor="iw-height">Height (cm)</label>
@@ -420,46 +363,36 @@ export default function HealthToolsPage() {
                     </select>
                   </div>
                 </div>
-                <button type="submit" className="calc-btn">
-                  Calculate Ideal Weight
-                </button>
-              </form>
-              {iwResult && (
-                <div className="result-box">
-                  <div className="result-label">Ideal Weight Range</div>
-                  <div className="result-value">{iwResult.devine} kg</div>
-                  <div className="result-sub">
-                    Healthy range: {iwResult.lo} – {iwResult.hi} kg (Devine formula)
-                  </div>
-                </div>
-              )}
-              <Disclaimer text="⚠️ Ideal weight varies by individual. Frame size, muscle mass, and health conditions all play a role." />
-              <RelatedTags tags={["Weight Goals", "BMI Chart"]} />
-            </div>
-          </div>
-        </div>
+              <CalcButton loading={loadingId === "idealweight"}>Calculate Ideal Weight</CalcButton>
+            </form>
+          </CalculatorCard>
+        </CategorySection>
 
-        {/* NUTRITION */}
-        <div className="category-title spaced">🍎 Nutrition & Hydration</div>
-        <div className="category-subtitle">Personalised daily targets for calories and water based on your body and lifestyle</div>
-        <div className="tools-grid">
-          <div className="tool-panel" id="calories">
-            <ToolHeader
-              icon="🍽️"
-              iconClass="amber"
-              title="Calorie Calculator"
-              desc="Calculate your daily calorie needs to maintain, lose, or gain weight based on your personal goals."
-            />
-            <div className="tool-body">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const f = e.currentTarget;
-                  setCalResult(
-                    calcCalories(num("cal-weight", f), num("cal-height", f), num("cal-age", f), str("cal-sex", f), num("cal-goal", f)),
-                  );
-                }}
-              >
+        <CategorySection
+          tabIndex={CATEGORY_TAB.NUTRITION}
+          activeTab={activeTab}
+          animationKey={tabAnimKey}
+          emoji="🍎"
+          title="Nutrition & Hydration"
+          subtitle="Personalised daily targets for calories and water based on your body and lifestyle"
+        >
+          <CalculatorCard
+            id="calories"
+            icon="🍽️"
+            iconClass="amber"
+            title="Calorie Calculator"
+            description="Calculate your daily calorie needs to maintain, lose, or gain weight based on your personal goals."
+          >
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const f = e.currentTarget;
+                void openResult("calories", () => {
+                  const result = calcCalories(num("cal-weight", f), num("cal-height", f), num("cal-age", f), str("cal-sex", f), num("cal-goal", f));
+                  return result ? buildCalorieModal(result) : null;
+                });
+              }}
+            >
                 <div className="form-row">
                   <div className="form-group">
                     <label htmlFor="cal-weight">Weight (kg)</label>
@@ -494,39 +427,27 @@ export default function HealthToolsPage() {
                     </select>
                   </div>
                 </div>
-                <button type="submit" className="calc-btn">
-                  Calculate Daily Calories
-                </button>
-              </form>
-              {calResult && (
-                <div className="result-box">
-                  <div className="result-label">Daily Calorie Target</div>
-                  <div className="result-value">{calResult.tdee} kcal</div>
-                  <div className="result-sub">
-                    Protein: {calResult.protein}g &nbsp;|&nbsp; Carbs: {calResult.carbs}g &nbsp;|&nbsp; Fat: {calResult.fat}g
-                  </div>
-                </div>
-              )}
-              <Disclaimer text="⚠️ These are general estimates. Individual needs vary. Consult a registered dietitian for a personalised plan." />
-              <RelatedTags tags={["Healthy Eating Guide", "Macronutrient Basics"]} />
-            </div>
-          </div>
+              <CalcButton loading={loadingId === "calories"}>Calculate Daily Calories</CalcButton>
+            </form>
+          </CalculatorCard>
 
-          <div className="tool-panel" id="water">
-            <ToolHeader
-              icon="💧"
-              iconClass="teal"
-              title="Water Intake Calculator"
-              desc="Find your optimal daily water intake to stay hydrated based on your weight, climate, and activity level."
-            />
-            <div className="tool-body">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const f = e.currentTarget;
-                  setWaterResult(calcWater(num("wa-weight", f), num("wa-age", f), num("wa-act", f), num("wa-climate", f)));
-                }}
-              >
+          <CalculatorCard
+            id="water"
+            icon="💧"
+            iconClass="teal"
+            title="Water Intake Calculator"
+            description="Find your optimal daily water intake to stay hydrated based on your weight, climate, and activity level."
+          >
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const f = e.currentTarget;
+                void openResult("water", () => {
+                  const result = calcWater(num("wa-weight", f), num("wa-age", f), num("wa-act", f), num("wa-climate", f));
+                  return result ? buildWaterModal(result) : null;
+                });
+              }}
+            >
                 <div className="form-row">
                   <div className="form-group">
                     <label htmlFor="wa-weight">Weight (kg)</label>
@@ -555,42 +476,36 @@ export default function HealthToolsPage() {
                     </select>
                   </div>
                 </div>
-                <button type="submit" className="calc-btn">
-                  Calculate Water Intake
-                </button>
-              </form>
-              {waterResult && (
-                <div className="result-box">
-                  <div className="result-label">Daily Water Intake</div>
-                  <div className="result-value">{waterResult.litres} litres</div>
-                  <div className="result-sub">Approx. {waterResult.cups} cups (250 ml each)</div>
-                </div>
-              )}
-              <Disclaimer text="⚠️ Needs vary with health status, medications, and illness. Increase intake if exercising heavily or in hot weather." />
-              <RelatedTags tags={["Dehydration Signs", "Hydration & Health"]} />
-            </div>
-          </div>
-        </div>
+              <CalcButton loading={loadingId === "water"}>Calculate Water Intake</CalcButton>
+            </form>
+          </CalculatorCard>
+        </CategorySection>
 
-        {/* HEART & BLOOD */}
-        <div className="category-title spaced">❤️ Heart & Blood Health</div>
-        <div className="category-subtitle">Monitor your cardiovascular health metrics with these clinically validated tools</div>
-        <div className="tools-grid">
-          <div className="tool-panel" id="heartrate">
-            <ToolHeader
-              icon="💓"
-              iconClass="pink"
-              title="Heart Rate Zone Calculator"
-              desc="Calculate your maximum heart rate and target heart rate zones for safe and effective cardiovascular training."
-            />
-            <div className="tool-body">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const f = e.currentTarget;
-                  setHrResult(calcHR(num("hr-age", f), num("hr-rest", f)));
-                }}
-              >
+        <CategorySection
+          tabIndex={CATEGORY_TAB.HEART}
+          activeTab={activeTab}
+          animationKey={tabAnimKey}
+          emoji="❤️"
+          title="Heart & Blood Health"
+          subtitle="Monitor your cardiovascular health metrics with these clinically validated tools"
+        >
+          <CalculatorCard
+            id="heartrate"
+            icon="💓"
+            iconClass="pink"
+            title="Heart Rate Zone Calculator"
+            description="Calculate your maximum heart rate and target heart rate zones for safe and effective cardiovascular training."
+          >
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const f = e.currentTarget;
+                void openResult("heartrate", () => {
+                  const result = calcHR(num("hr-age", f), num("hr-rest", f));
+                  return result ? buildHrModal(result) : null;
+                });
+              }}
+            >
                 <div className="form-row">
                   <div className="form-group">
                     <label htmlFor="hr-age">Age</label>
@@ -611,50 +526,27 @@ export default function HealthToolsPage() {
                     </select>
                   </div>
                 </div>
-                <button type="submit" className="calc-btn">
-                  Calculate Heart Rate Zones
-                </button>
-              </form>
-              {hrResult && (
-                <div className="result-box">
-                  <div className="result-label">Maximum Heart Rate</div>
-                  <div className="result-value">{hrResult.max} bpm</div>
-                  <div className="hr-zones">
-                    {hrResult.zones.map((z) => (
-                      <div
-                        key={z.name}
-                        className="hr-zone-row"
-                        style={{ background: `${z.col}18`, borderLeft: `3px solid ${z.col}` }}
-                      >
-                        <span style={{ color: z.col, fontWeight: 600 }}>{z.name}</span>
-                        <span style={{ color: "var(--gray-600)" }}>
-                          {z.lo}–{z.hi} bpm
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              <Disclaimer text="⚠️ Stop exercising immediately if you experience chest pain, dizziness, or shortness of breath." />
-              <RelatedTags tags={["Cardio Training", "Heart Health Guide"]} />
-            </div>
-          </div>
+              <CalcButton loading={loadingId === "heartrate"}>Calculate Heart Rate Zones</CalcButton>
+            </form>
+          </CalculatorCard>
 
-          <div className="tool-panel" id="bloodpressure">
-            <ToolHeader
-              icon="🩺"
-              iconClass="blue"
-              title="Blood Pressure Tracker"
-              desc="Enter your blood pressure reading to understand your category and receive personalised guidance."
-            />
-            <div className="tool-body">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const f = e.currentTarget;
-                  setBpResult(calcBP(num("bp-sys", f), num("bp-dia", f)));
-                }}
-              >
+          <CalculatorCard
+            id="bloodpressure"
+            icon="🩺"
+            iconClass="blue"
+            title="Blood Pressure Tracker"
+            description="Enter your blood pressure reading to understand your category and receive personalised guidance."
+          >
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const f = e.currentTarget;
+                void openResult("bloodpressure", () => {
+                  const result = calcBP(num("bp-sys", f), num("bp-dia", f));
+                  return result ? buildBpModal(result) : null;
+                });
+              }}
+            >
                 <div className="form-row">
                   <div className="form-group">
                     <label htmlFor="bp-sys">Systolic (mmHg)</label>
@@ -679,46 +571,35 @@ export default function HealthToolsPage() {
                     </select>
                   </div>
                 </div>
-                <button type="submit" className="calc-btn">
-                  Analyse Reading
-                </button>
-              </form>
-              {bpResult && (
-                <div className="result-box">
-                  <div className="result-label">Blood Pressure Category</div>
-                  <div className="result-value">
-                    {bpResult.sys} / {bpResult.dia} mmHg
-                  </div>
-                  <span className={`bpcat ${bpResult.cls}`}>{bpResult.category}</span>
-                  <div className="result-sub" style={{ marginTop: 8 }}>
-                    {bpResult.advice}
-                  </div>
-                </div>
-              )}
-              <Disclaimer text="⚠️ A single reading is not diagnostic. Monitor regularly and consult your doctor if readings are consistently elevated." />
-              <RelatedTags tags={["Hypertension Guide", "Heart-Healthy Diet"]} />
-            </div>
-          </div>
-        </div>
+              <CalcButton loading={loadingId === "bloodpressure"}>Analyse Reading</CalcButton>
+            </form>
+          </CalculatorCard>
+        </CategorySection>
 
-        {/* WOMEN'S HEALTH */}
-        <div className="category-title spaced">🤰 Women&apos;s Health</div>
-        <div className="category-subtitle">Reproductive health calculators designed with obstetricians and gynaecologists</div>
-        <div className="tools-grid">
-          <div className="tool-panel" id="pregnancy">
-            <ToolHeader
-              icon="🤰"
-              iconClass="pink"
-              title="Pregnancy Due Date Calculator"
-              desc="Calculate your estimated due date (EDD) and key pregnancy milestones from your last menstrual period."
-            />
-            <div className="tool-body">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  setPregResult(calcPregnancy(str("preg-lmp", e.currentTarget)));
-                }}
-              >
+        <CategorySection
+          tabIndex={CATEGORY_TAB.WOMENS}
+          activeTab={activeTab}
+          animationKey={tabAnimKey}
+          emoji="🤰"
+          title="Women's Health"
+          subtitle="Reproductive health calculators designed with obstetricians and gynaecologists"
+        >
+          <CalculatorCard
+            id="pregnancy"
+            icon="🤰"
+            iconClass="pink"
+            title="Pregnancy Due Date Calculator"
+            description="Calculate your estimated due date (EDD) and key pregnancy milestones from your last menstrual period."
+          >
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                void openResult("pregnancy", () => {
+                  const result = calcPregnancy(str("preg-lmp", e.currentTarget));
+                  return result ? buildPregnancyModal(result) : null;
+                });
+              }}
+            >
                 <div className="form-row single">
                   <div className="form-group">
                     <label htmlFor="preg-lmp">First Day of Last Menstrual Period (LMP)</label>
@@ -738,48 +619,27 @@ export default function HealthToolsPage() {
                     </select>
                   </div>
                 </div>
-                <button type="submit" className="calc-btn">
-                  Calculate Due Date
-                </button>
-              </form>
-              {pregResult && (
-                <div className="result-box">
-                  <div className="result-label">Estimated Due Date (EDD)</div>
-                  <div className="result-value">{pregResult.edd}</div>
-                  <div className="result-sub">{pregResult.weeksText}</div>
-                  <div className="preg-trimesters">
-                    <div className="preg-t1">🟢 1st Trimester: Weeks 1–13 (ends {pregResult.t1End})</div>
-                    <div className="preg-t2">🟡 2nd Trimester: Weeks 14–27 (ends {pregResult.t2End})</div>
-                    <div className="preg-t3">🔴 3rd Trimester: Weeks 28–40 (due {pregResult.eddShort})</div>
-                  </div>
-                </div>
-              )}
-              <Disclaimer text="⚠️ EDD is an estimate — only ~5% of babies are born on their due date. Ultrasound dating is the most accurate method." />
-              <RelatedTags tags={["Prenatal Care", "Pregnancy Nutrition", "Birth Plan"]} />
-            </div>
-          </div>
+              <CalcButton loading={loadingId === "pregnancy"}>Calculate Due Date</CalcButton>
+            </form>
+          </CalculatorCard>
 
-          <div className="tool-panel" id="ovulation">
-            <ToolHeader
-              icon="🌸"
-              iconClass="purple"
-              title="Ovulation Calculator"
-              desc="Predict your fertile window and ovulation date to help with family planning or conception."
-            />
-            <div className="tool-body">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const f = e.currentTarget;
-                  setOvResult(
-                    calcOvulation(
-                      str("ov-lmp", f),
-                      num("ov-cycle", f) || 28,
-                      num("ov-luteal", f) || 14,
-                    ),
-                  );
-                }}
-              >
+          <CalculatorCard
+            id="ovulation"
+            icon="🌸"
+            iconClass="purple"
+            title="Ovulation Calculator"
+            description="Predict your fertile window and ovulation date to help with family planning or conception."
+          >
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const f = e.currentTarget;
+                void openResult("ovulation", () => {
+                  const result = calcOvulation(str("ov-lmp", f), num("ov-cycle", f) || 28, num("ov-luteal", f) || 14);
+                  return result ? buildOvulationModal(result) : null;
+                });
+              }}
+            >
                 <div className="form-row single">
                   <div className="form-group">
                     <label htmlFor="ov-lmp">First Day of Last Period</label>
@@ -796,54 +656,37 @@ export default function HealthToolsPage() {
                     <input type="number" id="ov-luteal" name="ov-luteal" placeholder="14" min={10} max={16} />
                   </div>
                 </div>
-                <button type="submit" className="calc-btn">
-                  Calculate Fertile Window
-                </button>
-              </form>
-              {ovResult && (
-                <div className="result-box">
-                  <div className="result-label">Ovulation Date</div>
-                  <div className="result-value">{ovResult.ovDate}</div>
-                  <div className="result-sub">{ovResult.window}</div>
-                  <div className="result-sub" style={{ marginTop: 4 }}>
-                    Next period expected: {ovResult.nextPeriod}
-                  </div>
-                </div>
-              )}
-              <Disclaimer text="⚠️ Ovulation calculators provide estimates only. Cycle irregularities affect accuracy. Consult a fertility specialist for conception planning." />
-              <RelatedTags tags={["Fertility Guide", "Menstrual Health"]} />
-            </div>
-          </div>
-        </div>
+              <CalcButton loading={loadingId === "ovulation"}>Calculate Fertile Window</CalcButton>
+            </form>
+          </CalculatorCard>
+        </CategorySection>
 
-        {/* RISK ASSESSMENT */}
-        <div className="category-title spaced">🩸 Risk Assessment Tools</div>
-        <div className="category-subtitle">Clinically validated screening tools to assess your risk for common conditions</div>
-        <div className="tools-grid">
-          <div className="tool-panel" id="diabetes">
-            <ToolHeader
-              icon="🩸"
-              iconClass="amber"
-              title="Diabetes Risk Assessment"
-              desc="Assess your risk of developing Type 2 diabetes using the validated ADA risk screening questionnaire."
-            />
-            <div className="tool-body">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const f = e.currentTarget;
-                  setDbResult(
-                    calcDiabetes([
-                      num("db-age", f),
-                      num("db-bmi", f),
-                      num("db-fam", f),
-                      num("db-act", f),
-                      num("db-bp", f),
-                      num("db-gest", f),
-                    ]),
-                  );
-                }}
-              >
+        <CategorySection
+          tabIndex={CATEGORY_TAB.RISK}
+          activeTab={activeTab}
+          animationKey={tabAnimKey}
+          emoji="🩸"
+          title="Risk Assessment Tools"
+          subtitle="Clinically validated screening tools to assess your risk for common conditions"
+        >
+          <CalculatorCard
+            id="diabetes"
+            icon="🩸"
+            iconClass="amber"
+            title="Diabetes Risk Assessment"
+            description="Assess your risk of developing Type 2 diabetes using the validated ADA risk screening questionnaire."
+          >
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const f = e.currentTarget;
+                void openResult("diabetes", () => {
+                  const scores = [num("db-age", f), num("db-bmi", f), num("db-fam", f), num("db-act", f), num("db-bp", f), num("db-gest", f)];
+                  const score = scores.reduce((a, b) => a + b, 0);
+                  return buildDiabetesModal(calcDiabetes(scores), score);
+                });
+              }}
+            >
                 <div className="form-row">
                   <div className="form-group">
                     <label htmlFor="db-age">Age</label>
@@ -897,36 +740,27 @@ export default function HealthToolsPage() {
                     </select>
                   </div>
                 </div>
-                <button type="submit" className="calc-btn">
-                  Assess My Risk
-                </button>
-              </form>
-              {dbResult && (
-                <div style={{ marginTop: 14 }}>
-                  <div className={`risk-badge ${dbResult.cls}`}>{dbResult.badge}</div>
-                  <div className="risk-advice">{dbResult.advice}</div>
-                </div>
-              )}
-              <Disclaimer text="⚠️ This is a screening tool, not a diagnostic test. Only a blood glucose test (HbA1c or fasting glucose) can diagnose diabetes." />
-              <RelatedTags tags={["Type 2 Diabetes Guide", "Blood Sugar Management"]} />
-            </div>
-          </div>
+              <CalcButton loading={loadingId === "diabetes"}>Assess My Risk</CalcButton>
+            </form>
+          </CalculatorCard>
 
-          <div className="tool-panel" id="smoking">
-            <ToolHeader
-              icon="🚭"
-              iconClass="green"
-              title="Smoking Risk Calculator"
-              desc="Understand your cumulative smoking exposure (pack years) and associated health risks including lung cancer and COPD."
-            />
-            <div className="tool-body">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const f = e.currentTarget;
-                  setSmResult(calcSmoking(num("sm-cpd", f), num("sm-yrs", f)));
-                }}
-              >
+          <CalculatorCard
+            id="smoking"
+            icon="🚭"
+            iconClass="green"
+            title="Smoking Risk Calculator"
+            description="Understand your cumulative smoking exposure (pack years) and associated health risks including lung cancer and COPD."
+          >
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const f = e.currentTarget;
+                void openResult("smoking", () => {
+                  const result = calcSmoking(num("sm-cpd", f), num("sm-yrs", f));
+                  return result ? buildSmokingModal(result) : null;
+                });
+              }}
+            >
                 <div className="form-row">
                   <div className="form-group">
                     <label htmlFor="sm-cpd">Cigarettes/day</label>
@@ -946,37 +780,27 @@ export default function HealthToolsPage() {
                     </select>
                   </div>
                 </div>
-                <button type="submit" className="calc-btn">
-                  Calculate Smoking Risk
-                </button>
-              </form>
-              {smResult && (
-                <div className="result-box">
-                  <div className="result-label">Pack Years</div>
-                  <div className="result-value">{smResult.packYears} pack years</div>
-                  <div className="result-sub">{smResult.risk}</div>
-                </div>
-              )}
-              <Disclaimer text="⚠️ No level of smoking is safe. Quitting at any age has immediate and long-term health benefits. Speak to your doctor about cessation support." />
-              <RelatedTags tags={["Quitting Smoking Guide", "Lung Health", "COPD Risk"]} />
-            </div>
-          </div>
+              <CalcButton loading={loadingId === "smoking"}>Calculate Smoking Risk</CalcButton>
+            </form>
+          </CalculatorCard>
 
-          <div className="tool-panel" id="kidney">
-            <ToolHeader
-              icon="🫘"
-              iconClass="blue"
-              title="eGFR / Kidney Function Calculator"
-              desc="Estimate your kidney function using the CKD-EPI equation based on your serum creatinine level."
-            />
-            <div className="tool-body">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const f = e.currentTarget;
-                  setKdResult(calcKidney(num("kd-creat", f), num("kd-age", f), str("kd-sex", f), str("kd-race", f)));
-                }}
-              >
+          <CalculatorCard
+            id="kidney"
+            icon="🫘"
+            iconClass="blue"
+            title="eGFR / Kidney Function Calculator"
+            description="Estimate your kidney function using the CKD-EPI equation based on your serum creatinine level."
+          >
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const f = e.currentTarget;
+                void openResult("kidney", () => {
+                  const result = calcKidney(num("kd-creat", f), num("kd-age", f), str("kd-sex", f), str("kd-race", f));
+                  return result ? buildKidneyModal(result) : null;
+                });
+              }}
+            >
                 <div className="form-row">
                   <div className="form-group">
                     <label htmlFor="kd-creat">Serum Creatinine (mg/dL)</label>
@@ -1003,37 +827,28 @@ export default function HealthToolsPage() {
                     </select>
                   </div>
                 </div>
-                <button type="submit" className="calc-btn">
-                  Calculate eGFR
-                </button>
-              </form>
-              {kdResult && (
-                <div className="result-box">
-                  <div className="result-label">Estimated GFR (eGFR)</div>
-                  <div className="result-value">{kdResult.egfr} mL/min/1.73m²</div>
-                  <div className="result-sub">CKD Stage: {kdResult.stage}</div>
-                </div>
-              )}
-              <Disclaimer text="⚠️ eGFR requires a lab creatinine result. This calculator is for educational purposes only — CKD staging requires clinical evaluation." />
-              <RelatedTags tags={["Kidney Disease Guide", "CKD Stages"]} />
-            </div>
-          </div>
-        </div>
+              <CalcButton loading={loadingId === "kidney"}>Calculate eGFR</CalcButton>
+            </form>
+          </CalculatorCard>
+        </CategorySection>
 
-        {/* MENTAL HEALTH */}
-        <div className="category-title spaced">🧘 Mental Health Screening</div>
-        <div className="category-subtitle">
-          Validated screening tools used in clinical practice — not diagnostic, but an important first step
-        </div>
-        <div className="tools-grid">
-          <div className="tool-panel" id="mentalhealth">
-            <ToolHeader
-              icon="🧠"
-              iconClass="purple"
-              title="PHQ-9 Depression Screening"
-              desc="The PHQ-9 is the gold-standard clinical screening tool for depression severity, used by doctors worldwide."
-            />
-            <div className="tool-body">
+        <CategorySection
+          tabIndex={CATEGORY_TAB.MENTAL}
+          activeTab={activeTab}
+          animationKey={tabAnimKey}
+          emoji="🧘"
+          title="Mental Health Screening"
+          subtitle="Validated screening tools used in clinical practice — not diagnostic, but an important first step"
+        >
+          <CalculatorCard
+            id="mentalhealth"
+            icon="🧠"
+            iconClass="purple"
+            title="PHQ-9 Depression Screening"
+            description="The PHQ-9 is the gold-standard clinical screening tool for depression severity, used by doctors worldwide."
+            tall
+          >
+            <div className="calc-card-scroll">
               <p className="phq-intro">
                 Over the <strong>last 2 weeks</strong>, how often have you been bothered by the following?{" "}
                 <em>(0 = Not at all, 1 = Several days, 2 = More than half the days, 3 = Nearly every day)</em>
@@ -1059,35 +874,38 @@ export default function HealthToolsPage() {
                   </div>
                 ))}
               </div>
-              <button type="button" className="calc-btn" onClick={() => setPhqResult(calcPHQ9(phqScores.reduce((a, b) => a + b, 0)))}>
-                Calculate Score
-              </button>
-              {phqResult && (
-                <div style={{ marginTop: 14 }}>
-                  <div className={`risk-badge ${phqResult.cls}`}>{phqResult.badge}</div>
-                  <div className="risk-advice">{phqResult.advice}</div>
-                </div>
-              )}
-              <Disclaimer text="⚠️ This is a screening tool only. If you are having thoughts of self-harm, please call a crisis line immediately: 988 Suicide & Crisis Lifeline (call/text 988)." />
-              <RelatedTags tags={["Mental Health Resources", "Find a Psychiatrist", "Therapy Options"]} />
             </div>
-          </div>
+            <CalcButton
+              type="button"
+              loading={loadingId === "mentalhealth"}
+              onClick={() => {
+                void openResult("mentalhealth", () => {
+                  const score = phqScores.reduce((a, b) => a + b, 0);
+                  return buildPhqModal(calcPHQ9(score), score);
+                });
+              }}
+            >
+              Calculate Score
+            </CalcButton>
+          </CalculatorCard>
 
-          <div className="tool-panel" id="symptom">
-            <ToolHeader
-              icon="🔎"
-              iconClass="teal"
-              title="Symptom Checker"
-              desc="Enter your symptoms to get guidance on possible conditions and whether you need to seek urgent medical care."
-            />
-            <div className="tool-body">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const f = e.currentTarget;
-                  setSyResult(checkSymptom(str("sy-symp", f), str("sy-dur", f)));
-                }}
-              >
+          <CalculatorCard
+            id="symptom"
+            icon="🔎"
+            iconClass="teal"
+            title="Symptom Checker"
+            description="Enter your symptoms to get guidance on possible conditions and whether you need to seek urgent medical care."
+          >
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const f = e.currentTarget;
+                void openResult("symptom", () => {
+                  const result = checkSymptom(str("sy-symp", f), str("sy-dur", f));
+                  return result ? buildSymptomModal(result) : null;
+                });
+              }}
+            >
                 <div className="form-row">
                   <div className="form-group">
                     <label htmlFor="sy-age">Age</label>
@@ -1128,30 +946,21 @@ export default function HealthToolsPage() {
                     </select>
                   </div>
                 </div>
-                <button type="submit" className="calc-btn">
-                  Check Symptoms
-                </button>
-              </form>
-              {syResult && (
-                <div style={{ marginTop: 14 }}>
-                  <div className={`risk-badge ${syResult.cls}`}>{syResult.badge}</div>
-                  <div className="risk-advice spaced">{syResult.advice}</div>
-                </div>
-              )}
-              <Disclaimer text="⚠️ This tool does not provide a diagnosis. Always consult a qualified doctor for proper evaluation and treatment." />
-              <RelatedTags tags={["Book a Consultation", "Emergency Signs"]} />
-            </div>
-          </div>
-        </div>
+              <CalcButton loading={loadingId === "symptom"}>Check Symptoms</CalcButton>
+            </form>
+          </CalculatorCard>
+        </CategorySection>
 
         {/* CTA */}
         <div className="tools-cta">
-          <div className="eyebrow">Need Professional Advice?</div>
-          <h2>Your Health Tools Are Just the First Step</h2>
-          <p>
-            These tools help you understand your metrics — but a board-certified doctor can give you personalised
-            guidance, diagnosis, and treatment.
-          </p>
+          <SectionHeading
+            className="!mb-0"
+            eyebrow="Need Professional Advice?"
+            title="Your Health Tools Are Just the First Step"
+            description="These tools help you understand your metrics — but a board-certified doctor can give you personalised guidance, diagnosis, and treatment."
+            inverse
+            lightEyebrow
+          />
           <div className="tools-cta-btns">
             <Link href="/book-consultation" className="tools-cta-primary">
               📅 Book a Consultation
@@ -1162,6 +971,12 @@ export default function HealthToolsPage() {
           </div>
         </div>
       </div>
+
+      <CalculatorResultModal
+        data={modalResult}
+        onClose={() => setModalResult(null)}
+        onCalculateAgain={handleCalculateAgain}
+      />
     </div>
   );
 }

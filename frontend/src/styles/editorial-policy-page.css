@@ -162,8 +162,6 @@
 }
 
 .editorial-policy-page .mission-inner h2 {
-  font-family: var(--font-display);
-  font-size: 1.4rem;
   margin-bottom: 12px;
   display: flex;
   align-items: center;

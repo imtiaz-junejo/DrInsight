@@ -3,6 +3,10 @@
 import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
 import {
+  SectionEyebrow,
+  SectionTitle,
+} from "@/components/public/section-heading";
+import {
   doctorFullName,
   formatCurrency,
   formatDate,
@@ -1191,7 +1195,7 @@ export function DoctorBioPageContent({ doctorId }: { doctorId: string }) {
       {articles.length > 0 && (
         <div className="articles-section">
           <div className="articles-header">
-            <h2>📚 Articles by {name}</h2>
+            <SectionTitle>📚 Articles by {name}</SectionTitle>
             <div className="filter-tabs">
               <div
                 className={`ftab${articleFilter === "all" ? " active" : ""}`}
@@ -1346,19 +1350,8 @@ export function DoctorBioPageContent({ doctorId }: { doctorId: string }) {
       </div>
 
       <div className="cta-strip">
-        <div
-          style={{
-            fontSize: ".68rem",
-            fontWeight: 700,
-            letterSpacing: ".12em",
-            textTransform: "uppercase",
-            color: "#93c5fd",
-            marginBottom: 8,
-          }}
-        >
-          Consult {name}
-        </div>
-        <h2>Book a {doctor.specialty} Consultation Today</h2>
+        <SectionEyebrow light>Consult {name}</SectionEyebrow>
+        <SectionTitle inverse>Book a {doctor.specialty} Consultation Today</SectionTitle>
         <p>
           Get a personalised consultation with {name} — video, phone, or chat. Same-day appointments
           available.

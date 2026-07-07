@@ -4,6 +4,11 @@ import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
 import "@/styles/blog-page.css";
 import {
+  SectionEyebrow,
+  SectionHeading,
+  SectionTitle,
+} from "@/components/public/section-heading";
+import {
   doctorFullName,
   formatStatCount,
   getInitials,
@@ -180,8 +185,10 @@ export default function BlogPage() {
       <div className="main-wrap" ref={mainWrapRef}>
         <div className="blog-layout">
           <div>
-            <div className="section-eyebrow">Latest Articles</div>
-            <div className="section-title">Recent Medical Insights</div>
+            <SectionEyebrow className="section-eyebrow">Latest Articles</SectionEyebrow>
+            <SectionTitle as="div" className="section-title">
+              Recent Medical Insights
+            </SectionTitle>
 
             <div className="filter-bar" id="filter-bar">
               {filterPills.map((pill) => (
@@ -246,10 +253,10 @@ export default function BlogPage() {
             )}
 
             <div className="trending-section">
-              <div className="section-eyebrow" style={{ marginTop: 36 }}>
-                Most Read
-              </div>
-              <div className="section-title">Trending Articles</div>
+              <SectionEyebrow className="section-eyebrow mt-9">Most Read This Week</SectionEyebrow>
+              <SectionTitle as="div" className="section-title">
+                Trending Articles
+              </SectionTitle>
               <div className="trending-list">
                 {(popularPosts ?? []).map((item, i) => (
                   <Link key={item.id} href={`/blog/${item.slug}`} className="trending-item">
@@ -339,11 +346,14 @@ export default function BlogPage() {
 
       <div className="cats-section">
         <div className="cats-inner">
-          <div className="cats-section-header">
-            <div className="section-eyebrow">All Categories</div>
-            <h2>Browse by Medical Category</h2>
-            <p>Explore our full library of doctor-written articles across every medical field</p>
-          </div>
+          <SectionHeading
+            className="cats-section-header !mb-7 !text-left"
+            align="left"
+            eyebrow="All Categories"
+            title="Browse by Medical Category"
+            description="Explore our full library of doctor-written articles across every medical field"
+            descriptionClassName="!mx-0 !max-w-none"
+          />
           <div className="cats-grid" id="cats-grid">
             {(categories ?? []).map((cat) => (
               <button
@@ -366,14 +376,14 @@ export default function BlogPage() {
       </div>
 
       <div className="cta-band">
-        <div className="section-eyebrow" style={{ color: "#93c5fd" }}>
-          Never Stop Learning
-        </div>
-        <h2>Stay Informed with Weekly Health Insights</h2>
-        <p>
-          Join {stats ? formatStatCount(stats.newsletterCount ?? stats.patientCount) : "—"} readers who get our
-          curated weekly digest of the best new articles from our doctors.
-        </p>
+        <SectionHeading
+          className="!mb-0"
+          eyebrow="Never Stop Learning"
+          title="Stay Informed with Weekly Health Insights"
+          description={`Join ${stats ? formatStatCount(stats.newsletterCount ?? stats.patientCount) : "—"} readers who get our curated weekly digest of the best new articles from our doctors.`}
+          inverse
+          lightEyebrow
+        />
         <div className="cta-btns">
           <button
             type="button"

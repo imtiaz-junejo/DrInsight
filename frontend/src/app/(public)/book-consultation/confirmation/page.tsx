@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { usePaymentConfirmation } from "@/services/api-hooks";
 import { formatCurrency } from "@/lib/data-mappers";
+import { SectionTitle } from "@/components/public/section-heading";
 import "@/styles/book-consultation-page.css";
 
 function consultationLabel(type: string) {
@@ -41,7 +42,7 @@ export default function AppointmentConfirmationPage() {
     return (
       <div className="book-consultation-page">
         <div className="confirm-page show">
-          <h2>Invalid confirmation link</h2>
+          <SectionTitle>Invalid confirmation link</SectionTitle>
           <Link href="/book-consultation" className="cbtn-primary">
             Book a Consultation
           </Link>
@@ -57,7 +58,7 @@ export default function AppointmentConfirmationPage() {
           <p>Loading confirmation...</p>
         ) : isError || !data ? (
           <>
-            <h2>Confirmation not found</h2>
+            <SectionTitle>Confirmation not found</SectionTitle>
             <p>Your payment may still be processing. Check your patient dashboard shortly.</p>
             <Link href="/patient/consultations" className="cbtn-primary">
               Go to Dashboard
@@ -68,7 +69,7 @@ export default function AppointmentConfirmationPage() {
             <div className="confirm-circle success-animate">
               <i className="ti ti-circle-check" aria-hidden="true" />
             </div>
-            <h2>Appointment Confirmed!</h2>
+            <SectionTitle>Appointment Confirmed!</SectionTitle>
             <p>Your payment was successful. A confirmation email has been sent to your inbox.</p>
             <div className="confirm-details">
               <div className="cd-row">

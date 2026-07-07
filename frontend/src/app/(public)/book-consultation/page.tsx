@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "@/styles/book-consultation-page.css";
+import { SectionTitle } from "@/components/public/section-heading";
 import { formatCurrency, mapDoctorProfile, specialtyEmoji } from "@/lib/data-mappers";
 import { CONTACT_PHONE, CONTACT_PHONE_TEL } from "@/lib/site-contact";
 import type { DoctorScheduleDay } from "@/services/api-hooks";
@@ -394,7 +395,7 @@ export default function BookConsultationPage() {
             <Link href="/" className="back-home">
               <i className="ti ti-arrow-left" aria-hidden="true" /> Back to Home
             </Link>
-            <h2 className="booking-title">Book Consultation</h2>
+            <SectionTitle className="booking-title">Book Consultation</SectionTitle>
             <p className="booking-subtitle">Book an appointment with our trusted healthcare specialists</p>
 
             <div className="steps-bar">
@@ -1030,7 +1031,7 @@ export default function BookConsultationPage() {
         <div className="confirm-circle">
           <i className="ti ti-circle-check" aria-hidden="true" />
         </div>
-        <h2>Booking Confirmed!</h2>
+        <SectionTitle>Booking Confirmed!</SectionTitle>
         <p>
           Your consultation has been successfully booked. A confirmation email with joining instructions has been sent
           to your inbox.

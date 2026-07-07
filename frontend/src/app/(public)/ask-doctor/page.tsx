@@ -3,6 +3,11 @@
 import Link from "next/link";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
+  SectionEyebrow,
+  SectionHeading,
+  SectionTitle,
+} from "@/components/public/section-heading";
+import {
   doctorFullName,
   formatDate,
   formatStatCount,
@@ -245,7 +250,7 @@ export default function AskDoctorPage() {
       <div className="page-hero">
         <div className="page-hero-inner">
           <div className="eyebrow">Free Medical Q&A</div>
-          <h1>Ask a Board-Certified Doctor — Free</h1>
+          <h1 className="text-4xl font-bold">Ask a Board-Certified Doctor — Free</h1>
           <p>
             Submit your health question and receive a personalised, medically reviewed answer from one of our{" "}
             {stats ? formatStatCount(stats.doctorCount) : "—"} specialist physicians.
@@ -271,8 +276,10 @@ export default function AskDoctorPage() {
       <div className="main-wrap">
         <div className="two-col">
           <div>
-            <div className="section-eyebrow">Browse Questions</div>
-            <div className="section-title">Featured Answered Questions</div>
+            <SectionEyebrow className="section-eyebrow">Browse Questions</SectionEyebrow>
+            <SectionTitle as="div" className="section-title">
+              Featured Answered Questions
+            </SectionTitle>
             <div className="section-sub">
               Browse {stats ? formatStatCount(stats.answeredQuestions) : "—"} questions answered by our specialist doctors. Use the search and filters to find answers
               relevant to you.
@@ -430,7 +437,7 @@ export default function AskDoctorPage() {
 
       <div className="specialists-strip">
         <div className="specialists-inner">
-          <h2>Browse by Medical Specialty</h2>
+          <SectionTitle>Browse by Medical Specialty</SectionTitle>
           <p>Find questions answered by specialists in your area of health concern</p>
           <div className="spec-grid">
             {(specialties ?? []).map((s) => (
@@ -454,11 +461,12 @@ export default function AskDoctorPage() {
 
       <div className="faq-section">
         <div className="faq-inner">
-          <div className="faq-header">
-            <div className="section-eyebrow">Common Questions</div>
-            <h2>Frequently Asked Questions</h2>
-            <p>Everything you need to know about our Ask the Doctor service</p>
-          </div>
+          <SectionHeading
+            className="faq-header !mb-0"
+            eyebrow="Common Questions"
+            title="Frequently Asked Questions"
+            description="Everything you need to know about our Ask the Doctor service"
+          />
 
           {FAQ_ITEMS.map((item, index) => (
             <div key={item.q} className={`faq-item${openFaq === index ? " open" : ""}`}>
@@ -473,12 +481,14 @@ export default function AskDoctorPage() {
       </div>
 
       <div className="cta-band">
-        <div className="eyebrow">Need More Than an Answer?</div>
-        <h2>Book a Full Doctor Consultation</h2>
-        <p>
-          For a thorough, personalised evaluation with one of our specialists — video, phone, or chat. Same-day
-          appointments available from $49.
-        </p>
+        <SectionHeading
+          className="!mb-0"
+          eyebrow="Need More Than an Answer?"
+          title="Book a Full Doctor Consultation"
+          description="For a thorough, personalised evaluation with one of our specialists — video, phone, or chat. Same-day appointments available from $49."
+          inverse
+          lightEyebrow
+        />
         <div className="cta-btns">
           <Link href="/book-consultation" className="btn-white">
             📅 Book a Consultation

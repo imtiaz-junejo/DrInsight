@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import "@/styles/editorial-policy-page.css";
+import { SectionTitle } from "@/components/public/section-heading";
 
 const TOC = [
   { id: "s1", num: "1", label: "Editorial Philosophy" },
@@ -172,7 +173,7 @@ export function EditorialPolicyContent() {
 
       <div className="mission-box">
         <div className="mission-inner">
-          <h2>🏥 Our Editorial Mission</h2>
+          <SectionTitle>🏥 Our Editorial Mission</SectionTitle>
           <p>
             DrInsight is committed to being the most trusted source of medical information for patients, caregivers,
             and healthcare professionals. Every piece of content we publish undergoes a rigorous multi-stage editorial

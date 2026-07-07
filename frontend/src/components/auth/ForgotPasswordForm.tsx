@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import { cn } from "@/lib/utils";
+import { SectionTitle } from "@/components/public/section-heading";
 import { CONTACT_PHONE } from "@/lib/site-contact";
 import { api } from "@/lib/api";
 
@@ -226,7 +227,7 @@ export function ForgotPasswordForm() {
           {view === "form" && (
             <div id="formState">
               <div className="card-icon">🔑</div>
-              <h2 className="card-h2">Forgot Password?</h2>
+              <SectionTitle className="card-h2 text-center">Forgot Password?</SectionTitle>
               <p className="card-sub">
                 Select how you&apos;d like to receive your password reset link. The link expires in 15 minutes.
               </p>

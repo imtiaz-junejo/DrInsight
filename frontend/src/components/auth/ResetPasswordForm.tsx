@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import { cn } from "@/lib/utils";
+import { SectionTitle } from "@/components/public/section-heading";
 import { api } from "@/lib/api";
 
 type ViewState = "loading" | "form" | "success" | "expired";
@@ -310,7 +311,7 @@ export function ResetPasswordForm() {
           {view === "form" && (
             <div id="formState">
               <div className="card-icon">🛡️</div>
-              <h2 className="card-h2">Reset Your Password</h2>
+              <SectionTitle className="card-h2 text-center">Reset Your Password</SectionTitle>
               <p className="card-sub">Enter and confirm your new password below. Make it strong and memorable.</p>
 
               <div className={cn("expiry-bar", expiryWarning && "warning")}>

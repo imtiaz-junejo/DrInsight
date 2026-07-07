@@ -4,6 +4,11 @@ import Link from "next/link";
 import { useMemo, useState, type CSSProperties } from "react";
 import "@/styles/contact-page.css";
 import {
+  SectionEyebrow,
+  SectionHeading,
+  SectionTitle,
+} from "@/components/public/section-heading";
+import {
   formatSiteAddress,
   isOpenNow,
   mapsHref,
@@ -290,7 +295,7 @@ export default function ContactPage() {
 
       <div className="main-section">
         <div className="form-card">
-          <h2>Send Us a Message</h2>
+          <SectionTitle>Send Us a Message</SectionTitle>
           <p>Fill in the form below and our team will respond within 2–4 hours during business hours.</p>
 
           {!submitted ? (
@@ -584,8 +589,8 @@ export default function ContactPage() {
       </div>
 
       <div className="faq-mini">
-        <div className="eyebrow">Common Queries</div>
-        <h2>Frequently Asked Contact Questions</h2>
+        <SectionEyebrow className="eyebrow">Common Queries</SectionEyebrow>
+        <SectionTitle>Frequently Asked Contact Questions</SectionTitle>
         <p>Quick answers to the most common questions about reaching our team</p>
         <div className="faq-grid">
           {faqItems.map((item, i) => (
@@ -608,14 +613,14 @@ export default function ContactPage() {
       </div>
 
       <div className="cta-strip">
-        <div className="eyebrow" style={{ color: "#93c5fd" }}>
-          Ready for Expert Care?
-        </div>
-        <h2>Don&apos;t Wait — Talk to a Doctor Today</h2>
-        <p>
-          Book a video, phone, or chat consultation with a specialist from the comfort of your home.
-          Same-day appointments available.
-        </p>
+        <SectionHeading
+          className="!mb-0"
+          eyebrow="Ready for Expert Care?"
+          title="Don't Wait — Talk to a Doctor Today"
+          description="Book a video, phone, or chat consultation with a specialist from the comfort of your home. Same-day appointments available."
+          inverse
+          lightEyebrow
+        />
         <div className="cta-btns">
           <Link href="/book-consultation" className="btn-white">
             📅 Book a Consultation

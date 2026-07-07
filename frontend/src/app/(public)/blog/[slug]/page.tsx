@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { SectionTitle } from "@/components/public/section-heading";
 import { doctorFullName, getInitials, specialtyEmoji } from "@/lib/data-mappers";
 import { useBlogPost } from "@/services/api-hooks";
 
@@ -90,7 +91,7 @@ export default function BlogArticlePage() {
 
       <section className="border-t border-gray-200 bg-gray-50 px-6 py-12">
         <div className="mx-auto max-w-[1240px]">
-          <h2 className="font-display mb-6 text-xl font-bold text-gray-900">Related Articles</h2>
+          <SectionTitle className="mb-6">Related Articles</SectionTitle>
           <div className="grid gap-5 sm:grid-cols-3">
             {relatedPosts.length > 0 ? (
               relatedPosts.map((item) => (

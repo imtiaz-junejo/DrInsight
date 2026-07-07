@@ -10,6 +10,7 @@ import { formatStatCount } from "@/lib/data-mappers";
 import { usePlatformStats } from "@/services/api-hooks";
 import { useAuthStore, type AuthUser } from "@/store/auth.store";
 import { AuthSocialButtons } from "@/components/auth/AuthSocialButtons";
+import { SectionTitle } from "@/components/public/section-heading";
 import { FloatingInput } from "@/components/ui/floating-input";
 import { FloatingSelect } from "@/components/ui/floating-select";
 import {
@@ -671,7 +672,7 @@ export function RegisterForm() {
 
           {!success && oauthPendingCode && (
             <div id="oauth-complete">
-              <h2 className="step-title">Complete Facebook Registration</h2>
+              <SectionTitle className="step-title">Complete Facebook Registration</SectionTitle>
               <p className="step-subtitle">
                 Facebook authenticated successfully, but your account does not expose an email address.
                 Enter your email to finish creating your patient account.
@@ -702,7 +703,7 @@ export function RegisterForm() {
 
           {!success && !oauthPendingCode && currentStep === 1 && (
             <div id="step1">
-              <h2 className="step-title">Create Your Account</h2>
+              <SectionTitle className="step-title">Create Your Account</SectionTitle>
               <p className="step-subtitle">Choose how you&apos;ll be using DrInsight</p>
 
               <div className="type-grid">
@@ -793,7 +794,7 @@ export function RegisterForm() {
 
           {!success && !oauthPendingCode && currentStep === 2 && (
             <div id="step2">
-              <h2 className="step-title">Personal Information</h2>
+              <SectionTitle className="step-title">Personal Information</SectionTitle>
               <p className="step-subtitle">{step2Subtitle}</p>
 
               <div className="form-row">
@@ -871,7 +872,7 @@ export function RegisterForm() {
             <div id="step3">
               {accountType !== "physician" && (
                 <div id="step3patient">
-                  <h2 className="step-title">Your Health Profile</h2>
+                  <SectionTitle className="step-title">Your Health Profile</SectionTitle>
                   <p className="step-subtitle">Help us personalise your experience</p>
                   <div className="form-group">
                     <label className="form-label">
@@ -926,7 +927,7 @@ export function RegisterForm() {
 
               {accountType === "physician" && (
                 <div id="step3physician">
-                  <h2 className="step-title">Professional Profile</h2>
+                  <SectionTitle className="step-title">Professional Profile</SectionTitle>
                   <p className="step-subtitle">Help us match you with relevant clinical content</p>
                   <div className="form-group">
                     <FloatingInput
@@ -1008,7 +1009,7 @@ export function RegisterForm() {
 
           {!success && !oauthPendingCode && currentStep === 4 && (
             <div id="step4">
-              <h2 className="step-title">Secure Your Account</h2>
+              <SectionTitle className="step-title">Secure Your Account</SectionTitle>
               <p className="step-subtitle">Create a strong password to protect your health data</p>
 
               <div className="form-group">
