@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 
 export interface Paginated<T> {
@@ -515,6 +515,25 @@ export function useAskDoctorQuestions(params: { page?: number; limit?: number; c
       const { data } = await api.get<Paginated<AskDoctorQuestion>>("/ask-doctor", { params });
       return data;
     },
+  });
+}
+
+export function useAskDoctorQuestionsInfinite(params: {
+  limit?: number;
+  category?: string;
+  search?: string;
+}) {
+  return useInfiniteQuery({
+    queryKey: ["ask-doctor", "infinite", params],
+    queryFn: async ({ pageParam }) => {
+      const { data } = await api.get<Paginated<AskDoctorQuestion>>("/ask-doctor", {
+        params: { ...params, page: pageParam },
+      });
+      return data;
+    },
+    getNextPageParam: (last) =>
+      last.meta.page < last.meta.totalPages ? last.meta.page + 1 : undefined,
+    initialPageParam: 1,
   });
 }
 

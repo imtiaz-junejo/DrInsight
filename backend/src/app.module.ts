@@ -18,6 +18,7 @@ import { RedisModule } from './redis/redis.module';
 import { GatewayModule } from './gateway/gateway.module';
 import { PaymentsModule } from './payments/payments.module';
 import { AboutModule } from './about/about.module';
+import { AskDoctorModule } from './ask-doctor/ask-doctor.module';
 import { PlatformModule } from './platform/platform.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
@@ -41,6 +42,7 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
     VideoModule,
     PaymentsModule,
     AboutModule,
+    AskDoctorModule,
     PlatformModule,
     AiModule,
     GatewayModule,

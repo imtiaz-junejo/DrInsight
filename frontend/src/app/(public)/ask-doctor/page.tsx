@@ -2,134 +2,19 @@
 
 import Link from "next/link";
 import { useCallback, useMemo, useRef, useState } from "react";
-import {
-  SectionEyebrow,
-  SectionHeading,
-  SectionTitle,
-} from "@/components/public/section-heading";
-import {
-  doctorFullName,
-  formatDate,
-  formatStatCount,
-  getInitials,
-  gradientForId,
-  specialtyEmoji,
-} from "@/lib/data-mappers";
+import { BrowseQuestionsSection } from "@/components/ask-doctor/BrowseQuestionsSection";
+import { SectionHeading, SectionTitle } from "@/components/public/section-heading";
+import { formatStatCount, specialtyEmoji } from "@/lib/data-mappers";
 import {
   useAskDoctorCategories,
-  useAskDoctorQuestions,
   useDoctorSpecialties,
-  useMarkQuestionHelpful,
   usePlatformStats,
   useSubmitQuestion,
-  type AskDoctorQuestion,
 } from "@/services/api-hooks";
 import { FAQ_ITEMS, HERO_PILLS } from "./constants";
 
-type MappedQA = {
-  id: string;
-  cat: string;
-  catLabel: string;
-  searchKeywords: string;
-  time: string;
-  anonymous?: boolean;
-  question: string;
-  doctor: {
-    initials: string;
-    avatarBg: string;
-    name: string;
-    specialty: string;
-  };
-  answerHtml: string;
-  helpfulCount: number;
-  tags: string[];
-};
-
-function mapQuestion(q: AskDoctorQuestion): MappedQA {
-  const specialty = q.answeredBy?.doctorProfile?.specialty ?? q.category;
-  return {
-    id: q.id,
-    cat: q.category.toLowerCase(),
-    catLabel: q.category,
-    searchKeywords: `${q.question} ${q.answer ?? ""} ${specialty}`,
-    time: formatDate(q.answeredAt ?? q.createdAt),
-    anonymous: q.isAnonymous,
-    question: q.question,
-    doctor: {
-      initials: getInitials(q.answeredBy?.firstName, q.answeredBy?.lastName),
-      avatarBg: gradientForId(q.id),
-      name: q.answeredBy ? doctorFullName(q.answeredBy) : "DrInsight Medical Team",
-      specialty,
-    },
-    answerHtml: q.answer ?? "<p>Our medical team is reviewing this question.</p>",
-    helpfulCount: q.helpfulCount ?? 0,
-    tags: [q.category],
-  };
-}
-
-function QACard({
-  item,
-  helpfulCount,
-  onLike,
-}: {
-  item: MappedQA;
-  helpfulCount: number;
-  onLike: () => void;
-}) {
-  const [liked, setLiked] = useState(false);
-
-  const handleLike = () => {
-    if (!liked) {
-      setLiked(true);
-      onLike();
-    }
-  };
-
-  return (
-    <div className="qa-card">
-      <div className="qa-meta">
-        <span className="qa-cat-badge">{item.catLabel}</span>
-        <span className="qa-time">{item.time}</span>
-        {item.anonymous && <span className="qa-anon">🔒 Anonymous</span>}
-        <span className="verified-ans">✓ Verified Answer</span>
-      </div>
-      <div className="qa-question">{item.question}</div>
-      <div className="qa-answer">
-        <div className="qa-answer-header">
-          <div className="doc-avatar-sm" style={{ background: item.doctor.avatarBg }}>
-            {item.doctor.initials}
-          </div>
-          <div>
-            <div className="doc-name-sm">{item.doctor.name}</div>
-            <div className="doc-spec-sm">{item.doctor.specialty}</div>
-          </div>
-        </div>
-        <div className="qa-answer-text" dangerouslySetInnerHTML={{ __html: item.answerHtml }} />
-      </div>
-      <div className="qa-footer">
-        <div className="qa-helpful">
-          Was this helpful?{" "}
-          <button type="button" className={liked ? "liked" : ""} onClick={handleLike}>
-            👍 Helpful ({helpfulCount})
-          </button>
-        </div>
-        <div className="qa-tags">
-          {item.tags.map((tag) => (
-            <span key={tag} className="qa-tag">
-              {tag}
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function AskDoctorPage() {
-  const [search, setSearch] = useState("");
-  const [activeFilter, setActiveFilter] = useState("all");
-  const [helpfulCounts, setHelpfulCounts] = useState<Record<string, number>>({});
-
+  const [browseCategory, setBrowseCategory] = useState<string | undefined>();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [anonymous, setAnonymous] = useState(false);
@@ -141,27 +26,9 @@ export default function AskDoctorPage() {
   const qaFeedRef = useRef<HTMLDivElement>(null);
 
   const { data: stats } = usePlatformStats();
-  const { data: questionsData, isLoading } = useAskDoctorQuestions({ limit: 50 });
   const { data: categories } = useAskDoctorCategories();
   const { data: specialties } = useDoctorSpecialties();
   const submitQuestion = useSubmitQuestion();
-  const markHelpful = useMarkQuestionHelpful();
-
-  const qaItems = useMemo(
-    () => (questionsData?.data ?? []).map(mapQuestion),
-    [questionsData],
-  );
-
-  const categoryFilters = useMemo(
-    () => [
-      { val: "all", label: "All Categories" },
-      ...(categories ?? []).map((c) => ({
-        val: c.name.toLowerCase(),
-        label: `${c.name} (${c.count})`,
-      })),
-    ],
-    [categories],
-  );
 
   const formCategories = useMemo(() => {
     const fromQuestions = (categories ?? []).map((c) => c.name);
@@ -177,28 +44,6 @@ export default function AskDoctorPage() {
       { num: stats ? formatStatCount(stats.specialtyCount ?? 0) : "—", label: "Specialties" },
     ],
     [stats],
-  );
-
-  const filteredQA = useMemo(() => {
-    const q = search.toLowerCase().trim();
-    return qaItems.filter((item) => {
-      const catMatch = activeFilter === "all" || item.cat.includes(activeFilter);
-      const text = `${item.searchKeywords} ${item.question}`.toLowerCase();
-      const textMatch = !q || text.includes(q);
-      return catMatch && textMatch;
-    });
-  }, [search, activeFilter, qaItems]);
-
-  const incrementHelpful = useCallback(
-    (id: string, current: number) => {
-      if (helpfulCounts[id] !== undefined && helpfulCounts[id] > current) return;
-      markHelpful.mutate(id, {
-        onSuccess: (data) => {
-          setHelpfulCounts((prev) => ({ ...prev, [id]: data.helpfulCount }));
-        },
-      });
-    },
-    [helpfulCounts, markHelpful],
   );
 
   const toggleAnon = (checked: boolean) => {
@@ -241,9 +86,21 @@ export default function AskDoctorPage() {
     setOpenFaq((prev) => (prev === index ? -1 : index));
   };
 
-  const scrollToQA = () => {
+  const scrollToQA = useCallback(() => {
     qaFeedRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
+  }, []);
+
+  const selectSpecialtyFilter = useCallback(
+    (specialtyName: string) => {
+      const match = (categories ?? []).find(
+        (c) =>
+          c.name.toLowerCase().includes(specialtyName.toLowerCase()) ||
+          specialtyName.toLowerCase().includes(c.name.toLowerCase()),
+      );
+      setBrowseCategory(match?.name ?? specialtyName);
+    },
+    [categories],
+  );
 
   return (
     <div className="ask-doctor-page">
@@ -275,65 +132,19 @@ export default function AskDoctorPage() {
 
       <div className="main-wrap">
         <div className="two-col">
-          <div>
-            <SectionEyebrow className="section-eyebrow">Browse Questions</SectionEyebrow>
-            <SectionTitle as="div" className="section-title">
-              Featured Answered Questions
-            </SectionTitle>
-            <div className="section-sub">
-              Browse {stats ? formatStatCount(stats.answeredQuestions) : "—"} questions answered by our specialist doctors. Use the search and filters to find answers
-              relevant to you.
-            </div>
-
-            <div className="search-bar">
-              <input
-                type="text"
-                placeholder="Search questions by symptom, condition, or keyword..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-              <button type="button">🔍 Search</button>
-            </div>
-
-            <div className="cat-filters">
-              {categoryFilters.map(({ val, label }) => (
-                <button
-                  key={val}
-                  type="button"
-                  className={`cat-pill${activeFilter === val ? " active" : ""}`}
-                  onClick={() => setActiveFilter(val)}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-
-            <div id="qa-feed" ref={qaFeedRef}>
-              {isLoading ? (
-                <p style={{ textAlign: "center", color: "var(--gray-500)", padding: "24px 0" }}>Loading questions...</p>
-              ) : filteredQA.length > 0 ? (
-                filteredQA.map((item) => (
-                  <QACard
-                    key={item.id}
-                    item={item}
-                    helpfulCount={helpfulCounts[item.id] ?? item.helpfulCount}
-                    onLike={() => incrementHelpful(item.id, item.helpfulCount)}
-                  />
-                ))
-              ) : (
-                <div className="no-results">
-                  <div className="no-results-icon">🔍</div>
-                  <p>No questions match your search. Try different keywords or browse a category.</p>
-                </div>
-              )}
-            </div>
+          <div ref={qaFeedRef}>
+            <BrowseQuestionsSection
+              answeredCount={stats?.answeredQuestions}
+              activeCategory={browseCategory}
+            />
           </div>
 
           <div>
             <div className="ask-form-card">
               <h3>💬 Submit Your Question</h3>
               <p>
-                Get a free, personalised answer from one of our {stats ? formatStatCount(stats.doctorCount) : "—"} board-certified specialist doctors.
+                Get a free, personalised answer from one of our{" "}
+                {stats ? formatStatCount(stats.doctorCount) : "—"} board-certified specialist doctors.
               </p>
 
               {!submitted ? (
@@ -437,7 +248,9 @@ export default function AskDoctorPage() {
 
       <div className="specialists-strip">
         <div className="specialists-inner">
-          <SectionTitle>Browse by Medical Specialty</SectionTitle>
+          <SectionTitle className="!text-3xl text-white" inverse>
+            Browse by Medical Specialty
+          </SectionTitle>
           <p>Find questions answered by specialists in your area of health concern</p>
           <div className="spec-grid">
             {(specialties ?? []).map((s) => (
@@ -446,8 +259,8 @@ export default function AskDoctorPage() {
                 className="spec-item"
                 role="button"
                 tabIndex={0}
-                onClick={() => setActiveFilter(s.name.toLowerCase())}
-                onKeyDown={(e) => e.key === "Enter" && setActiveFilter(s.name.toLowerCase())}
+                onClick={() => selectSpecialtyFilter(s.name)}
+                onKeyDown={(e) => e.key === "Enter" && selectSpecialtyFilter(s.name)}
               >
                 <div className="spec-ico">{specialtyEmoji(s.name)}</div>
                 <span>
@@ -466,6 +279,7 @@ export default function AskDoctorPage() {
             eyebrow="Common Questions"
             title="Frequently Asked Questions"
             description="Everything you need to know about our Ask the Doctor service"
+            titleClassName="!text-3xl"
           />
 
           {FAQ_ITEMS.map((item, index) => (
@@ -488,6 +302,7 @@ export default function AskDoctorPage() {
           description="For a thorough, personalised evaluation with one of our specialists — video, phone, or chat. Same-day appointments available from $49."
           inverse
           lightEyebrow
+          titleClassName="!text-3xl"
         />
         <div className="cta-btns">
           <Link href="/book-consultation" className="btn-white">

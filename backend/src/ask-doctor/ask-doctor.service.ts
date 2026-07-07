@@ -21,13 +21,23 @@ export class AskDoctorService {
     const limit = query.limit || 12;
     const skip = (page - 1) * limit;
 
+    const searchTerm = query.search?.trim().replace(/\s+/g, ' ');
+
     const where = {
       status: QuestionStatus.ANSWERED,
       ...(query.category && { category: { equals: query.category, mode: 'insensitive' as const } }),
-      ...(query.search && {
+      ...(searchTerm && {
         OR: [
-          { question: { contains: query.search, mode: 'insensitive' as const } },
-          { answer: { contains: query.search, mode: 'insensitive' as const } },
+          { question: { contains: searchTerm, mode: 'insensitive' as const } },
+          { answer: { contains: searchTerm, mode: 'insensitive' as const } },
+          { category: { contains: searchTerm, mode: 'insensitive' as const } },
+          {
+            answeredBy: {
+              doctorProfile: {
+                specialty: { contains: searchTerm, mode: 'insensitive' as const },
+              },
+            },
+          },
         ],
       }),
     };

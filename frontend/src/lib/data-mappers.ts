@@ -15,7 +15,12 @@ const SPECIALTY_EMOJI: Record<string, string> = {
   Cardiology: "❤️",
   Neurology: "🧠",
   Endocrinology: "🩸",
-  Psychiatry: "🧠",
+  Psychiatry: "🧘",
+  "Mental Health": "🧘",
+  Gynecology: "🤰",
+  "Women's Health": "🤰",
+  Diabetes: "🩸",
+  ENT: "👂",
   Pediatrics: "👶",
   Orthopedics: "🦴",
   Dermatology: "🦷",
@@ -248,6 +253,21 @@ export function formatRelativeTime(dateStr: string): string {
   const hours = Math.floor(mins / 60);
   if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
   return formatDate(dateStr);
+}
+
+/** e.g. "Answered 2 days ago" for Ask Doctor cards */
+export function formatAnsweredAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const days = Math.floor(diff / 86400000);
+  if (days <= 0) return "Answered today";
+  if (days === 1) return "Answered 1 day ago";
+  if (days < 7) return `Answered ${days} days ago`;
+  const weeks = Math.floor(days / 7);
+  if (weeks === 1) return "Answered 1 week ago";
+  if (weeks < 5) return `Answered ${weeks} weeks ago`;
+  const months = Math.floor(days / 30);
+  if (months <= 1) return "Answered 1 month ago";
+  return `Answered ${months} months ago`;
 }
 
 export function isSameDay(a: Date, b: Date): boolean {
