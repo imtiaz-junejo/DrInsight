@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Author Guidelines — Write Medical Articles | DrInsight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* mobile safety */img,svg,video,iframe{max-width:100%}table{max-width:100%}html{-webkit-text-size-adjust:100%}
+
+:root{
+  --blue:#1a56a0;--blue-dark:#0f3d7a;--blue-light:#e8f0fb;--blue-mid:#4a90d9;
+  --teal:#0891b2;--green:#059669;--red:#dc2626;--amber:#f59e0b;--purple:#7c3aed;
+  --white:#ffffff;--gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;
+  --gray-400:#94a3b8;--gray-600:#475569;--gray-800:#1e293b;--gray-900:#0f172a;
+  --font-display:'Playfair Display',Georgia,serif;
+  --font-body:'DM Sans',system-ui,sans-serif;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.08);
+  --shadow-md:0 4px 16px rgba(0,0,0,.10);
+  --shadow-lg:0 8px 32px rgba(26,86,160,.14);
+  --radius:12px;--radius-lg:20px;
+  --transition:all .22s cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);color:var(--gray-800);background:var(--white);line-height:1.65;font-size:16px}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+ul{list-style:none}
+
+/* ===== TOP BAR (exact from home) ===== */
+.topbar{background:var(--blue-dark);color:#cbd5e1;font-size:.8rem;padding:.45rem 0}
+.topbar-inner{max-width:1240px;margin:auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.topbar a{color:#93c5fd;margin-left:16px}
+.topbar-emergency{display:flex;align-items:center;gap:8px;color:#fca5a5;font-weight:600}
+.topbar-emergency svg{width:14px;height:14px}
+
+/* ===== NAV (exact from home) ===== */
+nav{background:var(--white);border-bottom:1px solid var(--gray-200);position:sticky;top:0;z-index:100;box-shadow:var(--shadow-sm)}
+.nav-inner{max-width:1240px;margin:auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:70px}
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-size:1.5rem;font-weight:700;color:var(--blue-dark)}
+.logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--blue),var(--teal));border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.2rem}
+.nav-links{display:flex;align-items:center;gap:4px}
+.nav-links a{padding:8px 14px;border-radius:8px;font-size:.9rem;font-weight:500;color:var(--gray-600);transition:var(--transition)}
+.nav-links a:hover,.nav-links a.active{background:var(--blue-light);color:var(--blue)}
+.nav-links .btn-book{background:var(--blue);color:#fff!important;padding:8px 20px;border-radius:8px}
+.nav-links .btn-book:hover{background:var(--blue-dark);transform:translateY(-1px)}
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:4px}
+.hamburger span{display:block;width:24px;height:2px;background:var(--gray-800);margin:5px 0;transition:var(--transition)}
+.mobile-menu{display:none;flex-direction:column;gap:4px;padding:16px 24px;background:var(--white);border-top:1px solid var(--gray-200)}
+.mobile-menu a{padding:10px 12px;border-radius:8px;font-size:.92rem;font-weight:500;color:var(--gray-700)}
+.mobile-menu a:hover{background:var(--blue-light);color:var(--blue)}
+.mobile-menu.open{display:flex}
+
+/* ===== BREADCRUMB ===== */
+.breadcrumb{background:var(--gray-50);border-bottom:1px solid var(--gray-200);padding:10px 24px}
+.breadcrumb-inner{max-width:1240px;margin:auto;display:flex;align-items:center;gap:7px;font-size:.8rem;color:var(--gray-400)}
+.breadcrumb-inner a{color:var(--gray-400);transition:var(--transition)}
+.breadcrumb-inner a:hover{color:var(--blue)}
+.breadcrumb-inner .current{color:var(--blue);font-weight:600}
+
+/* ===== PROGRESS BAR ===== */
+.reading-progress{position:fixed;top:70px;left:0;right:0;height:3px;background:var(--gray-200);z-index:99}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--teal));width:0;transition:width .1s linear}
+
+/* ===== PAGE HERO ===== */
+.page-hero{background:linear-gradient(135deg,var(--blue-dark) 0%,var(--blue) 55%,var(--teal) 100%);color:#fff;padding:64px 24px;text-align:center;position:relative;overflow:hidden}
+.page-hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E")}
+.page-hero-inner{max-width:760px;margin:auto;position:relative;z-index:1}
+.page-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:50px;padding:6px 18px;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:20px;backdrop-filter:blur(4px)}
+.page-hero h1{font-family:var(--font-display);font-size:clamp(2rem,4vw,3rem);font-weight:700;margin-bottom:14px;line-height:1.2}
+.page-hero h1 span{color:#93c5fd}
+.page-hero p{font-size:1rem;opacity:.88;line-height:1.8;max-width:580px;margin:0 auto 22px}
+.hero-meta-row{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;font-size:.8rem;opacity:.78;margin-bottom:22px}
+.hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-white{background:#fff;color:var(--blue-dark);font-weight:700;padding:11px 24px;border-radius:10px;font-size:.9rem;border:none;cursor:pointer;font-family:var(--font-body);transition:var(--transition);display:inline-flex;align-items:center;gap:8px}
+.btn-white:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,.2)}
+.btn-ghost{background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.4);font-weight:600;padding:10px 24px;border-radius:10px;font-size:.9rem;cursor:pointer;font-family:var(--font-body);transition:var(--transition);display:inline-flex;align-items:center;gap:8px;backdrop-filter:blur(4px)}
+.btn-ghost:hover{background:rgba(255,255,255,.25)}
+.trust-strip{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:22px}
+.trust-pill{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:50px;padding:5px 15px;font-size:.72rem;font-weight:600;backdrop-filter:blur(4px)}
+
+/* ===== MAIN LAYOUT ===== */
+.main-layout{max-width:1240px;margin:0 auto;padding:40px 24px 60px;display:grid;grid-template-columns:260px 1fr;gap:32px;align-items:start}
+
+/* ===== STICKY TOC ===== */
+.toc-sidebar{position:sticky;top:88px;background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);overflow:hidden;max-height:calc(100vh - 104px);overflow-y:auto}
+.toc-header{background:var(--blue-dark);color:#fff;padding:14px 18px;font-size:.82rem;font-weight:700;display:flex;align-items:center;gap:8px;position:sticky;top:0}
+.toc-nav{padding:8px 0}
+.toc-item{display:flex;align-items:center;gap:8px;padding:6px 16px;font-size:.76rem;color:var(--gray-600);cursor:pointer;transition:var(--transition);border-left:3px solid transparent}
+.toc-item:hover,.toc-item.active{background:var(--blue-light);color:var(--blue);border-left-color:var(--blue)}
+.toc-item .toc-num{font-size:.66rem;font-weight:700;color:var(--blue);background:var(--blue-light);width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.toc-item.active .toc-num{background:var(--blue);color:#fff}
+.toc-apply-box{padding:16px;border-top:1px solid var(--gray-100);margin-top:4px}
+.toc-apply-btn{width:100%;background:var(--blue);color:#fff;border:none;padding:10px;border-radius:10px;font-family:var(--font-body);font-size:.82rem;font-weight:700;cursor:pointer;transition:var(--transition);display:flex;align-items:center;justify-content:center;gap:6px}
+.toc-apply-btn:hover{background:var(--blue-dark)}
+
+/* ===== SECTION STYLES ===== */
+.content-area{display:flex;flex-direction:column;gap:44px}
+.content-section{scroll-margin-top:88px}
+.section-title{font-family:var(--font-display);font-size:1.5rem;font-weight:700;color:var(--gray-900);margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--blue-light);display:flex;align-items:center;gap:12px}
+.section-num{background:var(--blue);color:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:700;flex-shrink:0}
+.section-num.green{background:var(--green)}
+.section-num.amber{background:var(--amber)}
+.section-num.purple{background:var(--purple)}
+.section-num.teal{background:var(--teal)}
+.section-num.red{background:var(--red)}
+.prose p{font-size:.92rem;color:var(--gray-700);line-height:1.85;margin-bottom:14px}
+.prose strong{color:var(--gray-900)}
+
+/* ===== CALLOUT BOXES ===== */
+.callout{border-radius:var(--radius);padding:16px 20px;margin:16px 0;border-left:4px solid}
+.callout-blue{background:var(--blue-light);border-color:var(--blue)}
+.callout-blue .callout-head{color:var(--blue)}
+.callout-blue p,.callout-blue li{font-size:.88rem;color:var(--blue-dark);line-height:1.7}
+.callout-green{background:#ecfdf5;border-color:var(--green)}
+.callout-green .callout-head{color:var(--green)}
+.callout-green p,.callout-green li{font-size:.88rem;color:#065f46;line-height:1.7}
+.callout-red{background:#fef2f2;border-color:var(--red)}
+.callout-red .callout-head{color:var(--red)}
+.callout-red p,.callout-red li{font-size:.88rem;color:#7f1d1d;line-height:1.7}
+.callout-amber{background:#fffbeb;border-color:var(--amber)}
+.callout-amber .callout-head{color:#d97706}
+.callout-amber p,.callout-amber li{font-size:.88rem;color:#78350f;line-height:1.7}
+.callout-purple{background:#f3f0ff;border-color:var(--purple)}
+.callout-purple .callout-head{color:var(--purple)}
+.callout-purple p,.callout-purple li{font-size:.88rem;color:#4c1d95;line-height:1.7}
+.callout-gray{background:var(--gray-50);border-color:var(--gray-400)}
+.callout-gray .callout-head{color:var(--gray-600)}
+.callout-gray p,.callout-gray li{font-size:.88rem;color:var(--gray-700);line-height:1.7}
+.callout-head{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.callout ul{margin-left:16px;list-style:disc;display:flex;flex-direction:column;gap:5px}
+
+/* ===== CARD GRIDS ===== */
+.card-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+.card-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:16px 0}
+.card-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:16px 0}
+.info-card{background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:20px;transition:var(--transition)}
+.info-card:hover{border-color:var(--blue-mid);box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.info-card .card-icon{font-size:1.8rem;margin-bottom:10px}
+.info-card h4{font-size:.92rem;font-weight:700;color:var(--gray-900);margin-bottom:6px}
+.info-card p{font-size:.8rem;color:var(--gray-600);line-height:1.6}
+.do-card{background:#ecfdf5;border:1.5px solid #a7f3d0;border-radius:var(--radius);padding:18px}
+.do-card h4{font-size:.82rem;font-weight:700;color:var(--green);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.do-card li{font-size:.82rem;color:#065f46;line-height:1.65}
+.dont-card{background:#fef2f2;border:1.5px solid #fca5a5;border-radius:var(--radius);padding:18px}
+.dont-card h4{font-size:.82rem;font-weight:700;color:var(--red);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.dont-card li{font-size:.82rem;color:#7f1d1d;line-height:1.65}
+.do-card ul,.dont-card ul{margin-left:14px;list-style:disc;display:flex;flex-direction:column;gap:4px}
+
+/* ===== PROCESS STEPS ===== */
+.process-timeline{display:flex;flex-direction:column;gap:0;position:relative;margin:20px 0}
+.process-timeline::before{content:'';position:absolute;left:18px;top:10px;bottom:10px;width:2px;background:linear-gradient(to bottom,var(--blue),var(--teal))}
+.process-step{display:flex;gap:20px;padding-bottom:24px;position:relative}
+.step-dot{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--teal));display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:700;color:#fff;flex-shrink:0;z-index:1;border:3px solid #fff;box-shadow:0 2px 8px rgba(26,86,160,.25)}
+.step-body{flex:1;padding-top:4px}
+.step-body h4{font-size:.96rem;font-weight:700;color:var(--gray-900);margin-bottom:5px;display:flex;align-items:center;gap:8px}
+.step-body p{font-size:.84rem;color:var(--gray-600);line-height:1.7}
+.step-badge{font-size:.66rem;font-weight:700;padding:2px 9px;border-radius:50px}
+.sb-blue{background:var(--blue-light);color:var(--blue)}
+.sb-green{background:#ecfdf5;color:var(--green)}
+.sb-amber{background:#fffbeb;color:#d97706}
+
+/* ===== CONTENT TYPES ===== */
+.content-type-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin:16px 0}
+.ct-card{border-radius:var(--radius-lg);padding:22px;border:1.5px solid var(--gray-200);transition:var(--transition)}
+.ct-card:hover{border-color:var(--blue-mid);box-shadow:var(--shadow-md)}
+.ct-icon{font-size:1.8rem;margin-bottom:10px}
+.ct-card h4{font-family:var(--font-display);font-size:1rem;font-weight:700;margin-bottom:6px}
+.ct-card p{font-size:.8rem;color:var(--gray-600);line-height:1.6;margin-bottom:10px}
+.ct-meta{display:flex;flex-wrap:wrap;gap:6px}
+.ct-tag{font-size:.68rem;font-weight:600;padding:3px 9px;border-radius:50px;background:var(--blue-light);color:var(--blue)}
+
+/* ===== CHECKLIST ===== */
+.checklist{display:flex;flex-direction:column;gap:8px;margin:14px 0}
+.cl-item{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--gray-50);border-radius:10px;border:1px solid var(--gray-200);font-size:.88rem;color:var(--gray-700);line-height:1.6}
+.cl-item .ci-icon{font-size:1rem;flex-shrink:0;margin-top:1px}
+.cl-item strong{color:var(--gray-900)}
+
+/* ===== QUALIFICATION TABLE ===== */
+.qual-table{width:100%;border-collapse:collapse;border-radius:var(--radius);overflow:hidden;margin:16px 0;font-size:.86rem}
+.qual-table th{background:var(--blue-dark);color:#fff;padding:12px 16px;text-align:left;font-size:.78rem;font-weight:600}
+.qual-table td{padding:11px 16px;border-bottom:1px solid var(--gray-100);color:var(--gray-700)}
+.qual-table tr:last-child td{border-bottom:none}
+.qual-table tr:nth-child(even){background:var(--gray-50)}
+.qual-table tr:hover td{background:var(--blue-light)}
+.badge{font-size:.7rem;font-weight:700;padding:3px 9px;border-radius:50px}
+.badge-req{background:#fef2f2;color:var(--red)}
+.badge-rec{background:#fffbeb;color:#d97706}
+.badge-opt{background:#ecfdf5;color:var(--green)}
+
+/* ===== ACCORDION ===== */
+.accordion{border:1.5px solid var(--gray-200);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+.accordion.open{border-color:var(--blue)}
+.acc-header{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;gap:12px;background:var(--white)}
+.acc-header h4{font-size:.92rem;font-weight:600;color:var(--gray-900)}
+.acc-chevron{width:22px;height:22px;border-radius:50%;background:var(--gray-100);display:flex;align-items:center;justify-content:center;font-size:.72rem;transition:var(--transition);flex-shrink:0}
+.accordion.open .acc-chevron{background:var(--blue-light);color:var(--blue);transform:rotate(180deg)}
+.acc-body{display:none;padding:0 18px 16px;border-top:1px solid var(--gray-100)}
+.accordion.open .acc-body{display:block;padding-top:14px}
+.acc-body p,.acc-body li{font-size:.86rem;color:var(--gray-700);line-height:1.7}
+.acc-body ul{margin-left:16px;list-style:disc;display:flex;flex-direction:column;gap:5px}
+
+/* ===== STYLE GUIDE BLOCKS ===== */
+.style-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+.style-block{border-radius:var(--radius);padding:16px;border:1.5px solid var(--gray-200)}
+.style-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gray-400);margin-bottom:10px}
+.style-example{font-size:.88rem;color:var(--gray-800);line-height:1.7}
+.style-block.do-style{border-color:#a7f3d0;background:#f0fdf4}
+.style-block.dont-style{border-color:#fca5a5;background:#fef2f2}
+.style-block.do-style .style-label{color:var(--green)}
+.style-block.dont-style .style-label{color:var(--red)}
+
+/* ===== CTA SECTION ===== */
+.apply-cta{background:linear-gradient(135deg,var(--blue-dark),var(--blue));color:#fff;border-radius:var(--radius-lg);padding:36px;text-align:center;margin-top:16px}
+.apply-cta h3{font-family:var(--font-display);font-size:1.6rem;margin-bottom:10px}
+.apply-cta p{font-size:.92rem;opacity:.9;max-width:520px;margin:0 auto 22px;line-height:1.7}
+.apply-steps-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:20px 0}
+.apply-step{text-align:center}
+.as-circle{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-size:.84rem;font-weight:700;margin:0 auto 8px}
+.as-label{font-size:.74rem;opacity:.85;line-height:1.4}
+.apply-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+.btn-apply{background:#fff;color:var(--blue-dark);border:none;padding:12px 28px;border-radius:10px;font-family:var(--font-body);font-size:.92rem;font-weight:700;cursor:pointer;transition:var(--transition)}
+.btn-apply:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,.2)}
+.btn-apply-ghost{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.5);padding:11px 24px;border-radius:10px;font-family:var(--font-body);font-size:.9rem;font-weight:600;cursor:pointer;transition:var(--transition)}
+.btn-apply-ghost:hover{background:rgba(255,255,255,.15)}
+
+/* ===== CONTACT CARDS ===== */
+.contact-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin:16px 0}
+.contact-card{background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:16px 18px}
+.contact-card h4{font-size:.86rem;font-weight:700;color:var(--gray-900);margin-bottom:4px}
+.contact-card a{font-size:.82rem;color:var(--blue);font-weight:600}
+.contact-card p{font-size:.76rem;color:var(--gray-500);margin-top:4px;line-height:1.5}
+
+/* ===== PAGE FOOTER (policy) ===== */
+.page-footer-bar{background:var(--gray-50);border-top:1px solid var(--gray-200);padding:22px 24px}
+.pf-bar-inner{max-width:1240px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.pf-pills{display:flex;gap:8px;flex-wrap:wrap}
+.pf-pill{background:var(--blue-light);color:var(--blue);font-size:.76rem;font-weight:600;padding:5px 14px;border-radius:50px;cursor:pointer;transition:var(--transition)}
+.pf-pill:hover{background:var(--blue);color:#fff}
+.pf-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.pf-btn{background:var(--blue);color:#fff;border:none;padding:8px 18px;border-radius:9px;font-family:var(--font-body);font-size:.8rem;font-weight:600;cursor:pointer;transition:var(--transition)}
+.pf-btn:hover{background:var(--blue-dark)}
+.pf-btn.green{background:var(--green)}
+.pf-btn.gray{background:var(--gray-600)}
+
+/* ===== FOOTER (exact from home) ===== */
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:1060px){.main-layout{grid-template-columns:1fr}.toc-sidebar{position:static;margin-bottom:24px;max-height:none}.card-grid-4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:900px){.footer-grid{grid-template-columns:1fr 1fr;gap:32px}.card-grid-3{grid-template-columns:1fr 1fr}.style-row,.card-grid-2{grid-template-columns:1fr}.apply-steps-row{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:640px){.nav-links{display:none}.hamburger{display:block}.mobile-menu.open{display:flex}.footer-grid{grid-template-columns:1fr}.footer-bottom{max-width:1240px;margin:48px auto 0;padding:24px 24px;border-top:1px solid #1e293b;display:flex;flex-direction:column;align-items:flex-start;gap:12px}.card-grid-3,.card-grid-4{grid-template-columns:1fr}.content-type-grid{grid-template-columns:1fr}.apply-steps-row{grid-template-columns:repeat(2,1fr)}}
+
+/* ===== CANONICAL HOME-PAGE FOOTER (override) ===== */
+footer{background:#0f172a;color:#94a3b8;font-size:.85rem;padding:64px 24px 0}
+.footer-grid{max-width:1240px;margin:auto;display:grid;grid-template-columns:2fr 1fr 1fr 1.5fr 1.5fr;gap:48px}
+.footer-brand .logo{color:#fff;margin-bottom:14px;display:flex;align-items:center;gap:10px;font-size:1.5rem;font-weight:700}
+.footer-brand p{line-height:1.7;margin-bottom:20px;font-size:.85rem}
+.footer-social{display:flex;gap:10px}
+.social-btn{width:36px;height:36px;background:#1e293b;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#94a3b8;transition:all .22s cubic-bezier(.4,0,.2,1);font-size:.9rem;text-decoration:none}
+.social-btn:hover{background:#1a56a0;color:#fff}
+.footer-col h4{color:#fff;font-size:.9rem;font-weight:700;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid #1e293b}
+.footer-col ul{list-style:none;padding:0;margin:0}
+.footer-col ul li{margin-bottom:8px}
+.footer-col ul li a{color:#94a3b8;transition:all .22s cubic-bezier(.4,0,.2,1);font-size:.83rem;text-decoration:none}
+.footer-col ul li a:hover{color:#93c5fd}
+.footer-subscribe input{width:100%;padding:10px 14px;background:#1e293b;border:1px solid #334155;border-radius:8px;color:#fff;font-family:'DM Sans',system-ui,sans-serif;font-size:.85rem;margin-bottom:10px;box-sizing:border-box}
+.footer-subscribe input::placeholder{color:#64748b}
+.footer-subscribe button{width:100%;background:#1a56a0;color:#fff;border:none;padding:10px;border-radius:8px;font-family:'DM Sans',system-ui,sans-serif;font-weight:600;cursor:pointer;transition:all .22s cubic-bezier(.4,0,.2,1)}
+.footer-subscribe button:hover{background:#4a90d9}
+.footer-contact-item{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:.82rem;color:#94a3b8}
+.footer-contact-item svg{width:16px;height:16px;color:#4a90d9;flex-shrink:0}
+.footer-bottom{max-width:1240px;margin:48px auto 0;padding:24px 24px;border-top:1px solid #1e293b;display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.footer-bottom p{font-size:.78rem}
+.footer-bottom-links{display:flex;gap:16px 22px;flex-wrap:wrap}
+.footer-bottom-links a{font-size:.78rem;color:#64748b;transition:all .22s cubic-bezier(.4,0,.2,1);text-decoration:none}
+.footer-bottom-links a:hover{color:#93c5fd}
+.hipaa-badge{display:inline-flex;align-items:center;gap:6px;background:#1e293b;border:1px solid #334155;border-radius:6px;padding:4px 10px;font-size:.72rem;color:#64748b;margin-top:8px}
+@media(max-width:900px){.footer-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.footer-grid{grid-template-columns:1fr}.footer-bottom{max-width:1240px;margin:48px auto 0;padding:24px 24px;border-top:1px solid #1e293b;display:flex;flex-direction:column;align-items:flex-start;gap:12px}}
+
+
+
+.footer-bottom .fb-note{margin-top:4px;color:#475569;font-size:.70rem;font-size:clamp(.55rem,.93vw,.74rem)}
+@media(min-width:900px){.footer-bottom .fb-note{white-space:nowrap}}
+</style>
+
+<!-- SEO -->
+<meta name="description" content="Write for DrInsight — qualification standards, article structure, citation rules, AI disclosure policy and the submission process for medical authors.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.drinsight.org/author-guidelines.html">
+<meta name="theme-color" content="#12275a">
+<link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<meta property="og:site_name" content="The Dr Insight">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Author Guidelines — Write Medical Articles | DrInsight">
+<meta property="og:description" content="Write for DrInsight — qualification standards, article structure, citation rules, AI disclosure policy and the submission process for medical authors.">
+<meta property="og:url" content="https://www.drinsight.org/author-guidelines.html">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Author Guidelines — Write Medical Articles | DrInsight">
+<meta name="twitter:description" content="Write for DrInsight — qualification standards, article structure, citation rules, AI disclosure policy and the submission process for medical authors.">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"MedicalOrganization","@id":"https://www.drinsight.org/#organization","name":"The Dr Insight","alternateName":"DrInsight","url":"https://www.drinsight.org/","logo":"https://www.drinsight.org/assets/drinsight-logo.png","slogan":"Trusted Medical Insights & Expert Consultation","foundingDate":"2022","founder":{"@type":"Person","name":"Dr. Javed Kumbhar","jobTitle":"Founder & Board of Director","honorificSuffix":"MBBS, RMP"},"address":{"@type":"PostalAddress","addressLocality":"Karachi","addressCountry":"PK"},"contactPoint":{"@type":"ContactPoint","telephone":"+92-335-3545545","email":"contact@drinsight.org","contactType":"customer service"},"medicalSpecialty":["Cardiovascular","Neurologic","Pediatric","Psychiatric","Dermatologic","Endocrine","Oncologic","Dentistry"]},{"@type":"WebSite","@id":"https://www.drinsight.org/#website","url":"https://www.drinsight.org/","name":"The Dr Insight","publisher":{"@id":"https://www.drinsight.org/#organization"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://www.drinsight.org/"},{"@type":"ListItem","position":2,"name":"Author Guidelines","item":"https://www.drinsight.org/author-guidelines.html"}]}]}</script>
+</head>
+<body>
+
+<!-- TOP BAR — exact from home -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-emergency">
+      <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+      Emergency: <strong>911</strong> &nbsp;|&nbsp; Medical Helpline: <strong>+92 335 3545545</strong>
+    </div>
+    <div>
+      <a href="login.html">Portal Login</a>
+    </div>
+  </div>
+</div>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="logo">
+      <img src="assets/drinsight-logo.png" alt="DrInsight — Trusted Medical Insights &amp; Expert Consultation" width="214" height="56" decoding="async" fetchpriority="high" style="height:56px;width:auto;display:block"></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="about.html">About Us</a>
+      <a href="health-tools.html">Health Tools</a>
+      <a href="doctors.html">Our Doctors</a>
+      <a href="ask-doctor.html">Ask the Doctor</a>
+      <a href="blog.html">Blog</a>
+      <a href="contact.html">Contact</a>
+      <a href="book-consultation.html" class="btn-book">Book Consultation</a>
+    </div>
+    <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">Home</a>
+    <a href="about.html">About Us</a>
+    <a href="health-tools.html">Health Tools</a>
+    <a href="doctors.html">Our Doctors</a>
+    <a href="ask-doctor.html">Ask the Doctor</a>
+    <a href="blog.html">Blog</a>
+    <a href="contact.html">Contact</a>
+    <a href="book-consultation.html">📅 Book Consultation</a>
+  </div>
+</nav>
+
+<!-- READING PROGRESS BAR -->
+<div class="reading-progress"><div class="progress-fill" id="progressFill"></div></div>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+  <div class="breadcrumb-inner">
+    <a href="index.html">🏠 Home</a>
+    <span>›</span>
+    <a href="editorial-policy.html">Editorial</a>
+    <span>›</span>
+    <span class="current">Author Guidelines</span>
+  </div>
+</div>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-eyebrow">✍️ CONTRIBUTE TO DRINSIGHT</div>
+    <h1>Author <span>Guidelines</span></h1>
+    <p>Everything you need to know about writing for DrInsight — from qualification standards and submission requirements to style guides and editorial standards.</p>
+    <div class="hero-meta-row">
+      <span>📅 Last Updated: June 1, 2026</span>
+      <span>📋 Version 2.1</span>
+      <span>🔒 HIPAA &amp; GDPR Compliant</span>
+    </div>
+    <div class="hero-actions">
+      <button class="btn-white" onclick="document.getElementById('s10').scrollIntoView({behavior:'smooth'})">✍️ Apply to Write</button>
+      <button class="btn-ghost" onclick="window.print()">🖨️ Download PDF</button>
+    </div>
+    <div class="trust-strip">
+      <div class="trust-pill">🩺 Physicians &amp; Allied Health Professionals</div>
+      <div class="trust-pill">🔬 Evidence-Based Standards</div>
+      <div class="trust-pill">✅ Peer-Reviewed Process</div>
+      <div class="trust-pill">📋 Full COI Disclosure Required</div>
+      <div class="trust-pill">💰 Paid Opportunities</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="main-layout">
+
+  <!-- STICKY TOC -->
+  <aside class="toc-sidebar">
+    <div class="toc-header">📑 Table of Contents</div>
+    <nav class="toc-nav" id="tocNav">
+      <div class="toc-item active" onclick="scrollTo('s1')"><div class="toc-num">1</div>Why Write for Us</div>
+      <div class="toc-item" onclick="scrollTo('s2')"><div class="toc-num">2</div>Who Can Contribute</div>
+      <div class="toc-item" onclick="scrollTo('s3')"><div class="toc-num">3</div>Qualification Standards</div>
+      <div class="toc-item" onclick="scrollTo('s4')"><div class="toc-num">4</div>Types of Content</div>
+      <div class="toc-item" onclick="scrollTo('s5')"><div class="toc-num">5</div>Before You Write</div>
+      <div class="toc-item" onclick="scrollTo('s6')"><div class="toc-num">6</div>Article Structure</div>
+      <div class="toc-item" onclick="scrollTo('s7')"><div class="toc-num">7</div>Writing Style Guide</div>
+      <div class="toc-item" onclick="scrollTo('s8')"><div class="toc-num">8</div>Evidence &amp; Sources</div>
+      <div class="toc-item" onclick="scrollTo('s9')"><div class="toc-num">9</div>Submission Process</div>
+      <div class="toc-item" onclick="scrollTo('s10')"><div class="toc-num">10</div>Apply to Write</div>
+      <div class="toc-item" onclick="scrollTo('s11')"><div class="toc-num">11</div>Author Rights &amp; Payments</div>
+      <div class="toc-item" onclick="scrollTo('s12')"><div class="toc-num">12</div>Conflict of Interest</div>
+      <div class="toc-item" onclick="scrollTo('s13')"><div class="toc-num">13</div>Editorial Standards</div>
+      <div class="toc-item" onclick="scrollTo('s14')"><div class="toc-num">14</div>Contact &amp; Support</div>
+    </nav>
+    <div class="toc-apply-box">
+      <button class="toc-apply-btn" onclick="document.getElementById('s10').scrollIntoView({behavior:'smooth'})">✍️ Apply to Become an Author</button>
+    </div>
+  </aside>
+
+  <!-- CONTENT AREA -->
+  <main class="content-area">
+
+    <!-- S1: WHY WRITE -->
+    <section class="content-section" id="s1">
+      <div class="section-title"><div class="section-num">1</div>Why Write for DrInsight</div>
+      <div class="prose">
+        <p>DrInsight reaches <strong>over 500,000 patients, caregivers, and healthcare professionals</strong> every month. By contributing to our platform, you help us fulfil our mission of making accurate, evidence-based medical information accessible to everyone — regardless of geography, income, or background.</p>
+      </div>
+      <div class="card-grid-4">
+        <div class="info-card"><div class="card-icon">📢</div><h4>Massive Reach</h4><p>Your articles reach 500K+ monthly readers across 50+ countries worldwide.</p></div>
+        <div class="info-card"><div class="card-icon">🎓</div><h4>CPD/CME Credit</h4><p>Receive a CPD/CME recognition letter for each published article on request.</p></div>
+        <div class="info-card"><div class="card-icon">🏅</div><h4>Author Profile</h4><p>A full, verified author bio page showcasing your credentials and publications.</p></div>
+        <div class="info-card"><div class="card-icon">💰</div><h4>Paid Opportunities</h4><p>Honorarium paid per published article for qualified medical authors.</p></div>
+        <div class="info-card"><div class="card-icon">🌍</div><h4>Fight Misinformation</h4><p>Help counter harmful medical misinformation with clinically accurate content.</p></div>
+        <div class="info-card"><div class="card-icon">🔗</div><h4>Portfolio Building</h4><p>Published articles are DOI-linked and citable for academic and professional portfolios.</p></div>
+        <div class="info-card"><div class="card-icon">🤝</div><h4>Editorial Support</h4><p>Dedicated editorial team assists you throughout the writing and review process.</p></div>
+        <div class="info-card"><div class="card-icon">📊</div><h4>Analytics Access</h4><p>See how many readers your articles reach, their engagement, and ratings.</p></div>
+      </div>
+    </section>
+
+    <!-- S2: WHO CAN CONTRIBUTE -->
+    <section class="content-section" id="s2">
+      <div class="section-title"><div class="section-num green">2</div>Who Can Contribute</div>
+      <div class="prose"><p>DrInsight welcomes contributions from qualified healthcare professionals and health science experts. We have three contributor categories, each with specific eligibility requirements.</p></div>
+      <div class="card-grid-3">
+        <div class="info-card" style="border-top:4px solid var(--blue)">
+          <div class="card-icon">👨‍⚕️</div>
+          <h4>Medical Doctors</h4>
+          <p>Licensed physicians (MBBS, MD, DO, MBChB) actively practising in any clinical specialty. Can write clinical overview, symptom guide, drug guide, and professional reference articles.</p>
+          <div style="margin-top:10px"><span class="badge badge-req">Required</span> <span style="font-size:.78rem;color:var(--gray-600);margin-left:4px">Active medical licence</span></div>
+        </div>
+        <div class="info-card" style="border-top:4px solid var(--green)">
+          <div class="card-icon">💊</div>
+          <h4>Allied Health Professionals</h4>
+          <p>Registered nurses, pharmacists, physiotherapists, dietitians, psychologists, and other licensed health professionals. Can write wellness, nutrition, rehabilitation, and mental health content.</p>
+          <div style="margin-top:10px"><span class="badge badge-req">Required</span> <span style="font-size:.78rem;color:var(--gray-600);margin-left:4px">Professional registration</span></div>
+        </div>
+        <div class="info-card" style="border-top:4px solid var(--teal)">
+          <div class="card-icon">🔬</div>
+          <h4>Medical Academics</h4>
+          <p>Researchers, professors, and academics with active clinical or research involvement in health sciences. Can write research explainers, evidence reviews, and educational content.</p>
+          <div style="margin-top:10px"><span class="badge badge-req">Required</span> <span style="font-size:.78rem;color:var(--gray-600);margin-left:4px">Active institutional affiliation</span></div>
+        </div>
+      </div>
+      <div class="callout callout-red">
+        <div class="callout-head">🚫 Who Cannot Contribute</div>
+        <ul>
+          <li>Individuals without a recognised medical or health science qualification</li>
+          <li>Pharmaceutical, device, or supplement company employees writing about their own products</li>
+          <li>Authors with undisclosed conflicts of interest related to article content</li>
+          <li>Anyone writing outside their recognised specialty or professional scope</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- S3: QUALIFICATION STANDARDS -->
+    <section class="content-section" id="s3">
+      <div class="section-title"><div class="section-num amber">3</div>Qualification Standards</div>
+      <div class="prose"><p>All authors must meet specific qualification requirements before their first article is published. Your credentials are verified by our Editorial team and displayed on your author bio page.</p></div>
+      <div style="overflow-x:auto">
+        <table class="qual-table">
+          <thead><tr><th>Requirement</th><th>Medical Doctors</th><th>Allied Health</th><th>Academics</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Degree</strong></td><td>MBBS / MD / DO / MBChB or equivalent</td><td>Recognised professional degree</td><td>PhD / Masters + active research</td></tr>
+            <tr><td><strong>Licence</strong></td><td>Active, unrestricted licence <span class="badge badge-req">Required</span></td><td>Active professional registration <span class="badge badge-req">Required</span></td><td>Active institutional affiliation <span class="badge badge-req">Required</span></td></tr>
+            <tr><td><strong>Experience</strong></td><td>Minimum 3 years post-graduation clinical experience</td><td>Minimum 3 years active professional practice</td><td>Minimum 3 years research / teaching</td></tr>
+            <tr><td><strong>Specialty scope</strong></td><td>Must write within recognised specialty <span class="badge badge-req">Strictly enforced</span></td><td>Must write within professional scope</td><td>Must write within research area</td></tr>
+            <tr><td><strong>Disciplinary status</strong></td><td>No current disciplinary proceedings <span class="badge badge-req">Required</span></td><td>No current disciplinary proceedings</td><td>No academic misconduct findings</td></tr>
+            <tr><td><strong>COI disclosure</strong></td><td>Mandatory — updated per article <span class="badge badge-req">Required</span></td><td>Mandatory <span class="badge badge-req">Required</span></td><td>Mandatory <span class="badge badge-req">Required</span></td></tr>
+            <tr><td><strong>Review required</strong></td><td>Independent peer review by Tier 1 specialist <span class="badge badge-rec">Yes</span></td><td>Physician sign-off required <span class="badge badge-req">Required</span></td><td>Peer review by specialist required</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout callout-blue">
+        <div class="callout-head">🔍 Credential Verification Process</div>
+        <ul>
+          <li>All credentials verified by Editorial team before first publication</li>
+          <li>Annual re-verification of licensure status for all active authors</li>
+          <li>Authors must notify DrInsight immediately if licensure is suspended or revoked</li>
+          <li>Verified credentials are publicly displayed on your author bio page with a verification badge</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- S4: CONTENT TYPES -->
+    <section class="content-section" id="s4">
+      <div class="section-title"><div class="section-num">4</div>Types of Content We Publish</div>
+      <div class="content-type-grid">
+        <div class="ct-card" style="background:linear-gradient(135deg,#eff6ff,#fff);border-color:#bfdbfe">
+          <div class="ct-icon">📄</div>
+          <h4>Clinical Overview Articles</h4>
+          <p>Comprehensive patient-facing guides covering conditions, symptoms, diagnosis, treatment, and prevention.</p>
+          <div class="ct-meta"><span class="ct-tag">Patients</span><span class="ct-tag">1,200+ words</span><span class="ct-tag">Peer reviewed</span></div>
+        </div>
+        <div class="ct-card" style="background:linear-gradient(135deg,#f0fdf4,#fff);border-color:#a7f3d0">
+          <div class="ct-icon">🩺</div>
+          <h4>Professional Reference Articles</h4>
+          <p>Technical clinical content for healthcare professionals — pathophysiology, management protocols, clinical pearls.</p>
+          <div class="ct-meta"><span class="ct-tag">HCPs</span><span class="ct-tag">1,500+ words</span><span class="ct-tag">Specialist review</span></div>
+        </div>
+        <div class="ct-card" style="background:linear-gradient(135deg,#fffbeb,#fff);border-color:#fde68a">
+          <div class="ct-icon">💊</div>
+          <h4>Drug & Medication Guides</h4>
+          <p>Educational drug information — indications, dosing ranges, side effects, interactions, and patient counselling.</p>
+          <div class="ct-meta"><span class="ct-tag">General/HCPs</span><span class="ct-tag">Pharmacologist review</span></div>
+        </div>
+        <div class="ct-card" style="background:linear-gradient(135deg,#f3f0ff,#fff);border-color:#c4b5fd">
+          <div class="ct-icon">🔬</div>
+          <h4>Research Explainers</h4>
+          <p>Accessible summaries of new clinical trials, systematic reviews, and significant research findings.</p>
+          <div class="ct-meta"><span class="ct-tag">General/HCPs</span><span class="ct-tag">Labelled "Emerging Evidence"</span></div>
+        </div>
+        <div class="ct-card" style="background:linear-gradient(135deg,#f0fdf4,#fff);border-color:#a7f3d0">
+          <div class="ct-icon">📋</div>
+          <h4>Symptom Guides</h4>
+          <p>Patient-facing content helping readers understand symptoms, possible causes, red flags, and when to seek care.</p>
+          <div class="ct-meta"><span class="ct-tag">Patients</span><span class="ct-tag">No specific diagnoses</span></div>
+        </div>
+        <div class="ct-card" style="background:linear-gradient(135deg,#eff6ff,#fff);border-color:#bfdbfe">
+          <div class="ct-icon">✅</div>
+          <h4>Health & Wellness Articles</h4>
+          <p>Evidence-based general wellness content — nutrition, exercise, sleep, mental wellbeing, and prevention.</p>
+          <div class="ct-meta"><span class="ct-tag">General public</span><span class="ct-tag">Allied health OK</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- S5: BEFORE YOU WRITE -->
+    <section class="content-section" id="s5">
+      <div class="section-title"><div class="section-num teal">5</div>Before You Write — Pre-Submission Checklist</div>
+      <div class="prose"><p>Before beginning your article, please confirm the following to avoid rejection at submission stage.</p></div>
+      <div class="checklist">
+        <div class="cl-item"><div class="ci-icon">✅</div><div><strong>Topic approval:</strong> Confirm your topic with our Editorial team before writing — many topics are already covered or assigned. Email: <span style="color:var(--blue);font-weight:600">authors@drinsight.org</span></div></div>
+        <div class="cl-item"><div class="ci-icon">✅</div><div><strong>Scope check:</strong> Confirm the article falls within your recognised specialty or professional scope</div></div>
+        <div class="cl-item"><div class="ci-icon">✅</div><div><strong>Source gathering:</strong> Identify minimum 5 peer-reviewed sources from the last 10 years (preferably last 5 years) before writing</div></div>
+        <div class="cl-item"><div class="ci-icon">✅</div><div><strong>COI self-check:</strong> Identify any financial, professional, or personal conflicts of interest related to the topic</div></div>
+        <div class="cl-item"><div class="ci-icon">✅</div><div><strong>Target audience:</strong> Confirm whether the article is for patients, healthcare professionals, or both — this determines tone and structure</div></div>
+        <div class="cl-item"><div class="ci-icon">✅</div><div><strong>Safe messaging:</strong> If your article covers mental health, suicide, eating disorders, or substance use — review our Safe Messaging Guidelines first</div></div>
+        <div class="cl-item"><div class="ci-icon">✅</div><div><strong>Original content:</strong> Confirm this article has not been published elsewhere and is entirely original work. We do not accept simultaneously submitted or republished content</div></div>
+        <div class="cl-item"><div class="ci-icon">✅</div><div><strong>AI disclosure:</strong> If you used AI writing tools, you must disclose this at submission. AI-generated content may not be submitted without explicit editorial approval and full disclosure</div></div>
+      </div>
+    </section>
+
+    <!-- S6: ARTICLE STRUCTURE -->
+    <section class="content-section" id="s6">
+      <div class="section-title"><div class="section-num">6</div>Required Article Structure</div>
+      <div class="prose"><p>All articles must follow our standard structure. Patient-facing and professional articles have slightly different requirements.</p></div>
+
+      <div class="accordion open" onclick="toggleAcc(this)">
+        <div class="acc-header"><h4>📄 Clinical Overview Articles — Required Sections</h4><div class="acc-chevron">▾</div></div>
+        <div class="acc-body">
+          <ul>
+            <li><strong>Key Takeaways box</strong> — 4–6 bullet points at the top (patient-friendly summary)</li>
+            <li><strong>What is [Condition]?</strong> — Plain language definition (2–3 paragraphs)</li>
+            <li><strong>Causes &amp; Risk Factors</strong> — Evidence-based, comprehensive</li>
+            <li><strong>Signs &amp; Symptoms</strong> — Clear, patient-friendly language</li>
+            <li><strong>Diagnosis</strong> — How it's diagnosed; what tests are involved</li>
+            <li><strong>Treatment Options</strong> — Current evidence-based treatment approaches</li>
+            <li><strong>Prevention</strong> — Where applicable, evidence-based prevention strategies</li>
+            <li><strong>When to See a Doctor</strong> — Red flags and urgency guidance (required)</li>
+            <li><strong>Medical Disclaimer</strong> — Standard disclaimer (auto-added by Editorial)</li>
+            <li><strong>References</strong> — Minimum 5 numbered, DOI-linked references</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="accordion" onclick="toggleAcc(this)">
+        <div class="acc-header"><h4>🩺 Professional Reference Articles — Required Sections</h4><div class="acc-chevron">▾</div></div>
+        <div class="acc-body">
+          <ul>
+            <li><strong>Clinical Summary Box</strong> — ICD-10 code, key diagnostic criteria, first-line treatment</li>
+            <li><strong>Epidemiology &amp; Pathophysiology</strong> — Incidence, prevalence, mechanisms</li>
+            <li><strong>Diagnostic Criteria</strong> — Current classification (DSM-5, ICD-11, specialty guidelines)</li>
+            <li><strong>Differential Diagnosis</strong> — Key differentials with distinguishing features</li>
+            <li><strong>Investigations</strong> — Appropriate workup with evidence basis</li>
+            <li><strong>Management Protocols</strong> — Step-by-step, guideline-referenced</li>
+            <li><strong>Pharmacotherapy</strong> — Drug names (generic + brand), doses, monitoring</li>
+            <li><strong>Special Populations</strong> — Pregnancy, paediatrics, elderly, renal/hepatic impairment</li>
+            <li><strong>Clinical Pearls</strong> — 3–5 practical clinical tips</li>
+            <li><strong>References</strong> — Minimum 8 peer-reviewed, DOI-linked references</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="accordion" onclick="toggleAcc(this)">
+        <div class="acc-header"><h4>💊 Drug & Medication Guide — Required Sections</h4><div class="acc-chevron">▾</div></div>
+        <div class="acc-body">
+          <ul>
+            <li><strong>Drug Overview Box</strong> — Generic name, brand names, drug class, availability</li>
+            <li><strong>Indications</strong> — Approved indications; off-label uses clearly labelled</li>
+            <li><strong>Mechanism of Action</strong> — Plain language explanation</li>
+            <li><strong>Dosing</strong> — General reference ranges only (never prescriptive); age-specific where relevant</li>
+            <li><strong>Contraindications</strong> — Absolute and relative (comprehensive)</li>
+            <li><strong>Side Effects</strong> — Common, serious, and black box warnings prominently displayed</li>
+            <li><strong>Drug Interactions</strong> — Clinically significant interactions</li>
+            <li><strong>Monitoring Parameters</strong> — Required lab monitoring, frequency</li>
+            <li><strong>Patient Counselling Points</strong> — What patients should know</li>
+            <li><strong>Dosing Disclaimer</strong> — Auto-added: "Dosing is for educational reference only"</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- S7: WRITING STYLE -->
+    <section class="content-section" id="s7">
+      <div class="section-title"><div class="section-num amber">7</div>Writing Style Guide</div>
+
+      <div class="callout callout-blue">
+        <div class="callout-head">📖 Tone & Language Standards</div>
+        <ul>
+          <li><strong>Patient-facing articles:</strong> Plain language, Flesch-Kincaid Grade 8–10, compassionate, non-alarmist</li>
+          <li><strong>Professional articles:</strong> Technical, precise, evidence-referenced, clinical terminology expected</li>
+          <li><strong>Both:</strong> Active voice preferred, present tense for established facts, no jargon without explanation</li>
+        </ul>
+      </div>
+
+      <div class="style-row">
+        <div class="style-block do-style">
+          <div class="style-label">✅ Write Like This</div>
+          <div class="style-example">"High blood pressure — also called hypertension — means the force of blood pushing against your artery walls is consistently too high. Over time, this can damage your heart and blood vessels."</div>
+        </div>
+        <div class="style-block dont-style">
+          <div class="style-label">❌ Not Like This</div>
+          <div class="style-example">"Arterial hypertension is characterised by persistently elevated systolic and/or diastolic blood pressure values, which can cause deleterious sequelae to the cardiovascular system if left untreated."</div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px">
+        <div class="accordion open" onclick="toggleAcc(this)">
+          <div class="acc-header"><h4>📝 Formatting Rules</h4><div class="acc-chevron">▾</div></div>
+          <div class="acc-body">
+            <ul>
+              <li><strong>Headings:</strong> H2 for main sections, H3 for subsections — no H4 or deeper in patient articles</li>
+              <li><strong>Paragraphs:</strong> Maximum 4 sentences per paragraph in patient-facing content</li>
+              <li><strong>Lists:</strong> Use bullet points for 3+ items; avoid lists with fewer than 3 items</li>
+              <li><strong>Bold text:</strong> Use sparingly — only for key terms, warnings, or critical clinical points</li>
+              <li><strong>Numbers:</strong> Spell out 1–9 in body text; use numerals for 10+, all statistics, doses, ages</li>
+              <li><strong>Drug names:</strong> Generic name first, brand name in parentheses on first mention — e.g. metformin (Glucophage)</li>
+              <li><strong>Statistics:</strong> Always cite source inline — e.g. "...affecting 1 in 10 adults (WHO, 2023)"</li>
+              <li><strong>Avoid:</strong> Hyperbolic language, exclamation marks, first-person ("I recommend..."), and directly addressing readers as "you" in professional articles</li>
+            </ul>
+          </div>
+        </div>
+        <div class="accordion" onclick="toggleAcc(this)">
+          <div class="acc-header"><h4>⚕️ Medical Language Rules</h4><div class="acc-chevron">▾</div></div>
+          <div class="acc-body">
+            <ul>
+              <li>Always use <strong>person-first language:</strong> "person with diabetes" not "diabetic person"</li>
+              <li>Use <strong>"died by suicide"</strong> not "committed suicide" — follow all safe messaging guidelines</li>
+              <li>Avoid stigmatising terms: "addict" → "person with substance use disorder"</li>
+              <li>Never state specific diagnoses for readers: "you may have X" — use "a doctor can determine if..."</li>
+              <li>Dose ranges must always be labelled <strong>"general reference only"</strong> — never as prescriptions</li>
+              <li>Off-label uses must always be explicitly labelled as "off-label" or "not approved for this use"</li>
+              <li>Experimental treatments must always be labelled "experimental" or "investigational"</li>
+              <li>Emergency symptoms must always include guidance to call emergency services immediately</li>
+            </ul>
+          </div>
+        </div>
+        <div class="accordion" onclick="toggleAcc(this)">
+          <div class="acc-header"><h4>🌍 Inclusive Language Guidelines</h4><div class="acc-chevron">▾</div></div>
+          <div class="acc-body">
+            <ul>
+              <li>Use gender-neutral language where clinically appropriate — "the patient" rather than assuming gender</li>
+              <li>Acknowledge where clinical evidence is based on specific populations and may not generalise</li>
+              <li>Note regional availability differences for medications and treatments where relevant</li>
+              <li>Avoid cultural assumptions in examples — use globally relatable contexts</li>
+              <li>Consider diverse age groups in examples — not just working-age adults</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-grid-2" style="margin-top:16px">
+        <div class="do-card">
+          <h4>✅ Do Include</h4>
+          <ul>
+            <li>Evidence-based statements with citations</li>
+            <li>Red flag symptoms and when to seek emergency care</li>
+            <li>Limitations of current evidence where relevant</li>
+            <li>Plain language explanations of medical terms</li>
+            <li>Balanced presentation of treatment options</li>
+            <li>Specific population considerations (pregnancy, children, elderly)</li>
+          </ul>
+        </div>
+        <div class="dont-card">
+          <h4>❌ Do NOT Include</h4>
+          <ul>
+            <li>Specific diagnoses for readers based on symptoms</li>
+            <li>Prescriptive dosing instructions</li>
+            <li>Unsubstantiated health claims</li>
+            <li>Promotion of specific brands or products</li>
+            <li>Anecdotal evidence without clinical support</li>
+            <li>Claims that are not supported by cited sources</li>
+            <li>Content that could delay emergency treatment</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- S8: EVIDENCE & SOURCES -->
+    <section class="content-section" id="s8">
+      <div class="section-title"><div class="section-num">8</div>Evidence & Source Standards</div>
+      <div class="callout callout-green">
+        <div class="callout-head">✅ Accepted Source Types (in order of preference)</div>
+        <ul>
+          <li><strong>Tier 1 (Required for clinical claims):</strong> Systematic reviews, meta-analyses, Cochrane reviews, clinical practice guidelines from WHO/CDC/NHS/AHA/ADA/ESC/NICE and equivalent bodies</li>
+          <li><strong>Tier 2 (Accepted with Tier 1 support):</strong> Randomised controlled trials (RCTs), cohort studies, case-control studies, peer-reviewed observational studies</li>
+          <li><strong>Tier 3 (Supporting only — not standalone):</strong> Expert consensus statements, case series, recognised specialist textbooks (within last 10 years)</li>
+        </ul>
+      </div>
+      <div class="callout callout-red">
+        <div class="callout-head">❌ NOT Accepted as Sources</div>
+        <ul>
+          <li>Wikipedia or any user-edited content</li>
+          <li>Non-peer-reviewed health websites or blogs</li>
+          <li>Pharmaceutical company promotional materials or press releases</li>
+          <li>Preprint studies not yet peer-reviewed (may be noted as "emerging research" only)</li>
+          <li>Retracted studies — always check for retraction before citing</li>
+          <li>AI-generated content presented as research evidence</li>
+          <li>Sources older than 10 years (unless landmark studies with explicit justification)</li>
+        </ul>
+      </div>
+      <div class="callout callout-blue">
+        <div class="callout-head">📋 Citation Requirements</div>
+        <ul>
+          <li><strong>Minimum sources:</strong> 5 per clinical article · 8 per professional reference article · 3 per wellness article</li>
+          <li><strong>Format:</strong> Numbered inline citations [1] with full reference list at end</li>
+          <li><strong>Link format:</strong> All sources must include a direct PubMed URL or DOI link — e.g. https://doi.org/10.1016/...</li>
+          <li><strong>Preferred age:</strong> Within 5 years. Maximum: 10 years (landmark studies excepted)</li>
+          <li><strong>Statistics:</strong> Every statistic must include source and year inline in text</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- S9: SUBMISSION PROCESS -->
+    <section class="content-section" id="s9">
+      <div class="section-title"><div class="section-num purple">9</div>Submission Process</div>
+      <div class="process-timeline">
+        <div class="process-step">
+          <div class="step-dot">1</div>
+          <div class="step-body">
+            <h4>✉️ Topic Proposal <span class="step-badge sb-blue">First step</span></h4>
+            <p>Email your proposed topic to <strong style="color:var(--blue)">authors@drinsight.org</strong> with a 2–3 sentence outline. Receive approval or feedback within 3–5 business days before writing.</p>
+          </div>
+        </div>
+        <div class="process-step">
+          <div class="step-dot">2</div>
+          <div class="step-body">
+            <h4>📋 Author Brief Received</h4>
+            <p>Receive your detailed author brief — including target audience, required word count, source requirements, safe messaging guidance if applicable, COI disclosure form, and submission deadline.</p>
+          </div>
+        </div>
+        <div class="process-step">
+          <div class="step-dot">3</div>
+          <div class="step-body">
+            <h4>✍️ Write Your Article <span class="step-badge sb-blue">You are here</span></h4>
+            <p>Write using the required structure for your article type. Submit as a Google Doc or Word document (.docx). Include all inline citations. Complete and attach the COI disclosure form.</p>
+          </div>
+        </div>
+        <div class="process-step">
+          <div class="step-dot">4</div>
+          <div class="step-body">
+            <h4>🖊️ Editorial Pre-Screen</h4>
+            <p>Our editorial team reviews your submission within 3–5 business days for structure, completeness, source quality, and style guide compliance. Returned with feedback if pre-screen fails.</p>
+          </div>
+        </div>
+        <div class="process-step">
+          <div class="step-dot">5</div>
+          <div class="step-body">
+            <h4>🔬 Medical Peer Review <span class="step-badge sb-green">Quality gate</span></h4>
+            <p>An independent specialist reviewer evaluates clinical accuracy, completeness, safety, and balance. Standard review time: 7 business days. You will receive revision requests or approval notification.</p>
+          </div>
+        </div>
+        <div class="process-step">
+          <div class="step-dot">6</div>
+          <div class="step-body">
+            <h4>✅ Revisions (If Required)</h4>
+            <p>You have 5 business days to address reviewer comments and resubmit. Maximum 2 revision cycles. If revisions are not completed within deadline, article is returned to queue.</p>
+          </div>
+        </div>
+        <div class="process-step">
+          <div class="step-dot">7</div>
+          <div class="step-body">
+            <h4>📌 Final Sign-Off & Publication <span class="step-badge sb-green">✓ Published</span></h4>
+            <p>Senior Editor gives final approval. Your article is published with your full author byline, credentials, reviewer credit, publication date, and all citations. You receive a publication confirmation email.</p>
+          </div>
+        </div>
+        <div class="process-step">
+          <div class="step-dot" style="background:linear-gradient(135deg,var(--amber),#f59e0b)">8</div>
+          <div class="step-body">
+            <h4>📊 Post-Publication</h4>
+            <p>Access your article analytics dashboard. Receive reader feedback notifications. Be notified when your article is due for scheduled re-review. Earn your CPD/CME recognition letter on request.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-amber">
+        <div class="callout-head">⚡ Submission Timelines to Know</div>
+        <ul>
+          <li><strong>Topic approval response:</strong> 3–5 business days</li>
+          <li><strong>Editorial pre-screen:</strong> 3–5 business days from submission</li>
+          <li><strong>Medical peer review:</strong> 7 business days standard · 14 days maximum</li>
+          <li><strong>Revision window:</strong> 5 business days to address reviewer comments</li>
+          <li><strong>Final sign-off to publication:</strong> 2–3 business days after final approval</li>
+          <li><strong>Total typical timeline:</strong> 3–5 weeks from submission to publication</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- S10: APPLY -->
+    <section class="content-section" id="s10">
+      <div class="section-title"><div class="section-num green">10</div>Apply to Become an Author</div>
+      <div class="apply-cta">
+        <h3>Start Writing for DrInsight</h3>
+        <p>Join our network of 200+ verified medical authors contributing to the most trusted medical platform in the region. Your expertise can help hundreds of thousands of patients make better health decisions.</p>
+        <div class="apply-steps-row">
+          <div class="apply-step"><div class="as-circle">1</div><div class="as-label">Submit Application Online</div></div>
+          <div class="apply-step"><div class="as-circle">2</div><div class="as-label">Verification of Credentials</div></div>
+          <div class="apply-step"><div class="as-circle">3</div><div class="as-label">Complete Orientation Module</div></div>
+          <div class="apply-step"><div class="as-circle">4</div><div class="as-label">Sign Author Agreement</div></div>
+          <div class="apply-step"><div class="as-circle">5</div><div class="as-label">Submit Your First Article</div></div>
+        </div>
+        <div class="apply-btns">
+          <button class="btn-apply" onclick="showToast('Opening application form...')">✍️ Apply to Become an Author →</button>
+          <button class="btn-apply-ghost" onclick="showToast('Opening email...')">📧 authors@drinsight.org</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- S11: RIGHTS & PAYMENTS -->
+    <section class="content-section" id="s11">
+      <div class="section-title"><div class="section-num teal">11</div>Author Rights & Payments</div>
+      <div class="card-grid-2">
+        <div class="callout callout-green">
+          <div class="callout-head">✅ What Authors Receive</div>
+          <ul>
+            <li><strong>Named byline</strong> on every published article with full credentials</li>
+            <li><strong>Verified author bio page</strong> with photo, credentials, and all published articles</li>
+            <li><strong>Honorarium</strong> paid per published article (rates shared on application)</li>
+            <li><strong>CPD/CME recognition letter</strong> issued on request for each published article</li>
+            <li><strong>Article analytics</strong> — views, time on page, rating, and engagement data</li>
+            <li><strong>DOI-linked publications</strong> citable for academic portfolios and CVs</li>
+            <li><strong>Editorial support</strong> throughout writing and revision process</li>
+          </ul>
+        </div>
+        <div class="callout callout-blue">
+          <div class="callout-head">📋 License & Rights</div>
+          <ul>
+            <li>Authors <strong>retain ownership</strong> of their original content</li>
+            <li>By submitting, authors grant DrInsight a <strong>worldwide, royalty-free, non-exclusive licence</strong> to publish, display, and distribute the content</li>
+            <li>DrInsight may edit content for clarity, length, and style guide compliance</li>
+            <li>Authors will be notified of any <strong>substantial editorial changes</strong> before publication</li>
+            <li>Content may be <strong>unpublished</strong> if it becomes clinically outdated or inaccurate — authors are notified</li>
+            <li>Authors may request <strong>retraction of their content</strong> with written justification</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout callout-amber">
+        <div class="callout-head">⚠️ Important: AI Content Policy</div>
+        <p>Authors may use AI writing tools as a drafting aid only. However: all AI-generated or AI-assisted content must be disclosed at submission. Content must be substantially reviewed, verified, and rewritten by the author — not submitted as generated. Articles found to be primarily AI-generated without disclosure will be rejected and the author account suspended.</p>
+      </div>
+    </section>
+
+    <!-- S12: CONFLICT OF INTEREST -->
+    <section class="content-section" id="s12">
+      <div class="section-title"><div class="section-num red">12</div>Conflict of Interest Policy</div>
+      <div class="prose"><p>All authors must disclose any financial, professional, or personal relationships that could influence — or appear to influence — the content they produce. Disclosure is mandatory and published transparently on every article.</p></div>
+      <div class="checklist">
+        <div class="cl-item"><div class="ci-icon">💰</div><div><strong>Financial relationships</strong> with pharmaceutical, device, or biotech companies relevant to article content</div></div>
+        <div class="cl-item"><div class="ci-icon">📊</div><div><strong>Research funding</strong> received from commercial entities related to article topic</div></div>
+        <div class="cl-item"><div class="ci-icon">🎤</div><div><strong>Speaker fees or honoraria</strong> received from organisations relevant to article content</div></div>
+        <div class="cl-item"><div class="ci-icon">🏢</div><div><strong>Employment or consultancy roles</strong> with companies relevant to article content</div></div>
+        <div class="cl-item"><div class="ci-icon">📦</div><div><strong>Stock or equity ownership</strong> in relevant healthcare or pharmaceutical companies</div></div>
+        <div class="cl-item"><div class="ci-icon">🤝</div><div><strong>Personal relationships</strong> that could create a perception of bias</div></div>
+      </div>
+      <div class="card-grid-3" style="margin-top:16px">
+        <div class="info-card" style="border-top:3px solid var(--green)">
+          <h4 style="color:var(--green)">Minor COI</h4>
+          <p>Disclosed and published on the article. Author may proceed with writing. Disclosure visible to all readers.</p>
+        </div>
+        <div class="info-card" style="border-top:3px solid var(--amber)">
+          <h4 style="color:#d97706">Moderate COI</h4>
+          <p>Disclosed and published. Additional independent reviewer assigned to provide extra oversight of article.</p>
+        </div>
+        <div class="info-card" style="border-top:3px solid var(--red)">
+          <h4 style="color:var(--red)">Significant COI</h4>
+          <p>Author recused from writing this article. Reassigned to a topic without conflict. No exceptions.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- S13: EDITORIAL STANDARDS -->
+    <section class="content-section" id="s13">
+      <div class="section-title"><div class="section-num">13</div>Editorial Standards & Commitments</div>
+      <div class="callout callout-blue">
+        <div class="callout-head">📋 Our Commitments to Authors</div>
+        <ul>
+          <li>Detailed, constructive editorial feedback on every submission</li>
+          <li>Transparent review process — you will always know where your article is in the pipeline</li>
+          <li>Respectful communication — all revision requests are specific, evidence-based, and professionally phrased</li>
+          <li>Your author profile is maintained and updated with every new publication</li>
+          <li>You are notified before any significant changes to your published article</li>
+          <li>You are notified when your article is scheduled for re-review and invited to update it yourself</li>
+        </ul>
+      </div>
+      <div class="callout callout-red">
+        <div class="callout-head">⚠️ Grounds for Article Rejection or Removal</div>
+        <ul>
+          <li>Fundamental clinical inaccuracies that cannot be corrected through revision</li>
+          <li>Content that could directly harm readers if acted upon</li>
+          <li>Plagiarism — content not original or copied from another source</li>
+          <li>Undisclosed conflicts of interest discovered after submission</li>
+          <li>AI-generated content submitted without disclosure</li>
+          <li>Fabricated or misrepresented citations</li>
+          <li>Content written outside the author's recognised specialty or scope</li>
+        </ul>
+      </div>
+      <div class="callout callout-gray">
+        <div class="callout-head">📖 Related Resources</div>
+        <ul>
+          <li><a href="editorial-policy.html" style="color:var(--blue);font-weight:600">📋 Full Editorial Policy →</a></li>
+          <li><a href="medical-review-process.html" style="color:var(--blue);font-weight:600">🔬 Medical Review Process →</a></li>
+          <li><a href="medical-review-process.html" style="color:var(--blue);font-weight:600">👨‍⚕️ Medical Reviewer Guidelines →</a></li>
+          <li><a href="editorial-policy.html" style="color:var(--blue);font-weight:600">💛 Safe Messaging Guidelines →</a></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- S14: CONTACT -->
+    <section class="content-section" id="s14">
+      <div class="section-title"><div class="section-num green">14</div>Contact & Support</div>
+      <div class="contact-grid">
+        <div class="contact-card">
+          <h4>✍️ New Author Applications</h4>
+          <a href="mailto:authors@drinsight.org">authors@drinsight.org</a>
+          <p>Apply to join our author network. Response within 3–5 business days.</p>
+        </div>
+        <div class="contact-card">
+          <h4>📋 Topic Proposals & Briefs</h4>
+          <a href="mailto:editorial@drinsight.org">editorial@drinsight.org</a>
+          <p>Submit topic ideas or request a writing brief. Response within 3–5 business days.</p>
+        </div>
+        <div class="contact-card">
+          <h4>📤 Article Submissions</h4>
+          <a href="mailto:submissions@drinsight.org">submissions@drinsight.org</a>
+          <p>Submit completed articles for editorial pre-screen and peer review.</p>
+        </div>
+        <div class="contact-card">
+          <h4>💰 Payments & Contracts</h4>
+          <a href="mailto:payments@drinsight.org">payments@drinsight.org</a>
+          <p>Queries about honoraria, author agreements, and CPD/CME letters.</p>
+        </div>
+        <div class="contact-card">
+          <h4>📝 Corrections & Updates</h4>
+          <a href="mailto:corrections@drinsight.org">corrections@drinsight.org</a>
+          <p>Request corrections or updates to your published articles.</p>
+        </div>
+        <div class="contact-card">
+          <h4>📍 Mailing Address</h4>
+          <p style="color:var(--gray-700);font-size:.84rem;line-height:1.6">DrInsight Inc.<br>Karachi<br>Pakistan</p>
+        </div>
+      </div>
+      <div class="callout callout-blue" style="margin-top:8px">
+        <div class="callout-head">⏱️ Response Time Commitments</div>
+        <ul>
+          <li>New author applications: <strong>3–5 business days</strong></li>
+          <li>Topic proposal decisions: <strong>3–5 business days</strong></li>
+          <li>Editorial pre-screen feedback: <strong>3–5 business days from submission</strong></li>
+          <li>Medical peer review: <strong>7–14 business days</strong></li>
+          <li>General inquiries: <strong>5–7 business days</strong></li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- PAGE FOOTER BAR -->
+<div class="page-footer-bar">
+  <div class="pf-bar-inner">
+    <div class="pf-pills">
+      <a href="editorial-policy.html" class="pf-pill">Editorial Policy</a>
+      <a href="medical-review-process.html" class="pf-pill">Medical Review Process</a>
+      <a href="privacy-policy.html" class="pf-pill">Privacy Policy</a>
+      <a href="terms-conditions.html" class="pf-pill">Terms & Conditions</a>
+      <a href="disclaimer.html" class="pf-pill">Disclaimer</a>
+    </div>
+    <div class="pf-actions">
+      <span style="font-size:.76rem;color:var(--gray-400)">Last updated: June 1, 2026 · v2.1</span>
+      <button class="pf-btn gray" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑ Back to Top</button>
+      <button class="pf-btn green" onclick="document.getElementById('s10').scrollIntoView({behavior:'smooth'})">✍️ Apply to Write</button>
+      <button class="pf-btn" onclick="window.print()">⬇️ Download PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER — exact from home -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="logo">
+        <img src="assets/drinsight-logo-footer.png" alt="DrInsight — Trusted Medical Insights &amp; Expert Consultation" width="214" height="56" loading="lazy" decoding="async" style="height:56px;width:auto;display:block"></div>
+      <p>Your trusted platform for evidence-based medical information, expert doctor consultations, and health tools — reviewed and approved by licensed physicians.</p>
+      <div class="hipaa-badge">🛡️ HIPAA Compliant</div>
+      <div class="hipaa-badge" style="margin-top:6px">🇪🇺 GDPR Compliant</div>
+      <div class="footer-social" style="margin-top:16px">
+        <a href="#" class="social-btn">𝕏</a>
+        <a href="#" class="social-btn">f</a>
+        <a href="#" class="social-btn">in</a>
+        <a href="#" class="social-btn">▶</a>
+        <a href="#" class="social-btn">📸</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="health-tools.html">Health Tools</a></li>
+        <li><a href="doctors.html">Our Doctors</a></li>
+        <li><a href="ask-doctor.html">Ask the Doctor</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="book-consultation.html">Book Consultation</a></li>
+        <li><a href="contact.html">Contact Us</a></li>
+        <li><a href="author-guidelines.html">Author Guidelines</a></li>
+        <li><a href="medical-review-process.html">Medical Review Process</a></li>
+        <li><a href="editorial-policy.html">Editorial Policy</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Medical Categories</h4>
+      <ul>
+        <li><a href="blog.html#clinical">Clinical Specialties</a></li>
+        <li><a href="blog.html#surgical">Surgical Specialties</a></li>
+        <li><a href="blog.html#diagnostic">Diagnostic Specialties</a></li>
+        <li><a href="blog.html#dental">Dental Specialties</a></li>
+        <li><a href="blog.html">Preventive Health</a></li>
+        <li><a href="blog.html">Mental Health</a></li>
+        <li><a href="blog.html">Women's Health</a></li>
+        <li><a href="blog.html">Men's Health</a></li>
+        <li><a href="blog.html">Pediatrics</a></li>
+        <li><a href="blog.html">Nutrition</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contact Information</h4>
+      <div class="footer-contact-item">
+        <svg fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>
+        +92 335 3545545
+      </div>
+      <div class="footer-contact-item">
+        <svg fill="currentColor" viewBox="0 0 20 20"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
+        contact@drinsight.org
+      </div>
+      <div class="footer-contact-item">
+        <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+        Karachi<br>Pakistan
+      </div>
+      <div class="footer-contact-item">
+        <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+        Mon–Fri: 8AM–8PM | Sat: 9AM–5PM
+      </div>
+      <div class="footer-contact-item" style="color:#25d366">
+        📱 WhatsApp: +92 335 3545545
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Expert Health Insights</h4>
+      <p style="font-size:.82rem;margin-bottom:14px">Get weekly medical tips and health news from our specialists.</p>
+      <div class="footer-subscribe">
+        <input type="email" placeholder="Your email address">
+        <button>Subscribe Free →</button>
+        <p style="font-size:.72rem;color:#475569;margin-top:8px">🔒 GDPR compliant. Unsubscribe anytime.</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>
+      <p>© 2026 DrInsight. All rights reserved.</p>
+      <p class="fb-note">⚕️ The content on DrInsight is for informational purposes only and is not a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider for medical decisions.</p>
+    </div>
+    <div class="footer-bottom-links">
+      <a href="privacy-policy.html">Privacy Policy</a>
+      <a href="terms-conditions.html">Terms of Service</a>
+      <a href="disclaimer.html">Medical Disclaimer</a>
+      <a href="cookie-policy.html">Cookie Policy</a>
+      <a href="sitemap.html">Sitemap</a>
+      <a href="faq.html">FAQ</a>
+    </div>
+  </div>
+</footer>
+
+<!-- TOAST -->
+<div style="position:fixed;bottom:24px;right:24px;background:var(--gray-900);color:#fff;padding:12px 22px;border-radius:12px;font-size:.88rem;font-weight:500;z-index:999;opacity:0;transform:translateY(8px);transition:all .3s ease;pointer-events:none;max-width:320px" id="toastMsg"></div>
+
+<script>
+function toggleMenu(){
+  document.getElementById('mobileMenu').classList.toggle('open');
+}
+
+// Reading progress
+window.addEventListener('scroll', function(){
+  var d = document.documentElement;
+  var pct = (d.scrollTop / (d.scrollHeight - d.clientHeight)) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  // Active TOC
+  var secs = ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13','s14'];
+  var active = 's1';
+  secs.forEach(function(id){
+    var el = document.getElementById(id);
+    if(el && el.getBoundingClientRect().top < 120) active = id;
+  });
+  document.querySelectorAll('.toc-item').forEach(function(item, i){
+    item.classList.toggle('active', secs[i] === active);
+  });
+});
+
+function scrollTo(id){
+  document.getElementById(id).scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function toggleAcc(el){
+  el.classList.toggle('open');
+}
+
+function showToast(msg){
+  var t = document.getElementById('toastMsg');
+  t.textContent = msg;
+  t.style.opacity = '1';
+  t.style.transform = 'translateY(0)';
+  setTimeout(function(){
+    t.style.opacity = '0';
+    t.style.transform = 'translateY(8px)';
+  }, 2600);
+}
+</script>
+
+<!-- ==== DRINSIGHT RESPONSIVE HARDENING (mobile-friendly overflow fixes) ==== -->
+<style id="drinsight-responsive-fix">
+/* Global: never let the page scroll sideways; media stays inside its box */
+html,body{max-width:100%;overflow-x:hidden}
+*{min-width:0}                 /* let grid/flex items shrink instead of forcing page-wide overflow */
+img,svg,video,iframe,canvas,object,embed,picture{max-width:100%;height:auto}
+table{max-width:100%}
+pre,code{white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere}
+/* long words, emails, urls wrap instead of pushing the layout wide */
+p,li,td,th,a,h1,h2,h3,h4,h5,h6,span,label,blockquote,figcaption,.prose{overflow-wrap:break-word}
+
+@media(max-width:900px){
+  /* content + sidebar layouts collapse to one column */
+  .article-layout,.main,.two-col,.blog-layout,.page-layout,.layout,
+  .content-wrap,.doc-layout,.split,.with-sidebar,.body-grid{
+    grid-template-columns:1fr !important;
+  }
+  /* wide sidebars stop reserving a fixed track */
+  .sidebar,.toc-sidebar,.aside,.side{max-width:100% !important}
+}
+
+@media(max-width:768px){
+  /* flex button/pill rows wrap onto new lines */
+  .action-btns,.hero-actions,.btn-row,.btn-group,.cta-row,.pill-row,
+  .tags,.chips,.expertise,.expertise-list,.badges{flex-wrap:wrap}
+  /* fallback: any table NOT converted to cards still scrolls instead of breaking layout */
+  table:not(.rtbl){display:block;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+}
+
+@media(max-width:600px){
+  /* multi-column card / stat grids drop to a single column on phones */
+  [class$="-grid"],[class*="-grid "],
+  .card-grid-2,.card-grid-3,.card-grid-4,
+  .stats-row,.stats-bar-inner,.trust-row,.trust-inner,
+  .apply-steps-row,.kv-grid,.fg,.role-grid,.cred-grid,.cat-tiles,.cats-grid,
+  .collection-grid,.legal-grid,.rights-grid,.security-grid,.contact-grid,
+  .cert-grid,.articles-grid,.auth-grid,.partner-admin-grid,.spec-grid,
+  .related-grid,.blog-grid{
+    grid-template-columns:1fr !important;
+  }
+  /* 7-day calendars stay compact but never overflow */
+  .cal-grid{grid-template-columns:repeat(7,1fr) !important;font-size:.62rem !important}
+  /* horizontal step indicators wrap instead of overflowing */
+  .steps,.progress-steps,.step-row,.apply-steps-row{flex-wrap:wrap}
+}
+
+/* ==== RESPONSIVE DATA TABLES: no more sideways sliding on phones ====
+   Tables with a header row become stacked "cards" — each row is a card and
+   every value shows its column label. Fits every screen with zero scrolling. */
+@media(max-width:680px){
+  table.rtbl{display:block;width:100% !important;border:none !important;background:none !important;overflow:visible !important}
+  table.rtbl thead{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+  table.rtbl tbody{display:block;width:100%}
+  table.rtbl tr{
+    display:block;width:100%;margin:0 0 14px;
+    border:1px solid var(--gray-200,#e2e8f0);border-radius:12px;
+    background:#fff;box-shadow:0 1px 4px rgba(15,23,42,.06);overflow:hidden
+  }
+  table.rtbl tr:nth-child(even){background:#fff}
+  table.rtbl td{
+    display:flex;justify-content:space-between;align-items:baseline;gap:14px;
+    width:auto !important;padding:10px 14px;border:none;border-bottom:1px solid #eef2f7;
+    text-align:right;font-size:.9rem;white-space:normal !important
+  }
+  table.rtbl td:first-child{background:var(--blue-light,#e8f0fb);font-weight:700}
+  table.rtbl td:last-child{border-bottom:none}
+  table.rtbl td::before{
+    content:attr(data-label);font-weight:600;color:#475569;
+    text-align:left;flex:0 0 40%;min-width:0;overflow-wrap:break-word
+  }
+  table.rtbl td:not([data-label])::before{display:none}
+  table.rtbl td:not([data-label]){justify-content:flex-start;text-align:left}
+  /* the old scroll wrappers no longer need to scroll — cards already fit */
+  .data-table-wrap,.table-wrap,.tbl-wrap,.table-scroll{overflow:visible !important;border:none !important}
+}
+</style>
+<script>
+/* Label each table cell with its column header so CSS can show them as cards on phones. */
+(function(){
+  function labelTables(){
+    var tables = document.querySelectorAll('table');
+    for (var t=0; t<tables.length; t++){
+      var tbl = tables[t];
+      if (tbl.getAttribute('data-rtbl')) continue;
+      // find header labels
+      var head = tbl.querySelector('thead tr');
+      var headerCells, hideFirstRow = false;
+      if (head){ headerCells = head.querySelectorAll('th,td'); }
+      else {
+        var firstRow = tbl.querySelector('tr');
+        if (!firstRow) continue;
+        headerCells = firstRow.querySelectorAll('th');
+        if (!headerCells.length) continue;   // no real headers -> leave it scrollable
+        hideFirstRow = true;
+      }
+      var labels = [];
+      for (var i=0;i<headerCells.length;i++){ labels.push(headerCells[i].textContent.trim()); }
+      if (!labels.length) continue;
+      var rows = tbl.querySelectorAll('tbody tr');
+      if (!rows.length) rows = tbl.querySelectorAll('tr');
+      for (var r=0;r<rows.length;r++){
+        if (hideFirstRow && r===0) continue;
+        var cells = rows[r].querySelectorAll('td');
+        for (var c=0;c<cells.length;c++){
+          if (labels[c] && !cells[c].hasAttribute('data-label')){
+            cells[c].setAttribute('data-label', labels[c]);
+          }
+        }
+      }
+      tbl.classList.add('rtbl');
+      tbl.setAttribute('data-rtbl','1');
+    }
+  }
+  if (document.readyState !== 'loading') labelTables();
+  else document.addEventListener('DOMContentLoaded', labelTables);
+})();
+</script>
+</body>
+</html>

@@ -1,16 +1,17 @@
-import { TopBar } from "./TopBar";
-import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
+import { SiteHeader } from "./SiteHeader";
 
 export function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <TopBar />
-      <Navbar />
+      <SiteHeader />
       <main className="flex-1">{children}</main>
       <Footer />
     </>
   );
 }
 
-export { TopBar, Navbar, Footer };
+export { SiteHeader } from "./SiteHeader";
+export { TopBar } from "./TopBar";
+export { Navbar } from "./Navbar";
+export { Footer } from "./Footer";

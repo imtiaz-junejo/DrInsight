@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sitemap — The Dr Insight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* mobile safety */img,svg,video,iframe{max-width:100%}table{max-width:100%}html{-webkit-text-size-adjust:100%}
+
+:root{
+  --blue:#1a56a0;--blue-dark:#0f3d7a;--blue-light:#e8f0fb;--blue-mid:#4a90d9;
+  --teal:#0891b2;--green:#059669;--red:#dc2626;--amber:#f59e0b;--purple:#7c3aed;
+  --white:#ffffff;--gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;
+  --gray-400:#94a3b8;--gray-600:#475569;--gray-800:#1e293b;--gray-900:#0f172a;
+  --font-display:'Playfair Display',Georgia,serif;
+  --font-body:'DM Sans',system-ui,sans-serif;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.08);
+  --shadow-md:0 4px 16px rgba(0,0,0,.10);
+  --shadow-lg:0 8px 32px rgba(26,86,160,.14);
+  --radius:12px;--radius-lg:20px;
+  --transition:all .22s cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);color:var(--gray-800);background:var(--white);line-height:1.65;font-size:16px}
+a{color:inherit;text-decoration:none}
+ul{list-style:none}
+
+/* TOP BAR */
+.topbar{background:var(--blue-dark);color:#cbd5e1;font-size:.8rem;padding:.45rem 0}
+.topbar-inner{max-width:1240px;margin:auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.topbar a{color:#93c5fd;margin-left:16px;transition:var(--transition)}
+.topbar a:hover{color:#fff}
+.topbar-emergency{display:flex;align-items:center;gap:8px;color:#fca5a5;font-weight:600}
+
+/* NAV */
+nav{background:var(--white);border-bottom:1px solid var(--gray-200);position:sticky;top:0;z-index:100;box-shadow:var(--shadow-sm)}
+.nav-inner{max-width:1240px;margin:auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:70px}
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-size:1.5rem;font-weight:700;color:var(--blue-dark)}
+.logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--blue),var(--teal));border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.2rem}
+.nav-links{display:flex;align-items:center;gap:4px}
+.nav-links a{padding:8px 14px;border-radius:8px;font-size:.9rem;font-weight:500;color:var(--gray-600);transition:var(--transition)}
+.nav-links a:hover{background:var(--blue-light);color:var(--blue)}
+.nav-links .btn-book{background:var(--blue);color:#fff!important;padding:8px 20px;border-radius:8px}
+.nav-links .btn-book:hover{background:var(--blue-dark)}
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:4px}
+.hamburger span{display:block;width:24px;height:2px;background:var(--gray-800);margin:5px 0;transition:var(--transition)}
+.mobile-menu{display:none;flex-direction:column;gap:4px;padding:16px 24px;background:var(--white);border-top:1px solid var(--gray-200)}
+.mobile-menu a{padding:10px 12px;border-radius:8px;font-size:.92rem;font-weight:500;color:var(--gray-700)}
+.mobile-menu a:hover{background:var(--blue-light);color:var(--blue)}
+.mobile-menu.open{display:flex}
+
+/* BREADCRUMB */
+.breadcrumb{background:var(--gray-50);border-bottom:1px solid var(--gray-200);padding:10px 24px}
+.breadcrumb-inner{max-width:1240px;margin:auto;display:flex;align-items:center;gap:7px;font-size:.8rem;color:var(--gray-400)}
+.breadcrumb-inner a{color:var(--gray-400);transition:var(--transition)}
+.breadcrumb-inner a:hover{color:var(--blue)}
+.breadcrumb-inner .current{color:var(--blue);font-weight:600}
+
+/* HERO */
+.page-hero{background:linear-gradient(135deg,var(--blue-dark) 0%,var(--blue) 55%,var(--teal) 100%);color:#fff;padding:56px 24px;text-align:center;position:relative;overflow:hidden}
+.page-hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E")}
+.page-hero-inner{max-width:720px;margin:auto;position:relative;z-index:1}
+.page-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:50px;padding:6px 18px;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:18px;backdrop-filter:blur(4px)}
+.page-hero h1{font-family:var(--font-display);font-size:clamp(2rem,4vw,2.8rem);font-weight:700;margin-bottom:12px}
+.page-hero h1 span{color:#93c5fd}
+.page-hero p{font-size:.96rem;opacity:.88;line-height:1.8;max-width:560px;margin:0 auto 22px}
+.hero-stats{display:flex;justify-content:center;gap:32px;flex-wrap:wrap}
+.hs{text-align:center}
+.hs strong{display:block;font-family:var(--font-display);font-size:1.6rem;font-weight:700;color:#93c5fd}
+.hs span{font-size:.76rem;opacity:.8}
+
+/* SEARCH */
+.search-bar-wrap{background:var(--white);border-bottom:1px solid var(--gray-200);padding:18px 24px;position:sticky;top:70px;z-index:50}
+.search-bar-inner{max-width:1240px;margin:auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.sm-search{position:relative;flex:1;min-width:260px}
+.sm-search::before{content:'🔍';position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:.86rem;pointer-events:none}
+.sm-search input{width:100%;padding:11px 16px 11px 40px;border:1.5px solid var(--gray-200);border-radius:50px;font-family:var(--font-body);font-size:.9rem;outline:none;transition:var(--transition)}
+.sm-search input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,160,.08)}
+.sm-filter{display:flex;gap:7px;flex-wrap:wrap}
+.sf{padding:7px 16px;border-radius:50px;border:1.5px solid var(--gray-200);font-size:.78rem;font-weight:600;cursor:pointer;background:var(--white);color:var(--gray-600);transition:var(--transition);font-family:var(--font-body)}
+.sf.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.sf:hover:not(.on){border-color:var(--blue-mid);color:var(--blue)}
+.sm-count{font-size:.8rem;color:var(--gray-400);font-weight:600;white-space:nowrap;margin-left:auto}
+.sm-count strong{color:var(--blue)}
+
+/* MAIN */
+.sitemap-main{max-width:1240px;margin:0 auto;padding:40px 24px 64px}
+.sitemap-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+
+/* SECTION CARD */
+.sm-section{background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);overflow:hidden;transition:var(--transition)}
+.sm-section:hover{border-color:var(--blue-mid);box-shadow:var(--shadow-md)}
+.sm-section-hd{padding:18px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--gray-100)}
+.sm-hd-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.sm-section-hd h3{font-family:var(--font-display);font-size:.96rem;font-weight:700;color:var(--gray-900)}
+.sm-section-hd span{font-size:.7rem;color:var(--gray-400);margin-top:2px;display:block}
+.sm-count-badge{margin-left:auto;font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:50px;background:var(--blue-light);color:var(--blue);white-space:nowrap}
+
+/* PAGE LIST */
+.sm-list{padding:6px 0}
+.sm-item{display:flex;align-items:center;gap:10px;padding:9px 20px;transition:var(--transition);cursor:pointer;border-bottom:1px solid var(--gray-50)}
+.sm-item:last-child{border-bottom:none}
+.sm-item:hover{background:var(--blue-light)}
+.sm-item:hover .sm-item-title{color:var(--blue)}
+.sm-item:hover .sm-arrow{opacity:1;transform:translateX(3px)}
+.sm-item-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sm-item-info{flex:1;min-width:0}
+.sm-item-title{font-size:.84rem;font-weight:600;color:var(--gray-800);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sm-item-url{font-size:.7rem;color:var(--gray-400);font-family:monospace;margin-top:1px;display:block}
+.sm-item-meta{display:flex;gap:6px;align-items:center;margin-top:3px;flex-wrap:wrap}
+.sm-tag{font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:50px}
+.tag-done{background:#f0fdf4;color:var(--green)}
+.tag-dynamic{background:#fffbeb;color:#d97706}
+.tag-auth{background:#fef2f2;color:var(--red)}
+.tag-new{background:#f5f3ff;color:var(--purple)}
+.sm-arrow{font-size:.8rem;color:var(--blue-mid);opacity:0;transition:var(--transition);margin-left:auto;flex-shrink:0}
+
+/* PRIORITY BADGE */
+.priority-high{border-left:3px solid var(--green)}
+.priority-med{border-left:3px solid var(--amber)}
+.priority-low{border-left:3px solid var(--gray-300)}
+
+/* XML SITEMAP CTA */
+.xml-cta{background:linear-gradient(135deg,var(--gray-900),var(--blue-dark));color:#fff;border-radius:var(--radius-lg);padding:28px 32px;margin:28px 0;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.xml-cta-left h3{font-family:var(--font-display);font-size:1.1rem;margin-bottom:6px}
+.xml-cta-left p{font-size:.86rem;opacity:.8;line-height:1.6;max-width:480px}
+.xml-cta-btns{display:flex;gap:10px;flex-wrap:wrap}
+.xml-btn{padding:11px 22px;border-radius:10px;font-family:var(--font-body);font-size:.88rem;font-weight:700;cursor:pointer;transition:var(--transition);display:flex;align-items:center;gap:7px;white-space:nowrap}
+.xml-btn.primary{background:#fff;color:var(--blue-dark);border:none}
+.xml-btn.primary:hover{background:var(--blue-light);transform:translateY(-1px)}
+.xml-btn.outline{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.4)}
+.xml-btn.outline:hover{background:rgba(255,255,255,.1)}
+
+/* SPECIALTY ARTICLES SECTION */
+.specialty-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:24px 0}
+.spec-card{background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:16px;text-align:center;transition:var(--transition);cursor:pointer}
+.spec-card:hover{border-color:var(--blue-mid);box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.spec-icon{font-size:1.6rem;margin-bottom:8px}
+.spec-name{font-size:.84rem;font-weight:700;color:var(--gray-900);margin-bottom:3px}
+.spec-count{font-size:.74rem;color:var(--gray-400)}
+.spec-url{font-size:.68rem;color:var(--blue);font-family:monospace;margin-top:4px}
+
+/* SECTION HEADING */
+.section-heading{display:flex;align-items:center;gap:12px;margin:36px 0 20px;padding-bottom:12px;border-bottom:2px solid var(--blue-light)}
+.section-heading h2{font-family:var(--font-display);font-size:1.2rem;font-weight:700;color:var(--gray-900)}
+.sh-badge{font-size:.72rem;font-weight:700;padding:4px 12px;border-radius:50px;background:var(--blue-light);color:var(--blue)}
+
+/* LAST UPDATED */
+.last-updated-row{display:flex;align-items:center;justify-content:space-between;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:12px 18px;margin-bottom:24px;flex-wrap:wrap;gap:10px}
+.lu-left{font-size:.82rem;color:var(--gray-600);display:flex;align-items:center;gap:8px}
+.lu-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0}
+.lu-right{display:flex;gap:8px;flex-wrap:wrap}
+.lu-btn{padding:6px 14px;border-radius:8px;border:1.5px solid var(--gray-200);font-size:.76rem;font-weight:600;cursor:pointer;background:var(--white);color:var(--gray-600);transition:var(--transition);font-family:var(--font-body)}
+.lu-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.lu-btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.lu-btn.primary:hover{background:var(--blue-dark)}
+
+/* NO RESULTS */
+.no-results{display:none;text-align:center;padding:48px 24px;grid-column:1/-1}
+.no-results.show{display:block}
+.no-results .nr-ico{font-size:2.5rem;margin-bottom:12px}
+.no-results h3{font-family:var(--font-display);font-size:1.1rem;color:var(--gray-900);margin-bottom:6px}
+.no-results p{font-size:.88rem;color:var(--gray-500)}
+
+/* FOOTER */
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--gray-900);color:#fff;padding:12px 22px;border-radius:12px;font-size:.88rem;font-weight:500;z-index:999;opacity:0;transform:translateY(8px);transition:all .3s ease;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* RESPONSIVE */
+@media(max-width:1060px){.sitemap-grid{grid-template-columns:1fr 1fr}.specialty-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:900px){.footer-grid{grid-template-columns:1fr 1fr;gap:32px}}
+@media(max-width:640px){
+  .nav-links{display:none}.hamburger{display:block}.mobile-menu.open{display:flex}
+  .sitemap-grid{grid-template-columns:1fr}
+  .specialty-grid{grid-template-columns:1fr 1fr}
+  .footer-grid{grid-template-columns:1fr}.footer-bottom{max-width:1240px;margin:48px auto 0;padding:24px 24px;border-top:1px solid #1e293b;display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+  .xml-cta{flex-direction:column}
+  .search-bar-inner{flex-direction:column;align-items:stretch}
+  .sm-count{margin-left:0}
+}
+
+/* ===== CANONICAL HOME-PAGE FOOTER (override) ===== */
+footer{background:#0f172a;color:#94a3b8;font-size:.85rem;padding:64px 24px 0}
+.footer-grid{max-width:1240px;margin:auto;display:grid;grid-template-columns:2fr 1fr 1fr 1.5fr 1.5fr;gap:48px}
+.footer-brand .logo{color:#fff;margin-bottom:14px;display:flex;align-items:center;gap:10px;font-size:1.5rem;font-weight:700}
+.footer-brand p{line-height:1.7;margin-bottom:20px;font-size:.85rem}
+.footer-social{display:flex;gap:10px}
+.social-btn{width:36px;height:36px;background:#1e293b;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#94a3b8;transition:all .22s cubic-bezier(.4,0,.2,1);font-size:.9rem;text-decoration:none}
+.social-btn:hover{background:#1a56a0;color:#fff}
+.footer-col h4{color:#fff;font-size:.9rem;font-weight:700;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid #1e293b}
+.footer-col ul{list-style:none;padding:0;margin:0}
+.footer-col ul li{margin-bottom:8px}
+.footer-col ul li a{color:#94a3b8;transition:all .22s cubic-bezier(.4,0,.2,1);font-size:.83rem;text-decoration:none}
+.footer-col ul li a:hover{color:#93c5fd}
+.footer-subscribe input{width:100%;padding:10px 14px;background:#1e293b;border:1px solid #334155;border-radius:8px;color:#fff;font-family:'DM Sans',system-ui,sans-serif;font-size:.85rem;margin-bottom:10px;box-sizing:border-box}
+.footer-subscribe input::placeholder{color:#64748b}
+.footer-subscribe button{width:100%;background:#1a56a0;color:#fff;border:none;padding:10px;border-radius:8px;font-family:'DM Sans',system-ui,sans-serif;font-weight:600;cursor:pointer;transition:all .22s cubic-bezier(.4,0,.2,1)}
+.footer-subscribe button:hover{background:#4a90d9}
+.footer-contact-item{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:.82rem;color:#94a3b8}
+.footer-contact-item svg{width:16px;height:16px;color:#4a90d9;flex-shrink:0}
+.footer-bottom{max-width:1240px;margin:48px auto 0;padding:24px 24px;border-top:1px solid #1e293b;display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.footer-bottom p{font-size:.78rem}
+.footer-bottom-links{display:flex;gap:16px 22px;flex-wrap:wrap}
+.footer-bottom-links a{font-size:.78rem;color:#64748b;transition:all .22s cubic-bezier(.4,0,.2,1);text-decoration:none}
+.footer-bottom-links a:hover{color:#93c5fd}
+.hipaa-badge{display:inline-flex;align-items:center;gap:6px;background:#1e293b;border:1px solid #334155;border-radius:6px;padding:4px 10px;font-size:.72rem;color:#64748b;margin-top:8px}
+@media(max-width:900px){.footer-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.footer-grid{grid-template-columns:1fr}.footer-bottom{max-width:1240px;margin:48px auto 0;padding:24px 24px;border-top:1px solid #1e293b;display:flex;flex-direction:column;align-items:flex-start;gap:12px}}
+
+
+
+.footer-bottom .fb-note{margin-top:4px;color:#475569;font-size:.70rem;font-size:clamp(.55rem,.93vw,.74rem)}
+@media(min-width:900px){.footer-bottom .fb-note{white-space:nowrap}}
+</style>
+
+<!-- SEO -->
+<meta name="description" content="A complete map of every page on DrInsight.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.drinsight.org/sitemap.html">
+<meta name="theme-color" content="#12275a">
+<link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<meta property="og:site_name" content="The Dr Insight">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Sitemap — The Dr Insight">
+<meta property="og:description" content="A complete map of every page on DrInsight.">
+<meta property="og:url" content="https://www.drinsight.org/sitemap.html">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Sitemap — The Dr Insight">
+<meta name="twitter:description" content="A complete map of every page on DrInsight.">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"MedicalOrganization","@id":"https://www.drinsight.org/#organization","name":"The Dr Insight","alternateName":"DrInsight","url":"https://www.drinsight.org/","logo":"https://www.drinsight.org/assets/drinsight-logo.png","slogan":"Trusted Medical Insights & Expert Consultation","foundingDate":"2022","founder":{"@type":"Person","name":"Dr. Javed Kumbhar","jobTitle":"Founder & Board of Director","honorificSuffix":"MBBS, RMP"},"address":{"@type":"PostalAddress","addressLocality":"Karachi","addressCountry":"PK"},"contactPoint":{"@type":"ContactPoint","telephone":"+92-335-3545545","email":"contact@drinsight.org","contactType":"customer service"},"medicalSpecialty":["Cardiovascular","Neurologic","Pediatric","Psychiatric","Dermatologic","Endocrine","Oncologic","Dentistry"]},{"@type":"WebSite","@id":"https://www.drinsight.org/#website","url":"https://www.drinsight.org/","name":"The Dr Insight","publisher":{"@id":"https://www.drinsight.org/#organization"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://www.drinsight.org/"},{"@type":"ListItem","position":2,"name":"Sitemap","item":"https://www.drinsight.org/sitemap.html"}]}]}</script>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-emergency">
+      <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+      Emergency: <strong>911</strong> &nbsp;|&nbsp; Medical Helpline: <strong>+92 335 3545545</strong>
+    </div>
+    <div>
+      <a href="login.html">Portal Login</a>
+    </div>
+  </div>
+</div>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="logo">
+      <img src="assets/drinsight-logo.png" alt="DrInsight — Trusted Medical Insights &amp; Expert Consultation" width="214" height="56" decoding="async" fetchpriority="high" style="height:56px;width:auto;display:block"></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="about.html">About Us</a>
+      <a href="health-tools.html">Health Tools</a>
+      <a href="doctors.html">Our Doctors</a>
+      <a href="ask-doctor.html">Ask the Doctor</a>
+      <a href="blog.html">Blog</a>
+      <a href="contact.html">Contact</a>
+      <a href="book-consultation.html" class="btn-book">Book Consultation</a>
+    </div>
+    <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">Home</a>
+    <a href="about.html">About Us</a>
+    <a href="health-tools.html">Health Tools</a>
+    <a href="doctors.html">Our Doctors</a>
+    <a href="ask-doctor.html">Ask the Doctor</a>
+    <a href="blog.html">Blog</a>
+    <a href="contact.html">Contact</a>
+    <a href="book-consultation.html">📅 Book Consultation</a>
+  </div>
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+  <div class="breadcrumb-inner">
+    <a href="index.html">🏠 Home</a>
+    <span>›</span>
+    <span class="current">Sitemap</span>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-eyebrow">🗺️ SITE NAVIGATION</div>
+    <h1>DrInsight <span>Sitemap</span></h1>
+    <p>A complete directory of every page on DrInsight — from health articles and doctor profiles to dashboards and legal policies.</p>
+    <div class="hero-stats">
+      <div class="hs"><strong>26</strong><span>Total Pages</span></div>
+      <div class="hs"><strong>600+</strong><span>Articles</span></div>
+      <div class="hs"><strong>8</strong><span>Specialties</span></div>
+      <div class="hs"><strong>7</strong><span>Doctor Profiles</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- SEARCH + FILTER BAR -->
+<div class="search-bar-wrap">
+  <div class="search-bar-inner">
+    <div class="sm-search">
+      <input type="text" id="smSearch" placeholder="Search pages by name or URL..." oninput="filterSitemap(this.value)">
+    </div>
+    <div class="sm-filter">
+      <button class="sf on" data-cat="all" onclick="setCat(this)">All (26)</button>
+      <button class="sf" data-cat="public" onclick="setCat(this)">🌐 Public (11)</button>
+      <button class="sf" data-cat="content" onclick="setCat(this)">📰 Content (3)</button>
+      <button class="sf" data-cat="editorial" onclick="setCat(this)">📋 Editorial (3)</button>
+      <button class="sf" data-cat="legal" onclick="setCat(this)">⚖️ Legal (4)</button>
+      <button class="sf" data-cat="auth" onclick="setCat(this)">🔐 Auth (4)</button>
+      <button class="sf" data-cat="dashboard" onclick="setCat(this)">📊 Dashboards (1)</button>
+    </div>
+    <div class="sm-count" id="smCount">Showing <strong>26</strong> of <strong>26</strong> pages</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="sitemap-main">
+
+  <!-- Last Updated row -->
+  <div class="last-updated-row">
+    <div class="lu-left">
+      <div class="lu-dot"></div>
+      <span>Sitemap last updated: <strong>June 14, 2026</strong> · All 26 pages live · Version 2.0</span>
+    </div>
+    <div class="lu-right">
+      <button class="lu-btn" onclick="showToast('XML sitemap: drinsight.org/sitemap.xml')">📄 XML Sitemap</button>
+      <button class="lu-btn" onclick="showToast('Robots.txt: drinsight.org/robots.txt')">🤖 robots.txt</button>
+      <button class="lu-btn primary" onclick="window.print()">🖨️ Print Sitemap</button>
+    </div>
+  </div>
+
+  <!-- SITEMAP GRID -->
+  <div class="sitemap-grid" id="smGrid">
+
+    <!-- 1. CORE PUBLIC PAGES -->
+    <div class="sm-section" data-cat="public">
+      <div class="sm-section-hd">
+        <div class="sm-hd-icon" style="background:var(--blue-light)">🏠</div>
+        <div>
+          <h3>Core Pages</h3>
+          <span>Main public-facing pages</span>
+        </div>
+        <div class="sm-count-badge">7 pages</div>
+      </div>
+      <div class="sm-list">
+        <a href="index.html" class="sm-item priority-high">
+          <div class="sm-item-dot" style="background:var(--green)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">🏠 Home</span>
+            <span class="sm-item-url">/</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-done">✓ Live</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="about.html" class="sm-item priority-high">
+          <div class="sm-item-dot" style="background:var(--green)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">ℹ️ About Us</span>
+            <span class="sm-item-url">/about</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-done">✓ Live</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="contact.html" class="sm-item priority-high">
+          <div class="sm-item-dot" style="background:var(--green)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">📞 Contact Us</span>
+            <span class="sm-item-url">/contact</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-done">✓ Live</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="faq.html" class="sm-item priority-med">
+          <div class="sm-item-dot" style="background:var(--green)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">❓ FAQ</span>
+            <span class="sm-item-url">/faq</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-done">✓ Live</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="health-tools.html" class="sm-item priority-high">
+          <div class="sm-item-dot" style="background:var(--green)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">🔧 Health Tools</span>
+            <span class="sm-item-url">/health-tools</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-done">✓ Live</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="ask-doctor.html" class="sm-item priority-high">
+          <div class="sm-item-dot" style="background:var(--green)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">💬 Ask the Doctor</span>
+            <span class="sm-item-url">/ask-the-doctor</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-done">✓ Live</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="book-consultation.html" class="sm-item priority-high">
+          <div class="sm-item-dot" style="background:var(--green)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">📅 Book Consultation</span>
+            <span class="sm-item-url">/book-consultation</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-done">✓ Live</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 2. DOCTOR DIRECTORY -->
+    <div class="sm-section" data-cat="public">
+      <div class="sm-section-hd">
+        <div class="sm-hd-icon" style="background:#f0fdf4">👨‍⚕️</div>
+        <div>
+          <h3>Doctor Directory</h3>
+          <span>Find & book specialists</span>
+        </div>
+        <div class="sm-count-badge">3 pages</div>
+      </div>
+      <div class="sm-list">
+        <a href="doctors.html" class="sm-item priority-high">
+          <div class="sm-item-dot" style="background:var(--green)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">👥 Doctors Directory</span>
+            <span class="sm-item-url">/doctors</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-done">✓ Live</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="author-bio.html" class="sm-item priority-high">
+          <div class="sm-item-dot" style="background:var(--amber)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">👤 Doctor Profile / Bio</span>
+            <span class="sm-item-url">/doctors/dr-[name]-[specialty]</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-dynamic">Dynamic</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="book-consultation.html" class="sm-item priority-med">
+          <div class="sm-item-dot" style="background:var(--green)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">📅 Book with a Doctor</span>
+            <span class="sm-item-url">/book-consultation?doctor=[slug]</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-dynamic">Dynamic</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+      </div>
+
+      <!-- Spacer then Doctor profiles -->
+      <div style="padding:12px 20px;background:var(--gray-50);border-top:1px solid var(--gray-100)">
+        <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-400);margin-bottom:10px">Featured Doctors (7)</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <span style="font-size:.72rem;padding:3px 10px;border-radius:50px;background:var(--blue-light);color:var(--blue);cursor:pointer" onclick="showToast('Opening Dr. Kumbhar profile...')">Dr. Kumbhar</span>
+          <span style="font-size:.72rem;padding:3px 10px;border-radius:50px;background:var(--blue-light);color:var(--blue);cursor:pointer" onclick="showToast('Opening Dr. Mitchell profile...')">Dr. Mitchell</span>
+          <span style="font-size:.72rem;padding:3px 10px;border-radius:50px;background:var(--blue-light);color:var(--blue);cursor:pointer" onclick="showToast('Opening Dr. Okafor profile...')">Dr. Okafor</span>
+          <span style="font-size:.72rem;padding:3px 10px;border-radius:50px;background:var(--blue-light);color:var(--blue);cursor:pointer" onclick="showToast('Opening Dr. Sharma profile...')">Dr. Sharma</span>
+          <span style="font-size:.72rem;padding:3px 10px;border-radius:50px;background:var(--blue-light);color:var(--blue);cursor:pointer" onclick="showToast('Opening Dr. Chen profile...')">Dr. Chen</span>
+          <span style="font-size:.72rem;padding:3px 10px;border-radius:50px;background:var(--blue-light);color:var(--blue);cursor:pointer" onclick="showToast('Opening Dr. Rivera profile...')">Dr. Rivera</span>
+          <span style="font-size:.72rem;padding:3px 10px;border-radius:50px;background:var(--blue-light);color:var(--blue);cursor:pointer" onclick="showToast('Opening Dr. Hassan profile...')">Dr. Hassan</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. CONTENT PAGES -->
+    <div class="sm-section" data-cat="content">
+      <div class="sm-section-hd">
+        <div class="sm-hd-icon" style="background:#eff6ff">📰</div>
+        <div>
+          <h3>Content Pages</h3>
+          <span>Articles, blog & authors</span>
+        </div>
+        <div class="sm-count-badge">3 pages</div>
+      </div>
+      <div class="sm-list">
+        <a href="blog.html" class="sm-item priority-high">
+          <div class="sm-item-dot" style="background:var(--green)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">📰 Blog Listing</span>
+            <span class="sm-item-url">/blog</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-done">✓ Live</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="article.html" class="sm-item priority-high">
+          <div class="sm-item-dot" style="background:var(--amber)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">📄 Single Article</span>
+            <span class="sm-item-url">/articles/[specialty]/[slug]</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-dynamic">Dynamic · 600+ pages</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="author-bio.html" class="sm-item priority-med">
+          <div class="sm-item-dot" style="background:var(--amber)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">🖊️ Author Bio Page</span>
+            <span class="sm-item-url">/authors/[author-slug]</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-dynamic">Dynamic</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+      </div>
+
+      <!-- Article specialties -->
+      <div style="padding:12px 20px;background:var(--gray-50);border-top:1px solid var(--gray-100)">
+        <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-400);margin-bottom:10px">Article Categories</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <a href="blog.html#cardiology" style="font-size:.72rem;padding:3px 10px;border-radius:50px;background:#fef2f2;color:var(--red)">❤️ Cardiology (86)</a>
+          <a href="blog.html#neurology" style="font-size:.72rem;padding:3px 10px;border-radius:50px;background:#f5f3ff;color:var(--purple)">🧠 Neurology (64)</a>
+          <a href="blog.html#endocrinology" style="font-size:.72rem;padding:3px 10px;border-radius:50px;background:#f0fdf4;color:var(--green)">🦋 Endocrinology (58)</a>
+          <a href="blog.html#mental-health" style="font-size:.72rem;padding:3px 10px;border-radius:50px;background:#eff6ff;color:var(--blue)">💭 Mental Health (71)</a>
+          <a href="blog.html#pediatrics" style="font-size:.72rem;padding:3px 10px;border-radius:50px;background:#fffbeb;color:#d97706">🧒 Pediatrics (52)</a>
+          <a href="blog.html#nutrition" style="font-size:.72rem;padding:3px 10px;border-radius:50px;background:#ecfdf5;color:var(--teal)">🥗 Nutrition (38)</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. EDITORIAL PAGES -->
+    <div class="sm-section" data-cat="editorial">
+      <div class="sm-section-hd">
+        <div class="sm-hd-icon" style="background:#fef9c3">📋</div>
+        <div>
+          <h3>Editorial & Trust</h3>
+          <span>Standards & transparency</span>
+        </div>
+        <div class="sm-count-badge">3 pages</div>
+      </div>
+      <div class="sm-list">
+        <a href="editorial-policy.html" class="sm-item priority-high">
+          <div class="sm-item-dot" style="background:var(--green)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">📜 Editorial Policy</span>
+            <span class="sm-item-url">/editorial-policy</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-done">✓ Live</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="medical-review-process.html" class="sm-item priority-high">
+          <div class="sm-item-dot" style="background:var(--green)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">🔬 Medical Review Process</span>
+            <span class="sm-item-url">/medical-review-process</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-done">✓ Live</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="author-guidelines.html" class="sm-item priority-high">
+          <div class="sm-item-dot" style="background:var(--green)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">✍️ Author Guidelines</span>
+            <span class="sm-item-url">/author-guidelines</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-done">✓ Live</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 5. LEGAL PAGES -->
+    <div class="sm-section" data-cat="legal">
+      <div class="sm-section-hd">
+        <div class="sm-hd-icon" style="background:#f0fdf4">⚖️</div>
+        <div>
+          <h3>Legal & Policy</h3>
+          <span>Privacy, terms & compliance</span>
+        </div>
+        <div class="sm-count-badge">4 pages</div>
+      </div>
+      <div class="sm-list">
+        <a href="privacy-policy.html" class="sm-item priority-high">
+          <div class="sm-item-dot" style="background:var(--green)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">🛡️ Privacy Policy</span>
+            <span class="sm-item-url">/privacy-policy</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-done">✓ Live</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="terms-conditions.html" class="sm-item priority-high">
+          <div class="sm-item-dot" style="background:var(--green)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">📃 Terms & Conditions</span>
+            <span class="sm-item-url">/terms-and-conditions</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-done">✓ Live</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="disclaimer.html" class="sm-item priority-high">
+          <div class="sm-item-dot" style="background:var(--green)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">⚠️ Medical Disclaimer</span>
+            <span class="sm-item-url">/disclaimer</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-done">✓ Live</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="cookie-policy.html" class="sm-item priority-med">
+          <div class="sm-item-dot" style="background:var(--green)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">🍪 Cookie Policy</span>
+            <span class="sm-item-url">/cookie-policy</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-done">✓ Live</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 6. AUTH PAGES -->
+    <div class="sm-section" data-cat="auth">
+      <div class="sm-section-hd">
+        <div class="sm-hd-icon" style="background:#fef2f2">🔐</div>
+        <div>
+          <h3>Authentication</h3>
+          <span>Login, register & reset</span>
+        </div>
+        <div class="sm-count-badge">4 pages</div>
+      </div>
+      <div class="sm-list">
+        <a href="login.html" class="sm-item priority-high">
+          <div class="sm-item-dot" style="background:var(--green)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">🔑 Login</span>
+            <span class="sm-item-url">/login</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-auth">Auth Required</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="register.html" class="sm-item priority-high">
+          <div class="sm-item-dot" style="background:var(--green)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">✨ Register</span>
+            <span class="sm-item-url">/register</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-done">✓ Live</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="forgot-password.html" class="sm-item priority-med">
+          <div class="sm-item-dot" style="background:var(--green)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">🔓 Forgot Password</span>
+            <span class="sm-item-url">/forgot-password</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-done">✓ Live</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="reset-password.html" class="sm-item priority-med">
+          <div class="sm-item-dot" style="background:var(--green)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">🔐 Reset Password</span>
+            <span class="sm-item-url">/reset-password</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-done">✓ Live</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 7. PATIENT DASHBOARD -->
+    <div class="sm-section" data-cat="dashboard">
+      <div class="sm-section-hd">
+        <div class="sm-hd-icon" style="background:#ecfdf5">🏥</div>
+        <div>
+          <h3>Patient Dashboard</h3>
+          <span>Logged-in patient portal</span>
+        </div>
+        <div class="sm-count-badge">10 tabs</div>
+      </div>
+      <div class="sm-list">
+        <a href="patient-dashboard.html" class="sm-item priority-high">
+          <div class="sm-item-dot" style="background:var(--green)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">📊 Overview</span>
+            <span class="sm-item-url">/dashboard/patient</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-auth">Auth · Patient</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="patient-dashboard.html" class="sm-item">
+          <div class="sm-item-dot" style="background:var(--blue)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">📅 My Consultations</span>
+            <span class="sm-item-url">/dashboard/patient/consultations</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-auth">Auth</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="patient-dashboard.html" class="sm-item">
+          <div class="sm-item-dot" style="background:var(--blue)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">📅 Book New Consultation</span>
+            <span class="sm-item-url">/dashboard/patient/book</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-auth">Auth</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="patient-dashboard.html" class="sm-item">
+          <div class="sm-item-dot" style="background:var(--blue)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">💪 Health Metrics</span>
+            <span class="sm-item-url">/dashboard/patient/health-metrics</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-auth">Auth</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="patient-dashboard.html" class="sm-item">
+          <div class="sm-item-dot" style="background:var(--blue)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">🔖 Saved Articles</span>
+            <span class="sm-item-url">/dashboard/patient/saved-articles</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-auth">Auth</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="patient-dashboard.html" class="sm-item">
+          <div class="sm-item-dot" style="background:var(--blue)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">❓ My Questions</span>
+            <span class="sm-item-url">/dashboard/patient/questions</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-auth">Auth</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="patient-dashboard.html" class="sm-item">
+          <div class="sm-item-dot" style="background:var(--blue)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">💬 Doctor Responses</span>
+            <span class="sm-item-url">/dashboard/patient/doctor-responses</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-auth">Auth</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="patient-dashboard.html" class="sm-item">
+          <div class="sm-item-dot" style="background:var(--blue)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">👤 My Profile</span>
+            <span class="sm-item-url">/dashboard/patient/profile</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-auth">Auth</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="patient-dashboard.html" class="sm-item">
+          <div class="sm-item-dot" style="background:var(--blue)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">⚙️ Settings</span>
+            <span class="sm-item-url">/dashboard/patient/settings</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-auth">Auth</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 8. DOCTOR DASHBOARD -->
+    <div class="sm-section" data-cat="dashboard">
+      <div class="sm-section-hd">
+        <div class="sm-hd-icon" style="background:#eff6ff">👨‍⚕️</div>
+        <div>
+          <h3>Doctor Dashboard</h3>
+          <span>Physician portal sections</span>
+        </div>
+        <div class="sm-count-badge">13 tabs</div>
+      </div>
+      <div class="sm-list">
+        <a href="doctor-dashboard.html" class="sm-item priority-high">
+          <div class="sm-item-dot" style="background:var(--green)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">📊 Overview</span>
+            <span class="sm-item-url">/dashboard/doctor</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-auth">Auth · Doctor</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="doctor-dashboard.html" class="sm-item">
+          <div class="sm-item-dot" style="background:var(--blue)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">👥 My Patients</span>
+            <span class="sm-item-url">/dashboard/doctor/patients</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-auth">Auth</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="doctor-dashboard.html" class="sm-item">
+          <div class="sm-item-dot" style="background:var(--blue)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">📅 Consultations</span>
+            <span class="sm-item-url">/dashboard/doctor/consultations</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-auth">Auth</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="doctor-dashboard.html" class="sm-item">
+          <div class="sm-item-dot" style="background:var(--blue)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">💬 Patient Q&A</span>
+            <span class="sm-item-url">/dashboard/doctor/qa</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-auth">Auth</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="doctor-dashboard.html" class="sm-item">
+          <div class="sm-item-dot" style="background:var(--blue)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">💊 Prescriptions</span>
+            <span class="sm-item-url">/dashboard/doctor/prescriptions</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-auth">Auth</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="doctor-dashboard.html" class="sm-item">
+          <div class="sm-item-dot" style="background:var(--blue)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">✍️ Submit Article</span>
+            <span class="sm-item-url">/dashboard/doctor/submit-article</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-auth">Auth</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="doctor-dashboard.html" class="sm-item">
+          <div class="sm-item-dot" style="background:var(--blue)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">📰 My Articles</span>
+            <span class="sm-item-url">/dashboard/doctor/my-articles</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-auth">Auth</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="doctor-dashboard.html" class="sm-item">
+          <div class="sm-item-dot" style="background:var(--blue)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">💰 Earnings</span>
+            <span class="sm-item-url">/dashboard/doctor/earnings</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-auth">Auth</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="doctor-dashboard.html" class="sm-item">
+          <div class="sm-item-dot" style="background:var(--blue)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">⭐ Reviews & Ratings</span>
+            <span class="sm-item-url">/dashboard/doctor/reviews</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-auth">Auth</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="doctor-dashboard.html" class="sm-item">
+          <div class="sm-item-dot" style="background:var(--blue)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">👤 My Profile</span>
+            <span class="sm-item-url">/dashboard/doctor/profile</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-auth">Auth</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 9. ADMIN PANEL -->
+    <div class="sm-section" data-cat="dashboard">
+      <div class="sm-section-hd">
+        <div class="sm-hd-icon" style="background:#f5f3ff">🛡️</div>
+        <div>
+          <h3>Admin Panel</h3>
+          <span>Platform management</span>
+        </div>
+        <div class="sm-count-badge">27 sections</div>
+      </div>
+      <div class="sm-list">
+        <a href="admin-dashboard.html" class="sm-item priority-high">
+          <div class="sm-item-dot" style="background:var(--green)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">📊 Admin Dashboard</span>
+            <span class="sm-item-url">/admin</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-auth">Auth · Admin Only</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="editorial-dashboard.html" class="sm-item priority-high">
+          <div class="sm-item-dot" style="background:var(--purple,#7c3aed)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">✍️ Editorial Dashboard</span>
+            <span class="sm-item-url">/editorial</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-auth">Auth · Editorial Only</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <div style="padding:10px 20px;background:var(--gray-50);border-bottom:1px solid var(--gray-100)">
+          <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-400);margin-bottom:8px">All 27 Admin Sections</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px">
+            <span style="font-size:.7rem;padding:2px 8px;border-radius:50px;background:var(--blue-light);color:var(--blue)">Users</span>
+            <span style="font-size:.7rem;padding:2px 8px;border-radius:50px;background:var(--blue-light);color:var(--blue)">Doctors</span>
+            <span style="font-size:.7rem;padding:2px 8px;border-radius:50px;background:var(--blue-light);color:var(--blue)">Patients</span>
+            <span style="font-size:.7rem;padding:2px 8px;border-radius:50px;background:var(--blue-light);color:var(--blue)">Roles</span>
+            <span style="font-size:.7rem;padding:2px 8px;border-radius:50px;background:var(--blue-light);color:var(--blue)">Appointments</span>
+            <span style="font-size:.7rem;padding:2px 8px;border-radius:50px;background:var(--blue-light);color:var(--blue)">Consultation Requests</span>
+            <span style="font-size:.7rem;padding:2px 8px;border-radius:50px;background:var(--blue-light);color:var(--blue)">Prescriptions</span>
+            <span style="font-size:.7rem;padding:2px 8px;border-radius:50px;background:var(--blue-light);color:var(--blue)">Blog Posts</span>
+            <span style="font-size:.7rem;padding:2px 8px;border-radius:50px;background:var(--blue-light);color:var(--blue)">Categories</span>
+            <span style="font-size:.7rem;padding:2px 8px;border-radius:50px;background:var(--blue-light);color:var(--blue)">Tags</span>
+            <span style="font-size:.7rem;padding:2px 8px;border-radius:50px;background:var(--blue-light);color:var(--blue)">Comments</span>
+            <span style="font-size:.7rem;padding:2px 8px;border-radius:50px;background:var(--blue-light);color:var(--blue)">Authors</span>
+            <span style="font-size:.7rem;padding:2px 8px;border-radius:50px;background:var(--blue-light);color:var(--blue)">Review Queue</span>
+            <span style="font-size:.7rem;padding:2px 8px;border-radius:50px;background:var(--blue-light);color:var(--blue)">Email Templates</span>
+            <span style="font-size:.7rem;padding:2px 8px;border-radius:50px;background:var(--blue-light);color:var(--blue)">OTP Templates</span>
+            <span style="font-size:.7rem;padding:2px 8px;border-radius:50px;background:var(--blue-light);color:var(--blue)">Notifications</span>
+            <span style="font-size:.7rem;padding:2px 8px;border-radius:50px;background:var(--blue-light);color:var(--blue)">Homepage Sections</span>
+            <span style="font-size:.7rem;padding:2px 8px;border-radius:50px;background:var(--blue-light);color:var(--blue)">Health Tools</span>
+            <span style="font-size:.7rem;padding:2px 8px;border-radius:50px;background:var(--blue-light);color:var(--blue)">FAQs</span>
+            <span style="font-size:.7rem;padding:2px 8px;border-radius:50px;background:var(--blue-light);color:var(--blue)">Contact Inquiries</span>
+            <span style="font-size:.7rem;padding:2px 8px;border-radius:50px;background:var(--blue-light);color:var(--blue)">SEO Settings</span>
+            <span style="font-size:.7rem;padding:2px 8px;border-radius:50px;background:var(--blue-light);color:var(--blue)">Traffic Analytics</span>
+            <span style="font-size:.7rem;padding:2px 8px;border-radius:50px;background:var(--blue-light);color:var(--blue)">Consultation Analytics</span>
+            <span style="font-size:.7rem;padding:2px 8px;border-radius:50px;background:var(--blue-light);color:var(--blue)">Revenue Analytics</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10. UTILITY PAGES -->
+    <div class="sm-section" data-cat="public">
+      <div class="sm-section-hd">
+        <div class="sm-hd-icon" style="background:#f0fdff">🛠️</div>
+        <div>
+          <h3>Utility Pages</h3>
+          <span>System & error pages</span>
+        </div>
+        <div class="sm-count-badge">2 pages</div>
+      </div>
+      <div class="sm-list">
+        <a href="404.html" class="sm-item priority-high">
+          <div class="sm-item-dot" style="background:var(--green)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">🔍 404 Error Page</span>
+            <span class="sm-item-url">/404</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-done">✓ Live</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+        <a href="sitemap.html" class="sm-item priority-high">
+          <div class="sm-item-dot" style="background:var(--green)"></div>
+          <div class="sm-item-info">
+            <span class="sm-item-title">🗺️ Sitemap (HTML)</span>
+            <span class="sm-item-url">/sitemap</span>
+            <div class="sm-item-meta"><span class="sm-tag tag-done">✓ Live</span></div>
+          </div>
+          <div class="sm-arrow">→</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- NO RESULTS -->
+    <div class="no-results" id="noResults">
+      <div class="nr-ico">🔍</div>
+      <h3>No pages found</h3>
+      <p>Try adjusting your search term or filter selection.</p>
+    </div>
+
+  </div><!-- end sitemap-grid -->
+
+  <!-- XML SITEMAP CTA -->
+  <div class="xml-cta">
+    <div class="xml-cta-left">
+      <h3>🤖 Looking for the XML Sitemap?</h3>
+      <p>Our machine-readable XML sitemap is available for search engines and SEO tools. It includes all 26 public pages with last-modified dates and priority scores.</p>
+    </div>
+    <div class="xml-cta-btns">
+      <button class="xml-btn primary" onclick="showToast('Opening XML sitemap: drinsight.org/sitemap.xml')">📄 View XML Sitemap</button>
+      <button class="xml-btn outline" onclick="showToast('robots.txt: drinsight.org/robots.txt')">🤖 robots.txt</button>
+    </div>
+  </div>
+
+  <!-- SPECIALTY ARTICLES SECTION -->
+  <div class="section-heading">
+    <h2>📰 Article Categories</h2>
+    <span class="sh-badge">600+ articles</span>
+  </div>
+  <div class="specialty-grid">
+    <a href="blog.html" class="spec-card">
+      <div class="spec-icon">❤️</div>
+      <div class="spec-name">Cardiology</div>
+      <div class="spec-count">86 articles</div>
+      <div class="spec-url">/blog/cardiology</div>
+    </a>
+    <a href="blog.html" class="spec-card">
+      <div class="spec-icon">🧠</div>
+      <div class="spec-name">Neurology</div>
+      <div class="spec-count">64 articles</div>
+      <div class="spec-url">/blog/neurology</div>
+    </a>
+    <a href="blog.html" class="spec-card">
+      <div class="spec-icon">🦋</div>
+      <div class="spec-name">Endocrinology</div>
+      <div class="spec-count">58 articles</div>
+      <div class="spec-url">/blog/endocrinology</div>
+    </a>
+    <a href="blog.html" class="spec-card">
+      <div class="spec-icon">💭</div>
+      <div class="spec-name">Mental Health</div>
+      <div class="spec-count">71 articles</div>
+      <div class="spec-url">/blog/mental-health</div>
+    </a>
+    <a href="blog.html" class="spec-card">
+      <div class="spec-icon">👶</div>
+      <div class="spec-name">Pediatrics</div>
+      <div class="spec-count">52 articles</div>
+      <div class="spec-url">/blog/pediatrics</div>
+    </a>
+    <a href="blog.html" class="spec-card">
+      <div class="spec-icon">🥗</div>
+      <div class="spec-name">Nutrition</div>
+      <div class="spec-count">38 articles</div>
+      <div class="spec-url">/blog/nutrition</div>
+    </a>
+    <a href="blog.html" class="spec-card">
+      <div class="spec-icon">👩</div>
+      <div class="spec-name">Women's Health</div>
+      <div class="spec-count">49 articles</div>
+      <div class="spec-url">/blog/womens-health</div>
+    </a>
+    <a href="blog.html" class="spec-card">
+      <div class="spec-icon">🦴</div>
+      <div class="spec-name">Orthopedics</div>
+      <div class="spec-count">31 articles</div>
+      <div class="spec-url">/blog/orthopedics</div>
+    </a>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="logo">
+        <img src="assets/drinsight-logo-footer.png" alt="DrInsight — Trusted Medical Insights &amp; Expert Consultation" width="214" height="56" loading="lazy" decoding="async" style="height:56px;width:auto;display:block"></div>
+      <p>Your trusted platform for evidence-based medical information, expert doctor consultations, and health tools — reviewed and approved by licensed physicians.</p>
+      <div class="hipaa-badge">🛡️ HIPAA Compliant</div>
+      <div class="hipaa-badge" style="margin-top:6px">🇪🇺 GDPR Compliant</div>
+      <div class="footer-social" style="margin-top:16px">
+        <a href="#" class="social-btn">𝕏</a>
+        <a href="#" class="social-btn">f</a>
+        <a href="#" class="social-btn">in</a>
+        <a href="#" class="social-btn">▶</a>
+        <a href="#" class="social-btn">📸</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="health-tools.html">Health Tools</a></li>
+        <li><a href="doctors.html">Our Doctors</a></li>
+        <li><a href="ask-doctor.html">Ask the Doctor</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="book-consultation.html">Book Consultation</a></li>
+        <li><a href="contact.html">Contact Us</a></li>
+        <li><a href="author-guidelines.html">Author Guidelines</a></li>
+        <li><a href="medical-review-process.html">Medical Review Process</a></li>
+        <li><a href="editorial-policy.html">Editorial Policy</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Medical Categories</h4>
+      <ul>
+        <li><a href="blog.html#clinical">Clinical Specialties</a></li>
+        <li><a href="blog.html#surgical">Surgical Specialties</a></li>
+        <li><a href="blog.html#diagnostic">Diagnostic Specialties</a></li>
+        <li><a href="blog.html#dental">Dental Specialties</a></li>
+        <li><a href="blog.html">Preventive Health</a></li>
+        <li><a href="blog.html">Mental Health</a></li>
+        <li><a href="blog.html">Women's Health</a></li>
+        <li><a href="blog.html">Men's Health</a></li>
+        <li><a href="blog.html">Pediatrics</a></li>
+        <li><a href="blog.html">Nutrition</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contact Information</h4>
+      <div class="footer-contact-item">
+        <svg fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>
+        +92 335 3545545
+      </div>
+      <div class="footer-contact-item">
+        <svg fill="currentColor" viewBox="0 0 20 20"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
+        contact@drinsight.org
+      </div>
+      <div class="footer-contact-item">
+        <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+        Karachi<br>Pakistan
+      </div>
+      <div class="footer-contact-item">
+        <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+        Mon–Fri: 8AM–8PM | Sat: 9AM–5PM
+      </div>
+      <div class="footer-contact-item" style="color:#25d366">
+        📱 WhatsApp: +92 335 3545545
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Expert Health Insights</h4>
+      <p style="font-size:.82rem;margin-bottom:14px">Get weekly medical tips and health news from our specialists.</p>
+      <div class="footer-subscribe">
+        <input type="email" placeholder="Your email address">
+        <button>Subscribe Free →</button>
+        <p style="font-size:.72rem;color:#475569;margin-top:8px">🔒 GDPR compliant. Unsubscribe anytime.</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>
+      <p>© 2026 DrInsight. All rights reserved.</p>
+      <p class="fb-note">⚕️ The content on DrInsight is for informational purposes only and is not a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider for medical decisions.</p>
+    </div>
+    <div class="footer-bottom-links">
+      <a href="privacy-policy.html">Privacy Policy</a>
+      <a href="terms-conditions.html">Terms of Service</a>
+      <a href="disclaimer.html">Medical Disclaimer</a>
+      <a href="cookie-policy.html">Cookie Policy</a>
+      <a href="sitemap.html">Sitemap</a>
+      <a href="faq.html">FAQ</a>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toastMsg"></div>
+
+<script>
+function toggleMenu(){
+  document.getElementById('mobileMenu').classList.toggle('open');
+}
+function showToast(msg){
+  var t=document.getElementById('toastMsg');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},2600);
+}
+
+var activeCat='all';
+
+function setCat(btn){
+  document.querySelectorAll('.sf').forEach(function(b){b.classList.remove('on');});
+  btn.classList.add('on');
+  activeCat=btn.dataset.cat;
+  applyFilters();
+}
+
+function filterSitemap(q){
+  applyFilters(q);
+}
+
+function applyFilters(q){
+  q = q || document.getElementById('smSearch').value.toLowerCase().trim();
+  var sections=document.querySelectorAll('.sm-section');
+  var visible=0;
+  sections.forEach(function(sec){
+    var catMatch = activeCat==='all' || sec.dataset.cat===activeCat;
+    var textMatch = q==='' || sec.textContent.toLowerCase().includes(q);
+    var show = catMatch && textMatch;
+    sec.style.display = show ? '' : 'none';
+    if(show) visible++;
+  });
+  document.getElementById('smCount').innerHTML='Showing <strong>'+visible+'</strong> section(s)';
+  var nr=document.getElementById('noResults');
+  nr.classList.toggle('show', visible===0);
+}
+</script>
+
+<!-- ==== DRINSIGHT RESPONSIVE HARDENING (mobile-friendly overflow fixes) ==== -->
+<style id="drinsight-responsive-fix">
+/* Global: never let the page scroll sideways; media stays inside its box */
+html,body{max-width:100%;overflow-x:hidden}
+*{min-width:0}                 /* let grid/flex items shrink instead of forcing page-wide overflow */
+img,svg,video,iframe,canvas,object,embed,picture{max-width:100%;height:auto}
+table{max-width:100%}
+pre,code{white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere}
+/* long words, emails, urls wrap instead of pushing the layout wide */
+p,li,td,th,a,h1,h2,h3,h4,h5,h6,span,label,blockquote,figcaption,.prose{overflow-wrap:break-word}
+
+@media(max-width:900px){
+  /* content + sidebar layouts collapse to one column */
+  .article-layout,.main,.two-col,.blog-layout,.page-layout,.layout,
+  .content-wrap,.doc-layout,.split,.with-sidebar,.body-grid{
+    grid-template-columns:1fr !important;
+  }
+  /* wide sidebars stop reserving a fixed track */
+  .sidebar,.toc-sidebar,.aside,.side{max-width:100% !important}
+}
+
+@media(max-width:768px){
+  /* flex button/pill rows wrap onto new lines */
+  .action-btns,.hero-actions,.btn-row,.btn-group,.cta-row,.pill-row,
+  .tags,.chips,.expertise,.expertise-list,.badges{flex-wrap:wrap}
+  /* fallback: any table NOT converted to cards still scrolls instead of breaking layout */
+  table:not(.rtbl){display:block;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+}
+
+@media(max-width:600px){
+  /* multi-column card / stat grids drop to a single column on phones */
+  [class$="-grid"],[class*="-grid "],
+  .card-grid-2,.card-grid-3,.card-grid-4,
+  .stats-row,.stats-bar-inner,.trust-row,.trust-inner,
+  .apply-steps-row,.kv-grid,.fg,.role-grid,.cred-grid,.cat-tiles,.cats-grid,
+  .collection-grid,.legal-grid,.rights-grid,.security-grid,.contact-grid,
+  .cert-grid,.articles-grid,.auth-grid,.partner-admin-grid,.spec-grid,
+  .related-grid,.blog-grid{
+    grid-template-columns:1fr !important;
+  }
+  /* 7-day calendars stay compact but never overflow */
+  .cal-grid{grid-template-columns:repeat(7,1fr) !important;font-size:.62rem !important}
+  /* horizontal step indicators wrap instead of overflowing */
+  .steps,.progress-steps,.step-row,.apply-steps-row{flex-wrap:wrap}
+}
+
+/* ==== RESPONSIVE DATA TABLES: no more sideways sliding on phones ====
+   Tables with a header row become stacked "cards" — each row is a card and
+   every value shows its column label. Fits every screen with zero scrolling. */
+@media(max-width:680px){
+  table.rtbl{display:block;width:100% !important;border:none !important;background:none !important;overflow:visible !important}
+  table.rtbl thead{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+  table.rtbl tbody{display:block;width:100%}
+  table.rtbl tr{
+    display:block;width:100%;margin:0 0 14px;
+    border:1px solid var(--gray-200,#e2e8f0);border-radius:12px;
+    background:#fff;box-shadow:0 1px 4px rgba(15,23,42,.06);overflow:hidden
+  }
+  table.rtbl tr:nth-child(even){background:#fff}
+  table.rtbl td{
+    display:flex;justify-content:space-between;align-items:baseline;gap:14px;
+    width:auto !important;padding:10px 14px;border:none;border-bottom:1px solid #eef2f7;
+    text-align:right;font-size:.9rem;white-space:normal !important
+  }
+  table.rtbl td:first-child{background:var(--blue-light,#e8f0fb);font-weight:700}
+  table.rtbl td:last-child{border-bottom:none}
+  table.rtbl td::before{
+    content:attr(data-label);font-weight:600;color:#475569;
+    text-align:left;flex:0 0 40%;min-width:0;overflow-wrap:break-word
+  }
+  table.rtbl td:not([data-label])::before{display:none}
+  table.rtbl td:not([data-label]){justify-content:flex-start;text-align:left}
+  /* the old scroll wrappers no longer need to scroll — cards already fit */
+  .data-table-wrap,.table-wrap,.tbl-wrap,.table-scroll{overflow:visible !important;border:none !important}
+}
+</style>
+<script>
+/* Label each table cell with its column header so CSS can show them as cards on phones. */
+(function(){
+  function labelTables(){
+    var tables = document.querySelectorAll('table');
+    for (var t=0; t<tables.length; t++){
+      var tbl = tables[t];
+      if (tbl.getAttribute('data-rtbl')) continue;
+      // find header labels
+      var head = tbl.querySelector('thead tr');
+      var headerCells, hideFirstRow = false;
+      if (head){ headerCells = head.querySelectorAll('th,td'); }
+      else {
+        var firstRow = tbl.querySelector('tr');
+        if (!firstRow) continue;
+        headerCells = firstRow.querySelectorAll('th');
+        if (!headerCells.length) continue;   // no real headers -> leave it scrollable
+        hideFirstRow = true;
+      }
+      var labels = [];
+      for (var i=0;i<headerCells.length;i++){ labels.push(headerCells[i].textContent.trim()); }
+      if (!labels.length) continue;
+      var rows = tbl.querySelectorAll('tbody tr');
+      if (!rows.length) rows = tbl.querySelectorAll('tr');
+      for (var r=0;r<rows.length;r++){
+        if (hideFirstRow && r===0) continue;
+        var cells = rows[r].querySelectorAll('td');
+        for (var c=0;c<cells.length;c++){
+          if (labels[c] && !cells[c].hasAttribute('data-label')){
+            cells[c].setAttribute('data-label', labels[c]);
+          }
+        }
+      }
+      tbl.classList.add('rtbl');
+      tbl.setAttribute('data-rtbl','1');
+    }
+  }
+  if (document.readyState !== 'loading') labelTables();
+  else document.addEventListener('DOMContentLoaded', labelTables);
+})();
+</script>
+</body>
+</html>

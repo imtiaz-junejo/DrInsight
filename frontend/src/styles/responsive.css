@@ -1,22 +1,67 @@
 /*
- * Shared responsive layer — preserves desktop (1024px+) layouts.
- * Mobile: 320–767px | Tablet: 768–1023px | Desktop: 1024px+
+ * Shared responsive layer — aligned with frontend/drinsight-responsive reference.
+ * Breakpoints: 480, 560, 600, 640, 680, 720, 768, 860, 900, 1060, 1100
+ * Desktop layouts preserved above page-specific thresholds (admin 861px+, dashboards 1061px+).
  */
 
 html {
   overflow-x: clip;
+  max-width: 100%;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   overflow-x: clip;
   min-width: 320px;
+  max-width: 100%;
+}
+
+*,
+*::before,
+*::after {
+  min-width: 0;
 }
 
 img,
 video,
-svg {
+svg,
+iframe,
+canvas,
+object,
+embed,
+picture {
   max-width: 100%;
   height: auto;
+}
+
+table {
+  max-width: 100%;
+}
+
+pre,
+code {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+p,
+li,
+td,
+th,
+a,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+span,
+label,
+blockquote,
+figcaption,
+.prose {
+  overflow-wrap: break-word;
 }
 
 /* Scrollable tables on small screens */
@@ -29,7 +74,7 @@ svg {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Sidebar backdrop (dashboards) */
+/* Sidebar backdrop (admin drawer) */
 .sidebar-backdrop {
   display: none;
   position: fixed;
@@ -45,8 +90,18 @@ svg {
   display: block;
 }
 
-/* Dashboard sidebar toggle — hidden on desktop */
+.patient-root .sidebar-backdrop,
+.doctor-root .sidebar-backdrop {
+  display: none !important;
+}
+
+/* Dashboard sidebar toggle — reference uses stacked sidebar, not drawer */
 .dash-sidebar-toggle,
+.patient-root .dash-sidebar-toggle,
+.doctor-root .dash-sidebar-toggle {
+  display: none !important;
+}
+
 .admin-root .mob-toggle {
   display: none;
   align-items: center;
@@ -63,14 +118,75 @@ svg {
   flex-shrink: 0;
 }
 
-/* ─── Tablet + Mobile (max 1023px) ─── */
-@media (max-width: 1023px) {
-  .dash-sidebar-toggle,
+/* Public main navigation — sticky on public, patient, and doctor pages */
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #fff;
+}
+
+.site-nav .nav-links .nav-link,
+.site-nav .nav-links .nav-link-cta {
+  border-radius: 8px;
+}
+
+.site-nav .nav-links .nav-link {
+  padding: 8px 14px;
+}
+
+.site-nav .nav-links .nav-link-cta {
+  padding: 8px 20px;
+}
+
+/* Public mobile nav — matches reference .mobile-menu */
+.site-mobile-menu {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 24px;
+  background: #fff;
+  border-top: 1px solid var(--gray-200, #e2e8f0);
+}
+
+.site-mobile-menu.open {
+  display: flex;
+}
+
+.site-mobile-menu a,
+.site-mobile-menu button {
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--gray-700, #334155);
+  text-align: left;
+}
+
+.site-mobile-menu a:hover,
+.site-mobile-menu button:hover {
+  background: var(--blue-light, #e8f0fb);
+  color: var(--blue, #1a56a0);
+}
+
+/* ─── Admin tablet (max 1100px) ─── */
+@media (max-width: 1100px) {
+  .admin-root .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin-root .grid2,
+  .admin-root .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Admin mobile drawer (max 860px) ─── */
+@media (max-width: 860px) {
   .admin-root .mob-toggle {
     display: inline-flex;
   }
 
-  /* Admin drawer */
   .admin-root .app {
     grid-template-columns: 1fr;
   }
@@ -89,11 +205,9 @@ svg {
     left: 0;
   }
 
-  .doctor-root .dash-main,
-  .patient-root .dash-main,
-  .admin-root .content {
+  .admin-root .content,
+  .admin-root .topbar {
     min-width: 0;
-    overflow-x: hidden;
   }
 
   .admin-root .topbar {
@@ -109,17 +223,13 @@ svg {
     width: min(140px, 100%);
   }
 
-  .admin-root .stats-row {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .admin-root .grid2,
-  .admin-root .form-grid,
   .admin-root .kv-grid {
     grid-template-columns: 1fr;
   }
+}
 
-  /* Doctor + Patient drawer */
+/* ─── Patient + Doctor stacked layout (max 1060px) ─── */
+@media (max-width: 1060px) {
   .doctor-root .dash-grid,
   .patient-root .dash-grid {
     grid-template-columns: 1fr;
@@ -127,33 +237,14 @@ svg {
 
   .doctor-root .dash-sidebar,
   .patient-root .dash-sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: min(300px, 88vw);
-    max-height: 100vh;
-    overflow-y: auto;
-    z-index: 300;
-    transform: translateX(-105%);
-    transition: transform 0.25s ease;
-    border-radius: 0;
-    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.2);
-  }
-
-  .doctor-root .dash-sidebar.open,
-  .patient-root .dash-sidebar.open {
-    transform: translateX(0);
-  }
-
-  .doctor-root .dash-header-inner,
-  .patient-root .dash-header-inner {
-    align-items: flex-start;
-  }
-
-  .doctor-root .dash-body,
-  .patient-root .dash-body {
-    padding: 0 16px;
-    margin: 20px auto;
+    position: static;
+    top: auto;
+    transform: none;
+    width: auto;
+    max-height: none;
+    overflow: visible;
+    border-radius: var(--radius-lg, 20px);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.08));
   }
 
   .doctor-root .stats-row,
@@ -161,6 +252,15 @@ svg {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .doctor-root .footer-grid,
+  .patient-root .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+}
+
+/* ─── Shared tablet (max 900px) ─── */
+@media (max-width: 900px) {
   .doctor-root .g21,
   .doctor-root .g21-dr,
   .doctor-root .g13,
@@ -174,42 +274,35 @@ svg {
     grid-template-columns: 1fr;
   }
 
-  .doctor-root .footer-grid,
-  .patient-root .footer-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 32px;
+  .article-layout,
+  .main,
+  .two-col,
+  .blog-layout,
+  .page-layout,
+  .layout,
+  .content-wrap,
+  .doc-layout,
+  .split,
+  .with-sidebar,
+  .body-grid {
+    grid-template-columns: 1fr !important;
   }
 
-  /* Public site padding */
-  nav .mx-auto {
-    padding-left: 16px;
-    padding-right: 16px;
+  .sidebar,
+  .toc-sidebar,
+  .aside,
+  .side {
+    max-width: 100% !important;
   }
 
-  /* Shared page hero tightening */
-  .about-page .page-hero,
-  .contact-page .page-hero,
-  .blog-page .page-hero,
-  .doctors-page .page-hero,
-  .ask-doctor-page .page-hero,
-  .health-tools-page .page-hero,
-  .faq-page .page-hero,
-  .sitemap-page .page-hero,
-  .book-consultation-page .page-hero {
-    padding-left: 16px;
-    padding-right: 16px;
+  .home-hero-inner,
+  .home-ask-inner {
+    grid-template-columns: 1fr !important;
+    gap: 40px !important;
   }
 
-  .about-page .page-hero-inner,
-  .contact-page .hero-inner,
-  .blog-page .page-hero-inner,
-  .doctors-page .page-hero-inner,
-  .ask-doctor-page .page-hero-inner,
-  .health-tools-page .page-hero-inner,
-  .faq-page .page-hero-inner,
-  .sitemap-page .page-hero-inner {
-    padding-left: 0;
-    padding-right: 0;
+  .home-hero-visual {
+    display: none !important;
   }
 
   .founder-inner,
@@ -224,6 +317,38 @@ svg {
     grid-template-columns: 1fr;
   }
 
+  .admin-root .dash-main,
+  .doctor-root .dash-main,
+  .patient-root .dash-main,
+  .admin-root .content {
+    min-width: 0;
+    overflow-x: hidden;
+  }
+}
+
+/* ─── Tablet (max 768px) ─── */
+@media (max-width: 768px) {
+  .action-btns,
+  .hero-actions,
+  .btn-row,
+  .btn-group,
+  .cta-row,
+  .pill-row,
+  .tags,
+  .chips,
+  .expertise,
+  .expertise-list,
+  .badges {
+    flex-wrap: wrap;
+  }
+
+  table:not(.rtbl) {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .health-tools-page .tools-nav {
     overflow-x: auto;
     flex-wrap: nowrap;
@@ -234,10 +359,7 @@ svg {
   .health-tools-page .tool-tab {
     flex-shrink: 0;
   }
-}
 
-/* ─── Mobile (max 767px) ─── */
-@media (max-width: 767px) {
   .register-page .register-layout,
   .forgot-password-page .fp-layout,
   .reset-password-page .rp-layout {
@@ -250,29 +372,9 @@ svg {
     padding: 24px 16px;
   }
 
-  .admin-root .stats-row {
-    grid-template-columns: 1fr;
-  }
-
   .doctor-root .stats-row,
   .patient-root .stats-row {
     grid-template-columns: 1fr 1fr;
-  }
-
-  .doctor-root .footer-grid,
-  .patient-root .footer-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .doctor-root .footer-bottom,
-  .patient-root .footer-bottom {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .doctor-root .form-row,
-  .patient-root .form-row {
-    grid-template-columns: 1fr;
   }
 
   .contact-page .contact-cards {
@@ -294,10 +396,6 @@ svg {
     grid-template-columns: 1fr;
   }
 
-  .health-tools-page .tools-grid {
-    grid-template-columns: 1fr;
-  }
-
   .ask-doctor-page .qa-grid,
   .ask-doctor-page .spec-grid,
   .blog-page .blog-grid,
@@ -316,20 +414,111 @@ svg {
   .book-consultation-page .steps-grid {
     grid-template-columns: 1fr !important;
   }
+}
 
+/* ─── Health tools (max 720px) ─── */
+@media (max-width: 720px) {
+  .health-tools-page .tools-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .health-tools-page .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Phone grids (max 600px) ─── */
+@media (max-width: 600px) {
+  [class$="-grid"],
+  [class*="-grid "],
+  .card-grid-2,
+  .card-grid-3,
+  .card-grid-4,
+  .stats-row,
+  .stats-bar-inner,
+  .trust-row,
+  .trust-inner,
+  .apply-steps-row,
+  .kv-grid,
+  .fg,
+  .role-grid,
+  .cred-grid,
+  .cat-tiles,
+  .cats-grid,
+  .collection-grid,
+  .legal-grid,
+  .rights-grid,
+  .security-grid,
+  .contact-grid,
+  .cert-grid,
+  .articles-grid,
+  .auth-grid,
+  .partner-admin-grid,
+  .spec-grid,
+  .related-grid,
+  .blog-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .cal-grid {
+    grid-template-columns: repeat(7, 1fr) !important;
+    font-size: 0.62rem !important;
+  }
+
+  .steps,
+  .progress-steps,
+  .step-row,
+  .apply-steps-row {
+    flex-wrap: wrap;
+  }
+}
+
+/* ─── Mobile (max 640px) ─── */
+@media (max-width: 640px) {
+  .public-section,
+  .home-section {
+    padding-top: 56px !important;
+    padding-bottom: 56px !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+
+  .home-newsletter-form {
+    flex-direction: column !important;
+  }
+
+  .doctor-root .dash-body,
+  .patient-root .dash-body {
+    padding: 0 16px;
+    margin: 20px auto;
+  }
+
+  .doctor-root .form-row,
+  .patient-root .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .doctor-root .footer-grid,
+  .patient-root .footer-grid,
   .site-footer .footer-grid {
     grid-template-columns: 1fr !important;
   }
 
+  .doctor-root .footer-bottom,
+  .patient-root .footer-bottom,
   .site-footer .footer-bottom {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
   }
 
-  /* TopBar emergency line wraps cleanly */
   .topbar-emergency-short {
     display: none;
+  }
+
+  .topbar-inner {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .toast,
@@ -343,8 +532,126 @@ svg {
   }
 }
 
-/* ─── Desktop (min 1024px) — lock admin sidebar visible ─── */
-@media (min-width: 1024px) {
+/* ─── Admin stats single column (max 560px) ─── */
+@media (max-width: 560px) {
+  .admin-root .stats-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Small phones (max 480px) ─── */
+@media (max-width: 480px) {
+  .doctor-root .stats-row,
+  .patient-root .stats-row {
+    grid-template-columns: 1fr;
+  }
+
+  .patient-root .vitals-grid,
+  .doctor-root .vitals-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .patient-root .info-grid,
+  .doctor-root .info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Responsive data tables (max 680px) ─── */
+@media (max-width: 680px) {
+  table.rtbl {
+    display: block;
+    width: 100% !important;
+    border: none !important;
+    background: none !important;
+    overflow: visible !important;
+  }
+
+  table.rtbl thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  table.rtbl tbody {
+    display: block;
+    width: 100%;
+  }
+
+  table.rtbl tr {
+    display: block;
+    width: 100%;
+    margin: 0 0 14px;
+    border: 1px solid var(--gray-200, #e2e8f0);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+    overflow: hidden;
+  }
+
+  table.rtbl tr:nth-child(even) {
+    background: #fff;
+  }
+
+  table.rtbl td {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 14px;
+    width: auto !important;
+    padding: 10px 14px;
+    border: none;
+    border-bottom: 1px solid #eef2f7;
+    text-align: right;
+    font-size: 0.9rem;
+    white-space: normal !important;
+  }
+
+  table.rtbl td:first-child {
+    background: var(--blue-light, #e8f0fb);
+    font-weight: 700;
+  }
+
+  table.rtbl td:last-child {
+    border-bottom: none;
+  }
+
+  table.rtbl td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #475569;
+    text-align: left;
+    flex: 0 0 40%;
+    min-width: 0;
+    overflow-wrap: break-word;
+  }
+
+  table.rtbl td:not([data-label])::before {
+    display: none;
+  }
+
+  table.rtbl td:not([data-label]) {
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .data-table-wrap,
+  .table-wrap,
+  .tbl-wrap,
+  .table-scroll {
+    overflow: visible !important;
+    border: none !important;
+  }
+}
+
+/* ─── Admin desktop (min 861px) ─── */
+@media (min-width: 861px) {
   .admin-root .app {
     grid-template-columns: 250px 1fr;
   }
@@ -361,6 +668,13 @@ svg {
     display: none !important;
   }
 
+  .admin-root .sidebar-backdrop.visible {
+    display: none !important;
+  }
+}
+
+/* ─── Patient + Doctor desktop (min 1061px) ─── */
+@media (min-width: 1061px) {
   .doctor-root .dash-grid,
   .patient-root .dash-grid {
     grid-template-columns: 282px 1fr;
@@ -373,14 +687,6 @@ svg {
     transform: none;
     width: auto;
     border-radius: var(--radius-lg, 20px);
-  }
-
-  .dash-sidebar-toggle {
-    display: none !important;
-  }
-
-  .sidebar-backdrop.visible {
-    display: none !important;
   }
 
   .doctor-root .dash-main,

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { SectionTitle } from "@/components/public/section-heading";
 import { FloatingInput } from "@/components/ui/floating-input";
@@ -12,15 +12,19 @@ import { Logo } from "@/components/layout/Logo";
 import { isAxiosError } from "axios";
 import { api } from "@/lib/api";
 import { clearOAuthLoadingProvider, resolvePostLoginPath, startOAuth, type OAuthProviderName } from "@/lib/oauth";
+import { bookingRegisterUrl, isBookingAuthFlow } from "@/lib/booking-auth";
+import { invalidateAuthProfile } from "@/services/patient-api-hooks";
 import { useAuthStore, type AuthUser } from "@/store/auth.store";
 
 export function LoginForm() {
   const searchParams = useSearchParams();
+  const fromBooking = isBookingAuthFlow(searchParams);
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [oauthLoading, setOauthLoading] = useState<OAuthProviderName | null>(null);
   const setAuth = useAuthStore((state) => state.setAuth);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     clearOAuthLoadingProvider();
@@ -43,6 +47,7 @@ export function LoginForm() {
     },
     onSuccess: (data) => {
       setAuth(data.user, data.accessToken, data.refreshToken);
+      void invalidateAuthProfile(queryClient);
       setError("");
       setSuccess("Login successful! Redirecting...");
       const destination = resolvePostLoginPath(data.user.role, searchParams.get("redirect"));
@@ -111,6 +116,12 @@ export function LoginForm() {
       <SectionTitle className="text-center">Welcome Back</SectionTitle>
       <p className="mb-6 text-center text-[.84rem] text-gray-500">Sign in to your patient or doctor account</p>
 
+      {fromBooking && (
+        <div className="mb-4 rounded-[10px] border border-[#bfdbfe] bg-[#eff6ff] px-3.5 py-3 text-[.84rem] leading-relaxed text-[#1e40af]">
+          Please create a Patient account or sign in to continue booking your consultation.
+        </div>
+      )}
+
       {error && (
         <div className="mb-4 flex items-center gap-2 rounded-[10px] border border-[#fecaca] bg-[#fef2f2] px-3.5 py-3 text-[.85rem] text-red">
           ⚠️ {error}
@@ -165,7 +176,7 @@ export function LoginForm() {
 
       <p className="mt-4 text-center text-[.83rem] text-gray-500">
         Don&apos;t have an account?{" "}
-        <Link href="/register" className="font-bold text-blue">
+        <Link href={fromBooking ? bookingRegisterUrl() : "/register"} className="font-bold text-blue">
           Create one free
         </Link>
       </p>

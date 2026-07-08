@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create an Account — The Dr Insight</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* mobile safety */img,svg,video,iframe{max-width:100%}table{max-width:100%}html{-webkit-text-size-adjust:100%}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#1a56a0;--blue-dark:#0f3d7a;--blue-light:#e8f0fb;--blue-mid:#4a90d9;
+  --teal:#0891b2;--green:#059669;--red:#dc2626;--amber:#f59e0b;
+  --white:#fff;--gray-50:#f8fafc;--gray-200:#e2e8f0;--gray-300:#cbd5e1;
+  --gray-400:#94a3b8;--gray-500:#64748b;--gray-600:#475569;--gray-800:#1e293b;--gray-900:#0f172a;
+  --shadow-lg:0 8px 32px rgba(26,86,160,.14);--radius:12px;--radius-lg:20px;
+  --transition:all .22s cubic-bezier(.4,0,.2,1)
+}
+body{font-family:'DM Sans',sans-serif;color:var(--gray-900);background:var(--gray-50);line-height:1.5}
+a{color:inherit;text-decoration:none}
+
+/* TOP BAR */
+.top-bar{background:var(--blue-dark);padding:8px 24px;font-size:.8rem}
+.top-bar-inner{max-width:1240px;margin:auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.top-bar-left{color:#fca5a5;display:flex;align-items:center;gap:6px}
+.top-bar-right{display:flex;gap:20px}
+.top-bar-right a{color:#93c5fd;transition:var(--transition)}
+.top-bar-right a:hover{color:#fff}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--gray-200);height:70px;display:flex;align-items:center}
+.nav-inner{max-width:1240px;margin:auto;width:100%;padding:0 24px;display:flex;justify-content:space-between;align-items:center}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo-icon{width:38px;height:38px;border-radius:9px;background:linear-gradient(135deg,var(--blue-dark),var(--teal));display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.2rem;font-weight:700;flex-shrink:0}
+.nav-logo-text{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;color:var(--blue-dark)}
+.nav-links{display:flex;align-items:center;gap:4px}
+.nav-links a{padding:7px 14px;border-radius:8px;font-size:.9rem;font-weight:500;color:var(--gray-600);transition:var(--transition)}
+.nav-links a:hover{background:var(--blue-light);color:var(--blue)}
+.nav-cta{background:var(--blue);color:#fff!important;border-radius:8px;padding:8px 18px!important;font-weight:600!important}
+.nav-cta:hover{background:var(--blue-dark)!important;color:#fff!important}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px}
+.hamburger span{display:block;width:24px;height:2px;background:var(--gray-600);border-radius:2px;transition:var(--transition)}
+.mobile-menu{display:none;position:absolute;top:70px;left:0;right:0;background:#fff;border-bottom:1px solid var(--gray-200);padding:12px 24px;flex-direction:column;gap:4px;z-index:99}
+.mobile-menu.open{display:flex}
+.mobile-menu a{padding:10px 14px;border-radius:8px;font-size:.92rem;color:var(--gray-600);font-weight:500;transition:var(--transition)}
+.mobile-menu a:hover{background:var(--blue-light);color:var(--blue)}
+
+/* ===== CANONICAL HOME-PAGE HEADER (override) ===== */
+.topbar{background:var(--blue-dark);color:#cbd5e1;font-size:.8rem;padding:.45rem 0}
+.topbar-inner{max-width:1240px;margin:auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.topbar a{color:#93c5fd;margin-left:16px;transition:var(--transition)}
+.topbar a:hover{color:#fff}
+.topbar-emergency{display:flex;align-items:center;gap:8px;color:#fca5a5;font-weight:600}
+.topbar-emergency svg{width:14px;height:14px}
+nav{background:var(--white);border-bottom:1px solid var(--gray-200);position:sticky;top:0;z-index:100;box-shadow:var(--shadow-sm)}
+.nav-inner{max-width:1240px;margin:auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:70px}
+.logo{display:flex;align-items:center;gap:10px;font-family:'Playfair Display',Georgia,serif;font-size:1.5rem;font-weight:700;color:var(--blue-dark)}
+.logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--blue),var(--teal));border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.2rem}
+.nav-links{display:flex;align-items:center;gap:4px}
+.nav-links a{padding:8px 14px;border-radius:8px;font-size:.9rem;font-weight:500;color:var(--gray-600);transition:var(--transition)}
+.nav-links a:hover,.nav-links a.active{background:var(--blue-light);color:var(--blue)}
+.nav-links .btn-book{background:var(--blue);color:#fff!important;padding:8px 20px;border-radius:8px}
+.nav-links .btn-book:hover{background:var(--blue-dark);transform:translateY(-1px)}
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:4px}
+.hamburger span{display:block;width:24px;height:2px;background:var(--gray-800);margin:5px 0;transition:var(--transition)}
+.mobile-menu{display:none;flex-direction:column;gap:4px;padding:16px 24px;background:var(--white);border-top:1px solid var(--gray-200)}
+.mobile-menu a{padding:10px 12px;border-radius:8px;font-size:.92rem;font-weight:500;color:var(--gray-600)}
+.mobile-menu a:hover{background:var(--blue-light);color:var(--blue)}
+@media(max-width:640px){.nav-links{display:none}.hamburger{display:block}.mobile-menu.open{display:flex}}
+
+/* BREADCRUMB */
+.breadcrumb{background:#fff;border-bottom:1px solid var(--gray-200);padding:10px 24px;font-size:.78rem;color:var(--gray-400)}
+.breadcrumb-inner{max-width:1240px;margin:auto;display:flex;align-items:center;gap:6px}
+.breadcrumb a{color:var(--gray-400);transition:var(--transition)}
+.breadcrumb a:hover{color:var(--blue)}
+.breadcrumb .current{color:var(--blue)}
+.breadcrumb .sep{color:var(--gray-300)}
+
+/* REGISTER LAYOUT */
+.reg-wrap{display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 112px)}
+
+/* LEFT PANEL */
+.reg-left{background:linear-gradient(135deg,#0f3d7a 0%,#1a56a0 55%,#0891b2 100%);position:relative;overflow:hidden;padding:60px 56px;color:#fff;display:flex;flex-direction:column;justify-content:center}
+.bg-pattern{position:absolute;inset:0;opacity:.04;background-image:url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M16 0h8v8h8v8h-8v8h-8v-8H8V8h8z' fill='white'/%3E%3C/svg%3E")}
+.deco-circle{position:absolute;border-radius:50%;background:rgba(255,255,255,.06)}
+.deco-c1{width:320px;height:320px;bottom:-80px;right:-80px}
+.deco-c2{width:180px;height:180px;top:-40px;right:-40px}
+.ll-content{position:relative;z-index:1}
+.ll-eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#93c5fd;margin-bottom:18px}
+.ll-h1{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,3vw,2.5rem);font-weight:700;line-height:1.2;margin-bottom:14px}
+.ll-h1 span{color:#93c5fd}
+.ll-para{font-size:.88rem;opacity:.88;line-height:1.8;max-width:400px;margin-bottom:24px}
+.benefit-cards{display:flex;flex-direction:column;gap:14px;margin-bottom:28px}
+.benefit-card{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:14px 18px;display:flex;align-items:flex-start;gap:12px;transition:var(--transition)}
+.benefit-card:hover{background:rgba(255,255,255,.15)}
+.bc-icon{font-size:1.3rem;flex-shrink:0;margin-top:2px}
+.bc-title{font-size:.88rem;font-weight:700;margin-bottom:2px}
+.bc-desc{font-size:.78rem;opacity:.8}
+.ll-stats{display:flex;gap:24px;flex-wrap:wrap}
+.ll-stat-num{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:#93c5fd;display:block}
+.ll-stat-label{font-size:.74rem;opacity:.8}
+
+/* RIGHT PANEL */
+.reg-right{background:var(--gray-50);overflow-y:auto;display:flex;align-items:flex-start;justify-content:center;padding:40px 24px}
+.reg-card{width:100%;max-width:500px;background:#fff;border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:40px;border:1px solid var(--gray-200)}
+
+/* STEP BAR */
+.step-bar{display:flex;align-items:center;margin-bottom:32px}
+.step-item{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1}
+.step-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;transition:var(--transition);z-index:1;position:relative}
+.step-dot.pending{background:var(--gray-50);color:var(--gray-400);border:2px solid var(--gray-200)}
+.step-dot.active{background:var(--blue);color:#fff;box-shadow:0 0 0 4px var(--blue-light)}
+.step-dot.done{background:var(--green);color:#fff}
+.step-label{font-size:.64rem;color:var(--gray-400);text-align:center;white-space:nowrap}
+.step-line{flex:1;height:2px;background:var(--gray-200);margin-top:-24px;transition:var(--transition)}
+.step-line.done{background:var(--green)}
+
+/* ALERT */
+.alert{display:none;padding:12px 14px;border-radius:10px;font-size:.85rem;margin-bottom:16px;align-items:center;gap:8px}
+.alert.error{display:flex;background:#fef2f2;border:1px solid #fecaca;color:var(--red)}
+.alert.success{display:flex;background:#f0fdf4;border:1px solid #bbf7d0;color:var(--green)}
+
+/* FORM */
+.step-title{font-family:'Playfair Display',serif;font-size:1.45rem;font-weight:700;color:var(--gray-900);margin-bottom:6px}
+.step-subtitle{font-size:.84rem;color:var(--gray-500);margin-bottom:24px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:.84rem;font-weight:600;color:var(--gray-700);margin-bottom:6px}
+.input-wrap{position:relative}
+.input-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:.9rem;pointer-events:none}
+.form-input{width:100%;padding:11px 14px 11px 38px;border:1.5px solid var(--gray-200);border-radius:10px;font-size:.9rem;font-family:'DM Sans',sans-serif;transition:var(--transition);outline:none;background:#fff;color:var(--gray-900)}
+.form-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,160,.08)}
+.form-select{width:100%;padding:11px 14px 11px 38px;border:1.5px solid var(--gray-200);border-radius:10px;font-size:.9rem;font-family:'DM Sans',sans-serif;transition:var(--transition);outline:none;background:#fff;color:var(--gray-900);cursor:pointer}
+.form-select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,160,.08)}
+.form-textarea{width:100%;padding:11px 14px;border:1.5px solid var(--gray-200);border-radius:10px;font-size:.9rem;font-family:'DM Sans',sans-serif;transition:var(--transition);outline:none;background:#fff;color:var(--gray-900);resize:vertical}
+.form-textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,160,.08)}
+.input-note{font-size:.75rem;color:var(--gray-400);margin-top:4px}
+
+/* TYPE CARDS */
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.type-card{border:2px solid var(--gray-200);border-radius:14px;padding:22px 18px;text-align:center;cursor:pointer;transition:var(--transition)}
+.type-card:hover{border-color:var(--blue-mid);background:var(--blue-light)}
+.type-card.selected{border-color:var(--blue);background:var(--blue-light)}
+.type-card .tc-icon{font-size:2.2rem;margin-bottom:10px}
+.type-card .tc-title{font-size:.92rem;font-weight:700;color:var(--gray-900);margin-bottom:4px}
+.type-card .tc-desc{font-size:.76rem;color:var(--gray-500)}
+.sub-section-label{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);padding-bottom:8px;border-bottom:2px solid var(--blue-light);margin-bottom:14px;margin-top:4px}
+.sub-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.sub-card{border:1.5px solid var(--gray-200);border-radius:12px;padding:14px 12px;text-align:center;cursor:pointer;transition:var(--transition)}
+.sub-card:hover{border-color:var(--blue-mid);background:var(--blue-light)}
+.sub-card.selected{border-color:var(--blue);background:var(--blue-light)}
+.sub-card .sc-icon{font-size:1.5rem;margin-bottom:6px}
+.sub-card .sc-title{font-size:.8rem;font-weight:700;color:var(--gray-900);margin-bottom:2px}
+.sub-card .sc-desc{font-size:.7rem;color:var(--gray-500)}
+
+/* SOCIAL */
+.social-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.oauth-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:10px;background:#fff;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;color:var(--gray-800);cursor:pointer;transition:all .22s cubic-bezier(.4,0,.2,1)}
+.oauth-btn:hover{border-color:var(--blue);background:var(--blue-light);transform:translateY(-1px)}
+.oauth-btn svg{width:18px;height:18px;flex-shrink:0}
+
+.divider{display:flex;align-items:center;gap:12px;margin-bottom:14px;font-size:.8rem;color:var(--gray-400)}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--gray-200)}
+
+/* TAG PILLS */
+.tag-cloud{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.tag-pill{padding:7px 14px;border-radius:50px;border:1.5px solid var(--gray-200);font-size:.8rem;font-weight:600;cursor:pointer;transition:var(--transition);color:var(--gray-600)}
+.tag-pill:hover{border-color:var(--blue-mid);color:var(--blue)}
+.tag-pill.selected{background:var(--blue);color:#fff;border-color:var(--blue)}
+.radio-pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.radio-pill{padding:7px 16px;border-radius:50px;border:1.5px solid var(--gray-200);font-size:.82rem;font-weight:600;cursor:pointer;transition:var(--transition);color:var(--gray-600)}
+.radio-pill.selected{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+/* CONTRIBUTION CARDS */
+.contrib-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.contrib-card{border:1.5px solid var(--gray-200);border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:var(--transition);position:relative}
+.contrib-card:hover{border-color:var(--blue-mid);background:var(--blue-light)}
+.contrib-card.selected{border-color:var(--blue);background:var(--blue-light)}
+.contrib-card input[type=checkbox]{position:absolute;opacity:0;pointer-events:none}
+.contrib-card .cc-icon{font-size:1.5rem;margin-bottom:6px}
+.contrib-card .cc-title{font-size:.82rem;font-weight:700;color:var(--gray-900);margin-bottom:4px}
+.contrib-card .cc-desc{font-size:.72rem;color:var(--gray-500);line-height:1.5}
+.contrib-note{display:none;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:10px 14px;font-size:.78rem;color:#92400e;margin-bottom:12px}
+
+/* PASSWORD */
+.pw-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:8px;margin-bottom:6px}
+.pw-seg{height:4px;border-radius:2px;background:var(--gray-200);transition:var(--transition)}
+.pw-seg.weak{background:var(--red)}
+.pw-seg.fair{background:var(--amber)}
+.pw-seg.good{background:var(--blue)}
+.pw-seg.strong{background:var(--green)}
+.pw-hint{font-size:.75rem;color:var(--gray-400);margin-bottom:12px}
+.pw-match{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:.9rem}
+.pw-toggle-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:.9rem;background:none;border:none;padding:0;line-height:1}
+
+/* TOGGLE 2FA */
+.toggle-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:14px;border:1.5px solid var(--gray-200);border-radius:10px}
+.toggle-switch{position:relative;width:42px;height:22px;flex-shrink:0}
+.toggle-switch input{opacity:0;width:0;height:0;position:absolute}
+.toggle-slider{position:absolute;inset:0;background:var(--gray-300);border-radius:50px;cursor:pointer;transition:var(--transition)}
+.toggle-slider::before{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;left:3px;top:3px;transition:var(--transition)}
+.toggle-switch input:checked+.toggle-slider{background:var(--blue)}
+.toggle-switch input:checked+.toggle-slider::before{transform:translateX(20px)}
+.toggle-label{font-size:.86rem;font-weight:600;color:var(--gray-700)}
+.twofa-note{display:none;background:var(--blue-light);border-radius:8px;padding:8px 12px;font-size:.78rem;color:var(--blue-dark);margin-bottom:12px}
+
+/* AGREEMENTS */
+.agree-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;font-size:.84rem;color:var(--gray-600);line-height:1.5}
+.agree-row input[type=checkbox]{accent-color:var(--blue);width:16px;height:16px;flex-shrink:0;margin-top:2px;cursor:pointer}
+.agree-row a{color:var(--blue);font-weight:600}
+
+/* NAV BUTTONS */
+.btn-row{display:flex;gap:10px;margin-top:20px}
+.btn-back{flex:0 0 auto;padding:11px 20px;background:#fff;border:1.5px solid var(--gray-200);border-radius:10px;font-size:.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--gray-700);transition:var(--transition)}
+.btn-back:hover{border-color:var(--blue);color:var(--blue)}
+.btn-next{flex:1;padding:13px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;transition:var(--transition);font-family:'DM Sans',sans-serif}
+.btn-next:hover{background:var(--blue-dark);transform:translateY(-1px);box-shadow:0 6px 20px rgba(26,86,160,.3)}
+.login-link{text-align:center;font-size:.83rem;color:var(--gray-500);margin-top:12px}
+.login-link a{color:var(--blue);font-weight:700}
+
+/* SUCCESS */
+.success-state{text-align:center;padding:20px 0}
+.success-icon{font-size:4rem;margin-bottom:16px}
+.success-h3{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;margin-bottom:12px}
+.success-para{font-size:.9rem;color:var(--gray-500);line-height:1.7;margin-bottom:24px}
+.success-btn{display:inline-block;padding:13px 32px;background:var(--blue);color:#fff;border-radius:10px;font-weight:700;font-size:.95rem;cursor:pointer;transition:var(--transition)}
+.success-btn:hover{background:var(--blue-dark)}
+.resend-link{display:block;margin-top:12px;font-size:.82rem;color:var(--blue);cursor:pointer}
+
+/* FOOTER */
+.footer-main{max-width:1240px;margin:auto;padding:64px 24px 0}
+.footer-brand-desc{font-size:.85rem;line-height:1.7;margin:12px 0 16px;color:#64748b}
+.footer-badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.footer-badge{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:5px 12px;font-size:.75rem;color:#93c5fd}
+.footer-socials{display:flex;gap:8px}
+.social-icon{width:36px;height:36px;background:rgba(255,255,255,.06);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.9rem;cursor:pointer;transition:var(--transition)}
+.social-icon:hover{background:var(--blue)}
+.footer-col-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:600;color:#fff;margin-bottom:16px}
+.footer-links{list-style:none;display:flex;flex-direction:column;gap:8px}
+.footer-links li a{font-size:.84rem;color:#64748b;transition:var(--transition)}
+.footer-links li a:hover{color:#93c5fd}
+.footer-contact-item .icon{font-size:.9rem;flex-shrink:0;margin-top:2px}
+.footer-contact-item .wa{color:#25d366}
+.footer-nl-input{width:100%;padding:10px 14px;background:#1e293b;border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#fff;font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;margin-bottom:8px}
+.footer-nl-btn{width:100%;padding:10px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:var(--transition)}
+.footer-nl-btn:hover{background:var(--blue-dark)}
+.footer-nl-note{font-size:.74rem;color:#475569;margin-top:8px}
+.footer-logo-text{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:#fff}
+
+@media(max-width:860px){
+  .reg-left{display:none}
+  .reg-wrap{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:1fr 1fr;gap:32px}
+}
+@media(max-width:640px){
+  .nav-links{display:none}
+  .hamburger{display:flex}
+  .footer-grid{grid-template-columns:1fr}
+  .form-row{grid-template-columns:1fr}
+  .type-grid{grid-template-columns:1fr}
+  .contrib-grid{grid-template-columns:1fr}
+  .reg-card{padding:28px 20px}
+  .step-label{display:none}
+}
+@media(max-width:480px){
+  .sub-grid{grid-template-columns:1fr 1fr}
+}
+
+/* ===== CANONICAL HOME-PAGE FOOTER (override) ===== */
+footer{background:#0f172a;color:#94a3b8;font-size:.85rem;padding:64px 24px 0}
+.footer-grid{max-width:1240px;margin:auto;display:grid;grid-template-columns:2fr 1fr 1fr 1.5fr 1.5fr;gap:48px}
+.footer-brand .logo{color:#fff;margin-bottom:14px;display:flex;align-items:center;gap:10px;font-size:1.5rem;font-weight:700}
+.footer-brand p{line-height:1.7;margin-bottom:20px;font-size:.85rem}
+.footer-social{display:flex;gap:10px}
+.social-btn{width:36px;height:36px;background:#1e293b;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#94a3b8;transition:all .22s cubic-bezier(.4,0,.2,1);font-size:.9rem;text-decoration:none}
+.social-btn:hover{background:#1a56a0;color:#fff}
+.footer-col h4{color:#fff;font-size:.9rem;font-weight:700;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid #1e293b}
+.footer-col ul{list-style:none;padding:0;margin:0}
+.footer-col ul li{margin-bottom:8px}
+.footer-col ul li a{color:#94a3b8;transition:all .22s cubic-bezier(.4,0,.2,1);font-size:.83rem;text-decoration:none}
+.footer-col ul li a:hover{color:#93c5fd}
+.footer-subscribe input{width:100%;padding:10px 14px;background:#1e293b;border:1px solid #334155;border-radius:8px;color:#fff;font-family:'DM Sans',system-ui,sans-serif;font-size:.85rem;margin-bottom:10px;box-sizing:border-box}
+.footer-subscribe input::placeholder{color:#64748b}
+.footer-subscribe button{width:100%;background:#1a56a0;color:#fff;border:none;padding:10px;border-radius:8px;font-family:'DM Sans',system-ui,sans-serif;font-weight:600;cursor:pointer;transition:all .22s cubic-bezier(.4,0,.2,1)}
+.footer-subscribe button:hover{background:#4a90d9}
+.footer-contact-item{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:.82rem;color:#94a3b8}
+.footer-contact-item svg{width:16px;height:16px;color:#4a90d9;flex-shrink:0}
+.footer-bottom .fb-note{margin-top:4px;color:#475569;font-size:.70rem;font-size:clamp(.55rem,.93vw,.74rem)}
+@media(min-width:900px){.footer-bottom .fb-note{white-space:nowrap}}
+.footer-bottom{max-width:1240px;margin:48px auto 0;padding:24px 24px;border-top:1px solid #1e293b;display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.footer-bottom p{font-size:.78rem}
+.footer-bottom-links{display:flex;gap:16px 22px;flex-wrap:wrap}
+.footer-bottom-links a{font-size:.78rem;color:#64748b;transition:all .22s cubic-bezier(.4,0,.2,1);text-decoration:none}
+.footer-bottom-links a:hover{color:#93c5fd}
+.hipaa-badge{display:inline-flex;align-items:center;gap:6px;background:#1e293b;border:1px solid #334155;border-radius:6px;padding:4px 10px;font-size:.72rem;color:#64748b;margin-top:8px}
+@media(max-width:900px){.footer-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.footer-grid{grid-template-columns:1fr}.footer-bottom{max-width:1240px;margin:48px auto 0;padding:24px 24px;border-top:1px solid #1e293b;display:flex;flex-direction:column;align-items:flex-start;gap:12px}}
+
+
+
+</style>
+
+<!-- SEO -->
+<meta name="description" content="Register for a free DrInsight account to book consultations and save your health tools.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="canonical" href="https://www.drinsight.org/register.html">
+<meta name="theme-color" content="#12275a">
+<link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<meta property="og:site_name" content="The Dr Insight">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Create an Account — The Dr Insight">
+<meta property="og:description" content="Register for a free DrInsight account to book consultations and save your health tools.">
+<meta property="og:url" content="https://www.drinsight.org/register.html">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Create an Account — The Dr Insight">
+<meta name="twitter:description" content="Register for a free DrInsight account to book consultations and save your health tools.">
+<script src="assets/api.js"></script>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-emergency">
+      <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+      Emergency: <strong>911</strong> &nbsp;|&nbsp; Medical Helpline: <strong>+92 335 3545545</strong>
+    </div>
+    <div>
+      <a href="login.html">Portal Login</a>
+    </div>
+  </div>
+</div>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="logo"><img src="assets/drinsight-logo.png" alt="DrInsight — Trusted Medical Insights &amp; Expert Consultation" width="214" height="56" decoding="async" fetchpriority="high" style="height:56px;width:auto;display:block"></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="about.html">About Us</a>
+      <a href="health-tools.html">Health Tools</a>
+      <a href="doctors.html">Our Doctors</a>
+      <a href="ask-doctor.html">Ask the Doctor</a>
+      <a href="blog.html">Blog</a>
+      <a href="contact.html">Contact</a>
+      <a href="book-consultation.html" class="btn-book">Book Consultation</a>
+    </div>
+    <button class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">Home</a>
+    <a href="about.html">About Us</a>
+    <a href="health-tools.html">Health Tools</a>
+    <a href="doctors.html">Our Doctors</a>
+    <a href="ask-doctor.html">Ask the Doctor</a>
+    <a href="blog.html">Blog</a>
+    <a href="contact.html">Contact</a>
+    <a href="book-consultation.html">📅 Book Consultation</a>
+  </div>
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+  <div class="breadcrumb-inner">
+    <a href="index.html">🏠 Home</a>
+    <span class="sep">›</span>
+    <a href="login.html">Login</a>
+    <span class="sep">›</span>
+    <span class="current">Create Account</span>
+  </div>
+</div>
+
+<!-- REGISTER LAYOUT -->
+<div class="reg-wrap">
+
+  <!-- LEFT PANEL (dynamic) -->
+  <div class="reg-left">
+    <div class="bg-pattern"></div>
+    <div class="deco-circle deco-c1"></div>
+    <div class="deco-circle deco-c2"></div>
+    <div class="ll-content" id="leftContent">
+      <!-- Updated dynamically -->
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="reg-right">
+    <div class="reg-card">
+
+      <!-- STEP BAR -->
+      <div class="step-bar">
+        <div class="step-item">
+          <div class="step-dot active" id="dot1">1</div>
+          <span class="step-label">Account Type</span>
+        </div>
+        <div class="step-line" id="line1"></div>
+        <div class="step-item">
+          <div class="step-dot pending" id="dot2">2</div>
+          <span class="step-label">Your Details</span>
+        </div>
+        <div class="step-line" id="line2"></div>
+        <div class="step-item">
+          <div class="step-dot pending" id="dot3">3</div>
+          <span class="step-label">Specialty Info</span>
+        </div>
+        <div class="step-line" id="line3"></div>
+        <div class="step-item">
+          <div class="step-dot pending" id="dot4">4</div>
+          <span class="step-label">Security</span>
+        </div>
+      </div>
+
+      <div class="alert" id="alertBox"></div>
+
+      <!-- ======= STEP 1 ======= -->
+      <div id="step1">
+        <h2 class="step-title">Create Your Account</h2>
+        <p class="step-subtitle">Choose how you'll be using DrInsight</p>
+
+        <div class="type-grid">
+          <div class="type-card" id="cardPatient" onclick="selectType('patient')">
+            <div class="tc-icon">🏥</div>
+            <div class="tc-title">Register as PATIENT</div>
+            <div class="tc-desc">I'm seeking medical info or consultations</div>
+          </div>
+          <div class="type-card" id="cardPhysician" onclick="selectType('physician')">
+            <div class="tc-icon">👨‍⚕️</div>
+            <div class="tc-title">Register as PHYSICIAN</div>
+            <div class="tc-desc">I'm a licensed healthcare professional</div>
+          </div>
+        </div>
+
+        <!-- Patient sub-types -->
+        <div id="patientSubs" style="display:none">
+          <div class="sub-section-label">I am a…</div>
+          <div class="sub-grid">
+            <div class="sub-card" onclick="selectSub('indiv')"><div class="sc-icon">👤</div><div class="sc-title">Individual Patient</div><div class="sc-desc">Managing my own health</div></div>
+            <div class="sub-card" onclick="selectSub('parent')"><div class="sc-icon">👨‍👩‍👦</div><div class="sc-title">Parent / Guardian</div><div class="sc-desc">Managing health of a child</div></div>
+            <div class="sub-card" onclick="selectSub('caregiver')"><div class="sc-icon">👴</div><div class="sc-title">Caregiver for Elder</div><div class="sc-desc">Caring for an elderly family member</div></div>
+            <div class="sub-card" onclick="selectSub('student')"><div class="sc-icon">🎓</div><div class="sc-title">Medical Student</div><div class="sc-desc">Studying medicine or health science</div></div>
+          </div>
+        </div>
+
+        <!-- Physician sub-types -->
+        <div id="physicianSubs" style="display:none">
+          <div class="sub-section-label">I am a…</div>
+          <div class="sub-grid">
+            <div class="sub-card" onclick="selectSub('specialist')"><div class="sc-icon">🩺</div><div class="sc-title">Specialist Doctor</div><div class="sc-desc">Board-certified in a specialty</div></div>
+            <div class="sub-card" onclick="selectSub('gp')"><div class="sc-icon">🔬</div><div class="sc-title">General Practitioner</div><div class="sc-desc">Primary care / family medicine</div></div>
+            <div class="sub-card" onclick="selectSub('surgeon')"><div class="sc-icon">💊</div><div class="sc-title">Surgeon</div><div class="sc-desc">Surgical specialty practice</div></div>
+            <div class="sub-card" onclick="selectSub('resident')"><div class="sc-icon">🏥</div><div class="sc-title">Resident / Fellow</div><div class="sc-desc">Postgraduate training</div></div>
+          </div>
+        </div>
+
+        <div class="social-grid">
+          <button class="oauth-btn" onclick="socialLogin('Google')"><svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84z"/></svg>Google</button>
+          <button class="oauth-btn" onclick="socialLogin('Facebook')"><svg viewBox="0 0 24 24"><path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>Facebook</button>
+        </div>
+        <div class="divider">or register with email</div>
+        <div class="btn-row">
+          <button class="btn-next" onclick="goStep(2)">Continue with Email →</button>
+        </div>
+        <p class="login-link">Already have an account? <a href="login.html">Sign in here</a></p>
+      </div>
+
+      <!-- ======= STEP 2 ======= -->
+      <div id="step2" style="display:none">
+        <h2 class="step-title">Personal Information</h2>
+        <p class="step-subtitle" id="step2sub">Tell us a little about yourself</p>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <div class="input-wrap">
+              <span class="input-icon">👤</span>
+              <input type="text" class="form-input" id="firstName" placeholder="John">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <div class="input-wrap">
+              <span class="input-icon">👤</span>
+              <input type="text" class="form-input" id="lastName" placeholder="Smith">
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <div class="input-wrap">
+            <span class="input-icon">✉️</span>
+            <input type="email" class="form-input" id="regEmail" placeholder="john@example.com">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number <span style="font-weight:400;color:var(--gray-400)">(optional)</span></label>
+          <div class="input-wrap">
+            <span class="input-icon">📱</span>
+            <input type="tel" class="form-input" id="phone" placeholder="+1 (555) 000-0000">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Date of Birth</label>
+            <div class="input-wrap">
+              <span class="input-icon">📅</span>
+              <input type="date" class="form-input" id="dob">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Country</label>
+            <div class="input-wrap">
+              <span class="input-icon">🌍</span>
+              <select class="form-select" id="country">
+                <option value="">Select country…</option>
+                <option>United States</option><option>United Kingdom</option>
+                <option>Pakistan</option><option>India</option>
+                <option>Canada</option><option>Australia</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic extra fields -->
+        <div id="extraFields"></div>
+
+        <div class="btn-row">
+          <button class="btn-back" onclick="goStep(1)">← Back</button>
+          <button class="btn-next" onclick="goStep(3)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- ======= STEP 3 ======= -->
+      <div id="step3" style="display:none">
+        <div id="step3patient">
+          <h2 class="step-title">Your Health Profile</h2>
+          <p class="step-subtitle">Help us personalise your experience</p>
+          <div class="form-group">
+            <label class="form-label">Health Interests <span style="font-weight:400;color:var(--gray-400)">(select all that apply)</span></label>
+            <div class="tag-cloud" id="healthTags">
+              <span class="tag-pill" onclick="toggleTag(this)">❤️ Cardiology</span>
+              <span class="tag-pill" onclick="toggleTag(this)">🧠 Neurology</span>
+              <span class="tag-pill" onclick="toggleTag(this)">🦋 Endocrinology</span>
+              <span class="tag-pill" onclick="toggleTag(this)">🍽️ Gastroenterology</span>
+              <span class="tag-pill" onclick="toggleTag(this)">🫘 Nephrology</span>
+              <span class="tag-pill" onclick="toggleTag(this)">🧴 Dermatology</span>
+              <span class="tag-pill" onclick="toggleTag(this)">🧠 Mental Health</span>
+              <span class="tag-pill" onclick="toggleTag(this)">🧒 Pediatrics</span>
+              <span class="tag-pill" onclick="toggleTag(this)">🦴 Rheumatology</span>
+              <span class="tag-pill" onclick="toggleTag(this)">🫁 Pulmonology</span>
+              <span class="tag-pill" onclick="toggleTag(this)">🎗️ Oncology</span>
+              <span class="tag-pill" onclick="toggleTag(this)">🦠 Infectious Disease</span>
+              <span class="tag-pill" onclick="toggleTag(this)">💊 Medications</span>
+              <span class="tag-pill" onclick="toggleTag(this)">🏃 Sports Medicine</span>
+              <span class="tag-pill" onclick="toggleTag(this)">😴 Sleep Medicine</span>
+              <span class="tag-pill" onclick="toggleTag(this)">🧬 Genetics</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Preferred Content Type</label>
+            <div class="radio-pills">
+              <span class="radio-pill" onclick="selectRadio(this,'content')">📖 Patient-friendly articles</span>
+              <span class="radio-pill" onclick="selectRadio(this,'content')">🔬 Clinical / technical content</span>
+              <span class="radio-pill" onclick="selectRadio(this,'content')">📋 Both</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Newsletter Frequency</label>
+            <div class="radio-pills">
+              <span class="radio-pill" onclick="selectRadio(this,'news')">Daily digest</span>
+              <span class="radio-pill" onclick="selectRadio(this,'news')">Weekly highlights</span>
+              <span class="radio-pill" onclick="selectRadio(this,'news')">Monthly roundup</span>
+              <span class="radio-pill" onclick="selectRadio(this,'news')">No newsletter</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Language Preference</label>
+            <div class="input-wrap">
+              <span class="input-icon">🌐</span>
+              <select class="form-select">
+                <option>English</option><option>Urdu</option><option>Arabic</option>
+                <option>Hindi</option><option>French</option><option>German</option>
+                <option>Spanish</option><option>Other</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div id="step3physician" style="display:none">
+          <h2 class="step-title">Professional Profile</h2>
+          <p class="step-subtitle">Help us match you with relevant clinical content</p>
+          <div class="form-group">
+            <label class="form-label">Medical License Number</label>
+            <div class="input-wrap">
+              <span class="input-icon">📋</span>
+              <input type="text" class="form-input" placeholder="MD-12345678">
+            </div>
+            <p class="input-note">⚠️ License will be verified before author/reviewer access is granted</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Regulatory Body / Medical Council</label>
+            <div class="input-wrap">
+              <span class="input-icon">🏛️</span>
+              <select class="form-select">
+                <option>Pakistan Medical Commission (PMC)</option>
+                <option>General Medical Council (GMC — UK)</option>
+                <option>American Medical Association (AMA)</option>
+                <option>Medical Council of India (MCI)</option>
+                <option>Australian Medical Association (AMA-AU)</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Clinical Interests</label>
+            <div class="tag-cloud">
+              <span class="tag-pill" onclick="toggleTag(this)">❤️ Cardiology</span>
+              <span class="tag-pill" onclick="toggleTag(this)">🧠 Neurology</span>
+              <span class="tag-pill" onclick="toggleTag(this)">🦋 Endocrinology</span>
+              <span class="tag-pill" onclick="toggleTag(this)">🍽️ Gastroenterology</span>
+              <span class="tag-pill" onclick="toggleTag(this)">🧴 Dermatology</span>
+              <span class="tag-pill" onclick="toggleTag(this)">🧠 Mental Health</span>
+              <span class="tag-pill" onclick="toggleTag(this)">🫁 Pulmonology</span>
+              <span class="tag-pill" onclick="toggleTag(this)">🎗️ Oncology</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Would you like to contribute?</label>
+            <div class="contrib-grid">
+              <div class="contrib-card" onclick="toggleContrib(this)">
+                <div class="cc-icon">✍️</div>
+                <div class="cc-title">Write Articles</div>
+                <div class="cc-desc">Share your clinical expertise with patients</div>
+              </div>
+              <div class="contrib-card" onclick="toggleContrib(this)">
+                <div class="cc-icon">🔬</div>
+                <div class="cc-title">Review Content</div>
+                <div class="cc-desc">Peer-review articles in your specialty</div>
+              </div>
+              <div class="contrib-card" onclick="toggleContrib(this)">
+                <div class="cc-icon">💬</div>
+                <div class="cc-title">Answer Patient Questions</div>
+                <div class="cc-desc">Respond to Ask the Doctor queries</div>
+              </div>
+            </div>
+            <div class="contrib-note" id="contribNote">📋 You'll need to complete a contributor agreement after registration</div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-back" onclick="goStep(2)">← Back</button>
+          <button class="btn-next" onclick="goStep(4)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- ======= STEP 4 ======= -->
+      <div id="step4" style="display:none">
+        <h2 class="step-title">Secure Your Account</h2>
+        <p class="step-subtitle">Create a strong password to protect your health data</p>
+
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input type="password" class="form-input" id="pw1" placeholder="Create a strong password" style="padding-right:42px" oninput="checkStrength()">
+            <button class="pw-toggle-btn" onclick="togglePw1()">👁️</button>
+          </div>
+          <div class="pw-bar">
+            <div class="pw-seg" id="seg1"></div>
+            <div class="pw-seg" id="seg2"></div>
+            <div class="pw-seg" id="seg3"></div>
+            <div class="pw-seg" id="seg4"></div>
+          </div>
+          <div class="pw-hint" id="pwHint">Enter a password to see strength</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Confirm Password</label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input type="password" class="form-input" id="pw2" placeholder="Repeat your password" style="padding-right:42px" oninput="checkMatch()">
+            <button class="pw-toggle-btn" onclick="togglePw2()">👁️</button>
+            <span class="pw-match" id="pwMatch"></span>
+          </div>
+        </div>
+
+        <div class="toggle-row">
+          <label class="toggle-switch">
+            <input type="checkbox" id="twofa" onchange="toggle2FA()">
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="toggle-label">Enable 2FA via email OTP</span>
+        </div>
+        <div class="twofa-note" id="twofaNote">📧 A verification code will be sent to your email each time you log in</div>
+
+        <div class="agree-row">
+          <input type="checkbox" id="agree1">
+          <label for="agree1">I agree to the <a href="terms-conditions.html">Terms &amp; Conditions</a> and <a href="privacy-policy.html">Privacy Policy</a></label>
+        </div>
+        <div class="agree-row">
+          <input type="checkbox" id="agree2">
+          <label for="agree2">I understand this platform provides educational health information only — not a substitute for professional medical advice</label>
+        </div>
+        <div class="agree-row">
+          <input type="checkbox" id="agree3">
+          <label for="agree3">Send me weekly health insights from our doctors (optional)</label>
+        </div>
+        <div class="agree-row" id="physicianAgree" style="display:none">
+          <input type="checkbox" id="agree4">
+          <label for="agree4">I confirm that my medical license is valid and in good standing. I understand misrepresentation will result in permanent account suspension.</label>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-back" onclick="goStep(3)">← Back</button>
+          <button class="btn-next" id="submitBtn" onclick="submitForm()">🎉 Create My Free Account</button>
+        </div>
+      </div>
+
+      <!-- SUCCESS STATE -->
+      <div id="successState" style="display:none">
+        <div class="success-state">
+          <div class="success-icon">✅</div>
+          <h3 class="success-h3">Account Created Successfully!</h3>
+          <p class="success-para" id="successMsg">Welcome to DrInsight! We've sent a verification email to your inbox.</p>
+          <a href="login.html" class="success-btn">Sign In to My Dashboard →</a>
+          <span class="resend-link">Didn't receive the email? Resend verification</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="logo">
+        <img src="assets/drinsight-logo-footer.png" alt="DrInsight — Trusted Medical Insights &amp; Expert Consultation" width="214" height="56" loading="lazy" decoding="async" style="height:56px;width:auto;display:block"></div>
+      <p>Your trusted platform for evidence-based medical information, expert doctor consultations, and health tools — reviewed and approved by licensed physicians.</p>
+      <div class="hipaa-badge">🛡️ HIPAA Compliant</div>
+      <div class="hipaa-badge" style="margin-top:6px">🇪🇺 GDPR Compliant</div>
+      <div class="footer-social" style="margin-top:16px">
+        <a href="#" class="social-btn">𝕏</a>
+        <a href="#" class="social-btn">f</a>
+        <a href="#" class="social-btn">in</a>
+        <a href="#" class="social-btn">▶</a>
+        <a href="#" class="social-btn">📸</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="health-tools.html">Health Tools</a></li>
+        <li><a href="doctors.html">Our Doctors</a></li>
+        <li><a href="ask-doctor.html">Ask the Doctor</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="book-consultation.html">Book Consultation</a></li>
+        <li><a href="contact.html">Contact Us</a></li>
+        <li><a href="author-guidelines.html">Author Guidelines</a></li>
+        <li><a href="medical-review-process.html">Medical Review Process</a></li>
+        <li><a href="editorial-policy.html">Editorial Policy</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Medical Categories</h4>
+      <ul>
+        <li><a href="blog.html#clinical">Clinical Specialties</a></li>
+        <li><a href="blog.html#surgical">Surgical Specialties</a></li>
+        <li><a href="blog.html#diagnostic">Diagnostic Specialties</a></li>
+        <li><a href="blog.html#dental">Dental Specialties</a></li>
+        <li><a href="blog.html">Preventive Health</a></li>
+        <li><a href="blog.html">Mental Health</a></li>
+        <li><a href="blog.html">Women's Health</a></li>
+        <li><a href="blog.html">Men's Health</a></li>
+        <li><a href="blog.html">Pediatrics</a></li>
+        <li><a href="blog.html">Nutrition</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contact Information</h4>
+      <div class="footer-contact-item">
+        <svg fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>
+        +92 335 3545545
+      </div>
+      <div class="footer-contact-item">
+        <svg fill="currentColor" viewBox="0 0 20 20"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
+        contact@drinsight.org
+      </div>
+      <div class="footer-contact-item">
+        <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+        Karachi<br>Pakistan
+      </div>
+      <div class="footer-contact-item">
+        <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+        Mon–Fri: 8AM–8PM | Sat: 9AM–5PM
+      </div>
+      <div class="footer-contact-item" style="color:#25d366">
+        📱 WhatsApp: +92 335 3545545
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Expert Health Insights</h4>
+      <p style="font-size:.82rem;margin-bottom:14px">Get weekly medical tips and health news from our specialists.</p>
+      <div class="footer-subscribe">
+        <input type="email" placeholder="Your email address">
+        <button>Subscribe Free →</button>
+        <p style="font-size:.72rem;color:#475569;margin-top:8px">🔒 GDPR compliant. Unsubscribe anytime.</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>
+      <p>© 2026 DrInsight. All rights reserved.</p>
+      <p class="fb-note">⚕️ The content on DrInsight is for informational purposes only and is not a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider for medical decisions.</p>
+    </div>
+    <div class="footer-bottom-links">
+      <a href="privacy-policy.html">Privacy Policy</a>
+      <a href="terms-conditions.html">Terms of Service</a>
+      <a href="disclaimer.html">Medical Disclaimer</a>
+      <a href="cookie-policy.html">Cookie Policy</a>
+      <a href="sitemap.html">Sitemap</a>
+      <a href="faq.html">FAQ</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// State
+let accountType='';
+let subType='';
+let currentStep=1;
+
+// ---- MOBILE MENU ----
+function toggleMenu(){
+  document.getElementById('mobileMenu').classList.toggle('open');
+}
+
+// ---- LEFT PANEL ----
+const leftPatient=`
+  <div class="ll-eyebrow">FREE PATIENT ACCOUNT</div>
+  <h1 class="ll-h1">Your Personal <span>Health Hub</span></h1>
+  <p class="ll-para">Everything you need to manage your health in one secure, trusted platform.</p>
+  <div class="benefit-cards">
+    <div class="benefit-card"><span class="bc-icon">🔖</span><div><div class="bc-title">Save Articles &amp; Guides</div><div class="bc-desc">Bookmark any article for quick access anytime</div></div></div>
+    <div class="benefit-card"><span class="bc-icon">💬</span><div><div class="bc-title">Ask the Doctor</div><div class="bc-desc">Submit questions and track responses from specialists</div></div></div>
+    <div class="benefit-card"><span class="bc-icon">📅</span><div><div class="bc-title">Book Consultations</div><div class="bc-desc">Schedule video, phone, or chat with our doctors</div></div></div>
+    <div class="benefit-card"><span class="bc-icon">📊</span><div><div class="bc-title">Health Dashboard</div><div class="bc-desc">Track your health tool results and history</div></div></div>
+  </div>
+  <div class="ll-stats">
+    <div><span class="ll-stat-num">500K+</span><span class="ll-stat-label">Active patients</span></div>
+    <div><span class="ll-stat-num">200+</span><span class="ll-stat-label">Specialist doctors</span></div>
+    <div><span class="ll-stat-num">Free</span><span class="ll-stat-label">Always free to join</span></div>
+  </div>`;
+
+const leftPhysician=`
+  <div class="ll-eyebrow">PHYSICIAN ACCOUNT</div>
+  <h1 class="ll-h1">Join Our <span>Expert Medical Network</span></h1>
+  <p class="ll-para">Connect with half a million patients and build your global medical reputation.</p>
+  <div class="benefit-cards">
+    <div class="benefit-card"><span class="bc-icon">✍️</span><div><div class="bc-title">Publish Articles</div><div class="bc-desc">Reach 500,000+ readers with your expertise</div></div></div>
+    <div class="benefit-card"><span class="bc-icon">🔬</span><div><div class="bc-title">Review &amp; Shape Content</div><div class="bc-desc">Peer-review articles in your specialty</div></div></div>
+    <div class="benefit-card"><span class="bc-icon">💬</span><div><div class="bc-title">Answer Patient Questions</div><div class="bc-desc">Respond to Ask the Doctor queries</div></div></div>
+    <div class="benefit-card"><span class="bc-icon">🎓</span><div><div class="bc-title">CPD/CME Recognition</div><div class="bc-desc">Receive recognition letters for contributions</div></div></div>
+  </div>
+  <div class="ll-stats">
+    <div><span class="ll-stat-num">500K+</span><span class="ll-stat-label">Active patients</span></div>
+    <div><span class="ll-stat-num">200+</span><span class="ll-stat-label">Specialist doctors</span></div>
+    <div><span class="ll-stat-num">🌍</span><span class="ll-stat-label">Global platform</span></div>
+  </div>`;
+
+const leftDefault=`
+  <div class="ll-eyebrow">FREE ACCOUNT — NO CREDIT CARD REQUIRED</div>
+  <h1 class="ll-h1">Join <span>500,000+</span> Informed Patients</h1>
+  <p class="ll-para">Access trusted medical information, expert consultations, and powerful health tools — all in one place.</p>
+  <div class="benefit-cards">
+    <div class="benefit-card"><span class="bc-icon">🔖</span><div><div class="bc-title">Save Articles &amp; Guides</div><div class="bc-desc">Bookmark any article for quick access anytime</div></div></div>
+    <div class="benefit-card"><span class="bc-icon">💬</span><div><div class="bc-title">Ask the Doctor</div><div class="bc-desc">Submit questions and track responses from specialists</div></div></div>
+    <div class="benefit-card"><span class="bc-icon">📅</span><div><div class="bc-title">Book Consultations</div><div class="bc-desc">Schedule video, phone, or chat with our doctors</div></div></div>
+    <div class="benefit-card"><span class="bc-icon">📊</span><div><div class="bc-title">Health Dashboard</div><div class="bc-desc">Track your health tool results and history</div></div></div>
+  </div>
+  <div class="ll-stats">
+    <div><span class="ll-stat-num">500K+</span><span class="ll-stat-label">Active patients</span></div>
+    <div><span class="ll-stat-num">200+</span><span class="ll-stat-label">Specialist doctors</span></div>
+    <div><span class="ll-stat-num">Free</span><span class="ll-stat-label">Always free to join</span></div>
+  </div>`;
+
+document.getElementById('leftContent').innerHTML=leftDefault;
+
+function selectType(type){
+  accountType=type;
+  document.getElementById('cardPatient').classList.toggle('selected',type==='patient');
+  document.getElementById('cardPhysician').classList.toggle('selected',type==='physician');
+  document.getElementById('patientSubs').style.display=type==='patient'?'block':'none';
+  document.getElementById('physicianSubs').style.display=type==='physician'?'block':'none';
+  document.getElementById('leftContent').innerHTML=type==='patient'?leftPatient:leftPhysician;
+  subType='';
+  document.querySelectorAll('.sub-card').forEach(c=>c.classList.remove('selected'));
+}
+
+function selectSub(sub){
+  subType=sub;
+  document.querySelectorAll('.sub-card').forEach(c=>c.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+}
+
+// ---- STEP NAV ----
+function updateStepBar(step){
+  for(let i=1;i<=4;i++){
+    const dot=document.getElementById('dot'+i);
+    if(i<step){dot.className='step-dot done';dot.textContent='✓';}
+    else if(i===step){dot.className='step-dot active';dot.textContent=i;}
+    else{dot.className='step-dot pending';dot.textContent=i;}
+    if(i<4){
+      const line=document.getElementById('line'+i);
+      line.className='step-line'+(i<step?' done':'');
+    }
+  }
+}
+
+function showStep(step){
+  for(let i=1;i<=4;i++){
+    document.getElementById('step'+i).style.display=i===step?'block':'none';
+  }
+  updateStepBar(step);
+  currentStep=step;
+  // Update step3 content
+  if(step===3){
+    document.getElementById('step3patient').style.display=accountType!=='physician'?'block':'none';
+    document.getElementById('step3physician').style.display=accountType==='physician'?'block':'none';
+  }
+  if(step===4){
+    document.getElementById('physicianAgree').style.display=accountType==='physician'?'flex':'none';
+    document.getElementById('submitBtn').textContent=accountType==='physician'?'🩺 Create My Physician Account':'🎉 Create My Free Account';
+  }
+}
+
+function buildExtraFields(){
+  const c=document.getElementById('extraFields');
+  c.innerHTML='';
+  if(accountType==='patient'){
+    if(subType==='indiv'||subType===''){
+      c.innerHTML+=`<div class="form-group"><label class="form-label">Gender</label><div class="input-wrap"><span class="input-icon">👤</span><select class="form-select"><option>Male</option><option>Female</option><option>Prefer not to say</option><option>Other</option></select></div></div>`;
+    } else if(subType==='parent'){
+      c.innerHTML+=`<div class="form-row"><div class="form-group"><label class="form-label">Child's Date of Birth</label><div class="input-wrap"><span class="input-icon">📅</span><input type="date" class="form-input"></div></div><div class="form-group"><label class="form-label">Relationship</label><div class="input-wrap"><span class="input-icon">👨‍👩‍👦</span><select class="form-select"><option>Parent</option><option>Legal Guardian</option><option>Other</option></select></div></div></div>`;
+    } else if(subType==='caregiver'){
+      c.innerHTML+=`<div class="form-group"><label class="form-label">Patient's Approximate Age Range</label><div class="input-wrap"><span class="input-icon">👴</span><select class="form-select"><option>60–70</option><option>70–80</option><option>80–90</option><option>90+</option></select></div></div>`;
+    } else if(subType==='student'){
+      c.innerHTML+=`<div class="form-row"><div class="form-group"><label class="form-label">University / Institution</label><div class="input-wrap"><span class="input-icon">🎓</span><input type="text" class="form-input" placeholder="University name"></div></div><div class="form-group"><label class="form-label">Year of Study</label><div class="input-wrap"><span class="input-icon">📅</span><select class="form-select"><option>Year 1</option><option>Year 2</option><option>Year 3</option><option>Year 4</option><option>Year 5</option><option>Year 6</option><option>Postgrad</option></select></div></div></div>`;
+    }
+    document.getElementById('step2sub').textContent='Tell us a little about yourself';
+  } else if(accountType==='physician'){
+    let html=`<div class="form-row"><div class="form-group"><label class="form-label">Hospital / Clinic</label><div class="input-wrap"><span class="input-icon">🏥</span><input type="text" class="form-input" placeholder="Institution name"></div></div><div class="form-group"><label class="form-label">City of Practice</label><div class="input-wrap"><span class="input-icon">📍</span><input type="text" class="form-input" placeholder="City"></div></div></div>`;
+    if(subType==='specialist'){
+      html+=`<div class="form-group"><label class="form-label">Primary Specialty</label><div class="input-wrap"><span class="input-icon">🩺</span><select class="form-select"><option>Cardiology</option><option>Neurology</option><option>Endocrinology</option><option>Gastroenterology</option><option>Dermatology</option><option>Oncology</option><option>Pulmonology</option><option>Other</option></select></div></div>`;
+    } else if(subType==='gp'){
+      html+=`<div class="form-group"><label class="form-label">Years in Practice</label><div class="input-wrap"><span class="input-icon">📅</span><select class="form-select"><option>1–5</option><option>5–10</option><option>10–20</option><option>20+</option></select></div></div>`;
+    } else if(subType==='surgeon'){
+      html+=`<div class="form-row"><div class="form-group"><label class="form-label">Surgical Specialty</label><div class="input-wrap"><span class="input-icon">🔪</span><input type="text" class="form-input" placeholder="e.g. Cardiac Surgery"></div></div><div class="form-group"><label class="form-label">Type of Practice</label><div class="input-wrap"><span class="input-icon">🏥</span><select class="form-select"><option>Public Hospital</option><option>Private</option><option>Academic</option></select></div></div></div>`;
+    } else if(subType==='resident'){
+      html+=`<div class="form-row"><div class="form-group"><label class="form-label">Training Program</label><div class="input-wrap"><span class="input-icon">🎓</span><input type="text" class="form-input" placeholder="Specialty training"></div></div><div class="form-group"><label class="form-label">Year of Training</label><div class="input-wrap"><span class="input-icon">📅</span><select class="form-select"><option>PGY-1</option><option>PGY-2</option><option>PGY-3</option><option>PGY-4</option><option>PGY-5</option><option>PGY-6</option><option>PGY-7</option></select></div></div></div>`;
+    }
+    c.innerHTML=html;
+    document.getElementById('step2sub').textContent='Your professional details';
+  }
+}
+
+function goStep(step){
+  const alert=document.getElementById('alertBox');
+  if(step===2 && currentStep===1){
+    if(!accountType){showErr('Please select an account type (Patient or Physician).');return;}
+    if(!subType){showErr('Please select your sub-type.');return;}
+    buildExtraFields();
+  }
+  if(step===3 && currentStep===2){
+    const fn=document.getElementById('firstName').value.trim();
+    const ln=document.getElementById('lastName').value.trim();
+    const em=document.getElementById('regEmail').value.trim();
+    if(!fn||!ln||!em){showErr('Please fill in first name, last name, and email.');return;}
+    const emailRe=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if(!emailRe.test(em)){showErr('Please enter a valid email address.');return;}
+  }
+  if(step===4 && currentStep===3){
+    const tags=document.querySelectorAll('#step3patient .tag-pill.selected, #step3physician .tag-pill.selected');
+    if(tags.length===0){showErr('Please select at least one health interest.');return;}
+  }
+  hideErr();
+  showStep(step);
+}
+
+function submitForm(){
+  if(typeof DrAPI!=='undefined' && DrAPI.connected()){
+    /* ---- REAL BACKEND SUBMIT (Laravel) ---- */
+    try{
+      const payload={name:(document.getElementById('regName')||document.getElementById('fullName')||{}).value||'',email:(document.getElementById('regEmail')||document.getElementById('email')||{}).value||'',password:(document.getElementById('regPassword')||document.getElementById('password')||{}).value||'',role:(typeof accountType!=='undefined'&&accountType==='physician')?'doctor':'patient'};
+      DrAPI.register(payload).then(()=>{ submitForm__demo(true); }).catch(err=>{ alert('⚠️ '+(err.message||'Submission failed. Please try again.')); });
+    }catch(e){ alert('⚠️ Please complete the form.'); }
+    return;
+  }
+  submitForm__demo(false);
+}
+function submitForm__demo(fromApi){
+  const pw1=document.getElementById('pw1').value;
+  const pw2=document.getElementById('pw2').value;
+  const a1=document.getElementById('agree1').checked;
+  const a2=document.getElementById('agree2').checked;
+  if(pw1.length<8){showErr('Password must be at least 8 characters.');return;}
+  if(pw1!==pw2){showErr('Passwords do not match.');return;}
+  if(!a1||!a2){showErr('Please accept the required agreements to continue.');return;}
+  if(accountType==='physician'){
+    const a4=document.getElementById('agree4').checked;
+    if(!a4){showErr('Physicians must confirm license validity.');return;}
+  }
+  // Show success
+  for(let i=1;i<=4;i++) document.getElementById('step'+i).style.display='none';
+  document.getElementById('alertBox').className='alert';
+  document.getElementById('successMsg').textContent=
+    accountType==='physician'
+      ? "Welcome! Your account is under review. We'll verify your credentials within 24–48 hours and notify you by email."
+      : "Welcome to DrInsight! We've sent a verification email to your inbox.";
+  document.getElementById('successState').style.display='block';
+  updateStepBar(5);
+}
+
+function showErr(msg){
+  const a=document.getElementById('alertBox');
+  a.className='alert error';
+  a.textContent='⚠️ '+msg;
+  setTimeout(()=>{a.className='alert';},4000);
+}
+function hideErr(){
+  document.getElementById('alertBox').className='alert';
+}
+
+// ---- TAG / RADIO / CONTRIB ----
+function toggleTag(el){el.classList.toggle('selected');}
+function selectRadio(el,group){
+  el.closest('.radio-pills').querySelectorAll('.radio-pill').forEach(p=>p.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function toggleContrib(card){
+  card.classList.toggle('selected');
+  const any=document.querySelectorAll('.contrib-card.selected').length>0;
+  document.getElementById('contribNote').style.display=any?'block':'none';
+}
+
+// ---- PASSWORD ----
+function checkStrength(){
+  const pw=document.getElementById('pw1').value;
+  let score=0;
+  if(pw.length>=8) score++;
+  if(/[A-Z]/.test(pw)) score++;
+  if(/[0-9]/.test(pw)) score++;
+  if(/[^A-Za-z0-9]/.test(pw)) score++;
+  const segs=[1,2,3,4];
+  const classes=['','weak','fair','good','strong'];
+  const colorMap={1:'weak',2:'fair',3:'good',4:'strong'};
+  const hints={0:'Enter a password to see strength',1:'Weak — too short',2:'Fair — add numbers or symbols',3:'Good — add uppercase for best security',4:'Strong password ✓'};
+  segs.forEach((s,i)=>{
+    const seg=document.getElementById('seg'+(i+1));
+    seg.className='pw-seg'+(i<score?' '+(colorMap[score]||''):'');
+  });
+  document.getElementById('pwHint').textContent=hints[score]||hints[0];
+}
+function checkMatch(){
+  const p1=document.getElementById('pw1').value;
+  const p2=document.getElementById('pw2').value;
+  const m=document.getElementById('pwMatch');
+  if(!p2){m.textContent='';return;}
+  m.textContent=p1===p2?'✓':'✗';
+  m.style.color=p1===p2?'var(--green)':'var(--red)';
+}
+function togglePw1(){
+  const i=document.getElementById('pw1');
+  i.type=i.type==='password'?'text':'password';
+}
+function togglePw2(){
+  const i=document.getElementById('pw2');
+  i.type=i.type==='password'?'text':'password';
+}
+function toggle2FA(){
+  const on=document.getElementById('twofa').checked;
+  document.getElementById('twofaNote').style.display=on?'block':'none';
+}
+
+// Init left panel
+showStep(1);
+
+/* Set your OAuth URLs here once your backend is ready */
+const OAUTH_LINKS = { Google:'', Facebook:'' };
+function socialLogin(provider){
+  const url = OAUTH_LINKS[provider];
+  if(url){ window.location.href = url; }
+  else { alert(provider+' sign-up is not connected yet. Please register with email.'); }
+}
+</script>
+
+<!-- ==== DRINSIGHT RESPONSIVE HARDENING (mobile-friendly overflow fixes) ==== -->
+<style id="drinsight-responsive-fix">
+/* Global: never let the page scroll sideways; media stays inside its box */
+html,body{max-width:100%;overflow-x:hidden}
+*{min-width:0}                 /* let grid/flex items shrink instead of forcing page-wide overflow */
+img,svg,video,iframe,canvas,object,embed,picture{max-width:100%;height:auto}
+table{max-width:100%}
+pre,code{white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere}
+/* long words, emails, urls wrap instead of pushing the layout wide */
+p,li,td,th,a,h1,h2,h3,h4,h5,h6,span,label,blockquote,figcaption,.prose{overflow-wrap:break-word}
+
+@media(max-width:900px){
+  /* content + sidebar layouts collapse to one column */
+  .article-layout,.main,.two-col,.blog-layout,.page-layout,.layout,
+  .content-wrap,.doc-layout,.split,.with-sidebar,.body-grid{
+    grid-template-columns:1fr !important;
+  }
+  /* wide sidebars stop reserving a fixed track */
+  .sidebar,.toc-sidebar,.aside,.side{max-width:100% !important}
+}
+
+@media(max-width:768px){
+  /* flex button/pill rows wrap onto new lines */
+  .action-btns,.hero-actions,.btn-row,.btn-group,.cta-row,.pill-row,
+  .tags,.chips,.expertise,.expertise-list,.badges{flex-wrap:wrap}
+  /* fallback: any table NOT converted to cards still scrolls instead of breaking layout */
+  table:not(.rtbl){display:block;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+}
+
+@media(max-width:600px){
+  /* multi-column card / stat grids drop to a single column on phones */
+  [class$="-grid"],[class*="-grid "],
+  .card-grid-2,.card-grid-3,.card-grid-4,
+  .stats-row,.stats-bar-inner,.trust-row,.trust-inner,
+  .apply-steps-row,.kv-grid,.fg,.role-grid,.cred-grid,.cat-tiles,.cats-grid,
+  .collection-grid,.legal-grid,.rights-grid,.security-grid,.contact-grid,
+  .cert-grid,.articles-grid,.auth-grid,.partner-admin-grid,.spec-grid,
+  .related-grid,.blog-grid{
+    grid-template-columns:1fr !important;
+  }
+  /* 7-day calendars stay compact but never overflow */
+  .cal-grid{grid-template-columns:repeat(7,1fr) !important;font-size:.62rem !important}
+  /* horizontal step indicators wrap instead of overflowing */
+  .steps,.progress-steps,.step-row,.apply-steps-row{flex-wrap:wrap}
+}
+
+/* ==== RESPONSIVE DATA TABLES: no more sideways sliding on phones ====
+   Tables with a header row become stacked "cards" — each row is a card and
+   every value shows its column label. Fits every screen with zero scrolling. */
+@media(max-width:680px){
+  table.rtbl{display:block;width:100% !important;border:none !important;background:none !important;overflow:visible !important}
+  table.rtbl thead{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+  table.rtbl tbody{display:block;width:100%}
+  table.rtbl tr{
+    display:block;width:100%;margin:0 0 14px;
+    border:1px solid var(--gray-200,#e2e8f0);border-radius:12px;
+    background:#fff;box-shadow:0 1px 4px rgba(15,23,42,.06);overflow:hidden
+  }
+  table.rtbl tr:nth-child(even){background:#fff}
+  table.rtbl td{
+    display:flex;justify-content:space-between;align-items:baseline;gap:14px;
+    width:auto !important;padding:10px 14px;border:none;border-bottom:1px solid #eef2f7;
+    text-align:right;font-size:.9rem;white-space:normal !important
+  }
+  table.rtbl td:first-child{background:var(--blue-light,#e8f0fb);font-weight:700}
+  table.rtbl td:last-child{border-bottom:none}
+  table.rtbl td::before{
+    content:attr(data-label);font-weight:600;color:#475569;
+    text-align:left;flex:0 0 40%;min-width:0;overflow-wrap:break-word
+  }
+  table.rtbl td:not([data-label])::before{display:none}
+  table.rtbl td:not([data-label]){justify-content:flex-start;text-align:left}
+  /* the old scroll wrappers no longer need to scroll — cards already fit */
+  .data-table-wrap,.table-wrap,.tbl-wrap,.table-scroll{overflow:visible !important;border:none !important}
+}
+</style>
+<script>
+/* Label each table cell with its column header so CSS can show them as cards on phones. */
+(function(){
+  function labelTables(){
+    var tables = document.querySelectorAll('table');
+    for (var t=0; t<tables.length; t++){
+      var tbl = tables[t];
+      if (tbl.getAttribute('data-rtbl')) continue;
+      // find header labels
+      var head = tbl.querySelector('thead tr');
+      var headerCells, hideFirstRow = false;
+      if (head){ headerCells = head.querySelectorAll('th,td'); }
+      else {
+        var firstRow = tbl.querySelector('tr');
+        if (!firstRow) continue;
+        headerCells = firstRow.querySelectorAll('th');
+        if (!headerCells.length) continue;   // no real headers -> leave it scrollable
+        hideFirstRow = true;
+      }
+      var labels = [];
+      for (var i=0;i<headerCells.length;i++){ labels.push(headerCells[i].textContent.trim()); }
+      if (!labels.length) continue;
+      var rows = tbl.querySelectorAll('tbody tr');
+      if (!rows.length) rows = tbl.querySelectorAll('tr');
+      for (var r=0;r<rows.length;r++){
+        if (hideFirstRow && r===0) continue;
+        var cells = rows[r].querySelectorAll('td');
+        for (var c=0;c<cells.length;c++){
+          if (labels[c] && !cells[c].hasAttribute('data-label')){
+            cells[c].setAttribute('data-label', labels[c]);
+          }
+        }
+      }
+      tbl.classList.add('rtbl');
+      tbl.setAttribute('data-rtbl','1');
+    }
+  }
+  if (document.readyState !== 'loading') labelTables();
+  else document.addEventListener('DOMContentLoaded', labelTables);
+})();
+</script>
+</body>
+</html>

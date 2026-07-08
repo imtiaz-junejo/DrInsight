@@ -2,18 +2,13 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Logo } from "./Logo";
 import { useAuthStore } from "@/store/auth.store";
 
 type NavLink = { href: string; label: string; cta?: boolean };
 
-// The public navbar is the single, shared navigation for the entire public
-// site (including the 404 page). Every visitor — guest, patient, or doctor —
-// sees the exact same set of links; the only thing that changes based on
-// auth state is the trailing call-to-action button, which becomes a
-// "role-aware button" rather than a full replacement of the navbar.
 const PUBLIC_LINKS: NavLink[] = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About Us" },
@@ -23,6 +18,12 @@ const PUBLIC_LINKS: NavLink[] = [
   { href: "/blog", label: "Blog" },
   { href: "/contact", label: "Contact" },
 ];
+
+const navLinkBase =
+  "nav-link rounded-[8px] px-3.5 py-2 text-[.9rem] font-medium text-gray-600 transition-all duration-[.22s]";
+
+const navCtaBase =
+  "nav-link-cta rounded-[8px] bg-blue px-5 py-2 text-[.9rem] font-semibold text-white transition-all duration-[.22s] hover:-translate-y-px hover:bg-blue-dark hover:text-white";
 
 function linksForRole(role?: string): NavLink[] {
   if (role === "PATIENT") {
@@ -37,9 +38,6 @@ function linksForRole(role?: string): NavLink[] {
     return [...PUBLIC_LINKS, { href: "/doctor", label: "Dashboard", cta: true }];
   }
 
-  // Admins never see the public navbar — the proxy redirects them to
-  // /admin before any public page renders. Guests fall back to the
-  // standard public link set with the default "Book Consultation" CTA.
   return [...PUBLIC_LINKS, { href: "/book-consultation", label: "Book Consultation", cta: true }];
 }
 
@@ -54,95 +52,86 @@ export function Navbar() {
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
 
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
+
   return (
-    <nav className="sticky top-0 z-[100] border-b border-gray-200 bg-white shadow-[var(--shadow-sm)]">
-      <div className="mx-auto flex h-[70px] max-w-[1240px] items-center justify-between px-4 sm:px-6">
+    <nav className="site-nav border-b border-gray-200 bg-white shadow-[var(--shadow-sm)]">
+      <div className="nav-inner mx-auto flex h-[70px] max-w-[1240px] items-center justify-between px-6">
         <Link href="/">
           <Logo />
         </Link>
 
-        <div className="hidden items-center lg:flex">
+        <div className="nav-links hidden min-[641px]:flex min-[641px]:items-center min-[641px]:gap-1">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               className={cn(
-                "rounded px-3.5 py-2 text-[.9rem] font-medium text-gray-600 transition-all duration-[.22s]",
-                link.cta && "bg-blue px-4 font-semibold text-white hover:bg-blue-dark hover:text-white",
-                isActive(link.href) && !link.cta && "bg-blue-light font-semibold text-blue",
-                !isActive(link.href) && !link.cta && "hover:bg-blue-light hover:text-blue",
+                link.cta ? navCtaBase : navLinkBase,
+                !link.cta && isActive(link.href) && "bg-blue-light font-semibold text-blue",
+                !link.cta && !isActive(link.href) && "hover:bg-blue-light hover:text-blue",
               )}
             >
               {link.label}
             </Link>
           ))}
-          {/* {user ? (
-            <button
-              type="button"
-              onClick={() => {
-                clearAuth();
-                router.push("/");
-              }}
-              className="rounded-lg border border-gray-200 px-4 py-2 text-[.9rem] font-semibold text-gray-600 transition hover:bg-blue-light hover:text-blue"
-            >
-              Logout
-            </button>
-          ) : (
-            <Link
-              href="/login"
-              className="rounded-lg border border-gray-200 px-4 py-2 text-[.9rem] font-semibold text-gray-600 transition hover:bg-blue-light hover:text-blue"
-            >
-              Login
-            </Link>
-          )} */}
         </div>
 
         <button
-          className="flex min-h-[44px] min-w-[44px] flex-col items-center justify-center gap-1.5 p-2 lg:hidden"
-          onClick={() => setMobileOpen(!mobileOpen)}
+          type="button"
+          className="hamburger block border-0 bg-transparent p-1 min-[641px]:hidden"
+          onClick={() => setMobileOpen((open) => !open)}
           aria-label="Toggle menu"
+          aria-expanded={mobileOpen}
         >
-          <span className="block h-0.5 w-6 bg-gray-800" />
-          <span className="block h-0.5 w-6 bg-gray-800" />
-          <span className="block h-0.5 w-6 bg-gray-800" />
+          <span className="my-[5px] block h-0.5 w-6 bg-gray-800 transition-all duration-[.22s]" />
+          <span className="my-[5px] block h-0.5 w-6 bg-gray-800 transition-all duration-[.22s]" />
+          <span className="my-[5px] block h-0.5 w-6 bg-gray-800 transition-all duration-[.22s]" />
         </button>
       </div>
 
-      {mobileOpen && (
-        <div className="flex flex-col gap-1 border-t border-gray-200 bg-white px-4 py-4 sm:px-6 lg:hidden">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setMobileOpen(false)}
-              className="rounded-lg px-3 py-2.5 text-[.92rem] font-medium text-gray-700 hover:bg-blue-light hover:text-blue"
-            >
-              {link.label}
-            </Link>
-          ))}
-          {user ? (
-            <button
-              type="button"
-              onClick={() => {
-                clearAuth();
-                setMobileOpen(false);
-                router.push("/");
-              }}
-              className="rounded-lg px-3 py-2.5 text-left text-[.92rem] font-medium text-red"
-            >
-              Logout
-            </button>
-          ) : (
-            <Link
-              href="/login"
-              onClick={() => setMobileOpen(false)}
-              className="rounded-lg px-3 py-2.5 text-[.92rem] font-medium text-blue"
-            >
-              Login
-            </Link>
-          )}
-        </div>
-      )}
+      <div className={cn("site-mobile-menu min-[641px]:hidden", mobileOpen && "open")}>
+        {navLinks.map((link) => (
+          <Link
+            key={link.href}
+            href={link.href}
+            onClick={() => setMobileOpen(false)}
+            className={cn(
+              "rounded-[8px]",
+              isActive(link.href) && "bg-blue-light font-semibold text-blue",
+              link.cta && "font-semibold text-blue",
+            )}
+          >
+            {link.cta ? `📅 ${link.label}` : link.label}
+          </Link>
+        ))}
+        {user ? (
+          <button
+            type="button"
+            onClick={() => {
+              clearAuth();
+              setMobileOpen(false);
+              router.push("/");
+            }}
+            className="rounded-[8px] border-0 bg-transparent"
+          >
+            Logout
+          </button>
+        ) : (
+          <Link href="/login" onClick={() => setMobileOpen(false)} className="rounded-[8px]">
+            Login
+          </Link>
+        )}
+      </div>
     </nav>
   );
 }

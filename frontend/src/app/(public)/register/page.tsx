@@ -1,4 +1,5 @@
 import { RegisterForm } from "@/components/auth/RegisterForm";
+import { Suspense } from "react";
 import "@/styles/register-page.css";
 
 export const metadata = {
@@ -9,7 +10,9 @@ export const metadata = {
 export default function RegisterPage() {
   return (
     <div className="register-page">
-      <RegisterForm />
+      <Suspense fallback={<div className="register-loading">Loading...</div>}>
+        <RegisterForm />
+      </Suspense>
     </div>
   );
 }

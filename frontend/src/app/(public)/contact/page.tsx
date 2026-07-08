@@ -262,7 +262,7 @@ export default function ContactPage() {
       <div className="contact-cards-section">
         <div className="contact-cards">
           {contactCards.map((card) => (
-            <div key={card.title} className="contact-card">
+            <div key={card.title} className="contact-card border border-gray-300">
               <div className="cc-icon" style={{ background: card.iconBg }}>
                 {card.icon}
               </div>
@@ -294,12 +294,13 @@ export default function ContactPage() {
       </div>
 
       <div className="main-section">
-        <div className="form-card">
-          <SectionTitle>Send Us a Message</SectionTitle>
-          <p>Fill in the form below and our team will respond within 2–4 hours during business hours.</p>
+        <div className="main-column">
+          <div className="form-card bg-gray-100">
+            <SectionTitle>Send Us a Message</SectionTitle>
+            <p>Fill in the form below and our team will respond within 2–4 hours during business hours.</p>
 
-          {!submitted ? (
-            <div id="contact-form">
+            {!submitted ? (
+              <div id="contact-form">
               <div className="subject-label">What is your enquiry about?</div>
               <div className="subject-tabs" id="subject-tabs">
                 {SUBJECT_TABS.map((tab) => (
@@ -455,11 +456,36 @@ export default function ContactPage() {
               </button>
             </div>
           )}
+          </div>
+
+          <div className="faq-mini">
+            <SectionEyebrow className="eyebrow">Common Queries</SectionEyebrow>
+            <SectionTitle>Frequently Asked Contact Questions</SectionTitle>
+            <p>Quick answers to the most common questions about reaching our team</p>
+            <div className="faq-grid">
+              {faqItems.map((item, i) => (
+                <div
+                  key={item.q}
+                  className={`faq-item${openFaq === i ? " open" : ""}`}
+                  onClick={() => toggleFAQ(i)}
+                  onKeyDown={(e) => e.key === "Enter" && toggleFAQ(i)}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <div className="faq-q">
+                    <h4>{item.q}</h4>
+                    <div className="faq-chev">▾</div>
+                  </div>
+                  <div className="faq-a">{item.a}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="sidebar">
-          <div className="sidebar-card">
-            <h3>📍 Office & Contact Info</h3>
+          <div className="sidebar-card sidebar-card-tone border border-gray-300 bg-gray-100">
+            <h3>Office & Contact Info</h3>
             <div className="info-item">
               <div className="info-ico" style={{ background: "#e8f0fb" }}>
                 📍
@@ -521,7 +547,7 @@ export default function ContactPage() {
             )}
           </div>
 
-          <div className="sidebar-card">
+          <div className="sidebar-card sidebar-card-tone border border-gray-300 bg-gray-100">
             <h3>🕐 Business Hours</h3>
             <div className="open-now">
               <div className="open-dot" />
@@ -569,7 +595,7 @@ export default function ContactPage() {
             </p>
           </div>
 
-          <div className="sidebar-card">
+          <div className="sidebar-card sidebar-card-tone border border-gray-300 bg-gray-100">
             <h3>🌐 Follow Us</h3>
             <p className="social-desc">
               Stay updated with the latest health news, doctor tips, and platform updates.
@@ -585,30 +611,6 @@ export default function ContactPage() {
               @DrInsight · {stats ? `${stats.newsletterCount ?? 0} newsletter subscribers` : "Follow us online"}
             </p>
           </div>
-        </div>
-      </div>
-
-      <div className="faq-mini">
-        <SectionEyebrow className="eyebrow">Common Queries</SectionEyebrow>
-        <SectionTitle>Frequently Asked Contact Questions</SectionTitle>
-        <p>Quick answers to the most common questions about reaching our team</p>
-        <div className="faq-grid">
-          {faqItems.map((item, i) => (
-            <div
-              key={item.q}
-              className={`faq-item${openFaq === i ? " open" : ""}`}
-              onClick={() => toggleFAQ(i)}
-              onKeyDown={(e) => e.key === "Enter" && toggleFAQ(i)}
-              role="button"
-              tabIndex={0}
-            >
-              <div className="faq-q">
-                <h4>{item.q}</h4>
-                <div className="faq-chev">▾</div>
-              </div>
-              <div className="faq-a">{item.a}</div>
-            </div>
-          ))}
         </div>
       </div>
 

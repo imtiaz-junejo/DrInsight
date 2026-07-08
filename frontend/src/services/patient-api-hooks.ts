@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { useAuthStore } from "@/store/auth.store";
 import type { Appointment, Paginated } from "@/services/api-hooks";
 
 export interface AuthProfile {
@@ -13,6 +14,8 @@ export interface AuthProfile {
   status: string;
   avatarUrl?: string | null;
   phone?: string | null;
+  dateOfBirth?: string | null;
+  gender?: string | null;
   createdAt: string;
   doctorProfile?: Record<string, unknown> | null;
   patientProfile?: {
@@ -65,14 +68,22 @@ export interface PaymentRecord {
   };
 }
 
-export function useAuthProfile() {
+export function useAuthProfile(options?: { enabled?: boolean }) {
+  const userId = useAuthStore((s) => s.user?.id);
   return useQuery({
-    queryKey: ["auth-profile"],
+    queryKey: ["auth-profile", userId],
     queryFn: async () => {
       const { data } = await api.get<AuthProfile>("/auth/me");
       return data;
     },
+    enabled: (options?.enabled ?? true) && Boolean(userId),
+    staleTime: 0,
+    refetchOnMount: "always",
   });
+}
+
+export function invalidateAuthProfile(queryClient: ReturnType<typeof useQueryClient>) {
+  return queryClient.invalidateQueries({ queryKey: ["auth-profile"] });
 }
 
 export function useUpdateProfile() {

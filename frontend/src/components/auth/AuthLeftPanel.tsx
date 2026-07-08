@@ -27,7 +27,7 @@ export function AuthLeftPanel({
   return (
     <div
       className={cn(
-        "relative hidden flex-col justify-center overflow-hidden bg-gradient-to-br from-blue-dark via-blue to-teal p-14 text-white lg:flex",
+        "relative hidden flex-col justify-center overflow-hidden bg-gradient-to-br from-blue-dark via-blue to-teal p-14 text-white min-[861px]:flex",
         className,
       )}
     >

@@ -53,8 +53,8 @@ export function HomePageContent() {
 
   return (
     <>
-      <section className="hero-pattern relative overflow-hidden bg-gradient-to-br from-blue-dark via-blue to-teal px-4 py-16 text-white sm:px-6 sm:py-20 lg:py-[90px]">
-        <div className="relative mx-auto grid max-w-[1240px] items-center gap-10 lg:grid-cols-2 lg:gap-[60px]">
+      <section className="home-section hero-pattern relative overflow-hidden bg-gradient-to-br from-blue-dark via-blue to-teal px-6 py-16 text-white min-[901px]:py-[90px]">
+        <div className="home-hero-inner relative mx-auto grid max-w-[1240px] items-center gap-10 min-[901px]:grid-cols-2 min-[901px]:gap-[60px]">
           <div>
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-4 py-1.5 text-[.8rem] font-semibold tracking-wide backdrop-blur-sm">
               <span>🏥</span> TRUSTED BY {stats ? formatStatCount(stats.patientsServed ?? stats.patientCount) : "—"} PATIENTS WORLDWIDE
@@ -85,7 +85,7 @@ export function HomePageContent() {
             </div>
           </div>
 
-          <div className="hidden flex-col gap-4 lg:flex">
+          <div className="home-hero-visual hidden flex-col gap-4 min-[901px]:flex">
             <div className="grid grid-cols-2 gap-3.5">
               {[
                 ["🩺", "Expert Doctors", `${stats ? formatStatCount(stats.doctorCount) : "—"} specialists across all major fields`],
@@ -120,8 +120,8 @@ export function HomePageContent() {
         </div>
       </section>
 
-      <div className="bg-white px-4 sm:px-6">
-        <div className="relative z-10 mx-auto -mt-10 flex max-w-[1240px] flex-wrap items-center gap-3.5 rounded-xl border-[1.5px] border-[#fecaca] bg-[#fef2f2] p-4 sm:px-6 lg:p-5">
+      <div className="bg-white px-6">
+        <div className="relative z-10 mx-auto -mt-10 flex max-w-[1240px] flex-wrap items-center gap-3.5 rounded-xl border-[1.5px] border-[#fecaca] bg-[#fef2f2] p-4 min-[901px]:p-5">
           <span className="text-2xl">🚨</span>
           <div className="flex-1">
             <strong className="text-red">Medical Emergency? Call 911 immediately.</strong>
@@ -139,7 +139,7 @@ export function HomePageContent() {
 
       <HomeHealthToolsSection />
 
-      <section className="px-4 py-16 sm:px-6 sm:py-20">
+      <section className="home-section px-6 py-16 min-[901px]:py-20">
         <div className="mx-auto max-w-[1240px]">
           <div className="mb-13 text-center">
             <div className="mb-2.5 text-[.78rem] font-bold uppercase tracking-widest text-blue">Medical Blog</div>
@@ -193,8 +193,8 @@ export function HomePageContent() {
         </div>
       </section>
 
-      <section className="bg-gradient-to-br from-[#f0f7ff] to-[#e8f4fd] px-4 py-16 sm:px-6 sm:py-20">
-        <div className="mx-auto grid max-w-[1240px] items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:gap-[60px]">
+      <section className="home-section bg-gradient-to-br from-[#f0f7ff] to-[#e8f4fd] px-6 py-16 min-[901px]:py-20">
+        <div className="home-ask-inner mx-auto grid max-w-[1240px] items-center gap-10 min-[901px]:grid-cols-2 min-[901px]:gap-[60px]">
           <div>
             <div className="mb-2.5 text-[.78rem] font-bold uppercase tracking-widest text-blue">Ask the Doctor</div>
             <h2 className="font-display text-[clamp(1.7rem,3vw,2.3rem)] font-bold leading-tight text-gray-900">
@@ -234,13 +234,13 @@ export function HomePageContent() {
                   Your Name (optional)
                 </label>
                 <input
-                  className="w-full rounded-lg border-[1.5px] border-gray-200 px-3.5 py-2.5 text-[.88rem] focus:border-blue focus:outline-none focus:ring-[3px] focus:ring-blue/10"
+                  className="w-full rounded-lg border-[1.5px] border-gray-300 px-3.5 py-2.5 text-[.88rem] focus:border-blue focus:outline-none focus:ring-[3px] focus:ring-blue/10"
                   placeholder="Leave blank to submit anonymously"
                 />
               </div>
               <div>
                 <label className="mb-1.5 block text-[.82rem] font-semibold text-gray-700">Medical Category</label>
-                <select className="w-full rounded-lg border-[1.5px] border-gray-200 px-3.5 py-2.5 text-[.88rem] focus:border-blue focus:outline-none" defaultValue="">
+                <select className="w-full rounded-lg border-[1.5px] border-gray-300 px-3.5 py-2.5 text-[.88rem] focus:border-blue focus:outline-none" defaultValue="">
                   <option value="" disabled>
                     Select a category...
                   </option>
@@ -254,7 +254,7 @@ export function HomePageContent() {
               <div>
                 <label className="mb-1.5 block text-[.82rem] font-semibold text-gray-700">Your Question</label>
                 <textarea
-                  className="min-h-[90px] w-full resize-y rounded-lg border-[1.5px] border-gray-200 px-3.5 py-2.5 text-[.88rem] focus:border-blue focus:outline-none"
+                  className="min-h-[90px] w-full resize-y rounded-lg border-[1.5px] border-gray-300 px-3.5 py-2.5 text-[.88rem] focus:border-blue focus:outline-none"
                   placeholder="Describe your symptoms or health concern in detail..."
                 />
               </div>
@@ -270,7 +270,7 @@ export function HomePageContent() {
         </div>
       </section>
 
-      <section className="bg-gradient-to-br from-blue-dark to-blue px-4 py-16 text-center text-white sm:px-6 sm:py-20">
+      <section className="home-section bg-gradient-to-br from-blue-dark to-blue px-6 py-16 text-center text-white min-[901px]:py-20">
         <div className="mb-2.5 text-[.78rem] font-bold uppercase tracking-widest text-[#93c5fd]">
           Virtual & In-Person Consultations
         </div>
@@ -296,7 +296,7 @@ export function HomePageContent() {
         </div>
       </section>
 
-      <section className="px-4 py-16 sm:px-6 sm:py-20">
+      <section className="home-section px-6 py-16 min-[901px]:py-20">
         <div className="mx-auto max-w-[1240px]">
           <div className="mb-13 text-center">
             <div className="mb-2.5 text-[.78rem] font-bold uppercase tracking-widest text-blue">Patient Stories</div>
@@ -354,13 +354,13 @@ export function HomePageContent() {
         </div>
       </section>
 
-      <section className="border-t border-gray-200 bg-gray-50 px-4 py-16 sm:px-6 sm:py-20">
+      <section className="home-section border-t border-gray-200 bg-gray-50 px-6 py-16 min-[901px]:py-20">
         <div className="mx-auto max-w-[600px] text-center">
           <h2 className="font-display text-[clamp(1.6rem,3vw,2.2rem)] font-bold">Stay Informed, Stay Healthy</h2>
           <p className="my-3 text-gray-600">
             Subscribe to our newsletter for weekly health tips from board-certified physicians.
           </p>
-          <form className="mx-auto flex max-w-[440px] flex-col gap-2.5 sm:flex-row" onSubmit={handleNewsletter}>
+          <form className="home-newsletter-form mx-auto flex max-w-[440px] flex-row gap-2.5 max-[640px]:flex-col" onSubmit={handleNewsletter}>
             <input
               type="email"
               placeholder="Your email address"
@@ -378,7 +378,7 @@ export function HomePageContent() {
         </div>
       </section>
 
-      <div className="bg-blue-dark px-4 py-10 text-white sm:px-6">
+      <div className="bg-blue-dark px-6 py-10 text-white">
         <div className="mx-auto grid max-w-[1240px] grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-3">
           {[
             ["/health-tools#bmi", "⚖️", "BMI Calculator"],

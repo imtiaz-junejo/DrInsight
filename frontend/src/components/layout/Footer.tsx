@@ -16,6 +16,7 @@ const QUICK_LINKS = [
   { href: "/health-tools", label: "Health Tools" },
   { href: "/ask-doctor", label: "Ask the Doctor" },
   { href: "/blog", label: "Blog" },
+  { href: "/research-publications", label: "Research & Publications" },
   { href: "/book-consultation", label: "Book Consultation" },
   { href: "/contact", label: "Contact Us" },
   { href: "/privacy-policy", label: "Privacy Policy" },

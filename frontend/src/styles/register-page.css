@@ -948,3 +948,23 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+.register-page .register-booking-notice {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: #1e40af;
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
+
+.register-page .register-loading {
+  min-height: calc(100vh - 112px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-500);
+  font-size: 0.9rem;
+}

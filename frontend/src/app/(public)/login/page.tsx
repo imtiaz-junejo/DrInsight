@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function LoginPage() {
   return (
-    <div className="grid min-h-[calc(100vh-112px)] lg:grid-cols-2">
+    <div className="grid min-h-[calc(100vh-112px)] min-[861px]:grid-cols-2">
         <AuthLeftPanel
           eyebrow="PATIENT & DOCTOR PORTAL"
           title={

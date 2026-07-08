@@ -1049,13 +1049,13 @@
   outline-offset: 2px;
 }
 
-@media (max-width: 1023px) {
+@media (max-width: 720px) {
   .health-tools-page .tools-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
   }
 
   .health-tools-page .form-row {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
   }
 
   .health-tools-page .page-hero h1 {
@@ -1064,14 +1064,6 @@
 }
 
 @media (max-width: 767px) {
-  .health-tools-page .tools-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .health-tools-page .form-row {
-    grid-template-columns: 1fr;
-  }
-
   .health-tools-page .ht-modal-result-inline {
     grid-template-columns: 1fr;
     gap: 8px;

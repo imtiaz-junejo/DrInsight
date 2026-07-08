@@ -9,6 +9,7 @@
   --gray-50: #f8fafc;
   --gray-100: #f1f5f9;
   --gray-200: #e2e8f0;
+  --gray-300: #d1d5db;
   --gray-400: #94a3b8;
   --gray-600: #475569;
   --gray-700: #334155;
@@ -161,7 +162,7 @@
 
 .contact-page .contact-card {
   background: #fff;
-  border: 1.5px solid var(--gray-200);
+  border: 1.5px solid var(--gray-300);
   border-radius: var(--radius-lg);
   padding: 22px 18px;
   text-align: center;
@@ -232,13 +233,20 @@
   margin: 44px auto;
   padding: 0 18px;
   display: grid;
-  grid-template-columns: 1fr 400px;
+  grid-template-columns: minmax(0, 1fr) 400px;
   gap: 32px;
   align-items: start;
 }
 
+.contact-page .main-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
 .contact-page .form-card {
-  background: #fff;
+  background: #f1f5f9;
   border: 1.5px solid var(--gray-200);
   border-radius: var(--radius-lg);
   padding: 28px;
@@ -279,12 +287,12 @@
   letter-spacing: 0.04em;
 }
 
-.contact-page .form-group input,
-.contact-page .form-group select,
-.contact-page .form-group textarea {
+.contact-page .form-card .form-group input,
+.contact-page .form-card .form-group select,
+.contact-page .form-card .form-group textarea {
   width: 100%;
   padding: 9px 12px;
-  border: 1.5px solid var(--gray-200);
+  border: 1.5px solid var(--gray-300);
   border-radius: 8px;
   font-size: 0.84rem;
   color: var(--gray-800);
@@ -293,9 +301,9 @@
   font-family: inherit;
 }
 
-.contact-page .form-group input:focus,
-.contact-page .form-group select:focus,
-.contact-page .form-group textarea:focus {
+.contact-page .form-card .form-group input:focus,
+.contact-page .form-card .form-group select:focus,
+.contact-page .form-card .form-group textarea:focus {
   outline: none;
   border-color: var(--blue);
   box-shadow: 0 0 0 3px rgba(26, 86, 160, 0.08);
@@ -323,19 +331,19 @@
   margin-bottom: 14px;
 }
 
-.contact-page .subj-tab {
+.contact-page .form-card .subj-tab {
   padding: 5px 12px;
   border-radius: 50px;
   font-size: 0.74rem;
   font-weight: 600;
-  border: 1.5px solid var(--gray-200);
+  border: 1.5px solid var(--gray-300);
   cursor: pointer;
   transition: var(--transition);
   background: #fff;
   color: var(--gray-600);
 }
 
-.contact-page .subj-tab:hover {
+.contact-page .form-card .subj-tab:hover {
   border-color: var(--blue);
   color: var(--blue);
 }
@@ -428,6 +436,17 @@
   margin-bottom: 16px;
 }
 
+.contact-page .form-card .form-check-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  flex-shrink: 0;
+  accent-color: var(--blue);
+  border: 1.5px solid var(--gray-300);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
 .contact-page .form-check-row input {
   width: auto;
 }
@@ -474,6 +493,11 @@
   border-radius: var(--radius-lg);
   padding: 22px;
   transition: var(--transition);
+}
+
+.contact-page .sidebar-card-tone {
+  background: #f1f5f9;
+  border-color: #d1d5db;
 }
 
 .contact-page .sidebar-card h3 {
@@ -743,6 +767,26 @@
   max-width: 1200px;
   margin: 0 auto 48px;
   padding: 0 18px;
+}
+
+.contact-page .main-column .faq-mini {
+  max-width: none;
+  margin: 0;
+  padding: 28px;
+  background: #e2e8f0;
+  border: 1.5px solid var(--gray-300);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.contact-page .main-column .faq-grid {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.contact-page .main-column .faq-item {
+  background: #fff;
+  border-color: var(--gray-300);
 }
 
 .contact-page .faq-mini h2 {

@@ -43,6 +43,7 @@ import { seedFinalizePhase } from './seed-finalize';
 import { seedOperationalPhase } from './seed-operational';
 import { seedSiteSettings } from './seed-site-settings';
 import { seedAboutContent } from './seed-about';
+import { seedPublications } from './seed-publications';
 import { assertDevelopmentEnvironment } from './seed-shared';
 
 const prisma = createPrismaClient();
@@ -60,6 +61,27 @@ type SeedUserInput = {
   lastSeenAt: Date | null;
   isOnline: boolean;
 };
+
+type EnsureStats = {
+  created: number;
+  skipped: number;
+};
+
+function seedIndexFromEmail(email: string, role: UserRole): number {
+  const prefix =
+    role === UserRole.ADMIN ? 'admin' : role === UserRole.DOCTOR ? 'doctor' : 'patient';
+  const match = email.match(new RegExp(`^${prefix}(\\d+)@`, 'i'));
+  return match ? Number.parseInt(match[1]!, 10) : 1;
+}
+
+function logRoleCounts(users: Array<{ role: UserRole }>) {
+  const admins = users.filter((user) => user.role === UserRole.ADMIN).length;
+  const doctors = users.filter((user) => user.role === UserRole.DOCTOR).length;
+  const patients = users.filter((user) => user.role === UserRole.PATIENT).length;
+  console.log(`✓ Existing admins found: ${admins}`);
+  console.log(`✓ Existing doctors found: ${doctors}`);
+  console.log(`✓ Existing patients found: ${patients}`);
+}
 
 async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, BCRYPT_ROUNDS);
@@ -154,35 +176,63 @@ async function removePreviousSeedUsers() {
   }
 }
 
-async function seedUsers(passwordHash: string) {
+async function ensureSeedUsers(passwordHash: string): Promise<EnsureStats> {
   const seedUsers = buildSeedUsers();
+  let created = 0;
+  let skipped = 0;
 
-  await prisma.user.createMany({
-    data: seedUsers.map((user) => ({
-      email: user.email,
-      passwordHash,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      role: user.role,
-      status: user.status,
-      phone: user.phone,
-      avatarUrl: user.avatarUrl,
-      emailVerified: user.emailVerified,
-      lastSeenAt: user.lastSeenAt,
-      isOnline: user.isOnline,
-    })),
-  });
+  for (const user of seedUsers) {
+    const existing = await prisma.user.findUnique({ where: { email: user.email } });
+    if (existing) {
+      skipped += 1;
+      continue;
+    }
 
-  return prisma.user.findMany({
-    where: { email: { in: seedUsers.map((user) => user.email) } },
-    orderBy: { email: 'asc' },
-  });
+    await prisma.user.create({
+      data: {
+        email: user.email,
+        passwordHash,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        status: user.status,
+        phone: user.phone,
+        avatarUrl: user.avatarUrl,
+        emailVerified: user.emailVerified,
+        lastSeenAt: user.lastSeenAt,
+        isOnline: user.isOnline,
+      },
+    });
+    created += 1;
+  }
+
+  console.log(`✓ Seed users ensured: ${created} created, ${skipped} already existed`);
+  return { created, skipped };
 }
 
-async function seedDoctorProfiles(doctorUsers: Array<{ id: string; firstName: string; lastName: string; email: string }>) {
-  const profiles = doctorUsers.map((user, index) => {
-    const i = index + 1;
-    const { gender } = personName(i, UserRole.DOCTOR);
+async function ensureDoctorProfiles(): Promise<EnsureStats> {
+  const doctorUsers = await prisma.user.findMany({
+    where: {
+      role: UserRole.DOCTOR,
+      email: {
+        in: Array.from({ length: DOCTOR_COUNT }, (_, index) => seedEmail(UserRole.DOCTOR, index + 1)),
+      },
+    },
+    orderBy: { email: 'asc' },
+  });
+
+  let created = 0;
+  let skipped = 0;
+
+  for (const user of doctorUsers) {
+    const existing = await prisma.doctorProfile.findUnique({ where: { userId: user.id } });
+    if (existing) {
+      skipped += 1;
+      continue;
+    }
+
+    const i = seedIndexFromEmail(user.email, UserRole.DOCTOR);
+    const { gender } = personName(i + 100, UserRole.DOCTOR);
     const cityInfo = pick(PAKISTANI_CITIES, i);
     const specialtyInfo = pick(MEDICAL_SPECIALTIES, i);
     const subSpecialty = pick(specialtyInfo.subSpecialties, i);
@@ -210,50 +260,99 @@ async function seedDoctorProfiles(doctorUsers: Array<{ id: string; firstName: st
       gender,
     });
 
-    return {
-      userId: user.id,
-      specialty: specialtyInfo.specialty,
-      subSpecialty,
-      licenseNumber,
-      bio: doctorBio(user.firstName, user.lastName, specialtyInfo.specialty, cityInfo.city, experienceYears, hospital),
-      experienceYears,
-      consultationFee: new Prisma.Decimal(consultationFeePkr(i)),
-      rating,
-      reviewCount,
-      availability,
-      languages,
-      education,
-      hospital,
-      ...bioProfile,
-    };
-  });
+    await prisma.doctorProfile.create({
+      data: {
+        userId: user.id,
+        specialty: specialtyInfo.specialty,
+        subSpecialty,
+        licenseNumber,
+        bio: doctorBio(
+          user.firstName,
+          user.lastName,
+          specialtyInfo.specialty,
+          cityInfo.city,
+          experienceYears,
+          hospital,
+        ),
+        experienceYears,
+        consultationFee: new Prisma.Decimal(consultationFeePkr(i)),
+        rating,
+        reviewCount,
+        availability,
+        languages,
+        education,
+        hospital,
+        ...bioProfile,
+      },
+    });
+    created += 1;
+  }
 
-  await prisma.doctorProfile.createMany({ data: profiles });
-  return profiles.length;
+  console.log(`✓ Doctor profiles ensured: ${created} created, ${skipped} already existed`);
+  return { created, skipped };
 }
 
-async function seedPatientProfiles(patientUsers: Array<{ id: string; firstName: string; lastName: string }>) {
-  const profiles = patientUsers.map((user, index) => {
-    const i = index + 1;
+async function ensurePatientProfiles(): Promise<EnsureStats> {
+  const patientUsers = await prisma.user.findMany({
+    where: {
+      role: UserRole.PATIENT,
+      email: {
+        in: Array.from({ length: PATIENT_COUNT }, (_, index) => seedEmail(UserRole.PATIENT, index + 1)),
+      },
+    },
+    orderBy: { email: 'asc' },
+  });
+
+  let created = 0;
+  let skipped = 0;
+
+  for (const user of patientUsers) {
+    const existing = await prisma.patientProfile.findUnique({ where: { userId: user.id } });
+    if (existing) {
+      skipped += 1;
+      continue;
+    }
+
+    const i = seedIndexFromEmail(user.email, UserRole.PATIENT);
     const allergyCount = i % 4;
     const allergies =
       allergyCount === 0 ? [] : pickMany(COMMON_ALLERGIES, allergyCount, i).slice(0, allergyCount);
     const contactFirst = pick(PAKISTANI_FIRST_NAMES_MALE, i + 50);
     const contactLast = pick(PAKISTANI_LAST_NAMES, i + 60);
 
-    return {
-      userId: user.id,
-      dateOfBirth: dateOfBirth(i),
-      gender: pick(GENDERS, i),
-      bloodGroup: pick(BLOOD_GROUPS, i),
-      allergies,
-      medicalHistory: pick(MEDICAL_HISTORY_SNIPPETS, i),
-      emergencyContact: emergencyContact(contactFirst, contactLast, i),
-    };
+    await prisma.patientProfile.create({
+      data: {
+        userId: user.id,
+        dateOfBirth: dateOfBirth(i),
+        gender: pick(GENDERS, i),
+        bloodGroup: pick(BLOOD_GROUPS, i),
+        allergies,
+        medicalHistory: pick(MEDICAL_HISTORY_SNIPPETS, i),
+        emergencyContact: emergencyContact(contactFirst, contactLast, i),
+      },
+    });
+    created += 1;
+  }
+
+  console.log(`✓ Patient profiles ensured: ${created} created, ${skipped} already existed`);
+  return { created, skipped };
+}
+
+async function ensureRefreshTokens(
+  users: Array<{ id: string; role: UserRole; status: UserStatus; email: string }>,
+): Promise<EnsureStats> {
+  const existingCount = await prisma.refreshToken.count({
+    where: { user: { email: { endsWith: `@${SEED_DOMAIN}` } } },
   });
 
-  await prisma.patientProfile.createMany({ data: profiles });
-  return profiles.length;
+  if (existingCount > 0) {
+    console.log(`✓ Refresh tokens already exist (${existingCount}), skipping`);
+    return { created: 0, skipped: existingCount };
+  }
+
+  const created = await seedRefreshTokens(users);
+  console.log(`✓ Refresh tokens created: ${created}`);
+  return { created, skipped: 0 };
 }
 
 async function seedRefreshTokens(
@@ -330,45 +429,49 @@ async function main() {
     return;
   }
 
+  if (phase === 'publications') {
+    const publicationStats = await seedPublications(prisma);
+    console.log('Publications seed completed successfully.');
+    console.log(publicationStats);
+    return;
+  }
+
   const expectedUserCount = ADMIN_COUNT + DOCTOR_COUNT + PATIENT_COUNT;
   const existingUsers = await loadExistingPhase1Users();
-  const reusePhase1 = existingUsers.length >= expectedUserCount;
 
-  if (reusePhase1) {
-    console.log(
-      `Reusing ${existingUsers.length} existing Phase 1 user(s); skipping user deletion and recreation.`,
-    );
+  if (existingUsers.length > 0) {
+    logRoleCounts(existingUsers);
+    console.log('✓ Reusing existing data');
   } else {
     console.log('Starting Phase 1 seed (User, DoctorProfile, PatientProfile, RefreshToken)...');
+  }
+
+  if (process.env.SEED_FORCE_RESET === 'true') {
+    console.log('⚠ SEED_FORCE_RESET=true — removing previously seeded @drinsight.pk users...');
     await removePreviousSeedUsers();
   }
 
-  let users = existingUsers;
-  let doctorProfileCount = await prisma.doctorProfile.count();
-  let patientProfileCount = await prisma.patientProfile.count();
-  let refreshTokenCount = await prisma.refreshToken.count({
-    where: { user: { email: { endsWith: `@${SEED_DOMAIN}` } } },
-  });
+  const passwordHash = await hashPassword(SEED_PASSWORD);
+  const userStats = await ensureSeedUsers(passwordHash);
+  const doctorProfileStats = await ensureDoctorProfiles();
+  const patientProfileStats = await ensurePatientProfiles();
 
-  if (!reusePhase1) {
-    const passwordHash = await hashPassword(SEED_PASSWORD);
-    users = await seedUsers(passwordHash);
-
-    const doctors = users.filter((user) => user.role === UserRole.DOCTOR);
-    const patients = users.filter((user) => user.role === UserRole.PATIENT);
-
-    doctorProfileCount = await seedDoctorProfiles(doctors);
-    patientProfileCount = await seedPatientProfiles(patients);
-    refreshTokenCount = await seedRefreshTokens(users);
-  }
+  const users = await loadExistingPhase1Users();
+  const refreshTokenStats = await ensureRefreshTokens(users);
 
   const admins = users.filter((user) => user.role === UserRole.ADMIN);
   const doctors = users.filter((user) => user.role === UserRole.DOCTOR);
   const patients = users.filter((user) => user.role === UserRole.PATIENT);
 
-  if (admins.length !== ADMIN_COUNT || doctors.length !== DOCTOR_COUNT || patients.length !== PATIENT_COUNT) {
+  if (admins.length === 0 || doctors.length === 0 || patients.length === 0) {
     throw new Error(
-      `Unexpected user counts: admins=${admins.length}, doctors=${doctors.length}, patients=${patients.length}`,
+      `Cannot continue seeding: need at least 1 admin, 1 doctor, and 1 patient (found admins=${admins.length}, doctors=${doctors.length}, patients=${patients.length}).`,
+    );
+  }
+
+  if (users.length < expectedUserCount) {
+    console.log(
+      `ℹ Seed user coverage: ${users.length}/${expectedUserCount} canonical @${SEED_DOMAIN} users present — continuing with available data.`,
     );
   }
 
@@ -378,6 +481,13 @@ async function main() {
   const contentStats = await seedContentPhase(prisma);
   const operationalStats = await seedOperationalPhase(prisma);
   const finalizeStats = await seedFinalizePhase(prisma);
+  const publicationStats = await seedPublications(prisma);
+
+  const doctorProfileCount = await prisma.doctorProfile.count();
+  const patientProfileCount = await prisma.patientProfile.count();
+  const refreshTokenCount = await prisma.refreshToken.count({
+    where: { user: { email: { endsWith: `@${SEED_DOMAIN}` } } },
+  });
 
   console.log('Seed completed successfully.');
   console.log({
@@ -385,6 +495,12 @@ async function main() {
     admins: admins.length,
     doctors: doctors.length,
     patients: patients.length,
+    phase1: {
+      users: userStats,
+      doctorProfiles: doctorProfileStats,
+      patientProfiles: patientProfileStats,
+      refreshTokens: refreshTokenStats,
+    },
     doctorProfiles: doctorProfileCount,
     patientProfiles: patientProfileCount,
     refreshTokens: refreshTokenCount,
@@ -395,6 +511,7 @@ async function main() {
       doctorProfilesSynced: finalizeStats.doctorProfilesSynced,
       conversationsSynced: finalizeStats.conversationsSynced,
     },
+    publications: publicationStats,
     defaultPassword: SEED_PASSWORD,
     sampleAdmin: admins[0]?.email,
     sampleDoctor: doctors[0]?.email,

@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /login.html
+Disallow: /register.html
+Disallow: /forgot-password.html
+Disallow: /reset-password.html
+Disallow: /patient-dashboard.html
+Disallow: /doctor-dashboard.html
+Disallow: /admin-dashboard.html
+Disallow: /editorial-dashboard.html
+
+Sitemap: https://www.drinsight.org/sitemap.xml

@@ -17,8 +17,6 @@ export function PatientSidebar() {
   const user = useAuthStore((s) => s.user);
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const showToast = usePatientUiStore((s) => s.showToast);
-  const setMobileSidebarOpen = usePatientUiStore((s) => s.setMobileSidebarOpen);
-  const mobileSidebarOpen = usePatientUiStore((s) => s.mobileSidebarOpen);
   const profileQuery = useAuthProfile();
   const appointmentsQuery = usePatientAppointments({ limit: 50 });
 
@@ -39,7 +37,7 @@ export function PatientSidebar() {
   };
 
   return (
-    <aside className={`dash-sidebar${mobileSidebarOpen ? " open" : ""}`}>
+    <aside className="dash-sidebar">
       <div className="sidebar-profile">
         <div className="sidebar-avatar-ring">
           <div className="sidebar-avatar">{initials}</div>
@@ -108,7 +106,6 @@ export function PatientSidebar() {
                   key={item.id}
                   href={item.href}
                   className={`snav-item${active ? " active" : ""}`}
-                  onClick={() => setMobileSidebarOpen(false)}
                 >
                   <span className="snav-ico">{item.ico}</span>
                   {item.name}

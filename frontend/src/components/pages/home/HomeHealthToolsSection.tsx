@@ -10,7 +10,7 @@ const toolCardHoverShadow =
 
 export function HomeHealthToolsSection() {
   return (
-    <section className="bg-gray-50 px-4 py-16 sm:px-6 sm:py-20">
+    <section className="home-section bg-gray-50 px-6 py-16 min-[901px]:py-20">
       <div className="mx-auto max-w-[1240px]">
         <div className="mb-13 text-center">
           <div className="mb-2.5 text-[.78rem] font-bold uppercase tracking-widest text-blue">

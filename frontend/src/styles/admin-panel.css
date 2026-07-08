@@ -1031,18 +1031,6 @@
   }
 }
 
-@media (max-width: 1023px) {
-  .admin-root .stats-row {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .admin-root .grid2 {
-    grid-template-columns: 1fr;
-  }
-  .admin-root .form-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 @media (max-width: 1100px) {
   .admin-root .stats-row {
     grid-template-columns: repeat(2, 1fr);
@@ -1341,6 +1329,21 @@
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.admin-root .rte-toolbar button {
+  border: 1.5px solid var(--gray-200);
+  background: #fff;
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.admin-root .rte-wrap .rte-editor {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 
 .admin-root .rte-btn {

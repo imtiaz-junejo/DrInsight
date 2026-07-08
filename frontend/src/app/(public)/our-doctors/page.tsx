@@ -23,11 +23,15 @@ function DoctorCard({
   return (
     <div className="doc-card" onClick={() => onProfile(doctor.id)} role="button" tabIndex={0}>
       <div className="doc-cover" style={{ background: doctor.bg }}>
-        <div className="doc-rating-badge">
-          ⭐ {doctor.rating.toFixed(1)}{" "}
-          <span className="review-count">({doctor.reviews})</span>
+        <div className="doc-cover-header">
+          <div className="doc-cover-badges-left">
+            {doctor.verified && <div className="doc-verified-badge">✓ Verified</div>}
+          </div>
+          <div className="doc-rating-badge">
+            ⭐ {doctor.rating.toFixed(1)}{" "}
+            <span className="review-count">({doctor.reviews})</span>
+          </div>
         </div>
-        {doctor.verified && <div className="doc-verified-badge">✓ Verified</div>}
         <div className="doc-av-wrap">
           <div className="doc-av" style={{ background: doctor.bg }}>
             {doctor.avatarUrl ? (
@@ -36,8 +40,11 @@ function DoctorCard({
             ) : (
               doctor.init
             )}
-            {doctor.online && <div className="doc-online" />}
           </div>
+          <div
+            className={`doc-status-dot${doctor.online ? " is-online" : " is-offline"}`}
+            aria-hidden="true"
+          />
         </div>
       </div>
       <div className="doc-body">

@@ -157,26 +157,97 @@ export interface DoctorProfile {
   similarSpecialists?: RelatedDoctorSummary[];
 }
 
+export interface BlogAuthorProfile {
+  id?: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl?: string | null;
+  role?: string;
+  doctorProfile?: {
+    specialty?: string | null;
+    subSpecialty?: string | null;
+    hospital?: string | null;
+    credentials?: string | null;
+    professionalTitle?: string | null;
+    experienceYears?: number | null;
+    bio?: string | null;
+    platformRole?: string | null;
+    editorialBoard?: boolean | null;
+  } | null;
+}
+
+export interface BlogReference {
+  text: string;
+  url?: string;
+}
+
+export interface BlogGlossaryTerm {
+  term: string;
+  definition: string;
+}
+
+export interface BlogComment {
+  id: string;
+  authorName: string;
+  authorEmail?: string | null;
+  content: string;
+  isVerifiedPatient?: boolean;
+  createdAt: string;
+}
+
+export interface BlogPostNavItem {
+  id: string;
+  title: string;
+  slug: string;
+  readTimeMinutes?: number;
+}
+
 export interface BlogPost {
   id: string;
   title: string;
   slug: string;
+  subtitle?: string | null;
   excerpt: string;
   content?: string;
+  coverImageUrl?: string | null;
+  coverImageAlt?: string | null;
+  coverImageCaption?: string | null;
+  specialty?: string | null;
   category?: { id?: string; name: string; slug: string };
-  author?: {
-    id?: string;
-    firstName: string;
-    lastName: string;
-    avatarUrl?: string | null;
-    role?: string;
-    doctorProfile?: { specialty?: string | null; hospital?: string | null; credentials?: string | null } | null;
-  };
+  author?: BlogAuthorProfile;
+  reviewer?: BlogAuthorProfile | null;
   readTimeMinutes: number;
   viewCount?: number;
+  shareCount?: number;
+  tags?: string[];
+  summaryPoints?: string[];
+  keyTakeaways?: string[];
+  references?: BlogReference[] | null;
+  glossary?: BlogGlossaryTerm[] | null;
+  medicalDisclaimer?: string | null;
+  peerReviewed?: boolean;
+  lastReviewedAt?: string | null;
+  updatedAt?: string;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  metaKeywords?: string[];
+  canonicalUrl?: string | null;
+  averageRating?: number | null;
+  ratingCount?: number;
+  helpfulYes?: number;
+  helpfulNo?: number;
   publishedAt?: string | null;
   featured?: boolean;
   relatedPosts?: BlogPost[];
+}
+
+export interface BlogPostDetail extends BlogPost {
+  authorArticleCount?: number;
+  sidebarRelated?: BlogPost[];
+  trendingInSpecialty?: BlogPostNavItem[];
+  previousPost?: BlogPostNavItem | null;
+  nextPost?: BlogPostNavItem | null;
+  comments?: BlogComment[];
 }
 
 export interface BlogCategory {
@@ -299,10 +370,45 @@ export function useBlogPost(slug: string) {
   return useQuery({
     queryKey: ["blog", slug],
     queryFn: async () => {
-      const { data } = await api.get<BlogPost>(`/blog/${slug}`);
+      const { data } = await api.get<BlogPostDetail>(`/blog/${slug}`);
       return data;
     },
     enabled: !!slug,
+  });
+}
+
+export function useBlogPostComment(slug: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (body: { authorName: string; authorEmail?: string; content: string }) => {
+      const { data } = await api.post(`/blog/${slug}/comments`, body);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["blog", slug] });
+    },
+  });
+}
+
+export function useBlogPostFeedback(slug: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (body: { helpful?: boolean; rating?: number; visitorKey?: string }) => {
+      const { data } = await api.post(`/blog/${slug}/feedback`, body);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["blog", slug] });
+    },
+  });
+}
+
+export function useBlogPostShare(slug: string) {
+  return useMutation({
+    mutationFn: async () => {
+      const { data } = await api.post(`/blog/${slug}/share`);
+      return data;
+    },
   });
 }
 

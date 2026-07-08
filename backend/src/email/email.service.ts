@@ -236,4 +236,33 @@ export class EmailService {
       this.logSmtpError('sendPaymentConfirmation() failed', error);
     }
   }
+
+  async sendCustomEmail(
+    to: string,
+    subject: string,
+    html: string,
+    text?: string,
+  ): Promise<void> {
+    if (!this.isSmtpConfigured()) {
+      this.logger.log(`[DEV] Custom email to ${to}: ${subject}`);
+      return;
+    }
+
+    const { from } = this.getSmtpConfig();
+    const transporter = this.getTransporter();
+
+    try {
+      await this.verifyTransporter(transporter);
+      await transporter.sendMail({
+        from,
+        to,
+        subject,
+        html,
+        text: text ?? html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(),
+      });
+    } catch (error) {
+      this.logSmtpError('sendCustomEmail() failed', error);
+      throw error;
+    }
+  }
 }

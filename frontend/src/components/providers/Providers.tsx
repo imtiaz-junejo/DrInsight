@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { AuthHydrator } from "@/components/auth/AuthHydrator";
+import { ResponsiveTableLabels } from "@/components/layout/ResponsiveTableLabels";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -16,7 +17,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthHydrator>{children}</AuthHydrator>
+      <AuthHydrator>
+        <ResponsiveTableLabels />
+        {children}
+      </AuthHydrator>
     </QueryClientProvider>
   );
 }

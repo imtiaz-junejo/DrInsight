@@ -1,12 +1,42 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { CONTACT_PHONE } from "@/lib/site-contact";
+import { api } from "@/lib/api";
+import { useAuthStore } from "@/store/auth.store";
+
+const portalLinkClass =
+  "ml-4 cursor-pointer border-0 bg-transparent p-0 font-inherit text-[#93c5fd] transition hover:text-white";
 
 export function TopBar() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const clearAuth = useAuthStore((state) => state.clearAuth);
+
+  async function handleLogout() {
+    const refreshToken =
+      useAuthStore.getState().refreshToken ??
+      (typeof window !== "undefined" ? localStorage.getItem("refreshToken") : null);
+
+    if (refreshToken) {
+      try {
+        await api.post("/auth/logout", { refreshToken });
+      } catch {
+        // Still clear local session if the server call fails.
+      }
+    }
+
+    clearAuth();
+    queryClient.clear();
+    router.replace("/");
+  }
+
   return (
     <div className="bg-blue-dark py-[.15rem] text-[.8rem] text-[#cbd5e1]">
-      <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-2 px-4 sm:gap-3 sm:px-6">
+      <div className="topbar-inner mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-3 px-6">
         <div className="flex min-w-0 flex-1 items-center gap-2 text-[0.72rem] font-semibold text-[#fca5a5] sm:text-[.8rem]">
           <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20" className="shrink-0">
             <path
@@ -21,15 +51,21 @@ export function TopBar() {
           </span>
         </div>
         <div className="shrink-0">
-          {/* <Link href="/about" className="ml-4 text-[#93c5fd] transition hover:text-white">
+          {/* <Link href="/about" className={portalLinkClass}>
             About
           </Link>
-          <Link href="/contact" className="ml-4 text-[#93c5fd] transition hover:text-white">
+          <Link href="/contact" className={portalLinkClass}>
             Contact
           </Link> */}
-          <Link href="/login" className="ml-4 text-[#93c5fd] transition hover:text-white">
-            Portal Login
-          </Link>
+          {isAuthenticated ? (
+            <button type="button" onClick={() => void handleLogout()} className={portalLinkClass}>
+              Portal Logout
+            </button>
+          ) : (
+            <Link href="/login" className={portalLinkClass}>
+              Portal Login
+            </Link>
+          )}
         </div>
       </div>
     </div>

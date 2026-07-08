@@ -52,6 +52,7 @@ export const adminNav: AdminNavGroup[] = [
     lbl: "Editorial Management",
     items: [
       { id: "review-queue", ico: "🔬", name: "Article Review Queue", badge: "5", href: "/admin/review-queue" },
+      { id: "publication-review", ico: "📤", name: "Publication Review", badge: "3", href: "/admin/publication-review" },
       { id: "review-process", ico: "📋", name: "Medical Review Process", href: "/admin/review-process" },
       { id: "editorial-policy", ico: "📜", name: "Editorial Policy Mgmt", href: "/admin/editorial-policy" },
       { id: "author-guidelines", ico: "📘", name: "Author Guidelines Mgmt", href: "/admin/author-guidelines" },
@@ -109,6 +110,7 @@ export const adminPageMeta: Record<string, [string, string]> = {
   comments: ["Comments", "Moderate reader comments across all articles"],
   authors: ["Authors", "Manage author profiles and verification status"],
   "review-queue": ["Article Review Queue", "Articles awaiting medical peer review"],
+  "publication-review": ["Publication Review Queue", "Doctor research publications awaiting editorial review and approval"],
   "review-process": ["Medical Review Process", "Configure review tiers, timelines, and reviewer assignments"],
   "editorial-policy": ["Editorial Policy Management", "Edit the public Editorial Policy page content"],
   "author-guidelines": ["Author Guidelines Management", "Edit the public Author Guidelines page content"],

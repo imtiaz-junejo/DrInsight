@@ -138,6 +138,44 @@ export function useDoctorBlogPosts(authorId?: string) {
   });
 }
 
+export interface CreateBlogPostPayload {
+  title: string;
+  slug: string;
+  subtitle?: string;
+  excerpt: string;
+  content: string;
+  categoryId: string;
+  coverImageUrl?: string;
+  coverImageAlt?: string;
+  coverImageCaption?: string;
+  specialty?: string;
+  tags?: string[];
+  summaryPoints?: string[];
+  keyTakeaways?: string[];
+  references?: Array<{ text: string; url?: string }>;
+  glossary?: Array<{ term: string; definition: string }>;
+  medicalDisclaimer?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  metaKeywords?: string[];
+  canonicalUrl?: string;
+  status?: "DRAFT" | "PUBLISHED";
+}
+
+export function useCreateBlogPost() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: CreateBlogPostPayload) => {
+      const { data } = await api.post<BlogPost>("/blog", payload);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["doctor-blog"] });
+      queryClient.invalidateQueries({ queryKey: ["blog"] });
+    },
+  });
+}
+
 export function useDoctorReviews(doctorId?: string) {
   return useQuery({
     queryKey: ["doctor-reviews", doctorId],

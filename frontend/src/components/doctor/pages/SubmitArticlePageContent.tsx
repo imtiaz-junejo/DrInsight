@@ -2,17 +2,28 @@
 
 import { useRef, useState } from "react";
 import { DashCard, DashPageHeader } from "@/components/doctor/ui/DoctorPrimitives";
+import { slugifyTitle } from "@/lib/blog-toc";
 import { todayFormatted } from "@/lib/doctor-utils";
+import { useBlogCategories } from "@/services/api-hooks";
+import { useCreateBlogPost } from "@/services/doctor-api-hooks";
 import { useDoctorUiStore } from "@/store/doctor-ui.store";
+
+const DEFAULT_DISCLAIMER =
+  "This article is for informational purposes only and does not constitute medical advice, diagnosis, or treatment. Always consult a qualified healthcare professional regarding any medical condition.";
 
 export function SubmitArticlePageContent() {
   const showToast = useDoctorUiStore((s) => s.showToast);
+  const createPost = useCreateBlogPost();
+  const { data: categories } = useBlogCategories();
+
   const [submitted, setSubmitted] = useState(false);
   const [wordCount, setWordCount] = useState(0);
   const [charCount, setCharCount] = useState(0);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isDraft, setIsDraft] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const execFmt = (cmd: string, val?: string) => {
     editorRef.current?.focus();
@@ -27,18 +38,75 @@ export function SubmitArticlePageContent() {
     setCharCount(text.length);
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, draft = false) => {
     e.preventDefault();
     const form = e.currentTarget;
-    const required = ["artTitle", "artSpec", "artAudience", "artType", "artAbstract", "artRef", "artCOI"] as const;
-    for (const id of required) {
-      const el = form.elements.namedItem(id) as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null;
-      if (!el?.value.trim()) {
-        showToast("⚠️ Please fill in all required fields");
-        return;
-      }
+    const title = (form.elements.namedItem("artTitle") as HTMLInputElement).value.trim();
+    const subtitle = (form.elements.namedItem("artSubtitle") as HTMLInputElement).value.trim();
+    const categoryId = (form.elements.namedItem("artCategory") as HTMLSelectElement).value;
+    const specialty = (form.elements.namedItem("artSpec") as HTMLSelectElement).value;
+    const excerpt = (form.elements.namedItem("artAbstract") as HTMLTextAreaElement).value.trim();
+    const content = editorRef.current?.innerHTML.trim() ?? "";
+    const summaryRaw = (form.elements.namedItem("artPoints") as HTMLTextAreaElement).value.trim();
+    const takeawaysRaw = (form.elements.namedItem("artTakeaways") as HTMLTextAreaElement).value.trim();
+    const referenceUrl = (form.elements.namedItem("artRef") as HTMLInputElement).value.trim();
+    const tagsRaw = (form.elements.namedItem("artTags") as HTMLInputElement).value.trim();
+    const seoTitle = (form.elements.namedItem("artSeoTitle") as HTMLInputElement).value.trim();
+    const seoDescription = (form.elements.namedItem("artSeoDesc") as HTMLTextAreaElement).value.trim();
+    const coverImageAlt = (form.elements.namedItem("artCoverAlt") as HTMLInputElement).value.trim();
+    const coverImageCaption = (form.elements.namedItem("artCoverCaption") as HTMLInputElement).value.trim();
+    const disclaimer =
+      (form.elements.namedItem("artDisclaimer") as HTMLTextAreaElement).value.trim() || DEFAULT_DISCLAIMER;
+
+    if (!title || !categoryId || !specialty || !excerpt || !content || !referenceUrl) {
+      showToast("⚠️ Please fill in all required fields");
+      return;
     }
-    setSubmitted(true);
+
+    const summaryPoints = summaryRaw
+      .split("\n")
+      .map((line) => line.replace(/^[-•*]\s*/, "").trim())
+      .filter(Boolean);
+    const keyTakeaways = takeawaysRaw
+      .split("\n")
+      .map((line) => line.replace(/^[-•*]\s*/, "").trim())
+      .filter(Boolean);
+    const tags = tagsRaw
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+
+    setIsDraft(draft);
+
+    try {
+      await createPost.mutateAsync({
+        title,
+        slug: slugifyTitle(title),
+        subtitle: subtitle || undefined,
+        excerpt,
+        content,
+        categoryId,
+        specialty,
+        coverImageUrl: previewUrl || undefined,
+        coverImageAlt: coverImageAlt || undefined,
+        coverImageCaption: coverImageCaption || undefined,
+        tags,
+        summaryPoints,
+        keyTakeaways,
+        references: [{ text: referenceUrl, url: referenceUrl }],
+        medicalDisclaimer: disclaimer,
+        seoTitle: seoTitle || title,
+        seoDescription: seoDescription || excerpt,
+        metaKeywords: tags,
+        status: draft ? "DRAFT" : "DRAFT",
+      });
+      setSubmitted(true);
+      showToast(draft ? "Saved as draft ✓" : "Article submitted for review ✓");
+    } catch {
+      showToast("⚠️ Failed to submit article. Please try again.");
+    } finally {
+      setIsDraft(false);
+    }
   };
 
   const handleImage = (file: File) => {
@@ -84,47 +152,46 @@ export function SubmitArticlePageContent() {
         title="✍️ New Article Submission"
         headerExtra={<span style={{ fontSize: "0.76rem", color: "var(--gray-400)" }}>All submissions reviewed within 48 hours</span>}
       >
-        <form className="art-form" onSubmit={handleSubmit}>
+        <form ref={formRef} className="art-form" onSubmit={(e) => handleSubmit(e, false)}>
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="artTitle">Article Title *</label>
               <input type="text" id="artTitle" name="artTitle" placeholder="e.g. Understanding Atrial Fibrillation in 2026" />
             </div>
             <div className="form-group">
-              <label htmlFor="artSpec">Medical Specialty *</label>
-              <select id="artSpec" name="artSpec" defaultValue="">
-                <option value="">Select specialty...</option>
-                {["Cardiology", "Neurology", "Endocrinology", "Gastroenterology", "Internal Medicine"].map((s) => (
-                  <option key={s}>{s}</option>
-                ))}
-              </select>
+              <label htmlFor="artSubtitle">Subtitle</label>
+              <input type="text" id="artSubtitle" name="artSubtitle" placeholder="A brief descriptive subtitle for the article header" />
             </div>
           </div>
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="artAudience">Target Audience *</label>
-              <select id="artAudience" name="artAudience" defaultValue="">
-                <option value="">Select audience...</option>
-                <option>General Public / Patients</option>
-                <option>Healthcare Professionals</option>
-                <option>Both (Patient + Professional)</option>
+              <label htmlFor="artCategory">Category *</label>
+              <select id="artCategory" name="artCategory" defaultValue="">
+                <option value="">Select category...</option>
+                {categories?.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="form-group">
-              <label htmlFor="artType">Article Type *</label>
-              <select id="artType" name="artType" defaultValue="">
-                <option value="">Select type...</option>
-                <option>Clinical Overview</option>
-                <option>Drug / Medication Guide</option>
-                <option>Patient Education</option>
+              <label htmlFor="artSpec">Medical Specialty *</label>
+              <select id="artSpec" name="artSpec" defaultValue="">
+                <option value="">Select specialty...</option>
+                {categories?.map((cat) => (
+                  <option key={cat.slug} value={cat.name}>
+                    {cat.name}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
           <div className="form-group">
             <label htmlFor="artAbstract">
-              Article Abstract / Summary * <span style={{ fontWeight: 400, color: "var(--gray-400)" }}>(200–400 words)</span>
+              Article Abstract / Excerpt * <span style={{ fontWeight: 400, color: "var(--gray-400)" }}>(shown in header & SEO)</span>
             </label>
-            <textarea id="artAbstract" name="artAbstract" rows={5} placeholder="Provide a concise summary of your article..." />
+            <textarea id="artAbstract" name="artAbstract" rows={4} placeholder="Provide a concise summary of your article..." />
           </div>
 
           <div className="form-group">
@@ -168,10 +235,20 @@ export function SubmitArticlePageContent() {
             </div>
             <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: "none" }} onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImage(f); }} />
           </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="artCoverAlt">Cover Image Alt Text</label>
+              <input type="text" id="artCoverAlt" name="artCoverAlt" placeholder="Describe the cover image for accessibility" />
+            </div>
+            <div className="form-group">
+              <label htmlFor="artCoverCaption">Cover Image Caption</label>
+              <input type="text" id="artCoverCaption" name="artCoverCaption" placeholder="Image credit and caption shown below the hero image" />
+            </div>
+          </div>
 
           <div className="form-group">
             <label>
-              📝 Article Content <span style={{ fontWeight: 400, color: "var(--gray-400)" }}>(Full article body — required)</span>
+              📝 Article Content * <span style={{ fontWeight: 400, color: "var(--gray-400)" }}>(Full article body — use H2/H3 for sections)</span>
             </label>
             <div className="rte-wrap">
               <div className="rte-toolbar">
@@ -207,15 +284,19 @@ export function SubmitArticlePageContent() {
                 data-placeholder="Start writing your full article here..."
               />
               <div className="rte-footer">
-                <span style={{ fontSize: "0.72rem", color: "var(--gray-400)" }}>💡 Tip: Use Heading 2 for main sections, Heading 3 for subsections.</span>
+                <span style={{ fontSize: "0.72rem", color: "var(--gray-400)" }}>💡 Use Heading 2 for main sections, Heading 3 for subsections.</span>
                 <span style={{ fontSize: "0.72rem", color: "var(--gray-400)" }}>{charCount} characters</span>
               </div>
             </div>
           </div>
 
           <div className="form-group">
-            <label htmlFor="artPoints">Key Clinical Points <span style={{ fontWeight: 400, color: "var(--gray-400)" }}>(one per line)</span></label>
+            <label htmlFor="artPoints">Summary Points — What Readers Will Learn <span style={{ fontWeight: 400, color: "var(--gray-400)" }}>(one per line)</span></label>
             <textarea id="artPoints" name="artPoints" rows={4} placeholder={"• Point 1\n• Point 2\n• Point 3"} />
+          </div>
+          <div className="form-group">
+            <label htmlFor="artTakeaways">Key Takeaways <span style={{ fontWeight: 400, color: "var(--gray-400)" }}>(one per line)</span></label>
+            <textarea id="artTakeaways" name="artTakeaways" rows={4} placeholder={"• Takeaway 1\n• Takeaway 2"} />
           </div>
           <div className="form-row">
             <div className="form-group">
@@ -223,31 +304,45 @@ export function SubmitArticlePageContent() {
               <input type="url" id="artRef" name="artRef" placeholder="https://pubmed.ncbi.nlm.nih.gov/..." />
             </div>
             <div className="form-group">
-              <label htmlFor="artWords">Estimated Word Count</label>
-              <select id="artWords" name="artWords">
-                <option>1,000–1,500 words</option>
-                <option>1,500–2,500 words</option>
-                <option>2,500–4,000 words</option>
-              </select>
+              <label htmlFor="artTags">Tags <span style={{ fontWeight: 400, color: "var(--gray-400)" }}>(comma-separated)</span></label>
+              <input type="text" id="artTags" name="artTags" placeholder="migraine, neurology, headache" />
             </div>
           </div>
-          <div className="form-group">
-            <label htmlFor="artCOI">Conflict of Interest Disclosure *</label>
-            <select id="artCOI" name="artCOI" defaultValue="">
-              <option value="">Select...</option>
-              <option>None — I have no conflicts of interest related to this article</option>
-              <option>Pharmaceutical — I have received funding / honoraria from a pharma company</option>
-            </select>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="artSeoTitle">SEO Title</label>
+              <input type="text" id="artSeoTitle" name="artSeoTitle" placeholder="Custom title for search engines (defaults to article title)" />
+            </div>
+            <div className="form-group">
+              <label htmlFor="artSeoDesc">Meta Description</label>
+              <textarea id="artSeoDesc" name="artSeoDesc" rows={2} placeholder="Short description for search engine results" />
+            </div>
           </div>
+
+          <div className="form-group">
+            <label htmlFor="artDisclaimer">Medical Disclaimer</label>
+            <textarea id="artDisclaimer" name="artDisclaimer" rows={3} defaultValue={DEFAULT_DISCLAIMER} />
+          </div>
+
           <div style={{ background: "#fffbeb", borderLeft: "4px solid var(--amber)", borderRadius: 6, padding: "12px 16px", fontSize: "0.8rem", color: "#92400e", lineHeight: 1.6 }}>
             ⚠️ <strong>Editorial Notice:</strong> All submitted articles undergo a multi-stage review process. By submitting, you confirm this is original work and you hold valid medical licensure.
           </div>
           <div className="art-btn-row">
-            <button type="button" className="art-submit-btn draft" onClick={() => showToast("Saved as draft ✓")}>
-              💾 Save as Draft
+            <button
+              type="button"
+              className="art-submit-btn draft"
+              disabled={createPost.isPending}
+              onClick={() => {
+                if (formRef.current) {
+                  handleSubmit({ preventDefault: () => undefined, currentTarget: formRef.current } as React.FormEvent<HTMLFormElement>, true);
+                }
+              }}
+            >
+              {createPost.isPending && isDraft ? "Saving..." : "💾 Save as Draft"}
             </button>
-            <button type="submit" className="art-submit-btn">
-              📤 Submit for Review
+            <button type="submit" className="art-submit-btn" disabled={createPost.isPending}>
+              {createPost.isPending && !isDraft ? "Submitting..." : "📤 Submit for Review"}
             </button>
           </div>
         </form>

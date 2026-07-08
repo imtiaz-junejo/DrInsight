@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useMutation } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -16,9 +17,12 @@ import { FloatingSelect } from "@/components/ui/floating-select";
 import {
   clearOAuthLoadingProvider,
   dashboardForRole,
+  resolvePostLoginPath,
   startOAuth,
   type OAuthProviderName,
 } from "@/lib/oauth";
+import { BOOKING_RETURN_PATH, isBookingAuthFlow } from "@/lib/booking-auth";
+import { invalidateAuthProfile } from "@/services/patient-api-hooks";
 
 type AccountType = "patient" | "physician" | "";
 type SubType =
@@ -133,6 +137,10 @@ const PW_COLOR: Record<number, string> = {
 };
 
 export function RegisterForm() {
+  const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
+  const fromBooking = isBookingAuthFlow(searchParams);
+  const bookingRedirect = searchParams.get("redirect") || BOOKING_RETURN_PATH;
   const setAuth = useAuthStore((state) => state.setAuth);
 
   const [currentStep, setCurrentStep] = useState(1);
@@ -150,6 +158,7 @@ export function RegisterForm() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [dob, setDob] = useState("");
+  const [gender, setGender] = useState("Male");
   const [country, setCountry] = useState("");
   const [primarySpecialty, setPrimarySpecialty] = useState("Cardiology");
   const [licenseNumber, setLicenseNumber] = useState("");
@@ -224,6 +233,8 @@ export function RegisterForm() {
       lastName: string;
       role: "PATIENT" | "DOCTOR";
       phone?: string;
+      dateOfBirth?: string;
+      gender?: string;
       specialty?: string;
       licenseNumber?: string;
     }) => {
@@ -241,6 +252,16 @@ export function RegisterForm() {
       }
       if ("accessToken" in data && data.accessToken) {
         setAuth(data.user, data.accessToken, data.refreshToken);
+        void invalidateAuthProfile(queryClient);
+        if (fromBooking && data.user.role === "PATIENT") {
+          setSuccessMsg("Welcome to DrInsight! Resuming your consultation booking...");
+          setSuccess(true);
+          setError("");
+          window.setTimeout(() => {
+            window.location.assign(resolvePostLoginPath(data.user.role, bookingRedirect));
+          }, 1200);
+          return;
+        }
         setSuccessMsg("Welcome to DrInsight! We've sent a verification email to your inbox.");
         setSuccess(true);
         setError("");
@@ -279,6 +300,8 @@ export function RegisterForm() {
     if (pending) {
       setOauthPendingCode(pending);
       setAccountType("patient");
+    } else if (params.get("from") === "booking" || params.get("account") === "patient") {
+      setAccountType("patient");
     }
   }, []);
 
@@ -294,7 +317,11 @@ export function RegisterForm() {
     onSuccess: (data) => {
       setAuth(data.user, data.accessToken, data.refreshToken);
       setError("");
-      window.location.assign(dashboardForRole(data.user.role));
+      void invalidateAuthProfile(queryClient);
+      const destination = fromBooking
+        ? resolvePostLoginPath(data.user.role, bookingRedirect)
+        : dashboardForRole(data.user.role);
+      window.location.assign(destination);
     },
     onError: (err) => {
       if (isAxiosError(err)) {
@@ -321,7 +348,7 @@ export function RegisterForm() {
   function handleOAuth(provider: OAuthProviderName) {
     setError("");
     setOauthLoading(provider);
-    startOAuth(provider);
+    startOAuth(provider, fromBooking ? bookingRedirect : searchParams.get("redirect"));
   }
 
   function handleCompleteOAuthRegistration() {
@@ -445,6 +472,8 @@ export function RegisterForm() {
       email: email.trim(),
       password,
       phone: phone.trim() || undefined,
+      dateOfBirth: dob || undefined,
+      gender: accountType === "patient" ? gender : undefined,
       role: accountType === "physician" ? "DOCTOR" : "PATIENT",
       specialty,
       licenseNumber: accountType === "physician" ? licenseNumber.trim() || `PENDING-${Date.now()}` : undefined,
@@ -454,16 +483,7 @@ export function RegisterForm() {
   function renderExtraFields() {
     if (accountType === "patient") {
       if (subType === "indiv" || subType === "") {
-        return (
-          <div className="form-group">
-            <FloatingSelect label="Gender" defaultValue="Male">
-              <option>Male</option>
-              <option>Female</option>
-              <option>Prefer not to say</option>
-              <option>Other</option>
-            </FloatingSelect>
-          </div>
-        );
+        return null;
       }
       if (subType === "parent") {
         return (
@@ -706,6 +726,13 @@ export function RegisterForm() {
               <SectionTitle className="step-title">Create Your Account</SectionTitle>
               <p className="step-subtitle">Choose how you&apos;ll be using DrInsight</p>
 
+              {fromBooking && (
+                <div className="register-booking-notice">
+                  Create a free Patient account to continue booking your consultation. Your selections will be
+                  restored automatically.
+                </div>
+              )}
+
               <div className="type-grid">
                 <div
                   className={cn("type-card", accountType === "patient" && "selected")}
@@ -854,6 +881,22 @@ export function RegisterForm() {
                   </FloatingSelect>
                 </div>
               </div>
+
+              {accountType === "patient" && (
+                <div className="form-group">
+                  <FloatingSelect
+                    label="Biological Sex / Gender"
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                  >
+                    <option value="">Select…</option>
+                    <option>Male</option>
+                    <option>Female</option>
+                    <option>Prefer not to say</option>
+                    <option>Other</option>
+                  </FloatingSelect>
+                </div>
+              )}
 
               <div id="extraFields">{renderExtraFields()}</div>
 
@@ -1125,8 +1168,19 @@ export function RegisterForm() {
                 <p className="success-para" id="successMsg">
                   {successMsg}
                 </p>
-                <Link href={accountType === "physician" ? "/login" : "/patient"} className="success-btn">
-                  Go to My Dashboard →
+                <Link
+                  href={
+                    fromBooking && accountType !== "physician"
+                      ? bookingRedirect
+                      : accountType === "physician"
+                        ? "/login"
+                        : "/patient"
+                  }
+                  className="success-btn"
+                >
+                  {fromBooking && accountType !== "physician"
+                    ? "Continue Booking →"
+                    : "Go to My Dashboard →"}
                 </Link>
                 <button type="button" className="resend-link">
                   Didn&apos;t receive the email? Resend verification

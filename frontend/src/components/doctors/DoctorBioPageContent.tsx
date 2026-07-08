@@ -22,6 +22,11 @@ import type {
   RelatedDoctorSummary,
 } from "@/services/api-hooks";
 import { useDoctor, useNewsletterSubscribe } from "@/services/api-hooks";
+import {
+  PUBLICATION_TYPE_LABELS,
+  useDoctorPublicationsByDoctor,
+  type Publication,
+} from "@/services/publications-api-hooks";
 import "@/styles/doctor-bio-page.css";
 
 type TabKey = "about" | "articles" | "reviews" | "credentials";
@@ -173,8 +178,30 @@ function ArticleGridCard({ article, index }: { article: DoctorArticleSummary; in
   );
 }
 
+function PublicationBioCard({ pub }: { pub: Publication }) {
+  const year = pub.publicationDate
+    ? new Date(pub.publicationDate).getFullYear()
+    : pub.publishedAt
+      ? new Date(pub.publishedAt).getFullYear()
+      : null;
+  const journalLine = [pub.journalName?.toUpperCase(), year].filter(Boolean).join(" · ");
+
+  return (
+    <Link href={`/research-publications/${pub.slug}`} className="pub-item pub-item-link">
+      <div className="pub-journal">{journalLine || PUBLICATION_TYPE_LABELS[pub.publicationType]}</div>
+      <div className="pub-title">{pub.title}</div>
+      <div className="pub-meta">
+        {year ? <span className="pub-year">{year}</span> : null}
+        {pub.citationCount > 0 && <span className="pub-cite">📌 {pub.citationCount} citations</span>}
+        {pub.doi ? <span className="pub-doi">DOI: {pub.doi}</span> : null}
+      </div>
+    </Link>
+  );
+}
+
 export function DoctorBioPageContent({ doctorId }: { doctorId: string }) {
   const { data: doctor, isLoading, isError } = useDoctor(doctorId);
+  const { data: approvedPublications = [] } = useDoctorPublicationsByDoctor(doctorId, 20);
   const newsletter = useNewsletterSubscribe();
   const [tab, setTab] = useState<TabKey>("about");
   const [bioOpen, setBioOpen] = useState(false);
@@ -203,7 +230,7 @@ export function DoctorBioPageContent({ doctorId }: { doctorId: string }) {
     () => asArray<NonNullable<DoctorProfile["certifications"]>[number]>(doctor?.certifications),
     [doctor?.certifications],
   );
-  const publications = useMemo(
+  const legacyPublications = useMemo(
     () => asArray<NonNullable<DoctorProfile["publications"]>[number]>(doctor?.publications),
     [doctor?.publications],
   );
@@ -301,6 +328,7 @@ export function DoctorBioPageContent({ doctorId }: { doctorId: string }) {
   const profileUpdated = doctor.updatedAt
     ? formatDate(doctor.updatedAt, { month: "long", day: "numeric", year: "numeric" })
     : verifiedLabel;
+  const isOnline = doctor.user?.isOnline === true || doctor.availability === "AVAILABLE";
 
   const visibleArticles = articles.slice(0, articlesVisible);
   const visibleReviews = reviews.slice(0, reviewsVisible);
@@ -350,11 +378,16 @@ export function DoctorBioPageContent({ doctorId }: { doctorId: string }) {
               ) : (
                 emoji
               )}
-              <div className="hero-verified-ring">✅</div>
-              {(doctor.user?.isOnline || doctor.availability === "AVAILABLE") && (
-                <div className="hero-av-online" />
-              )}
             </div>
+            {doctor.credentialsVerifiedAt && (
+              <div className="hero-verified-ring" aria-label="Verified">
+                ✓
+              </div>
+            )}
+            <div
+              className={`hero-status-dot${isOnline ? " is-online" : " is-offline"}`}
+              aria-hidden="true"
+            />
           </div>
 
           <div className="hero-info">
@@ -584,22 +617,33 @@ export function DoctorBioPageContent({ doctorId }: { doctorId: string }) {
                 </div>
               )}
 
-              {publications.length > 0 && (
+              {(approvedPublications.length > 0 || legacyPublications.length > 0) && (
                 <div className="s-card">
-                  <div className="s-title">🔬 Research & Publications</div>
-                  {publications.map((pub) => (
-                    <div key={`${pub.year}-${pub.title}`} className="pub-item">
-                      <div className="pub-journal">{pub.journal}</div>
-                      <div className="pub-title">{pub.title}</div>
-                      <div className="pub-meta">
-                        <span className="pub-year">{pub.year}</span>
-                        {pub.citations != null && (
-                          <span className="pub-cite">📌 {pub.citations} citations</span>
-                        )}
-                        {pub.doi && <span className="pub-doi">DOI: {pub.doi}</span>}
-                      </div>
-                    </div>
+                  <div className="s-title">
+                    🔬 Research & Publications
+                    {approvedPublications.length > 0 && (
+                      <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "var(--gray-500)", marginLeft: 8 }}>
+                        {approvedPublications.length} approved
+                      </span>
+                    )}
+                  </div>
+                  {approvedPublications.map((pub) => (
+                    <PublicationBioCard key={pub.id} pub={pub} />
                   ))}
+                  {approvedPublications.length === 0 &&
+                    legacyPublications.map((pub) => (
+                      <div key={`${pub.year}-${pub.title}`} className="pub-item">
+                        <div className="pub-journal">{pub.journal}</div>
+                        <div className="pub-title">{pub.title}</div>
+                        <div className="pub-meta">
+                          <span className="pub-year">{pub.year}</span>
+                          {pub.citations != null && (
+                            <span className="pub-cite">📌 {pub.citations} citations</span>
+                          )}
+                          {pub.doi && <span className="pub-doi">DOI: {pub.doi}</span>}
+                        </div>
+                      </div>
+                    ))}
                   {researchTags.length > 0 && (
                     <div
                       style={{

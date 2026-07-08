@@ -31,6 +31,13 @@ model User {
   patientProfile       PatientProfile?
   refreshTokens        RefreshToken[]
   passwordResetTokens  PasswordResetToken[]
+  emailTemplatesCreated EmailTemplate[] @relation("EmailTemplatesCreated")
+  otpTemplatesCreated   OtpTemplate[] @relation("OtpTemplatesCreated")
+  notificationCampaignsCreated NotificationCampaign[] @relation("NotificationCampaignsCreated")
+  targetedNotificationCampaigns NotificationCampaign[] @relation("NotificationCampaignAudience")
+  reviewedPublications         Publication[]          @relation("PublicationReviewer")
+  publicationReviews           PublicationReview[]
+  publicationBookmarks         PublicationBookmark[]
 
   @@index([email])
   @@index([role])
@@ -130,6 +137,7 @@ model DoctorProfile {
   user                  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   prescriptions         Prescription[]     @relation("DoctorPrescriptions")
   reviews               Review[]
+  submittedPublications Publication[]
 
   @@index([specialty])
   @@index([availability])
@@ -531,6 +539,93 @@ model FounderMessage {
   @@map("founder_messages")
 }
 
+model EmailTemplate {
+  id          String         @id @default(cuid())
+  name        String
+  subject     String
+  category    String
+  bodyHtml    String         @db.Text
+  variables   String[]       @default([])
+  status      TemplateStatus @default(DRAFT)
+  isEnabled   Boolean        @default(true)
+  icon        String?
+  createdById String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  createdBy   User?          @relation("EmailTemplatesCreated", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([category])
+  @@map("email_templates")
+}
+
+model OtpTemplate {
+  id            String         @id @default(cuid())
+  name          String
+  purpose       OtpPurpose
+  subject       String?
+  message       String         @db.Text
+  expiryMinutes Int            @default(10)
+  otpLength     Int            @default(6)
+  senderName    String         @default("DrInsight")
+  status        TemplateStatus @default(DRAFT)
+  isEnabled     Boolean        @default(true)
+  createdById   String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  createdBy     User?          @relation("OtpTemplatesCreated", fields: [createdById], references: [id], onDelete: SetNull)
+  deliveryLogs  OtpDeliveryLog[]
+
+  @@index([purpose])
+  @@index([status])
+  @@map("otp_templates")
+}
+
+model OtpDeliveryLog {
+  id         String             @id @default(cuid())
+  templateId String?
+  channel    OtpDeliveryChannel
+  status     OtpDeliveryStatus
+  recipient  String
+  createdAt  DateTime           @default(now())
+  template   OtpTemplate?       @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([channel])
+  @@map("otp_delivery_logs")
+}
+
+model NotificationCampaign {
+  id             String                 @id @default(cuid())
+  title          String
+  message        String                 @db.Text
+  type           String                 @default("GENERAL")
+  priority       NotificationPriority   @default(NORMAL)
+  audience       NotificationAudience
+  audienceUserId String?
+  channels       NotificationChannel[]
+  scheduleAt     DateTime?
+  expiresAt      DateTime?
+  actionLabel    String?
+  actionUrl      String?
+  status         CampaignStatus         @default(DRAFT)
+  totalSent      Int                    @default(0)
+  delivered      Int                    @default(0)
+  readCount      Int                    @default(0)
+  failed         Int                    @default(0)
+  createdById    String?
+  sentAt         DateTime?
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+  createdBy      User?                  @relation("NotificationCampaignsCreated", fields: [createdById], references: [id], onDelete: SetNull)
+  audienceUser   User?                  @relation("NotificationCampaignAudience", fields: [audienceUserId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([audience])
+  @@index([scheduleAt])
+  @@map("notification_campaigns")
+}
+
 enum OAuthProvider {
   GOOGLE
   FACEBOOK
@@ -596,6 +691,262 @@ enum NotificationType {
   SYSTEM
   REVIEW
   PRESCRIPTION
+  PUBLICATION
+}
+
+enum PublicationStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  NEEDS_REVISION
+}
+
+enum PublicationType {
+  JOURNAL_ARTICLE
+  RESEARCH_PAPER
+  CASE_STUDY
+  CLINICAL_TRIAL
+  REVIEW_ARTICLE
+  CONFERENCE_PAPER
+  BOOK_CHAPTER
+  THESIS
+}
+
+enum PublicationVisibility {
+  PUBLIC
+  PRIVATE
+  AFTER_APPROVAL
+}
+
+enum PublicationAttachmentType {
+  PDF
+  COVER_IMAGE
+  SUPPLEMENTARY
+  DATASET
+  FIGURE
+  TABLE
+}
+
+enum PublicationReviewAction {
+  APPROVE
+  REJECT
+  REQUEST_REVISION
+  SUBMIT
+  ASSIGN_REVIEWER
+}
+
+model Publication {
+  id                        String                @id @default(cuid())
+  doctorId                  String
+  slug                      String                @unique
+  title                     String
+  subtitle                  String?
+  abstract                  String                @db.Text
+  introduction              String?               @db.Text
+  results                   String?               @db.Text
+  discussion                String?               @db.Text
+  conclusion                String?               @db.Text
+  researchCategory          String?
+  medicalSpecialty          String?
+  publicationType           PublicationType
+  language                  String                @default("English")
+  institution               String?
+  department                String?
+  orcid                     String?
+  correspondingAuthor       String?
+  journalName               String?
+  publisher                 String?
+  volume                    String?
+  issue                     String?
+  pages                     String?
+  doi                       String?
+  issn                      String?
+  publicationDate           DateTime?
+  acceptanceDate            DateTime?
+  submissionDate            DateTime?
+  researchMethodology       String?               @db.Text
+  studyDesign               String?
+  sampleSize                String?
+  fundingSource             String?
+  ethicalApprovalNumber     String?
+  clinicalTrialRegistration String?
+  researchOverview          String?               @db.Text
+  methodologySteps          String?               @db.Text
+  partners                  String?
+  referenceCount            Int?
+  reviewingPhysician        String?
+  physicianReviewed         Boolean               @default(false)
+  evidenceBased             Boolean               @default(false)
+  openAccess                Boolean               @default(false)
+  fullyReferenced           Boolean               @default(false)
+  coiDisclosed              Boolean               @default(false)
+  doiUrl                    String?
+  journalUrl                String?
+  pubmedUrl                 String?
+  googleScholarUrl          String?
+  visibility                PublicationVisibility @default(AFTER_APPROVAL)
+  seoTitle                  String?
+  metaDescription           String?
+  status                    PublicationStatus     @default(DRAFT)
+  featured                  Boolean               @default(false)
+  pinned                    Boolean               @default(false)
+  featuredOrder             Int?
+  viewCount                 Int                   @default(0)
+  downloadCount             Int                   @default(0)
+  shareCount                Int                   @default(0)
+  citationCount             Int                   @default(0)
+  readTimeMinutes           Int                   @default(5)
+  assignedReviewerId        String?
+  submittedAt               DateTime?
+  approvedAt                DateTime?
+  rejectedAt                DateTime?
+  publishedAt               DateTime?
+  createdAt                 DateTime              @default(now())
+  updatedAt                 DateTime              @updatedAt
+  doctor                    DoctorProfile         @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  assignedReviewer          User?                 @relation("PublicationReviewer", fields: [assignedReviewerId], references: [id], onDelete: SetNull)
+  authors                   PublicationAuthor[]
+  keywords                  PublicationKeyword[]
+  attachments               PublicationAttachment[]
+  reviews                   PublicationReview[]
+  revisions                 PublicationRevision[]
+  views                     PublicationView[]
+  downloads                 PublicationDownload[]
+  bookmarks                 PublicationBookmark[]
+  citations                 PublicationCitation[]
+
+  @@index([doctorId])
+  @@index([status])
+  @@index([publicationType])
+  @@index([medicalSpecialty])
+  @@index([featured, featuredOrder])
+  @@index([publishedAt])
+  @@index([viewCount])
+  @@index([downloadCount])
+  @@index([citationCount])
+  @@map("publications")
+}
+
+model PublicationAuthor {
+  id            String      @id @default(cuid())
+  publicationId String
+  name          String
+  role          String?
+  orcid         String?
+  affiliation   String?
+  isPrimary     Boolean     @default(false)
+  sortOrder     Int         @default(0)
+  publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+
+  @@index([publicationId])
+  @@map("publication_authors")
+}
+
+model PublicationKeyword {
+  id            String      @id @default(cuid())
+  publicationId String
+  keyword       String
+  publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+
+  @@index([publicationId])
+  @@index([keyword])
+  @@map("publication_keywords")
+}
+
+model PublicationAttachment {
+  id            String                    @id @default(cuid())
+  publicationId String
+  type          PublicationAttachmentType
+  fileName      String
+  fileUrl       String
+  fileSize      Int?
+  mimeType      String?
+  storageKey    String?
+  createdAt     DateTime                  @default(now())
+  publication   Publication               @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+
+  @@index([publicationId])
+  @@map("publication_attachments")
+}
+
+model PublicationReview {
+  id             String                  @id @default(cuid())
+  publicationId  String
+  reviewerId     String
+  action         PublicationReviewAction
+  internalNotes  String?                 @db.Text
+  feedback       String?                 @db.Text
+  visibility     PublicationVisibility?
+  featured       Boolean?
+  pinned         Boolean?
+  createdAt      DateTime                @default(now())
+  publication    Publication             @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  reviewer       User                    @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+
+  @@index([publicationId])
+  @@index([reviewerId])
+  @@map("publication_reviews")
+}
+
+model PublicationRevision {
+  id            String      @id @default(cuid())
+  publicationId String
+  revisionNotes String?     @db.Text
+  snapshot      Json?
+  submittedAt   DateTime    @default(now())
+  publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+
+  @@index([publicationId])
+  @@map("publication_revisions")
+}
+
+model PublicationView {
+  id            String      @id @default(cuid())
+  publicationId String
+  viewerKey     String
+  createdAt     DateTime    @default(now())
+  publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+
+  @@index([publicationId])
+  @@index([viewerKey])
+  @@map("publication_views")
+}
+
+model PublicationDownload {
+  id            String      @id @default(cuid())
+  publicationId String
+  downloaderKey String
+  createdAt     DateTime    @default(now())
+  publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+
+  @@index([publicationId])
+  @@map("publication_downloads")
+}
+
+model PublicationBookmark {
+  id            String      @id @default(cuid())
+  publicationId String
+  userId        String
+  createdAt     DateTime    @default(now())
+  publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([publicationId, userId])
+  @@index([userId])
+  @@map("publication_bookmarks")
+}
+
+model PublicationCitation {
+  id            String      @id @default(cuid())
+  publicationId String
+  citedByKey    String
+  createdAt     DateTime    @default(now())
+  publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+
+  @@index([publicationId])
+  @@map("publication_citations")
 }
 
 enum VideoProvider {
@@ -627,4 +978,58 @@ enum PaymentStatus {
   FAILED
   CANCELLED
   REFUNDED
+}
+
+enum TemplateStatus {
+  ACTIVE
+  DRAFT
+}
+
+enum OtpPurpose {
+  LOGIN
+  REGISTRATION
+  EMAIL_VERIFICATION
+  PHONE_VERIFICATION
+  PASSWORD_RESET
+  TWO_FACTOR
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+  PUSH
+}
+
+enum NotificationAudience {
+  ALL_USERS
+  PATIENTS
+  DOCTORS
+  ADMINS
+  INDIVIDUAL
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENT
+  ARCHIVED
+}
+
+enum OtpDeliveryChannel {
+  EMAIL
+  SMS
+}
+
+enum OtpDeliveryStatus {
+  SENT
+  FAILED
+  VERIFIED
 }

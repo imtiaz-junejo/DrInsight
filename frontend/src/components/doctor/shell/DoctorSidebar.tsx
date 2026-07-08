@@ -22,8 +22,6 @@ export function DoctorSidebar() {
   const availability = useDoctorUiStore((s) => s.availability);
   const setAvailability = useDoctorUiStore((s) => s.setAvailability);
   const showToast = useDoctorUiStore((s) => s.showToast);
-  const setMobileSidebarOpen = useDoctorUiStore((s) => s.setMobileSidebarOpen);
-  const mobileSidebarOpen = useDoctorUiStore((s) => s.mobileSidebarOpen);
 
   const initials = getInitials(user?.firstName, user?.lastName);
   const fullName = `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim() || "Doctor";
@@ -41,7 +39,7 @@ export function DoctorSidebar() {
   };
 
   return (
-    <aside className={`dash-sidebar${mobileSidebarOpen ? " open" : ""}`}>
+    <aside className="dash-sidebar">
       <div className="sidebar-profile">
         <div className="sidebar-avatar-ring">
           <div className="sidebar-avatar">{initials}</div>
@@ -83,7 +81,6 @@ export function DoctorSidebar() {
                   key={item.id}
                   href={item.href}
                   className={`snav-item${active ? " active" : ""}`}
-                  onClick={() => setMobileSidebarOpen(false)}
                 >
                   <span className="snav-ico">{item.ico}</span>
                   {item.name}

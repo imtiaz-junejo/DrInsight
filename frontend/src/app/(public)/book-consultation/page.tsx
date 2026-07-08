@@ -10,11 +10,23 @@ import { CONTACT_PHONE, CONTACT_PHONE_TEL } from "@/lib/site-contact";
 import type { DoctorScheduleDay } from "@/services/api-hooks";
 import { StripePaymentWrapper } from "@/components/payments/StripePaymentWrapper";
 import {
+  bookingLoginUrl,
+  bookingRegisterUrl,
+  verifyPatientSession,
+} from "@/lib/booking-auth";
+import { extractPatientFormFields } from "@/lib/patient-profile";
+import { useAuthStore } from "@/store/auth.store";
+import {
+  usePendingBookingStore,
+  type PendingBookingData,
+} from "@/store/pending-booking.store";
+import {
   useCreateBookingDraft,
   useCreatePaymentIntent,
   useDoctorSpecialties,
   useDoctors,
 } from "@/services/api-hooks";
+import { useAuthProfile } from "@/services/patient-api-hooks";
 
 const MONTHS = [
   "January",
@@ -87,11 +99,10 @@ function isDayAvailable(schedule: DoctorScheduleDay[] | null | undefined, date: 
 }
 
 const STEPS = [
-  { num: 1, label: "Select Specialty", sublabel: "Choose your specialty" },
-  { num: 2, label: "Select Doctor", sublabel: "Choose your doctor" },
-  { num: 3, label: "Select Date & Time", sublabel: "Pick a convenient slot" },
-  { num: 4, label: "Patient Information", sublabel: "Your details" },
-  { num: 5, label: "Payment", sublabel: "Secure checkout" },
+  { num: 1, label: "Specialty & Doctor", sublabel: "Choose your specialist" },
+  { num: 2, label: "Date & Time", sublabel: "Pick a convenient slot" },
+  { num: 3, label: "Patient Details", sublabel: "Your information" },
+  { num: 4, label: "Payment", sublabel: "Secure checkout" },
 ];
 
 type UploadedFile = { name: string; size: number };
@@ -152,6 +163,9 @@ export default function BookConsultationPage() {
   const [billingName, setBillingName] = useState("");
   const [billingEmail, setBillingEmail] = useState("");
   const [billingCountry, setBillingCountry] = useState("US");
+  const [patientPhone, setPatientPhone] = useState("");
+  const [patientDob, setPatientDob] = useState("");
+  const [patientGender, setPatientGender] = useState("");
   const [bookingDraftId, setBookingDraftId] = useState("");
   const [clientSecret, setClientSecret] = useState("");
   const [providerIntentId, setProviderIntentId] = useState("");
@@ -164,6 +178,25 @@ export default function BookConsultationPage() {
   const [selTime, setSelTime] = useState("");
 
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [authVerifying, setAuthVerifying] = useState(false);
+  const [nonPatientBlock, setNonPatientBlock] = useState(false);
+  const [restoredBanner, setRestoredBanner] = useState(false);
+  const restoreAttempted = useRef(false);
+  const isRestoringRef = useRef(false);
+  const lastPrefilledKey = useRef<string | null>(null);
+
+  const user = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const isBootstrapped = useAuthStore((s) => s.isBootstrapped);
+  const setUser = useAuthStore((s) => s.setUser);
+  const pendingBooking = usePendingBookingStore((s) => s.booking);
+  const pendingHasHydrated = usePendingBookingStore((s) => s.hasHydrated);
+  const savePendingBooking = usePendingBookingStore((s) => s.saveBooking);
+  const clearPendingBooking = usePendingBookingStore((s) => s.clearBooking);
+  const setAwaitingAuth = usePendingBookingStore((s) => s.setAwaitingAuth);
+
+  const shouldLoadProfile = isBootstrapped && isAuthenticated && user?.role === "PATIENT" && currentStep >= 3;
+  const profileQuery = useAuthProfile({ enabled: shouldLoadProfile });
 
   const matchingDoctors = useMemo(
     () =>
@@ -177,17 +210,14 @@ export default function BookConsultationPage() {
     [allDoctors, spec],
   );
 
-  const topDoctors = useMemo(
-    () =>
-      spec
-        ? [...matchingDoctors].sort((a, b) => b.rating - a.rating || b.reviews - a.reviews).slice(0, 3)
-        : [],
-    [matchingDoctors, spec],
+  const sortedDoctors = useMemo(
+    () => [...matchingDoctors].sort((a, b) => b.rating - a.rating || b.reviews - a.reviews),
+    [matchingDoctors],
   );
 
   const selectedDoctor = useMemo(
-    () => allDoctors.find((d) => d.id === doctorId) ?? matchingDoctors[0],
-    [allDoctors, doctorId, matchingDoctors],
+    () => allDoctors.find((d) => d.id === doctorId) ?? null,
+    [allDoctors, doctorId],
   );
 
   const consultationTypes = useMemo(() => {
@@ -250,15 +280,106 @@ export default function BookConsultationPage() {
   }, [searchParams, allDoctors]);
 
   useEffect(() => {
-    if (matchingDoctors.length > 0 && !matchingDoctors.some((d) => d.id === doctorId)) {
-      setDoctorId(matchingDoctors[0].id);
+    if (!doctorsLoading && allDoctors.length > 0 && doctorId && !matchingDoctors.some((d) => d.id === doctorId)) {
+      setDoctorId("");
     }
-  }, [matchingDoctors, doctorId]);
+  }, [allDoctors.length, doctorId, doctorsLoading, matchingDoctors]);
+
+  const handleSpecChange = useCallback((value: string) => {
+    setSpec(value);
+    setDoctorId("");
+  }, []);
 
   const goStep = useCallback((n: number) => {
     setCurrentStep(n);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
+
+  const applyPendingBooking = useCallback((saved: PendingBookingData) => {
+    isRestoringRef.current = true;
+    setSpec(saved.spec);
+    setDoctorId(saved.doctorId);
+    setConsultType(saved.consultType);
+    setSelDate(saved.selDate);
+    setSelTime(saved.selTime);
+    setCalMonth(saved.calMonth);
+    setCalYear(saved.calYear);
+    if (saved.billingName) setBillingName(saved.billingName);
+    if (saved.billingEmail) setBillingEmail(saved.billingEmail);
+    if (saved.billingCountry) setBillingCountry(saved.billingCountry);
+    window.setTimeout(() => {
+      isRestoringRef.current = false;
+    }, 0);
+  }, []);
+
+  useEffect(() => {
+    if (!isBootstrapped || !pendingHasHydrated || restoreAttempted.current) return;
+    if (!pendingBooking?.spec || !pendingBooking?.doctorId || !pendingBooking?.selDate || !pendingBooking?.selTime) {
+      return;
+    }
+
+    if (isAuthenticated && user?.role === "PATIENT") {
+      restoreAttempted.current = true;
+      applyPendingBooking(pendingBooking);
+      if (pendingBooking.awaitingAuth) {
+        setAwaitingAuth(false);
+      }
+      setRestoredBanner(true);
+      goStep(3);
+      return;
+    }
+
+    if (isAuthenticated && user && user.role !== "PATIENT" && pendingBooking.awaitingAuth) {
+      restoreAttempted.current = true;
+      applyPendingBooking(pendingBooking);
+      setAwaitingAuth(false);
+      setNonPatientBlock(true);
+      goStep(2);
+    }
+  }, [
+    applyPendingBooking,
+    goStep,
+    isAuthenticated,
+    isBootstrapped,
+    pendingBooking,
+    pendingHasHydrated,
+    setAwaitingAuth,
+    user,
+  ]);
+
+  useEffect(() => {
+    if (currentStep !== 3) {
+      lastPrefilledKey.current = null;
+      return;
+    }
+    if (!profileQuery.isSuccess || !profileQuery.data) return;
+
+    const profile = profileQuery.data;
+    const prefillKey = `${profile.id}:${profileQuery.dataUpdatedAt}`;
+    if (lastPrefilledKey.current === prefillKey) return;
+    lastPrefilledKey.current = prefillKey;
+
+    const fields = extractPatientFormFields(profile);
+    const fullName = `${fields.firstName} ${fields.lastName}`.trim();
+    if (fullName) setBillingName(fullName);
+    if (fields.email) setBillingEmail(fields.email);
+    if (fields.phone) setPatientPhone(fields.phone);
+    if (fields.dateOfBirth) setPatientDob(fields.dateOfBirth);
+    if (fields.gender) setPatientGender(fields.gender);
+  }, [currentStep, profileQuery.isSuccess, profileQuery.data, profileQuery.dataUpdatedAt]);
+
+  useEffect(() => {
+    if (!restoredBanner) return;
+    const timer = setTimeout(() => setRestoredBanner(false), 8000);
+    return () => clearTimeout(timer);
+  }, [restoredBanner]);
+
+  useEffect(() => {
+    if (isRestoringRef.current) return;
+    if (currentStep > 1 && !doctorId) {
+      goStep(1);
+    }
+  }, [currentStep, doctorId, goStep]);
 
   const changeMonth = (dir: number) => {
     let nextMonth = calMonth + dir;
@@ -293,12 +414,66 @@ export default function BookConsultationPage() {
     setUploadedFiles((prev) => [...prev, ...newFiles]);
   };
 
+  const handleContinueToPatientDetails = async () => {
+    if (!selDate || !selTime || !spec || !doctorId) return;
+
+    setAuthVerifying(true);
+    setNonPatientBlock(false);
+
+    try {
+      const { status, user: verifiedUser } = await verifyPatientSession();
+
+      if (status === "patient" && verifiedUser) {
+        setUser(verifiedUser);
+        savePendingBooking({
+          spec,
+          doctorId,
+          consultType,
+          selDate,
+          selTime,
+          calMonth,
+          calYear,
+          currentStep: 3,
+          billingName: billingName || `${verifiedUser.firstName} ${verifiedUser.lastName}`.trim(),
+          billingEmail: billingEmail || verifiedUser.email,
+          billingCountry,
+          awaitingAuth: false,
+        });
+        goStep(3);
+        return;
+      }
+
+      if (status === "unauthenticated") {
+        savePendingBooking({
+          spec,
+          doctorId,
+          consultType,
+          selDate,
+          selTime,
+          calMonth,
+          calYear,
+          currentStep: 3,
+          billingName,
+          billingEmail,
+          billingCountry,
+          awaitingAuth: true,
+        });
+        window.location.href = bookingLoginUrl();
+        return;
+      }
+
+      setNonPatientBlock(true);
+    } finally {
+      setAuthVerifying(false);
+    }
+  };
+
   const proceedToPayment = async () => {
     if (!selectedDoctor || !selDate || !selTime) {
       alert("Please select a doctor, date, and time.");
       return;
     }
-    goStep(5);
+    goStep(4);
     setPaymentError("");
     setPaymentLoading(true);
     setClientSecret("");
@@ -321,23 +496,32 @@ export default function BookConsultationPage() {
       setProviderIntentId(intent.providerIntentId);
     } catch {
       setPaymentError("Unable to start payment. Please log in as a patient and try again.");
-      goStep(4);
+      goStep(3);
     } finally {
       setPaymentLoading(false);
     }
   };
 
   const handlePaymentSuccess = (appointmentId: string) => {
+    clearPendingBooking();
     setConfirmed(true);
     setBookingRef(appointmentId.slice(0, 13).toUpperCase());
     window.location.href = `/book-consultation/confirmation?appointmentId=${appointmentId}`;
   };
 
   const resetBooking = () => {
+    clearPendingBooking();
     setConfirmed(false);
+    setNonPatientBlock(false);
+    setRestoredBanner(false);
     setCurrentStep(1);
+    setSpec("");
+    setDoctorId("");
     setSelDate("");
     setSelTime("");
+    setPatientPhone("");
+    setPatientDob("");
+    setPatientGender("");
     setUploadedFiles([]);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -422,8 +606,37 @@ export default function BookConsultationPage() {
 
       {!confirmed && (
         <div id="booking-flow">
+          {restoredBanner && (
+            <div className="booking-restored-banner step-section-enter" role="status">
+              <i className="ti ti-circle-check" aria-hidden="true" />
+              <span>Welcome back! Your booking has been restored.</span>
+            </div>
+          )}
+
+          {nonPatientBlock && (
+            <div className="booking-auth-block step-section-enter" role="alert">
+              <div className="booking-auth-block-icon">
+                <i className="ti ti-user-exclamation" aria-hidden="true" />
+              </div>
+              <div className="booking-auth-block-body">
+                <h3>Patient account required</h3>
+                <p>
+                  Only Patient accounts can book consultations. Please register a Patient account to continue.
+                </p>
+                <div className="booking-auth-block-actions">
+                  <Link href={bookingRegisterUrl()} className="booking-auth-block-primary">
+                    Register as Patient
+                  </Link>
+                  <button type="button" className="booking-auth-block-secondary" onClick={() => setNonPatientBlock(false)}>
+                    Back
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="main">
-            <div id="step-content">
+            <div id="step-content" key={currentStep} className="step-panel step-panel-enter">
               {currentStep === 1 && (
                 <div id="step1">
                   <div className="form-panel form-panel-accent">
@@ -432,9 +645,9 @@ export default function BookConsultationPage() {
                         <i className="ti ti-stethoscope" aria-hidden="true" />
                       </div>
                       <div>
-                        <div className="panel-title">Select Specialty</div>
+                        <div className="panel-title">Select Specialty & Doctor</div>
                         <div className="panel-sub panel-sub-inline">
-                          Choose the medical specialty that best matches your health concern
+                          Choose your specialty, then select a doctor from the list below
                         </div>
                       </div>
                     </div>
@@ -442,7 +655,7 @@ export default function BookConsultationPage() {
                       <select
                         className="spec-select"
                         value={spec}
-                        onChange={(e) => setSpec(e.target.value)}
+                        onChange={(e) => handleSpecChange(e.target.value)}
                         aria-label="Select a specialty"
                       >
                         <option value="">Select a specialty</option>
@@ -456,126 +669,134 @@ export default function BookConsultationPage() {
                     </div>
                   </div>
 
-                  <div className="top-doctors-section">
-                    <div className="top-doctors-head">
-                      <div>
-                        <h3 className="top-doctors-title">Top Doctors</h3>
-                        <p className="top-doctors-sub">Our top specialists in this field</p>
+                  {spec && (
+                    <div className="top-doctors-section step-section-enter">
+                      <div className="top-doctors-head">
+                        <div>
+                          <h3 className="top-doctors-title">Available Doctors</h3>
+                          <p className="top-doctors-sub">
+                            {sortedDoctors.length} specialist{sortedDoctors.length !== 1 ? "s" : ""} in {spec}
+                          </p>
+                        </div>
                       </div>
-                      {matchingDoctors.length > 3 && (
-                        <button type="button" className="show-all-link" onClick={() => goStep(2)}>
-                          Show all available doctors <i className="ti ti-arrow-right" aria-hidden="true" />
-                        </button>
-                      )}
-                    </div>
 
-                    <div className="top-doc-grid">
-                      {doctorsLoading ? (
-                        <p style={{ color: "var(--gray-500)" }}>Loading doctors...</p>
-                      ) : topDoctors.length > 0 ? (
-                        topDoctors.map((d) => (
-                          <div
-                            key={d.id}
-                            className={`top-doc-card${doctorId === d.id ? " sel" : ""}`}
-                            onClick={() => setDoctorId(d.id)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") setDoctorId(d.id);
-                            }}
-                            role="button"
-                            tabIndex={0}
-                          >
-                            <div className="top-doc-video">
-                              <i className="ti ti-video" aria-hidden="true" />
-                            </div>
-                            <div className="top-doc-av">
-                              {d.avatarUrl ? (
-                                <img src={d.avatarUrl} alt="" />
-                              ) : (
-                                <span style={{ background: d.bg }}>{d.init}</span>
-                              )}
-                            </div>
-                            <h4>{d.name}</h4>
-                            <div className="top-doc-spec">{d.specialtyName}</div>
-                            <div className="top-doc-rating">
-                              <i className="ti ti-star-filled" aria-hidden="true" /> {d.rating.toFixed(1)} ({d.reviews}{" "}
-                              reviews)
-                            </div>
-                            <div className="top-doc-exp">{d.exp} years experience</div>
-                            <Link
-                              href={`/our-doctors/${d.id}`}
-                              className="top-doc-profile-btn"
-                              onClick={(e) => e.stopPropagation()}
+                      <div className="top-doc-grid">
+                        {doctorsLoading ? (
+                          <p style={{ color: "var(--gray-500)" }}>Loading doctors...</p>
+                        ) : sortedDoctors.length > 0 ? (
+                          sortedDoctors.map((d) => (
+                            <div
+                              key={d.id}
+                              className={`top-doc-card${doctorId === d.id ? " sel" : ""}`}
+                              onClick={() => setDoctorId(d.id)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === " ") setDoctorId(d.id);
+                              }}
+                              role="button"
+                              tabIndex={0}
+                              aria-pressed={doctorId === d.id}
                             >
-                              View Profile
-                            </Link>
-                          </div>
-                        ))
-                      ) : (
-                        <p style={{ color: "var(--gray-500)" }}>No doctors available for this specialty.</p>
-                      )}
-                    </div>
-
-                    {matchingDoctors.length > 3 && (
-                      <div className="show-all-bottom">
-                        <button type="button" className="show-all-link" onClick={() => goStep(2)}>
-                          Show all available doctors <i className="ti ti-arrow-right" aria-hidden="true" />
-                        </button>
+                              {doctorId === d.id && (
+                                <div className="top-doc-selected-badge" aria-hidden="true">
+                                  <i className="ti ti-check" />
+                                </div>
+                              )}
+                              <div className="top-doc-video">
+                                <i className="ti ti-video" aria-hidden="true" />
+                              </div>
+                              <div className="top-doc-av">
+                                {d.avatarUrl ? (
+                                  <img src={d.avatarUrl} alt="" />
+                                ) : (
+                                  <span style={{ background: d.bg }}>{d.init}</span>
+                                )}
+                              </div>
+                              <h4>{d.name}</h4>
+                              <div className="top-doc-spec">{d.specialtyName}</div>
+                              <div className="top-doc-rating">
+                                <i className="ti ti-star-filled" aria-hidden="true" /> {d.rating.toFixed(1)} ({d.reviews}{" "}
+                                reviews)
+                              </div>
+                              <div className="top-doc-exp">{d.exp} years experience</div>
+                              <div className="top-doc-fee">{formatCurrency(d.fee)} / 30 min</div>
+                              <div className={`top-doc-avail${d.online ? " online" : ""}`}>
+                                <i className="ti ti-circle-check" aria-hidden="true" />{" "}
+                                {d.online ? "Available today" : "Book appointment"}
+                              </div>
+                              <Link
+                                href={`/our-doctors/${d.id}`}
+                                className="top-doc-profile-btn"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                View Profile
+                              </Link>
+                            </div>
+                          ))
+                        ) : (
+                          <p style={{ color: "var(--gray-500)" }}>No doctors available for this specialty.</p>
+                        )}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
 
                   <div className="nav-btns">
                     <div />
-                    <button type="button" className="btn-next" onClick={() => goStep(2)} disabled={!spec}>
-                      Continue to Select Doctor <i className="ti ti-arrow-right" aria-hidden="true" />
+                    <button
+                      type="button"
+                      className="btn-next"
+                      onClick={() => goStep(2)}
+                      disabled={!spec || !doctorId}
+                    >
+                      Continue to Date & Time <i className="ti ti-arrow-right" aria-hidden="true" />
                     </button>
                   </div>
                 </div>
               )}
 
-              {currentStep === 2 && (
+              {currentStep === 2 && selectedDoctor && (
                 <div id="step2">
-                  <div className="form-panel">
-                    <div className="panel-title">
-                      <i className="ti ti-user-md" aria-hidden="true" /> Select Doctor
-                    </div>
-                    <div className="panel-sub">All doctors are board-certified with verified credentials</div>
-                    <div className="doc-grid">
-                      {doctorsLoading ? (
-                        <p style={{ color: "var(--gray-500)" }}>Loading doctors...</p>
-                      ) : matchingDoctors.length > 0 ? (
-                        matchingDoctors.map((d) => (
-                          <div
-                            key={d.id}
-                            className={`doc-card${doctorId === d.id ? " sel" : ""}`}
-                            onClick={() => setDoctorId(d.id)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") setDoctorId(d.id);
-                            }}
-                            role="button"
-                            tabIndex={0}
-                          >
-                            <div className="doc-av" style={{ background: d.bg }}>
-                              {d.avatarUrl ? <img src={d.avatarUrl} alt="" /> : d.init}
-                            </div>
-                            <h4>{d.name}</h4>
-                            <div className="dspec">{d.specLabel}</div>
-                            <div className="dexp">{d.exp} yrs experience</div>
-                            <div className="drating">★★★★★ {d.rating.toFixed(1)} ({d.reviews})</div>
-                            <div className="dfee">{formatCurrency(d.fee)} / 20 min</div>
-                            <div className="doc-badge">
-                              <i className="ti ti-circle-check" aria-hidden="true" />{" "}
-                              {d.online ? "Available today" : "Book appointment"}
-                            </div>
-                          </div>
-                        ))
+                  <div className="selected-doctor-summary step-section-enter">
+                    <div className="sds-avatar">
+                      {selectedDoctor.avatarUrl ? (
+                        <img src={selectedDoctor.avatarUrl} alt="" />
                       ) : (
-                        <p style={{ color: "var(--gray-500)" }}>No doctors available for this specialty.</p>
+                        <span style={{ background: selectedDoctor.bg }}>{selectedDoctor.init}</span>
                       )}
+                    </div>
+                    <div className="sds-body">
+                      <div className="sds-header">
+                        <div>
+                          <h3 className="sds-name">{selectedDoctor.name}</h3>
+                          <div className="sds-spec">{selectedDoctor.specialtyName}</div>
+                        </div>
+                        <button type="button" className="sds-change-btn" onClick={() => goStep(1)}>
+                          <i className="ti ti-switch-horizontal" aria-hidden="true" /> Change Doctor
+                        </button>
+                      </div>
+                      <div className="sds-meta">
+                        <div className="sds-meta-item">
+                          <i className="ti ti-star-filled" aria-hidden="true" />
+                          <span>
+                            {selectedDoctor.rating.toFixed(1)} ({selectedDoctor.reviews} reviews)
+                          </span>
+                        </div>
+                        <div className="sds-meta-item">
+                          <i className="ti ti-briefcase" aria-hidden="true" />
+                          <span>{selectedDoctor.exp} yrs experience</span>
+                        </div>
+                        <div className="sds-meta-item">
+                          <i className="ti ti-currency-dollar" aria-hidden="true" />
+                          <span>{formatCurrency(selectedDoctor.fee)} / 30 min</span>
+                        </div>
+                        <div className={`sds-meta-item sds-avail${selectedDoctor.online ? " online" : ""}`}>
+                          <i className="ti ti-circle-check" aria-hidden="true" />
+                          <span>{selectedDoctor.online ? "Available today" : "Book appointment"}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="form-panel panel-spaced">
+                  <div className="form-panel panel-spaced step-section-enter">
                     <div className="panel-title">
                       <i className="ti ti-device-laptop" aria-hidden="true" /> Consultation Type
                     </div>
@@ -598,20 +819,8 @@ export default function BookConsultationPage() {
                       ))}
                     </div>
                   </div>
-                  <div className="nav-btns">
-                    <button type="button" className="btn-back" onClick={() => goStep(1)}>
-                      <i className="ti ti-arrow-left" aria-hidden="true" /> Back
-                    </button>
-                    <button type="button" className="btn-next" onClick={() => goStep(3)}>
-                      Continue to Date & Time <i className="ti ti-arrow-right" aria-hidden="true" />
-                    </button>
-                  </div>
-                </div>
-              )}
 
-              {currentStep === 3 && (
-                <div id="step3">
-                  <div className="form-panel">
+                  <div className="form-panel panel-spaced step-section-enter">
                     <div className="panel-title">
                       <i className="ti ti-calendar" aria-hidden="true" /> Select Date & Time
                     </div>
@@ -687,19 +896,30 @@ export default function BookConsultationPage() {
                     </div>
                   </div>
                   <div className="nav-btns">
-                    <button type="button" className="btn-back" onClick={() => goStep(2)}>
+                    <button type="button" className="btn-back" onClick={() => goStep(1)}>
                       <i className="ti ti-arrow-left" aria-hidden="true" /> Back
                     </button>
-                    <button type="button" className="btn-next" onClick={() => goStep(4)}>
-                      Continue to Patient Info <i className="ti ti-arrow-right" aria-hidden="true" />
+                    <button
+                      type="button"
+                      className="btn-next"
+                      onClick={handleContinueToPatientDetails}
+                      disabled={!selDate || !selTime || authVerifying}
+                    >
+                      {authVerifying ? (
+                        "Verifying account..."
+                      ) : (
+                        <>
+                          Continue to Patient Details <i className="ti ti-arrow-right" aria-hidden="true" />
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>
               )}
 
-              {currentStep === 4 && (
-                <div id="step4">
-                  <div className="form-panel">
+              {currentStep === 3 && (
+                <div id="step3">
+                  <div className="form-panel step-section-enter">
                     <div className="panel-title">
                       <i className="ti ti-user" aria-hidden="true" /> Patient Information
                     </div>
@@ -742,21 +962,31 @@ export default function BookConsultationPage() {
                       </div>
                       <div className="form-group">
                         <label>Phone Number</label>
-                        <input type="tel" placeholder="+1 (555) 000-0000" />
+                        <input
+                          type="tel"
+                          placeholder="+1 (555) 000-0000"
+                          value={patientPhone}
+                          onChange={(e) => setPatientPhone(e.target.value)}
+                        />
                       </div>
                     </div>
                     <div className="form-row">
                       <div className="form-group">
                         <label>Date of Birth</label>
-                        <input type="date" />
+                        <input
+                          type="date"
+                          value={patientDob}
+                          onChange={(e) => setPatientDob(e.target.value)}
+                        />
                       </div>
                       <div className="form-group">
                         <label>Biological Sex</label>
-                        <select defaultValue="">
+                        <select value={patientGender} onChange={(e) => setPatientGender(e.target.value)}>
                           <option value="">Select...</option>
                           <option>Male</option>
                           <option>Female</option>
                           <option>Prefer not to say</option>
+                          <option>Other</option>
                         </select>
                       </div>
                     </div>
@@ -814,7 +1044,7 @@ export default function BookConsultationPage() {
                   </div>
 
                   <div className="nav-btns">
-                    <button type="button" className="btn-back" onClick={() => goStep(3)}>
+                    <button type="button" className="btn-back" onClick={() => goStep(2)}>
                       <i className="ti ti-arrow-left" aria-hidden="true" /> Back
                     </button>
                     <button
@@ -829,9 +1059,9 @@ export default function BookConsultationPage() {
                 </div>
               )}
 
-              {currentStep === 5 && (
-                <div id="step5">
-                  <div className="form-panel">
+              {currentStep === 4 && (
+                <div id="step4">
+                  <div className="form-panel step-section-enter">
                     <div className="panel-title">
                       <i className="ti ti-credit-card" aria-hidden="true" /> Secure Payment
                     </div>
@@ -954,7 +1184,7 @@ export default function BookConsultationPage() {
                   </div>
 
                   <div className="nav-btns">
-                    <button type="button" className="btn-back" onClick={() => goStep(4)}>
+                    <button type="button" className="btn-back" onClick={() => goStep(3)}>
                       <i className="ti ti-arrow-left" aria-hidden="true" /> Back
                     </button>
                   </div>

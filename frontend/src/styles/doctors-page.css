@@ -424,26 +424,76 @@
 }
 
 .doctors-page .doc-cover {
-  height: 68px;
+  height: 88px;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 8px 10px 0;
+  box-sizing: border-box;
+}
+
+.doctors-page .doc-cover-header {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 0;
+}
+
+.doctors-page .doc-cover-badges-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  flex: 1 1 auto;
+  padding-right: 8px;
 }
 
 .doctors-page .doc-av-wrap {
   position: absolute;
-  bottom: -26px;
+  bottom: -28px;
   left: 18px;
+  z-index: 3;
+  width: 62px;
+  height: 62px;
+  flex-shrink: 0;
 }
 
 .doctors-page .doc-verified-badge {
-  position: absolute;
-  top: 8px;
-  left: 10px;
+  position: static;
   background: rgba(5, 150, 105, 0.95);
   color: #fff;
   font-size: 0.64rem;
   font-weight: 700;
   padding: 3px 7px;
   border-radius: 999px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.doctors-page .doc-status-dot {
+  position: absolute;
+  bottom: 2px;
+  right: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  z-index: 4;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.08);
+}
+
+.doctors-page .doc-status-dot.is-online {
+  background: var(--green);
+}
+
+.doctors-page .doc-status-dot.is-offline {
+  background: var(--gray-400);
 }
 
 .doctors-page .doc-av-img {
@@ -459,8 +509,6 @@
   border-radius: 50%;
   display: flex;
   align-items: center;
-  position: relative;
-  overflow: hidden;
   justify-content: center;
   font-size: 1.4rem;
   font-weight: 700;
@@ -468,22 +516,12 @@
   font-family: var(--font-display);
   border: 3px solid #fff;
   box-shadow: var(--shadow-md);
-  position: relative;
+  overflow: hidden;
 }
 
-.doctors-page .doc-online {
-  position: absolute;
-  bottom: 0;
-  right: -2px;
-  width: 14px;
-  height: 14px;
-  background: var(--green);
-  border-radius: 50%;
-  border: 2px solid #fff;
-}
 
 .doctors-page .doc-body {
-  padding: 32px 18px 16px;
+  padding: 36px 18px 16px;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -491,9 +529,8 @@
 }
 
 .doctors-page .doc-rating-badge {
-  position: absolute;
-  top: 10px;
-  right: 10px;
+  position: static;
+  flex-shrink: 0;
   background: rgba(255, 255, 255, 0.95);
   border-radius: 50px;
   padding: 3px 8px;
@@ -504,6 +541,8 @@
   align-items: center;
   gap: 3px;
   box-shadow: var(--shadow-sm);
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .doctors-page .doc-rating-badge .review-count {
@@ -766,6 +805,24 @@
 @media (max-width: 640px) {
   .doctors-page .doc-grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .doctors-page .doc-cover {
+    height: 92px;
+    padding: 8px 10px 0;
+  }
+
+  .doctors-page .doc-cover-badges-left {
+    gap: 5px;
+  }
+
+  .doctors-page .doc-av-wrap {
+    left: 16px;
+    bottom: -26px;
+  }
+
+  .doctors-page .doc-body {
+    padding-top: 34px;
   }
 
   .doctors-page .stats-strip {

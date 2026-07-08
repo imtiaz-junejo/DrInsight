@@ -28,6 +28,8 @@ export const doctorNav: DoctorNavGroup[] = [
     items: [
       { id: "submit-article", ico: "✍️", name: "Submit Article", href: "/doctor/submit-article" },
       { id: "articles", ico: "📰", name: "My Articles", badge: "47", badgeClass: "sb-g", href: "/doctor/articles" },
+      { id: "submit-publication", ico: "📤", name: "Submit Publication", href: "/doctor/submit-publication" },
+      { id: "publications", ico: "📚", name: "My Publications", href: "/doctor/publications" },
     ],
   },
   {
@@ -54,6 +56,8 @@ export const doctorPageMeta: Record<string, [string, string]> = {
   prescriptions: ["Prescriptions", "Prescriptions issued to your patients"],
   "submit-article": ["Submit an Article", "Share evidence-based medical content with our editorial team"],
   articles: ["My Articles", "Published, draft, and in-review articles"],
+  "submit-publication": ["Submit a Publication", "Submit research for the public Research & Publications page"],
+  publications: ["My Publications", "Published, draft, and in-review research publications"],
   earnings: ["Earnings", "Consultation revenue and monthly performance"],
   reviews: ["Reviews & Ratings", "Patient feedback and rating breakdown"],
   profile: ["Physician Profile", "Your professional profile and contribution stats"],
