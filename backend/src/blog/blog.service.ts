@@ -6,6 +6,15 @@ import {
 import { BlogCommentStatus, BlogStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { interleavePostsByCategory, orderCategorySlugs } from './blog-mixed-order';
+import { slugifyText, uniqueBlogSlug, uniqueCategorySlug, uniqueTagSlug } from './blog-slug.util';
+import {
+  CreateBlogCategoryDto,
+  UpdateBlogCategoryDto,
+} from './dto/blog-category.dto';
+import {
+  CreateBlogTagDto,
+  UpdateBlogTagDto,
+} from './dto/blog-tag.dto';
 import {
   CreateBlogPostDto,
   SubmitBlogCommentDto,
@@ -21,6 +30,8 @@ const authorSelect = {
   role: true,
   doctorProfile: {
     select: {
+      id: true,
+      profileSlug: true,
       specialty: true,
       subSpecialty: true,
       hospital: true,
@@ -61,7 +72,10 @@ export class BlogService {
     search?: string;
     status?: BlogStatus | 'ALL';
     authorId?: string;
-    sort?: 'recent' | 'popular' | 'mixed';
+    tag?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    sort?: 'recent' | 'popular' | 'title' | 'oldest' | 'mixed';
   }) {
     const useMixed = query.sort === 'mixed' && !query.category && !query.search;
 
@@ -77,6 +91,20 @@ export class BlogService {
       ...(query.status && query.status !== 'ALL' ? { status: query.status } : {}),
       ...(query.authorId && { authorId: query.authorId }),
       ...(query.category && { category: { slug: query.category } }),
+      ...(query.tag && {
+        OR: [
+          { tags: { has: query.tag } },
+          { postTags: { some: { tag: { OR: [{ slug: query.tag }, { name: { equals: query.tag, mode: 'insensitive' } }] } } } },
+        ],
+      }),
+      ...(query.dateFrom || query.dateTo
+        ? {
+            publishedAt: {
+              ...(query.dateFrom ? { gte: new Date(query.dateFrom) } : {}),
+              ...(query.dateTo ? { lte: new Date(query.dateTo) } : {}),
+            },
+          }
+        : {}),
       ...(query.search && {
         OR: [
           { title: { contains: query.search, mode: 'insensitive' } },
@@ -88,14 +116,22 @@ export class BlogService {
     const orderBy: Prisma.BlogPostOrderByWithRelationInput =
       query.sort === 'popular'
         ? { viewCount: 'desc' }
-        : { publishedAt: 'desc' };
+        : query.sort === 'title'
+          ? { title: 'asc' }
+          : query.sort === 'oldest'
+            ? { publishedAt: 'asc' }
+            : { publishedAt: 'desc' };
 
     const [data, total] = await Promise.all([
       this.prisma.blogPost.findMany({
         where,
         skip,
         take: limit,
-        include: postInclude,
+        include: {
+          ...postInclude,
+          reviewer: { select: { id: true, firstName: true, lastName: true } },
+          _count: { select: { comments: true } },
+        },
         orderBy,
       }),
       this.prisma.blogPost.count({ where }),
@@ -458,6 +494,7 @@ export class BlogService {
       ...(data.canonicalUrl !== undefined && { canonicalUrl: data.canonicalUrl }),
       ...(readTimeMinutes !== undefined && { readTimeMinutes }),
       ...(data.featured !== undefined && { featured: data.featured }),
+      ...(data.pinned !== undefined && { pinned: data.pinned }),
       ...(data.lastReviewedAt !== undefined && {
         lastReviewedAt: data.lastReviewedAt ? new Date(data.lastReviewedAt) : null,
       }),
@@ -476,6 +513,10 @@ export class BlogService {
         : { disconnect: true };
     }
 
+    if (data.authorId !== undefined) {
+      payload.author = { connect: { id: data.authorId } };
+    }
+
     if (data.status !== undefined) {
       payload.status = data.status;
       if (isCreate && data.status === BlogStatus.PUBLISHED && !data.publishedAt) {
@@ -486,10 +527,34 @@ export class BlogService {
     return payload;
   }
 
+  private async syncPostTags(postId: string, tagNames: string[]) {
+    const normalized = [...new Set(tagNames.map((t) => t.trim()).filter(Boolean))];
+    const tagIds: string[] = [];
+
+    for (const name of normalized) {
+      const slug = slugifyText(name) || 'tag';
+      const tag = await this.prisma.blogTag.upsert({
+        where: { slug },
+        create: { name, slug, isActive: true },
+        update: { name },
+      });
+      tagIds.push(tag.id);
+    }
+
+    await this.prisma.blogPostTag.deleteMany({ where: { postId } });
+    if (tagIds.length) {
+      await this.prisma.blogPostTag.createMany({
+        data: tagIds.map((tagId) => ({ postId, tagId })),
+        skipDuplicates: true,
+      });
+    }
+  }
+
   async create(authorId: string, data: CreateBlogPostDto) {
     const readTimeMinutes = data.readTimeMinutes ?? estimateReadTime(data.content);
+    const resolvedAuthorId = data.authorId ?? authorId;
 
-    return this.prisma.blogPost.create({
+    const post = await this.prisma.blogPost.create({
       data: {
         title: data.title,
         slug: data.slug,
@@ -513,6 +578,7 @@ export class BlogService {
         canonicalUrl: data.canonicalUrl,
         readTimeMinutes,
         featured: data.featured ?? false,
+        pinned: data.pinned ?? false,
         status: data.status ?? BlogStatus.DRAFT,
         publishedAt:
           data.publishedAt
@@ -521,12 +587,18 @@ export class BlogService {
               ? new Date()
               : null,
         lastReviewedAt: data.lastReviewedAt ? new Date(data.lastReviewedAt) : null,
-        authorId,
+        authorId: resolvedAuthorId,
         categoryId: data.categoryId,
         reviewerId: data.reviewerId,
       },
       include: { category: true, author: true },
     });
+
+    if (data.tags?.length) {
+      await this.syncPostTags(post.id, data.tags);
+    }
+
+    return post;
   }
 
   async update(slug: string, data: UpdateBlogPostDto) {
@@ -543,11 +615,17 @@ export class BlogService {
       payload.publishedAt = new Date();
     }
 
-    return this.prisma.blogPost.update({
+    const post = await this.prisma.blogPost.update({
       where: { slug },
       data: payload,
       include: { category: true, author: true },
     });
+
+    if (data.tags !== undefined) {
+      await this.syncPostTags(post.id, data.tags);
+    }
+
+    return post;
   }
 
   async submitComment(slug: string, data: SubmitBlogCommentDto) {
@@ -564,6 +642,439 @@ export class BlogService {
         status: BlogCommentStatus.PENDING,
       },
     });
+  }
+
+  async findCommentsAdmin(query: {
+    status?: BlogCommentStatus;
+    page?: number;
+    limit?: number;
+    search?: string;
+  }) {
+    const page = query.page || 1;
+    const limit = query.limit || 20;
+    const skip = (page - 1) * limit;
+    const where: Prisma.BlogCommentWhereInput = {
+      ...(query.status ? { status: query.status } : {}),
+      ...(query.search
+        ? {
+            OR: [
+              { content: { contains: query.search, mode: 'insensitive' } },
+              { authorName: { contains: query.search, mode: 'insensitive' } },
+              { post: { title: { contains: query.search, mode: 'insensitive' } } },
+            ],
+          }
+        : {}),
+    };
+
+    const [data, total, totalAll, approved, pending, rejected] = await Promise.all([
+      this.prisma.blogComment.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: { post: { select: { title: true, slug: true } } },
+      }),
+      this.prisma.blogComment.count({ where }),
+      this.prisma.blogComment.count(),
+      this.prisma.blogComment.count({ where: { status: BlogCommentStatus.APPROVED } }),
+      this.prisma.blogComment.count({ where: { status: BlogCommentStatus.PENDING } }),
+      this.prisma.blogComment.count({ where: { status: BlogCommentStatus.REJECTED } }),
+    ]);
+
+    return {
+      data,
+      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+      stats: { totalAll, approved, pending, rejected },
+    };
+  }
+
+  async updateCommentStatus(id: string, status: BlogCommentStatus) {
+    return this.prisma.blogComment.update({
+      where: { id },
+      data: { status },
+      include: { post: { select: { title: true, slug: true } } },
+    });
+  }
+
+  async deleteComment(id: string) {
+    const comment = await this.prisma.blogComment.findUnique({ where: { id } });
+    if (!comment) throw new NotFoundException('Comment not found');
+    await this.prisma.blogComment.delete({ where: { id } });
+    return { success: true };
+  }
+
+  async getManageStats() {
+    const [total, published, draft, archived] = await Promise.all([
+      this.prisma.blogPost.count(),
+      this.prisma.blogPost.count({ where: { status: BlogStatus.PUBLISHED } }),
+      this.prisma.blogPost.count({ where: { status: BlogStatus.DRAFT } }),
+      this.prisma.blogPost.count({ where: { status: BlogStatus.ARCHIVED } }),
+    ]);
+    return { total, published, draft, archived };
+  }
+
+  async publishPost(slug: string) {
+    return this.update(slug, { status: BlogStatus.PUBLISHED });
+  }
+
+  async unpublishPost(slug: string) {
+    const existing = await this.prisma.blogPost.findUnique({ where: { slug } });
+    if (!existing) throw new NotFoundException('Blog post not found');
+    return this.prisma.blogPost.update({
+      where: { slug },
+      data: { status: BlogStatus.DRAFT },
+      include: { category: true, author: true },
+    });
+  }
+
+  async archivePost(slug: string) {
+    return this.update(slug, { status: BlogStatus.ARCHIVED });
+  }
+
+  async duplicatePost(slug: string) {
+    const existing = await this.prisma.blogPost.findUnique({
+      where: { slug },
+      include: { postTags: true },
+    });
+    if (!existing) throw new NotFoundException('Blog post not found');
+
+    const newSlug = await uniqueBlogSlug(this.prisma, `${existing.slug}-copy`);
+    const copy = await this.prisma.blogPost.create({
+      data: {
+        title: `${existing.title} (Copy)`,
+        slug: newSlug,
+        subtitle: existing.subtitle,
+        excerpt: existing.excerpt,
+        content: existing.content,
+        coverImageUrl: existing.coverImageUrl,
+        coverImageAlt: existing.coverImageAlt,
+        coverImageCaption: existing.coverImageCaption,
+        categoryId: existing.categoryId,
+        authorId: existing.authorId,
+        status: BlogStatus.DRAFT,
+        readTimeMinutes: existing.readTimeMinutes,
+        tags: existing.tags,
+        summaryPoints: existing.summaryPoints,
+        keyTakeaways: existing.keyTakeaways,
+        references: existing.references ?? undefined,
+        glossary: existing.glossary ?? undefined,
+        medicalDisclaimer: existing.medicalDisclaimer,
+        peerReviewed: existing.peerReviewed,
+        seoTitle: existing.seoTitle,
+        seoDescription: existing.seoDescription,
+        metaKeywords: existing.metaKeywords,
+        canonicalUrl: existing.canonicalUrl,
+        specialty: existing.specialty,
+        featured: false,
+        pinned: false,
+        reviewerId: existing.reviewerId,
+      },
+      include: { category: true, author: true },
+    });
+
+    if (existing.postTags.length) {
+      await this.prisma.blogPostTag.createMany({
+        data: existing.postTags.map((pt) => ({ postId: copy.id, tagId: pt.tagId })),
+        skipDuplicates: true,
+      });
+    }
+
+    return copy;
+  }
+
+  async findCategoriesAdmin(query: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    sort?: 'name' | 'posts' | 'recent';
+  }) {
+    const page = query.page || 1;
+    const limit = query.limit || 20;
+    const skip = (page - 1) * limit;
+    const where: Prisma.BlogCategoryWhereInput = query.search
+      ? {
+          OR: [
+            { name: { contains: query.search, mode: 'insensitive' } },
+            { slug: { contains: query.search, mode: 'insensitive' } },
+          ],
+        }
+      : {};
+
+    const categories = await this.prisma.blogCategory.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: query.sort === 'recent' ? { updatedAt: 'desc' } : { name: 'asc' },
+      include: {
+        parent: { select: { id: true, name: true, slug: true } },
+        _count: { select: { posts: true } },
+      },
+    });
+
+    const total = await this.prisma.blogCategory.count({ where });
+    const data =
+      query.sort === 'posts'
+        ? [...categories].sort((a, b) => b._count.posts - a._count.posts)
+        : categories;
+
+    return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
+  }
+
+  async createCategory(data: CreateBlogCategoryDto) {
+    const name = data.name.trim();
+    if (!name) throw new BadRequestException('Category name is required');
+
+    const existingName = await this.prisma.blogCategory.findFirst({
+      where: { name: { equals: name, mode: 'insensitive' } },
+    });
+    if (existingName) throw new BadRequestException('A category with this name already exists');
+
+    const slug = data.slug?.trim() || (await uniqueCategorySlug(this.prisma, name));
+    const slugTaken = await this.prisma.blogCategory.findUnique({ where: { slug } });
+    if (slugTaken) throw new BadRequestException('A category with this slug already exists');
+
+    if (data.parentId) {
+      const parent = await this.prisma.blogCategory.findUnique({ where: { id: data.parentId } });
+      if (!parent) throw new BadRequestException('Parent category not found');
+    }
+
+    return this.prisma.blogCategory.create({
+      data: {
+        name,
+        slug,
+        description: data.description?.trim() || null,
+        parentId: data.parentId || null,
+        icon: data.icon?.trim() || null,
+        color: data.color?.trim() || null,
+        isActive: data.isActive ?? true,
+      },
+      include: {
+        parent: { select: { id: true, name: true, slug: true } },
+        _count: { select: { posts: true } },
+      },
+    });
+  }
+
+  async updateCategory(id: string, data: UpdateBlogCategoryDto) {
+    const existing = await this.prisma.blogCategory.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundException('Category not found');
+
+    if (data.name?.trim()) {
+      const duplicate = await this.prisma.blogCategory.findFirst({
+        where: {
+          name: { equals: data.name.trim(), mode: 'insensitive' },
+          NOT: { id },
+        },
+      });
+      if (duplicate) throw new BadRequestException('A category with this name already exists');
+    }
+
+    let slug = data.slug?.trim();
+    if (slug) {
+      const slugTaken = await this.prisma.blogCategory.findFirst({
+        where: { slug, NOT: { id } },
+      });
+      if (slugTaken) throw new BadRequestException('A category with this slug already exists');
+    } else if (data.name?.trim()) {
+      slug = await uniqueCategorySlug(this.prisma, data.name.trim(), id);
+    }
+
+    if (data.parentId) {
+      if (data.parentId === id) throw new BadRequestException('Category cannot be its own parent');
+      const parent = await this.prisma.blogCategory.findUnique({ where: { id: data.parentId } });
+      if (!parent) throw new BadRequestException('Parent category not found');
+    }
+
+    return this.prisma.blogCategory.update({
+      where: { id },
+      data: {
+        ...(data.name !== undefined && { name: data.name.trim() }),
+        ...(slug !== undefined && { slug }),
+        ...(data.description !== undefined && { description: data.description?.trim() || null }),
+        ...(data.parentId !== undefined && { parentId: data.parentId || null }),
+        ...(data.icon !== undefined && { icon: data.icon?.trim() || null }),
+        ...(data.color !== undefined && { color: data.color?.trim() || null }),
+        ...(data.isActive !== undefined && { isActive: data.isActive }),
+      },
+      include: {
+        parent: { select: { id: true, name: true, slug: true } },
+        _count: { select: { posts: true } },
+      },
+    });
+  }
+
+  async deleteCategory(id: string) {
+    const existing = await this.prisma.blogCategory.findUnique({
+      where: { id },
+      include: { _count: { select: { posts: true, children: true } } },
+    });
+    if (!existing) throw new NotFoundException('Category not found');
+    if (existing._count.posts > 0) {
+      throw new BadRequestException('Cannot delete a category that has articles');
+    }
+    if (existing._count.children > 0) {
+      throw new BadRequestException('Cannot delete a category that has child categories');
+    }
+    await this.prisma.blogCategory.delete({ where: { id } });
+    return { success: true };
+  }
+
+  async findTagsAdmin(query: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    sort?: 'name' | 'posts' | 'recent';
+  }) {
+    const page = query.page || 1;
+    const limit = query.limit || 20;
+    const skip = (page - 1) * limit;
+    const where: Prisma.BlogTagWhereInput = query.search
+      ? {
+          OR: [
+            { name: { contains: query.search, mode: 'insensitive' } },
+            { slug: { contains: query.search, mode: 'insensitive' } },
+          ],
+        }
+      : {};
+
+    const tags = await this.prisma.blogTag.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: query.sort === 'recent' ? { updatedAt: 'desc' } : { name: 'asc' },
+      include: { _count: { select: { posts: true } } },
+    });
+
+    const total = await this.prisma.blogTag.count({ where });
+    const data =
+      query.sort === 'posts'
+        ? [...tags].sort((a, b) => b._count.posts - a._count.posts)
+        : tags;
+
+    return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
+  }
+
+  async createTag(data: CreateBlogTagDto) {
+    const name = data.name.trim();
+    if (!name) throw new BadRequestException('Tag name is required');
+
+    const existingName = await this.prisma.blogTag.findFirst({
+      where: { name: { equals: name, mode: 'insensitive' } },
+    });
+    if (existingName) throw new BadRequestException('A tag with this name already exists');
+
+    const slug = data.slug?.trim() || (await uniqueTagSlug(this.prisma, name));
+    const slugTaken = await this.prisma.blogTag.findUnique({ where: { slug } });
+    if (slugTaken) throw new BadRequestException('A tag with this slug already exists');
+
+    return this.prisma.blogTag.create({
+      data: {
+        name,
+        slug,
+        description: data.description?.trim() || null,
+        color: data.color?.trim() || null,
+        isActive: data.isActive ?? true,
+      },
+      include: { _count: { select: { posts: true } } },
+    });
+  }
+
+  async updateTag(id: string, data: UpdateBlogTagDto) {
+    const existing = await this.prisma.blogTag.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundException('Tag not found');
+
+    if (data.name?.trim()) {
+      const duplicate = await this.prisma.blogTag.findFirst({
+        where: {
+          name: { equals: data.name.trim(), mode: 'insensitive' },
+          NOT: { id },
+        },
+      });
+      if (duplicate) throw new BadRequestException('A tag with this name already exists');
+    }
+
+    let slug = data.slug?.trim();
+    if (slug) {
+      const slugTaken = await this.prisma.blogTag.findFirst({
+        where: { slug, NOT: { id } },
+      });
+      if (slugTaken) throw new BadRequestException('A tag with this slug already exists');
+    } else if (data.name?.trim()) {
+      slug = await uniqueTagSlug(this.prisma, data.name.trim(), id);
+    }
+
+    return this.prisma.blogTag.update({
+      where: { id },
+      data: {
+        ...(data.name !== undefined && { name: data.name.trim() }),
+        ...(slug !== undefined && { slug }),
+        ...(data.description !== undefined && { description: data.description?.trim() || null }),
+        ...(data.color !== undefined && { color: data.color?.trim() || null }),
+        ...(data.isActive !== undefined && { isActive: data.isActive }),
+      },
+      include: { _count: { select: { posts: true } } },
+    });
+  }
+
+  async deleteTag(id: string) {
+    const existing = await this.prisma.blogTag.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundException('Tag not found');
+    await this.prisma.blogTag.delete({ where: { id } });
+    return { success: true };
+  }
+
+  async findAuthorsAdmin(query: { page?: number; limit?: number; search?: string }) {
+    const page = query.page || 1;
+    const limit = query.limit || 20;
+    const skip = (page - 1) * limit;
+
+    const userWhere: Prisma.UserWhereInput = {
+      role: 'DOCTOR',
+      ...(query.search
+        ? {
+            OR: [
+              { firstName: { contains: query.search, mode: 'insensitive' } },
+              { lastName: { contains: query.search, mode: 'insensitive' } },
+              { email: { contains: query.search, mode: 'insensitive' } },
+            ],
+          }
+        : {}),
+    };
+
+    const [users, total] = await Promise.all([
+      this.prisma.user.findMany({
+        where: userWhere,
+        skip,
+        take: limit,
+        orderBy: { lastName: 'asc' },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          avatarUrl: true,
+          status: true,
+          _count: {
+            select: {
+              blogPosts: { where: { status: BlogStatus.PUBLISHED } },
+            },
+          },
+        },
+      }),
+      this.prisma.user.count({ where: userWhere }),
+    ]);
+
+    const data = users.map((user) => ({
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      avatarUrl: user.avatarUrl,
+      status: user.status,
+      articlesPublished: user._count.blogPosts,
+    }));
+
+    return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
   }
 
   async submitFeedback(slug: string, data: SubmitBlogFeedbackDto, userId?: string) {
@@ -673,6 +1184,100 @@ export class BlogService {
       where: { id: post.id },
       data: { shareCount: { increment: 1 } },
       select: { shareCount: true },
+    });
+  }
+
+  async findBySlugForManage(slug: string) {
+    const post = await this.prisma.blogPost.findUnique({
+      where: { slug },
+      include: {
+        category: true,
+        author: { select: authorSelect },
+        reviewer: { select: authorSelect },
+        _count: { select: { comments: true, ratings: true } },
+      },
+    });
+    if (!post) throw new NotFoundException('Blog post not found');
+
+    const references = Array.isArray(post.references) ? post.references : [];
+    return {
+      ...post,
+      citationCount: references.length,
+      bookmarkCount: post.helpfulYes,
+      downloadCount: post.shareCount,
+    };
+  }
+
+  async delete(slug: string) {
+    const post = await this.prisma.blogPost.findUnique({ where: { slug } });
+    if (!post) throw new NotFoundException('Blog post not found');
+    await this.prisma.blogPost.delete({ where: { id: post.id } });
+    return { success: true };
+  }
+
+  async findSavedForUser(userId: string, query: { page?: number; limit?: number }) {
+    const page = query.page || 1;
+    const limit = query.limit || 20;
+    const skip = (page - 1) * limit;
+
+    const where = { userId };
+    const [bookmarks, total] = await Promise.all([
+      this.prisma.blogPostBookmark.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { updatedAt: 'desc' },
+        include: {
+          post: {
+            include: {
+              category: true,
+              author: { select: authorSelect },
+            },
+          },
+        },
+      }),
+      this.prisma.blogPostBookmark.count({ where }),
+    ]);
+
+    return {
+      data: bookmarks.map((b) => ({
+        ...b.post,
+        readPercent: b.readPercent,
+        bookmarkedAt: b.createdAt,
+      })),
+      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+    };
+  }
+
+  async saveBookmark(userId: string, slug: string) {
+    const post = await this.prisma.blogPost.findUnique({ where: { slug } });
+    if (!post) throw new NotFoundException('Blog post not found');
+
+    return this.prisma.blogPostBookmark.upsert({
+      where: { userId_postId: { userId, postId: post.id } },
+      create: { userId, postId: post.id },
+      update: {},
+    });
+  }
+
+  async removeBookmark(userId: string, slug: string) {
+    const post = await this.prisma.blogPost.findUnique({ where: { slug } });
+    if (!post) throw new NotFoundException('Blog post not found');
+
+    await this.prisma.blogPostBookmark.deleteMany({
+      where: { userId, postId: post.id },
+    });
+    return { removed: true };
+  }
+
+  async updateBookmarkProgress(userId: string, slug: string, readPercent: number) {
+    const post = await this.prisma.blogPost.findUnique({ where: { slug } });
+    if (!post) throw new NotFoundException('Blog post not found');
+
+    return this.prisma.blogPostBookmark.upsert({
+      where: { userId_postId: { userId, postId: post.id } },
+      create: { userId, postId: post.id, readPercent },
+      update: { readPercent },
     });
   }
 }

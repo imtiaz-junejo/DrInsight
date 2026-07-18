@@ -7,37 +7,52 @@ datasource db {
 }
 
 model User {
-  id                String              @id @default(cuid())
-  email             String              @unique
-  passwordHash      String?
-  firstName         String
-  lastName          String
-  role              UserRole            @default(PATIENT)
-  status            UserStatus          @default(PENDING)
-  avatarUrl         String?
-  phone             String?
-  emailVerified     Boolean             @default(false)
-  lastSeenAt        DateTime?
-  isOnline          Boolean             @default(false)
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  answeredQuestions AskDoctorQuestion[] @relation("AnsweredBy")
-  blogPosts         BlogPost[]
-  reviewedBlogPosts BlogPost[]          @relation("BlogReviewer")
-  doctorProfile     DoctorProfile?
-  oauthAccounts     OAuthAccount[]
-  sentMessages      Message[]           @relation("SentMessages")
-  notifications     Notification[]
-  patientProfile       PatientProfile?
-  refreshTokens        RefreshToken[]
-  passwordResetTokens  PasswordResetToken[]
-  emailTemplatesCreated EmailTemplate[] @relation("EmailTemplatesCreated")
-  otpTemplatesCreated   OtpTemplate[] @relation("OtpTemplatesCreated")
-  notificationCampaignsCreated NotificationCampaign[] @relation("NotificationCampaignsCreated")
+  id                            String                 @id @default(cuid())
+  email                         String                 @unique
+  passwordHash                  String?
+  firstName                     String
+  lastName                      String
+  role                          UserRole               @default(PATIENT)
+  status                        UserStatus             @default(PENDING)
+  avatarUrl                     String?
+  phone                         String?
+  emailVerified                 Boolean                @default(false)
+  profileCompletedAt            DateTime?
+  lastSeenAt                    DateTime?
+  isOnline                      Boolean                @default(false)
+  createdAt                     DateTime               @default(now())
+  updatedAt                     DateTime               @updatedAt
+  answeredQuestions             AskDoctorQuestion[]    @relation("AnsweredBy")
+  blogPosts                     BlogPost[]
+  reviewedBlogPosts             BlogPost[]             @relation("BlogReviewer")
+  articleReviewActions          ArticleReviewHistory[] @relation("ArticleReviewActor")
+  editorialPolicyVersions       EditorialPolicyVersion[]
+  authorGuidelineVersions       AuthorGuidelineVersion[]
+  editorialReviewAssignments    EditorialReviewStage[] @relation("EditorialStageReviewer")
+  medicalReviewerProfile        MedicalReviewer?
+  assignedContactInquiries      ContactSubmission[]    @relation("ContactInquiryAssignee")
+  contactInquiryReplies         ContactInquiryReply[]  @relation("ContactInquiryReplies")
+  contactInquiryNotes           ContactInquiryNote[]   @relation("ContactInquiryNotes")
+  doctorProfile                 DoctorProfile?
+  emailTemplatesCreated         EmailTemplate[]        @relation("EmailTemplatesCreated")
+  newsletterCampaignsCreated    NewsletterCampaign[]   @relation("NewsletterCampaignsCreated")
+  sentMessages                  Message[]              @relation("SentMessages")
   targetedNotificationCampaigns NotificationCampaign[] @relation("NotificationCampaignAudience")
-  reviewedPublications         Publication[]          @relation("PublicationReviewer")
-  publicationReviews           PublicationReview[]
-  publicationBookmarks         PublicationBookmark[]
+  notificationCampaignsCreated  NotificationCampaign[] @relation("NotificationCampaignsCreated")
+  notifications                 Notification[]
+  oauthAccounts                 OAuthAccount[]
+  otpTemplatesCreated           OtpTemplate[]          @relation("OtpTemplatesCreated")
+  passwordResetTokens           PasswordResetToken[]
+  emailVerificationTokens       EmailVerificationToken[]
+  patientProfile                PatientProfile?
+  authoredClinicalNotes         PatientClinicalNote[]  @relation("ClinicalNoteAuthor")
+  publicationBookmarks          PublicationBookmark[]
+  blogPostBookmarks             BlogPostBookmark[]
+  submittedQuestions            AskDoctorQuestion[]    @relation("QuestionSubmitter")
+  healthToolUsages              HealthToolUsage[]
+  publicationReviews            PublicationReview[]
+  reviewedPublications          Publication[]          @relation("PublicationReviewer")
+  refreshTokens                 RefreshToken[]
 
   @@index([email])
   @@index([role])
@@ -87,57 +102,102 @@ model PasswordResetToken {
   @@map("password_reset_tokens")
 }
 
+model EmailVerificationToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("email_verification_tokens")
+}
+
 model DoctorProfile {
-  id                    String             @id @default(cuid())
-  userId                String             @unique
+  id                    String                @id @default(cuid())
+  userId                String                @unique
+  doctorNumber          String?               @unique
   specialty             String
   subSpecialty          String?
-  licenseNumber         String             @unique
+  licenseNumber         String                @unique
   bio                   String?
+  experienceYears       Int                   @default(0)
+  consultationFee       Decimal               @default(0) @db.Decimal(10, 2)
+  rating                Float                 @default(0)
+  reviewCount           Int                   @default(0)
+  availability          DoctorAvailability    @default(OFFLINE)
+  languages             String[]              @default([])
+  education             String?
+  hospital              String?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
   bioFull               String?
   credentials           String?
   professionalTitle     String?
-  experienceYears       Int                @default(0)
-  consultationFee       Decimal            @default(0) @db.Decimal(10, 2)
-  rating                Float              @default(0)
-  reviewCount           Int                @default(0)
-  patientsTreated       Int                @default(0)
+  patientsTreated       Int                   @default(0)
   successRate           Float?
   responseTime          String?
-  availability          DoctorAvailability @default(OFFLINE)
-  languages             String[]           @default([])
-  expertise             String[]           @default([])
-  services              String[]           @default([])
-  researchTags          String[]           @default([])
-  education             String?
+  expertise             String[]              @default([])
+  services              String[]              @default([])
+  researchTags          String[]              @default([])
   educationHistory      Json?
   certifications        Json?
   publications          Json?
   awards                Json?
   speakingEngagements   Json?
   weeklySchedule        Json?
-  hospital              String?
+  clinicSchedule        Json?
+  onlineSchedule        Json?
   city                  String?
-  country               String?            @default("Pakistan")
+  country               String?               @default("Pakistan")
   gender                String?
+  dateOfBirth           DateTime?
   address               String?
+  licenseCertificateUrl String?
   coverImageUrl         String?
   linkedinUrl           String?
   twitterUrl            String?
+  youtubeUrl            String?
+  websiteUrl            String?
+  orcidUrl              String?
+  researchGateUrl       String?
+  googleScholarUrl      String?
+  facebookUrl           String?
+  instagramUrl          String?
+  authorType            AuthorType            @default(DOCTOR)
+  bookingEnabled        Boolean               @default(true)
+  onlineAvailEnabled    Boolean               @default(true)
+  physicalAvailEnabled  Boolean               @default(true)
+  researchGrantsTotal   String?
+  licenseBoard          String?
+  verificationNote      String?
   platformRole          String?
-  editorialBoard        Boolean            @default(false)
+  editorialBoard        Boolean               @default(false)
   medicalReviewerFor    String?
   conflictOfInterest    String?
   credentialsVerifiedAt DateTime?
-  createdAt             DateTime           @default(now())
-  updatedAt             DateTime           @updatedAt
-  appointments          Appointment[]      @relation("DoctorAppointments")
+  profileSlug           String?               @unique
+  seoFocusKeyword       String?
+  seoMetaTitle          String?
+  seoMetaDescription    String?
+  seoSchemaJson         Json?
+  appointments          Appointment[]         @relation("DoctorAppointments")
   bookingDrafts         BookingDraft[]
-  conversations         Conversation[]     @relation("DoctorConversations")
-  user                  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  prescriptions         Prescription[]     @relation("DoctorPrescriptions")
-  reviews               Review[]
+  conversations         Conversation[]        @relation("DoctorConversations")
+  user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  doctor_publications   doctor_publications[]
+  prescriptions         Prescription[]        @relation("DoctorPrescriptions")
+  clinicalNotes         PatientClinicalNote[] @relation("DoctorClinicalNotes")
+  labOrders             LabOrder[]            @relation("DoctorLabOrders")
+  criticalAlerts        PatientCriticalAlert[] @relation("DoctorCriticalAlerts")
+  prescriptionDrafts    PrescriptionDraft[]   @relation("DoctorPrescriptionDrafts")
   submittedPublications Publication[]
+  reviews               Review[]
+  assignedQuestions     AskDoctorQuestion[] @relation("DoctorAssignedQuestions")
+  profileFeedback       AuthorProfileFeedback[]
 
   @@index([specialty])
   @@index([availability])
@@ -145,23 +205,52 @@ model DoctorProfile {
   @@map("doctor_profiles")
 }
 
+model AuthorProfileFeedback {
+  id              String        @id @default(cuid())
+  doctorProfileId String
+  helpful         Boolean
+  viewerKey       String?
+  createdAt       DateTime      @default(now())
+  doctorProfile   DoctorProfile @relation(fields: [doctorProfileId], references: [id], onDelete: Cascade)
+
+  @@index([doctorProfileId])
+  @@index([viewerKey])
+  @@map("author_profile_feedback")
+}
+
 model PatientProfile {
   id               String         @id @default(cuid())
   userId           String         @unique
+  patientNumber    String?        @unique
   dateOfBirth      DateTime?
   gender           String?
   bloodGroup       String?
   allergies        String[]       @default([])
   medicalHistory   String?
   emergencyContact String?
+  city             String?
+  province         String?
+  country          String?
+  address          String?
+  postalCode       String?
+  accountSubType   String?
+  healthInterests  String[]       @default([])
+  contentPreference String?
+  newsletterFrequency String?
+  languagePreference String?
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
   appointments     Appointment[]  @relation("PatientAppointments")
   bookingDrafts    BookingDraft[]
   conversations    Conversation[] @relation("PatientConversations")
   user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  prescriptions    Prescription[] @relation("PatientPrescriptions")
-  reviews          Review[]
+  prescriptions      Prescription[]         @relation("PatientPrescriptions")
+  clinicalNotes      PatientClinicalNote[]  @relation("PatientClinicalNotes")
+  labOrders          LabOrder[]             @relation("PatientLabOrders")
+  criticalAlerts     PatientCriticalAlert[] @relation("PatientCriticalAlerts")
+  prescriptionDrafts PrescriptionDraft[]    @relation("PatientPrescriptionDrafts")
+  reviews            Review[]
+  vitalReadings      PatientVitalReading[]
 
   @@map("patient_profiles")
 }
@@ -174,10 +263,19 @@ model Appointment {
   durationMinutes  Int               @default(30)
   status           AppointmentStatus @default(PENDING)
   consultationType ConsultationType  @default(VIDEO)
+  bookingSource    BookingSource     @default(ONLINE)
+  bookedByUserId   String?
   reason           String?
   notes            String?
   meetingRoomId    String?
+  roomId           String?
+  meetingStatus    MeetingStatus     @default(WAITING)
   videoProvider    VideoProvider?
+  startedAt        DateTime?
+  endedAt          DateTime?
+  durationSeconds  Int?
+  doctorJoinedAt   DateTime?
+  patientJoinedAt  DateTime?
   cancelledAt      DateTime?
   cancelReason     String?
   createdAt        DateTime          @default(now())
@@ -187,13 +285,256 @@ model Appointment {
   conversation     Conversation?
   payment          Payment?
   prescription     Prescription?
+  clinicalNotes    PatientClinicalNote[]
   review           Review?
+  meeting          Meeting?
+  labOrders        LabOrder[]
 
   @@index([patientId])
   @@index([doctorId])
   @@index([scheduledAt])
   @@index([status])
+  @@index([meetingStatus])
+  @@index([roomId])
+  @@index([meetingRoomId])
+  @@index([bookingSource])
   @@map("appointments")
+}
+
+model Meeting {
+  id            String               @id @default(uuid())
+  appointmentId String               @unique
+  roomId        String               @unique
+  status        MeetingStatus        @default(WAITING)
+  startedAt     DateTime?
+  endedAt       DateTime?
+  durationSeconds Int?
+  createdById   String?
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  appointment   Appointment          @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  participants  MeetingParticipant[]
+  events        MeetingEvent[]
+  callLogs      CallLog[]
+  connectionLogs ConnectionLog[]
+  chats         MeetingChat[]
+  attachments   MeetingAttachment[]
+  audits        MeetingAudit[]
+  recordings    MeetingRecording[]
+
+  @@index([status])
+  @@index([roomId])
+  @@index([startedAt])
+  @@map("meetings")
+}
+
+model MeetingParticipant {
+  id           String              @id @default(uuid())
+  meetingId    String
+  userId       String
+  role         MeetingParticipantRole
+  socketId     String?
+  joinedAt     DateTime?
+  leftAt       DateTime?
+  isConnected  Boolean             @default(false)
+  cameraEnabled Boolean            @default(true)
+  micEnabled   Boolean             @default(true)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  meeting      Meeting             @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  deviceInfo   DeviceInfo?
+  networkStats NetworkStats[]
+
+  @@unique([meetingId, userId])
+  @@index([meetingId])
+  @@index([userId])
+  @@map("meeting_participants")
+}
+
+model MeetingEvent {
+  id         String           @id @default(uuid())
+  meetingId  String
+  userId     String?
+  eventType  MeetingEventType
+  payload    Json?
+  createdAt  DateTime         @default(now())
+  meeting    Meeting          @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@index([meetingId])
+  @@index([eventType])
+  @@index([createdAt])
+  @@map("meeting_events")
+}
+
+model CallLog {
+  id          String        @id @default(uuid())
+  meetingId   String
+  userId      String?
+  action      CallLogAction
+  details     Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime      @default(now())
+  meeting     Meeting       @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@index([meetingId])
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("call_logs")
+}
+
+model ConnectionLog {
+  id              String              @id @default(uuid())
+  meetingId       String
+  userId          String?
+  state           ConnectionLogState
+  iceState        String?
+  signalingState  String?
+  errorCode       String?
+  errorMessage    String?
+  metadata        Json?
+  createdAt       DateTime            @default(now())
+  meeting         Meeting             @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@index([meetingId])
+  @@index([userId])
+  @@index([state])
+  @@index([createdAt])
+  @@map("connection_logs")
+}
+
+model DeviceInfo {
+  id            String             @id @default(uuid())
+  participantId String             @unique
+  browser       String?
+  os            String?
+  deviceType    String?
+  cameraLabel   String?
+  microphoneLabel String?
+  screenWidth   Int?
+  screenHeight  Int?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  participant   MeetingParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@map("device_info")
+}
+
+model NetworkStats {
+  id             String             @id @default(uuid())
+  participantId  String
+  quality        NetworkQuality
+  packetLoss     Float?
+  latencyMs      Float?
+  bitrateKbps    Float?
+  roundTripMs    Float?
+  jitterMs       Float?
+  rawStats       Json?
+  createdAt      DateTime           @default(now())
+  participant    MeetingParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@index([participantId])
+  @@index([quality])
+  @@index([createdAt])
+  @@map("network_stats")
+}
+
+model MeetingChat {
+  id          String            @id @default(uuid())
+  meetingId   String
+  senderId    String
+  content     String
+  replyToId   String?
+  deliveredAt DateTime?
+  seenAt      DateTime?
+  seenById    String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  meeting     Meeting           @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  replyTo     MeetingChat?      @relation("ChatReply", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies     MeetingChat[]     @relation("ChatReply")
+
+  @@index([meetingId])
+  @@index([senderId])
+  @@index([replyToId])
+  @@index([createdAt])
+  @@map("meeting_chats")
+}
+
+model MeetingAttachment {
+  id          String   @id @default(uuid())
+  meetingId   String
+  uploaderId  String
+  fileName    String
+  mimeType    String
+  fileUrl     String
+  fileSize    Int?
+  createdAt   DateTime @default(now())
+  meeting     Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@index([meetingId])
+  @@index([uploaderId])
+  @@map("meeting_attachments")
+}
+
+model MeetingAudit {
+  id         String           @id @default(uuid())
+  meetingId  String
+  actorId    String?
+  action     MeetingAuditAction
+  details    Json?
+  ipAddress  String?
+  createdAt  DateTime         @default(now())
+  meeting    Meeting          @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@index([meetingId])
+  @@index([actorId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("meeting_audits")
+}
+
+model MeetingRecording {
+  id          String           @id @default(uuid())
+  meetingId   String
+  storageUrl  String?
+  status      RecordingStatus  @default(PENDING)
+  startedAt   DateTime?
+  endedAt     DateTime?
+  durationSeconds Int?
+  metadata    Json?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  meeting     Meeting          @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@index([meetingId])
+  @@index([status])
+  @@map("meeting_recordings")
+}
+
+model LabOrder {
+  id            String         @id @default(uuid())
+  appointmentId String
+  doctorId      String
+  patientId     String
+  tests         Json
+  instructions  String?
+  priority      LabOrderPriority @default(ROUTINE)
+  status        LabOrderStatus @default(ORDERED)
+  orderedAt     DateTime       @default(now())
+  completedAt   DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  appointment   Appointment    @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  doctor        DoctorProfile  @relation("DoctorLabOrders", fields: [doctorId], references: [id])
+  patient       PatientProfile @relation("PatientLabOrders", fields: [patientId], references: [id])
+
+  @@index([appointmentId])
+  @@index([doctorId])
+  @@index([patientId])
+  @@index([status])
+  @@map("lab_orders")
 }
 
 model BookingDraft {
@@ -222,33 +563,33 @@ model BookingDraft {
 }
 
 model Payment {
-  id                    String        @id @default(cuid())
-  bookingDraftId        String        @unique
-  appointmentId         String?       @unique
-  patientId             String?
-  doctorId              String?
-  provider              String        @default("stripe")
-  providerIntentId      String        @unique
-  stripeChargeId        String?
-  clientSecret          String
-  amountCents           Int
-  consultationFeeCents  Int           @default(0)
-  platformFeeCents      Int           @default(500)
-  taxCents              Int           @default(0)
-  currency              String        @default("usd")
-  status                PaymentStatus @default(REQUIRES_PAYMENT_METHOD)
-  paymentMethod         String?
-  receiptUrl            String?
-  invoiceNumber         String?       @unique
-  billingName           String?
-  billingEmail          String?
-  billingCountry        String?
-  metadata              Json?
-  createdAt             DateTime      @default(now())
-  updatedAt             DateTime      @updatedAt
-  confirmedAt           DateTime?
-  appointment           Appointment?  @relation(fields: [appointmentId], references: [id])
-  bookingDraft          BookingDraft  @relation(fields: [bookingDraftId], references: [id])
+  id                   String        @id @default(cuid())
+  bookingDraftId       String        @unique
+  appointmentId        String?       @unique
+  provider             String        @default("stripe")
+  providerIntentId     String        @unique
+  clientSecret         String
+  amountCents          Int
+  currency             String        @default("usd")
+  status               PaymentStatus @default(REQUIRES_PAYMENT_METHOD)
+  metadata             Json?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  confirmedAt          DateTime?
+  patientId            String?
+  doctorId             String?
+  stripeChargeId       String?
+  paymentMethod        String?
+  receiptUrl           String?
+  invoiceNumber        String?       @unique
+  platformFeeCents     Int           @default(500)
+  taxCents             Int           @default(0)
+  consultationFeeCents Int           @default(0)
+  billingName          String?
+  billingEmail         String?
+  billingCountry       String?
+  appointment          Appointment?  @relation(fields: [appointmentId], references: [id])
+  bookingDraft         BookingDraft  @relation(fields: [bookingDraftId], references: [id])
 
   @@index([status])
   @@index([patientId])
@@ -257,61 +598,105 @@ model Payment {
 }
 
 model BlogCategory {
-  id          String     @id @default(cuid())
+  id          String         @id @default(cuid())
   name        String
-  slug        String     @unique
+  slug        String         @unique
   description String?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  parentId    String?
+  icon        String?
+  color       String?
+  isActive    Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  parent      BlogCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children    BlogCategory[] @relation("CategoryHierarchy")
   posts       BlogPost[]
 
+  @@index([parentId])
+  @@index([isActive])
   @@map("blog_categories")
 }
 
+model BlogTag {
+  id          String        @id @default(cuid())
+  name        String        @unique
+  slug        String        @unique
+  description String?
+  color       String?
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  posts       BlogPostTag[]
+
+  @@index([isActive])
+  @@map("blog_tags")
+}
+
+model BlogPostTag {
+  postId String
+  tagId  String
+  post   BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag    BlogTag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+  @@index([tagId])
+  @@map("blog_post_tags")
+}
+
 model BlogPost {
-  id                String        @id @default(cuid())
+  id                String           @id @default(cuid())
   title             String
-  slug              String        @unique
-  subtitle          String?
+  slug              String           @unique
   excerpt           String
   content           String
   coverImageUrl     String?
-  coverImageAlt     String?
-  coverImageCaption String?
   categoryId        String
   authorId          String
+  status            BlogStatus       @default(DRAFT)
+  readTimeMinutes   Int              @default(5)
+  viewCount         Int              @default(0)
+  tags              String[]         @default([])
+  publishedAt       DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  featured          Boolean          @default(false)
+  pinned            Boolean          @default(false)
+  featuredOrder     Int?
+  subtitle          String?
+  coverImageAlt     String?
+  coverImageCaption String?
   reviewerId        String?
   specialty         String?
-  status            BlogStatus    @default(DRAFT)
-  readTimeMinutes   Int           @default(5)
-  viewCount         Int           @default(0)
-  shareCount        Int           @default(0)
-  tags              String[]      @default([])
-  summaryPoints     String[]      @default([])
-  keyTakeaways      String[]      @default([])
+  shareCount        Int              @default(0)
+  summaryPoints     String[]         @default([])
+  keyTakeaways      String[]         @default([])
   references        Json?
   glossary          Json?
   medicalDisclaimer String?
-  peerReviewed      Boolean       @default(false)
+  peerReviewed      Boolean          @default(false)
   lastReviewedAt    DateTime?
   seoTitle          String?
   seoDescription    String?
-  metaKeywords      String[]      @default([])
+  metaKeywords      String[]         @default([])
   canonicalUrl      String?
   averageRating     Float?
-  ratingCount       Int           @default(0)
-  helpfulYes        Int           @default(0)
-  helpfulNo         Int           @default(0)
-  featured          Boolean       @default(false)
-  featuredOrder     Int?
-  publishedAt       DateTime?
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
-  author            User          @relation(fields: [authorId], references: [id])
-  reviewer          User?         @relation("BlogReviewer", fields: [reviewerId], references: [id])
-  category          BlogCategory  @relation(fields: [categoryId], references: [id])
+  ratingCount       Int              @default(0)
+  helpfulYes        Int              @default(0)
+  helpfulNo         Int              @default(0)
   comments          BlogComment[]
   ratings           BlogPostRating[]
+  postTags          BlogPostTag[]
+  author            User             @relation(fields: [authorId], references: [id])
+  category          BlogCategory     @relation(fields: [categoryId], references: [id])
+  reviewer          User?            @relation("BlogReviewer", fields: [reviewerId], references: [id])
+  reviewPriority    ReviewPriority   @default(NORMAL)
+  submittedAt       DateTime?
+  approvedAt        DateTime?
+  rejectedAt        DateTime?
+  revisionNotes     String?
+  reviewHistories   ArticleReviewHistory[]
+  editorialReview   EditorialReview?
+  bookmarks         BlogPostBookmark[]
 
   @@index([categoryId])
   @@index([authorId])
@@ -320,6 +705,8 @@ model BlogPost {
   @@index([publishedAt])
   @@index([featured, featuredOrder])
   @@index([specialty])
+  @@index([reviewPriority])
+  @@index([submittedAt])
   @@map("blog_posts")
 }
 
@@ -333,9 +720,9 @@ model BlogComment {
   status            BlogCommentStatus @default(PENDING)
   parentId          String?
   createdAt         DateTime          @default(now())
-  post              BlogPost          @relation(fields: [postId], references: [id], onDelete: Cascade)
   parent            BlogComment?      @relation("CommentReplies", fields: [parentId], references: [id])
   replies           BlogComment[]     @relation("CommentReplies")
+  post              BlogPost          @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@index([postId])
   @@index([status])
@@ -353,6 +740,39 @@ model BlogPostRating {
   @@unique([postId, raterKey])
   @@index([postId])
   @@map("blog_post_ratings")
+}
+
+model BlogPostBookmark {
+  id          String   @id @default(cuid())
+  userId      String
+  postId      String
+  readPercent Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post        BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@index([userId])
+  @@index([postId])
+  @@map("blog_post_bookmarks")
+}
+
+model PatientVitalReading {
+  id         String       @id @default(cuid())
+  patientId  String
+  type       VitalType
+  value      String
+  unit       String?
+  status     VitalStatus  @default(NORMAL)
+  recordedAt DateTime     @default(now())
+  notes      String?
+  createdAt  DateTime     @default(now())
+  patient    PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([patientId, type, recordedAt])
+  @@index([patientId, recordedAt])
+  @@map("patient_vital_readings")
 }
 
 model Conversation {
@@ -427,78 +847,310 @@ model Review {
 }
 
 model Prescription {
-  id            String         @id @default(cuid())
-  appointmentId String         @unique
-  doctorId      String
-  patientId     String
-  diagnosis     String?
-  items         Json
-  notes         String?
-  pdfUrl        String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  appointment   Appointment    @relation(fields: [appointmentId], references: [id])
-  doctor        DoctorProfile  @relation("DoctorPrescriptions", fields: [doctorId], references: [id])
-  patient       PatientProfile @relation("PatientPrescriptions", fields: [patientId], references: [id])
+  id                 String             @id @default(cuid())
+  appointmentId      String             @unique
+  doctorId           String
+  patientId          String
+  diagnosis          String?
+  items              Json
+  notes              String?
+  pdfUrl             String?
+  status             PrescriptionStatus @default(ISSUED)
+  prescriptionNumber String?            @unique
+  verifyId           String?
+  extendedData       Json?
+  followUpDate       DateTime?
+  digitalSignature   String?
+  issuedAt           DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  appointment        Appointment        @relation(fields: [appointmentId], references: [id])
+  doctor             DoctorProfile      @relation("DoctorPrescriptions", fields: [doctorId], references: [id])
+  patient            PatientProfile     @relation("PatientPrescriptions", fields: [patientId], references: [id])
 
   @@index([doctorId])
   @@index([patientId])
+  @@index([status])
   @@map("prescriptions")
 }
 
-model AskDoctorQuestion {
+model PrescriptionDraft {
   id            String         @id @default(cuid())
-  category      String
-  question      String
-  answer        String?
-  answeredById  String?
-  submitterName String?
-  isAnonymous   Boolean        @default(false)
-  helpfulCount  Int            @default(0)
-  status        QuestionStatus @default(PENDING)
+  doctorId      String
+  patientId     String
+  appointmentId String?
+  data          Json
   createdAt     DateTime       @default(now())
-  answeredAt    DateTime?
-  answeredBy    User?          @relation("AnsweredBy", fields: [answeredById], references: [id])
+  updatedAt     DateTime       @updatedAt
+  doctor        DoctorProfile  @relation("DoctorPrescriptionDrafts", fields: [doctorId], references: [id], onDelete: Cascade)
+  patient       PatientProfile @relation("PatientPrescriptionDrafts", fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@unique([doctorId, patientId])
+  @@index([patientId])
+  @@map("prescription_drafts")
+}
+
+model PatientClinicalNote {
+  id                 String                 @id @default(cuid())
+  patientId          String
+  doctorId           String
+  appointmentId      String?
+  authorId           String
+  authorType         ClinicalNoteAuthorType @default(DOCTOR)
+  title              String
+  noteType           String                 @default("Progress Note")
+  clinicalNotes      String                 @default("")
+  followUpNotes      String?
+  privateNotes       String?
+  priority           ClinicalNotePriority   @default(NORMAL)
+  attachments        Json?
+  followUpReminderAt DateTime?
+  patientReadAt      DateTime?
+  doctorReadAt       DateTime?
+  isDraft            Boolean                @default(false)
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+  patient            PatientProfile         @relation("PatientClinicalNotes", fields: [patientId], references: [id], onDelete: Cascade)
+  doctor             DoctorProfile          @relation("DoctorClinicalNotes", fields: [doctorId], references: [id], onDelete: Cascade)
+  author             User                   @relation("ClinicalNoteAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  appointment        Appointment?           @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+
+  @@index([patientId])
+  @@index([doctorId])
+  @@index([appointmentId])
+  @@index([authorId])
+  @@index([authorType])
+  @@index([priority])
+  @@index([createdAt])
+  @@map("patient_clinical_notes")
+}
+
+model PatientCriticalAlert {
+  id            String                       @id @default(cuid())
+  patientId     String
+  doctorId      String
+  severity      PatientAlertSeverity
+  category      String
+  reason        String
+  clinicalNotes String?
+  attachments   Json?
+  reviewDate    DateTime?
+  notifyTeam    Boolean                      @default(true)
+  status        PatientAlertStatus           @default(ACTIVE)
+  resolvedAt    DateTime?
+  resolvedById  String?
+  createdAt     DateTime                     @default(now())
+  updatedAt     DateTime                     @updatedAt
+  patient       PatientProfile               @relation("PatientCriticalAlerts", fields: [patientId], references: [id], onDelete: Cascade)
+  doctor        DoctorProfile                @relation("DoctorCriticalAlerts", fields: [doctorId], references: [id], onDelete: Cascade)
+  history       PatientCriticalAlertHistory[]
+
+  @@index([patientId, status])
+  @@index([doctorId])
+  @@index([severity])
+  @@map("patient_critical_alerts")
+}
+
+model PatientCriticalAlertHistory {
+  id            String               @id @default(cuid())
+  alertId       String
+  action        String
+  details       String?
+  performedById String?
+  createdAt     DateTime             @default(now())
+  alert         PatientCriticalAlert @relation(fields: [alertId], references: [id], onDelete: Cascade)
+
+  @@index([alertId])
+  @@index([createdAt])
+  @@map("patient_critical_alert_history")
+}
+
+model AskDoctorQuestion {
+  id              String         @id @default(cuid())
+  category        String
+  title           String?
+  question        String
+  answer          String?
+  answerDraft     String?
+  rejectReason    String?
+  rejectedAt      DateTime?
+  answeredById      String?
+  submitterUserId String?
+  doctorId        String?
+  submitterName   String?
+  isAnonymous     Boolean        @default(false)
+  attachments     Json?
+  status          QuestionStatus @default(PENDING)
+  approvedAt      DateTime?
+  createdAt       DateTime       @default(now())
+  answeredAt      DateTime?
+  helpfulCount    Int            @default(0)
+  answeredBy      User?          @relation("AnsweredBy", fields: [answeredById], references: [id])
+  submitter       User?          @relation("QuestionSubmitter", fields: [submitterUserId], references: [id], onDelete: SetNull)
+  doctor          DoctorProfile? @relation("DoctorAssignedQuestions", fields: [doctorId], references: [id], onDelete: SetNull)
 
   @@index([category])
   @@index([status])
+  @@index([submitterUserId])
+  @@index([doctorId])
   @@map("ask_doctor_questions")
 }
 
 model ContactSubmission {
-  id        String   @id @default(cuid())
-  name      String
-  email     String
-  subject   String?
-  message   String
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id               String                 @id @default(cuid())
+  name             String
+  email            String
+  phone            String?
+  subject          String?
+  message          String
+  inquiryType      String                 @default("GENERAL")
+  isRead           Boolean                @default(false)
+  createdAt        DateTime               @default(now())
+  status           ContactInquiryStatus   @default(NEW)
+  assignedStaffId  String?
+  attachments      Json?
+  updatedAt        DateTime               @default(now()) @updatedAt
+  archivedAt       DateTime?
+  assignedStaff    User?                  @relation("ContactInquiryAssignee", fields: [assignedStaffId], references: [id])
+  notes            ContactInquiryNote[]
+  replies          ContactInquiryReply[]
 
+  @@index([status])
+  @@index([assignedStaffId])
+  @@index([inquiryType])
   @@map("contact_submissions")
+}
+
+model ContactInquiryReply {
+  id          String            @id @default(cuid())
+  inquiryId   String
+  authorId    String
+  message     String
+  isInternal  Boolean           @default(false)
+  createdAt   DateTime          @default(now())
+  author      User              @relation("ContactInquiryReplies", fields: [authorId], references: [id], onDelete: Cascade)
+  inquiry     ContactSubmission @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+
+  @@index([inquiryId, createdAt])
+  @@map("contact_inquiry_replies")
+}
+
+model ContactInquiryNote {
+  id        String            @id @default(cuid())
+  inquiryId String
+  authorId  String
+  note      String
+  createdAt DateTime          @default(now())
+  author    User              @relation("ContactInquiryNotes", fields: [authorId], references: [id], onDelete: Cascade)
+  inquiry   ContactSubmission @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+
+  @@index([inquiryId, createdAt])
+  @@map("contact_inquiry_notes")
+}
+
+enum NewsletterCampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENT
+}
+
+enum NewsletterAudience {
+  ALL
+  ACTIVE
 }
 
 model NewsletterSubscriber {
   id        String   @id @default(cuid())
   email     String   @unique
+  source    String?  @default("website")
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 
+  @@index([isActive, createdAt])
   @@map("newsletter_subscribers")
 }
 
+model NewsletterCampaign {
+  id             String                   @id @default(cuid())
+  subject        String
+  previewText    String?
+  bodyHtml       String
+  bodyText       String?
+  articleLink    String?
+  status         NewsletterCampaignStatus @default(DRAFT)
+  audience       NewsletterAudience       @default(ACTIVE)
+  scheduledAt    DateTime?
+  sentAt         DateTime?
+  recipientCount Int                      @default(0)
+  createdById    String?
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+  createdBy      User?                    @relation("NewsletterCampaignsCreated", fields: [createdById], references: [id])
+
+  @@index([status, scheduledAt])
+  @@index([createdAt])
+  @@map("newsletter_campaigns")
+}
+
 model SiteSettings {
-  id              String   @id @default("default")
-  contactPhone    String
-  contactEmail    String
-  contactWhatsapp String?
-  addressLine1    String?
-  addressLine2    String?
-  city            String?
-  country         String   @default("Pakistan")
-  businessHours   Json?
-  updatedAt       DateTime @updatedAt
+  id                     String   @id @default("default")
+  contactPhone           String
+  contactEmail           String
+  contactWhatsapp        String?
+  addressLine1           String?
+  addressLine2           String?
+  city                   String?
+  country                String   @default("Pakistan")
+  businessHours          Json?
+  officeHoursText        String?
+  mapsUrl                String?
+  updatedAt              DateTime @updatedAt
+  siteName               String?  @default("The Dr Insight")
+  siteTitle              String?
+  timezone               String?  @default("UTC")
+  defaultMetaTitleSuffix String?  @default(" | DrInsight")
+  defaultMetaDescription String?
+  defaultMetaKeywords    String?
+  ogTitle                String?
+  ogDescription          String?
+  twitterHandle          String?
+  globalSchemaJson       Json?
+  googleSearchConsole    String?
+  googleAnalyticsId      String?
+  xmlSitemapUrl          String?  @default("https://drinsight.org/sitemap.xml")
+  robotsTxt              String?  @db.Text
+  sitemapXml             String?  @db.Text
+  siteUrl                String?  @default("https://drinsight.org")
+  faviconUrl             String?
+  socialSharingImageUrl  String?
+  logoUrl                String?
+  footerLogoUrl          String?
+  heroImageUrl           String?
+  wordmarkText           String?
+  tagline                String?
+  pageHeroImages         Json?
+  headerMenu             Json?
+  footerMenu             Json?
+  advertisements         Json?
+  socialLinks            Json?
+  smtpHost               String?
+  smtpFrom               String?
+  integrationSecrets     String?  @db.Text
+  requireTwoFactor       Boolean  @default(false)
 
   @@map("site_settings")
+}
+
+model SiteMediaAsset {
+  id        String   @id @default(cuid())
+  url       String
+  label     String?
+  mimeType  String?
+  sizeBytes Int?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("site_media_assets")
 }
 
 model TrustedPartner {
@@ -522,7 +1174,7 @@ model FounderMessage {
   designation       String
   imageUrl          String?
   headline          String
-  messageHtml       String   @db.Text
+  messageHtml       String
   signatureImageUrl String?
   videoUrl          String?
   isActive          Boolean  @default(true)
@@ -544,7 +1196,7 @@ model EmailTemplate {
   name        String
   subject     String
   category    String
-  bodyHtml    String         @db.Text
+  bodyHtml    String
   variables   String[]       @default([])
   status      TemplateStatus @default(DRAFT)
   isEnabled   Boolean        @default(true)
@@ -552,7 +1204,7 @@ model EmailTemplate {
   createdById String?
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
-  createdBy   User?          @relation("EmailTemplatesCreated", fields: [createdById], references: [id], onDelete: SetNull)
+  createdBy   User?          @relation("EmailTemplatesCreated", fields: [createdById], references: [id])
 
   @@index([status])
   @@index([category])
@@ -560,21 +1212,21 @@ model EmailTemplate {
 }
 
 model OtpTemplate {
-  id            String         @id @default(cuid())
+  id            String           @id @default(cuid())
   name          String
   purpose       OtpPurpose
   subject       String?
-  message       String         @db.Text
-  expiryMinutes Int            @default(10)
-  otpLength     Int            @default(6)
-  senderName    String         @default("DrInsight")
-  status        TemplateStatus @default(DRAFT)
-  isEnabled     Boolean        @default(true)
+  message       String
+  expiryMinutes Int              @default(10)
+  otpLength     Int              @default(6)
+  senderName    String           @default("DrInsight")
+  status        TemplateStatus   @default(DRAFT)
+  isEnabled     Boolean          @default(true)
   createdById   String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  createdBy     User?          @relation("OtpTemplatesCreated", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
   deliveryLogs  OtpDeliveryLog[]
+  createdBy     User?            @relation("OtpTemplatesCreated", fields: [createdById], references: [id])
 
   @@index([purpose])
   @@index([status])
@@ -588,7 +1240,7 @@ model OtpDeliveryLog {
   status     OtpDeliveryStatus
   recipient  String
   createdAt  DateTime           @default(now())
-  template   OtpTemplate?       @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  template   OtpTemplate?       @relation(fields: [templateId], references: [id])
 
   @@index([createdAt])
   @@index([channel])
@@ -596,11 +1248,11 @@ model OtpDeliveryLog {
 }
 
 model NotificationCampaign {
-  id             String                 @id @default(cuid())
+  id             String                @id @default(cuid())
   title          String
-  message        String                 @db.Text
-  type           String                 @default("GENERAL")
-  priority       NotificationPriority   @default(NORMAL)
+  message        String
+  type           String                @default("GENERAL")
+  priority       NotificationPriority  @default(NORMAL)
   audience       NotificationAudience
   audienceUserId String?
   channels       NotificationChannel[]
@@ -608,17 +1260,17 @@ model NotificationCampaign {
   expiresAt      DateTime?
   actionLabel    String?
   actionUrl      String?
-  status         CampaignStatus         @default(DRAFT)
-  totalSent      Int                    @default(0)
-  delivered      Int                    @default(0)
-  readCount      Int                    @default(0)
-  failed         Int                    @default(0)
+  status         CampaignStatus        @default(DRAFT)
+  totalSent      Int                   @default(0)
+  delivered      Int                   @default(0)
+  readCount      Int                   @default(0)
+  failed         Int                   @default(0)
   createdById    String?
   sentAt         DateTime?
-  createdAt      DateTime               @default(now())
-  updatedAt      DateTime               @updatedAt
-  createdBy      User?                  @relation("NotificationCampaignsCreated", fields: [createdById], references: [id], onDelete: SetNull)
-  audienceUser   User?                  @relation("NotificationCampaignAudience", fields: [audienceUserId], references: [id], onDelete: SetNull)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  audienceUser   User?                 @relation("NotificationCampaignAudience", fields: [audienceUserId], references: [id])
+  createdBy      User?                 @relation("NotificationCampaignsCreated", fields: [createdById], references: [id])
 
   @@index([status])
   @@index([audience])
@@ -626,132 +1278,17 @@ model NotificationCampaign {
   @@map("notification_campaigns")
 }
 
-enum OAuthProvider {
-  GOOGLE
-  FACEBOOK
-}
-
-enum UserRole {
-  ADMIN
-  DOCTOR
-  PATIENT
-}
-
-enum UserStatus {
-  ACTIVE
-  INACTIVE
-  SUSPENDED
-  PENDING
-}
-
-enum DoctorAvailability {
-  AVAILABLE
-  BUSY
-  OFFLINE
-}
-
-enum AppointmentStatus {
-  PENDING
-  CONFIRMED
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED
-  NO_SHOW
-}
-
-enum ConsultationType {
-  VIDEO
-  AUDIO
-  CHAT
-  IN_PERSON
-}
-
-enum BlogStatus {
-  DRAFT
-  PUBLISHED
-  ARCHIVED
-}
-
-enum BlogCommentStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
-enum MessageType {
-  TEXT
-  IMAGE
-  FILE
-  SYSTEM
-}
-
-enum NotificationType {
-  APPOINTMENT
-  MESSAGE
-  SYSTEM
-  REVIEW
-  PRESCRIPTION
-  PUBLICATION
-}
-
-enum PublicationStatus {
-  DRAFT
-  SUBMITTED
-  UNDER_REVIEW
-  APPROVED
-  REJECTED
-  NEEDS_REVISION
-}
-
-enum PublicationType {
-  JOURNAL_ARTICLE
-  RESEARCH_PAPER
-  CASE_STUDY
-  CLINICAL_TRIAL
-  REVIEW_ARTICLE
-  CONFERENCE_PAPER
-  BOOK_CHAPTER
-  THESIS
-}
-
-enum PublicationVisibility {
-  PUBLIC
-  PRIVATE
-  AFTER_APPROVAL
-}
-
-enum PublicationAttachmentType {
-  PDF
-  COVER_IMAGE
-  SUPPLEMENTARY
-  DATASET
-  FIGURE
-  TABLE
-}
-
-enum PublicationReviewAction {
-  APPROVE
-  REJECT
-  REQUEST_REVISION
-  SUBMIT
-  ASSIGN_REVIEWER
-}
-
 model Publication {
-  id                        String                @id @default(cuid())
+  id                        String                  @id @default(cuid())
   doctorId                  String
-  slug                      String                @unique
+  slug                      String                  @unique
   title                     String
   subtitle                  String?
-  abstract                  String                @db.Text
-  introduction              String?               @db.Text
-  results                   String?               @db.Text
-  discussion                String?               @db.Text
-  conclusion                String?               @db.Text
+  abstract                  String
   researchCategory          String?
   medicalSpecialty          String?
   publicationType           PublicationType
-  language                  String                @default("English")
+  language                  String                  @default("English")
   institution               String?
   department                String?
   orcid                     String?
@@ -766,56 +1303,87 @@ model Publication {
   publicationDate           DateTime?
   acceptanceDate            DateTime?
   submissionDate            DateTime?
-  researchMethodology       String?               @db.Text
+  researchMethodology       String?
   studyDesign               String?
   sampleSize                String?
   fundingSource             String?
   ethicalApprovalNumber     String?
   clinicalTrialRegistration String?
-  researchOverview          String?               @db.Text
-  methodologySteps          String?               @db.Text
+  researchOverview          String?
+  methodologySteps          String?
   partners                  String?
   referenceCount            Int?
   reviewingPhysician        String?
-  physicianReviewed         Boolean               @default(false)
-  evidenceBased             Boolean               @default(false)
-  openAccess                Boolean               @default(false)
-  fullyReferenced           Boolean               @default(false)
-  coiDisclosed              Boolean               @default(false)
+  physicianReviewed         Boolean                 @default(false)
+  evidenceBased             Boolean                 @default(false)
+  openAccess                Boolean                 @default(false)
+  fullyReferenced           Boolean                 @default(false)
+  coiDisclosed              Boolean                 @default(false)
   doiUrl                    String?
   journalUrl                String?
   pubmedUrl                 String?
   googleScholarUrl          String?
-  visibility                PublicationVisibility @default(AFTER_APPROVAL)
+  visibility                PublicationVisibility   @default(AFTER_APPROVAL)
   seoTitle                  String?
   metaDescription           String?
-  status                    PublicationStatus     @default(DRAFT)
-  featured                  Boolean               @default(false)
-  pinned                    Boolean               @default(false)
+  status                    PublicationStatus       @default(DRAFT)
+  featured                  Boolean                 @default(false)
+  pinned                    Boolean                 @default(false)
   featuredOrder             Int?
-  viewCount                 Int                   @default(0)
-  downloadCount             Int                   @default(0)
-  shareCount                Int                   @default(0)
-  citationCount             Int                   @default(0)
-  readTimeMinutes           Int                   @default(5)
+  viewCount                 Int                     @default(0)
+  downloadCount             Int                     @default(0)
+  shareCount                Int                     @default(0)
+  citationCount             Int                     @default(0)
+  readTimeMinutes           Int                     @default(5)
   assignedReviewerId        String?
   submittedAt               DateTime?
   approvedAt                DateTime?
   rejectedAt                DateTime?
   publishedAt               DateTime?
-  createdAt                 DateTime              @default(now())
-  updatedAt                 DateTime              @updatedAt
-  doctor                    DoctorProfile         @relation(fields: [doctorId], references: [id], onDelete: Cascade)
-  assignedReviewer          User?                 @relation("PublicationReviewer", fields: [assignedReviewerId], references: [id], onDelete: SetNull)
-  authors                   PublicationAuthor[]
-  keywords                  PublicationKeyword[]
+  createdAt                 DateTime                @default(now())
+  updatedAt                 DateTime                @updatedAt
+  introduction              String?
+  results                   String?
+  discussion                String?
+  conclusion                String?
+  articleId                 String?
+  license                   String?
+  abstractBackground        String?
+  abstractMethods           String?
+  abstractResults           String?
+  abstractConclusions       String?
+  objectives                String?
+  methodsContent            String?
+  methodsTable              String?
+  figureData                String?
+  figureCaption             String?
+  resultSummary             String?
+  practiceImplications      String?
+  limitations               String?
+  keyFindings               String?
+  authorContributions       String?
+  ethicsStatement           String?
+  dataAvailabilityStatement String?
+  conflictsOfInterest       String?
+  acknowledgments           String?
+  abbreviations             String?
+  lastReviewedDate          DateTime?
+  peerReviewOutcome         String?
+  nextScheduledReview       DateTime?
+  evidenceGrade             String?
   attachments               PublicationAttachment[]
+  authors                   PublicationAuthor[]
+  references                PublicationReference[]
+  bookmarks                 PublicationBookmark[]
+  citations                 PublicationCitation[]
+  downloads                 PublicationDownload[]
+  keywords                  PublicationKeyword[]
   reviews                   PublicationReview[]
   revisions                 PublicationRevision[]
   views                     PublicationView[]
-  downloads                 PublicationDownload[]
-  bookmarks                 PublicationBookmark[]
-  citations                 PublicationCitation[]
+  assignedReviewer          User?                   @relation("PublicationReviewer", fields: [assignedReviewerId], references: [id])
+  doctor                    DoctorProfile           @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  editorialReview           EditorialReview?
 
   @@index([doctorId])
   @@index([status])
@@ -855,6 +1423,18 @@ model PublicationKeyword {
   @@map("publication_keywords")
 }
 
+model PublicationReference {
+  id            String      @id @default(cuid())
+  publicationId String
+  citation      String
+  doi           String?
+  sortOrder     Int         @default(0)
+  publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+
+  @@index([publicationId])
+  @@map("publication_references")
+}
+
 model PublicationAttachment {
   id            String                    @id @default(cuid())
   publicationId String
@@ -872,18 +1452,18 @@ model PublicationAttachment {
 }
 
 model PublicationReview {
-  id             String                  @id @default(cuid())
-  publicationId  String
-  reviewerId     String
-  action         PublicationReviewAction
-  internalNotes  String?                 @db.Text
-  feedback       String?                 @db.Text
-  visibility     PublicationVisibility?
-  featured       Boolean?
-  pinned         Boolean?
-  createdAt      DateTime                @default(now())
-  publication    Publication             @relation(fields: [publicationId], references: [id], onDelete: Cascade)
-  reviewer       User                    @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+  id            String                  @id @default(cuid())
+  publicationId String
+  reviewerId    String
+  action        PublicationReviewAction
+  internalNotes String?
+  feedback      String?
+  visibility    PublicationVisibility?
+  featured      Boolean?
+  pinned        Boolean?
+  createdAt     DateTime                @default(now())
+  publication   Publication             @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  reviewer      User                    @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
 
   @@index([publicationId])
   @@index([reviewerId])
@@ -893,7 +1473,7 @@ model PublicationReview {
 model PublicationRevision {
   id            String      @id @default(cuid())
   publicationId String
-  revisionNotes String?     @db.Text
+  revisionNotes String?
   snapshot      Json?
   submittedAt   DateTime    @default(now())
   publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
@@ -949,6 +1529,803 @@ model PublicationCitation {
   @@map("publication_citations")
 }
 
+model AuditLogEntry {
+  id             String        @id @default(cuid())
+  actorUserId    String?
+  actorName      String
+  actorRole      String?
+  actorEmail     String?
+  action         String
+  target         String?
+  ipAddress      String?
+  result         AuditResult   @default(SUCCESS)
+  severity       AuditSeverity @default(INFO)
+  category       AuditCategory @default(ADMIN)
+  details        Json?
+  acknowledgedAt DateTime?
+  createdAt      DateTime      @default(now())
+
+  @@index([createdAt])
+  @@index([category])
+  @@index([severity])
+  @@index([result])
+  @@map("audit_log_entries")
+}
+
+model Faq {
+  id               String    @id @default(cuid())
+  question         String
+  answer           String
+  category         String
+  displayOrder     Int       @default(0)
+  priority         Int       @default(0)
+  status           FaqStatus @default(PUBLISHED)
+  isActive         Boolean   @default(true)
+  tags             String[]  @default([])
+  relatedSpecialty String?
+  relatedService   String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([isActive, displayOrder])
+  @@index([status, category])
+  @@map("faqs")
+}
+
+model HomepageSection {
+  id           String              @id @default(cuid())
+  slug         String              @unique
+  title        String
+  displayOrder Int                 @default(0)
+  isVisible    Boolean             @default(true)
+  status       ContentPublishStatus @default(PUBLISHED)
+  config       Json?
+  draftConfig  Json?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  @@index([isVisible, displayOrder])
+  @@index([status])
+  @@map("homepage_sections")
+}
+
+model SeoPageSetting {
+  id              String               @id @default(cuid())
+  pageName        String
+  path            String               @unique
+  slug            String?
+  metaTitle       String
+  metaDescription String?
+  metaKeywords    String[]             @default([])
+  canonicalUrl    String?
+  ogTitle         String?
+  ogDescription   String?
+  ogImageUrl      String?
+  twitterCard     String?              @default("summary_large_image")
+  robots          String?              @default("index,follow")
+  schemaJson      Json?
+  sitemapPriority Float?               @default(0.5)
+  status          ContentPublishStatus @default(PUBLISHED)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@map("seo_page_settings")
+}
+
+model CmsPage {
+  id           String           @id @default(cuid())
+  slug         String           @unique
+  title        String
+  heroSubtitle String?
+  lastUpdated  DateTime?
+  version      String?
+  extra        Json?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  sections     CmsPageSection[]
+
+  @@map("cms_pages")
+}
+
+model CmsPageSection {
+  id           String   @id @default(cuid())
+  pageId       String
+  title        String
+  contentHtml  String?
+  displayOrder Int      @default(0)
+  isVisible    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  page         CmsPage  @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId, displayOrder])
+  @@map("cms_page_sections")
+}
+
+model HealthTool {
+  id              String            @id @default(cuid())
+  slug            String            @unique
+  name            String
+  description     String?
+  iconEmoji       String?
+  category        String?
+  route           String?
+  isActive        Boolean           @default(true)
+  featured        Boolean           @default(false)
+  displayOrder    Int               @default(0)
+  usageCount      Int               @default(0)
+  seoTitle        String?
+  seoDescription  String?
+  metaKeywords    String[]          @default([])
+  settings        Json?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  usages          HealthToolUsage[]
+
+  @@index([isActive, displayOrder])
+  @@index([featured])
+  @@index([category])
+  @@map("health_tools")
+}
+
+model HealthToolUsage {
+  id            String     @id @default(cuid())
+  toolId        String
+  userId        String?
+  sessionId     String?
+  resultSummary String?
+  notes         String?
+  resultJson    Json?
+  createdAt     DateTime   @default(now())
+  tool          HealthTool @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  user          User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([toolId, createdAt])
+  @@index([userId, createdAt])
+  @@map("health_tool_usages")
+}
+
+model PageView {
+  id              String   @id @default(cuid())
+  path            String
+  referrer        String?
+  sessionId       String?
+  durationSeconds Int?
+  createdAt       DateTime @default(now())
+
+  @@index([path])
+  @@index([sessionId])
+  @@index([createdAt])
+  @@index([referrer])
+  @@map("page_views")
+}
+
+model ReviewProcessSettings {
+  id                       String   @id @default("default")
+  tier1MinYears            Int      @default(5)
+  tier2MinYears            Int      @default(7)
+  reviewDeadlineDays       Int      @default(7)
+  maxRevisionCycles        Int      @default(2)
+  authorRevisionWindowDays Int      @default(5)
+  minSourcesPerArticle     Int      @default(5)
+  updatedAt                DateTime @updatedAt
+
+  @@map("review_process_settings")
+}
+
+model ContentCurrencySchedule {
+  id                String   @id @default(cuid())
+  contentType       String   @unique
+  reviewCycleMonths Int
+  displayOrder      Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("content_currency_schedules")
+}
+
+model AdminRole {
+  id           String           @id @default(cuid())
+  key          String           @unique
+  name         String
+  description  String?
+  displayOrder Int              @default(0)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  permissions  RolePermission[]
+
+  @@map("admin_roles")
+}
+
+model AdminPermission {
+  id           String           @id @default(cuid())
+  key          String           @unique
+  name         String
+  displayOrder Int              @default(0)
+  roles        RolePermission[]
+
+  @@map("admin_permissions")
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  enabled      Boolean         @default(true)
+  permission   AdminPermission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role         AdminRole       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model doctor_publications {
+  id              String        @id
+  doctorId        String
+  title           String
+  journal         String
+  publicationYear Int
+  doi             String?
+  url             String?
+  abstract        String?
+  citations       Int           @default(0)
+  authors         String?
+  publisher       String?
+  volume          String?
+  issue           String?
+  pages           String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime
+  doctor_profiles DoctorProfile @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  @@index([doctorId])
+  @@index([publicationYear])
+}
+
+model ArticleReviewHistory {
+  id            String              @id @default(cuid())
+  postId        String
+  actorId       String
+  action        ArticleReviewAction
+  fromStatus    BlogStatus?
+  toStatus      BlogStatus?
+  notes         String?
+  internalNotes String?
+  createdAt     DateTime            @default(now())
+  actor         User                @relation("ArticleReviewActor", fields: [actorId], references: [id], onDelete: Cascade)
+  post          BlogPost            @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId, createdAt])
+  @@index([actorId])
+  @@map("article_review_history")
+}
+
+model EditorialReview {
+  id            String                 @id @default(cuid())
+  postId        String?                @unique
+  publicationId String?                @unique
+  currentStage  EditorialReviewStageType @default(SUBMITTED)
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  post          BlogPost?              @relation(fields: [postId], references: [id], onDelete: Cascade)
+  publication   Publication?           @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  stages        EditorialReviewStage[]
+
+  @@index([currentStage])
+  @@map("editorial_reviews")
+}
+
+model EditorialReviewStage {
+  id            String                   @id @default(cuid())
+  reviewId      String
+  stage         EditorialReviewStageType
+  reviewerId    String?
+  reviewDate    DateTime?
+  dueDate       DateTime?
+  status        EditorialStageStatus     @default(PENDING)
+  notes         String?
+  medicalNotes  String?
+  internalNotes String?
+  completedAt   DateTime?
+  displayOrder  Int                      @default(0)
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
+  review        EditorialReview          @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  reviewer      User?                    @relation("EditorialStageReviewer", fields: [reviewerId], references: [id])
+
+  @@unique([reviewId, stage])
+  @@index([reviewId, displayOrder])
+  @@index([reviewerId])
+  @@map("editorial_review_stages")
+}
+
+model MedicalReviewer {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  tier         Int      @default(1)
+  specialty    String?
+  isActive     Boolean  @default(true)
+  maxWorkload  Int      @default(10)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([isActive, tier])
+  @@map("medical_reviewers")
+}
+
+model EditorialPolicy {
+  id            String                  @id @default(cuid())
+  title         String
+  slug          String                  @unique
+  category      EditorialPolicyCategory
+  version       String                  @default("1.0")
+  effectiveDate DateTime?
+  status        EditorialDocumentStatus @default(DRAFT)
+  contentHtml   String?
+  seoTitle      String?
+  seoDescription String?
+  metaKeywords  String[]                @default([])
+  isCurrent     Boolean                 @default(false)
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+  versions      EditorialPolicyVersion[]
+
+  @@index([category, status])
+  @@index([isCurrent])
+  @@map("editorial_policies")
+}
+
+model EditorialPolicyVersion {
+  id             String          @id @default(cuid())
+  policyId       String
+  versionNumber  String
+  title          String
+  contentHtml    String?
+  changeLog      String?
+  seoTitle       String?
+  seoDescription String?
+  metaKeywords   String[]        @default([])
+  isCurrent      Boolean         @default(false)
+  createdById    String?
+  createdAt      DateTime        @default(now())
+  createdBy      User?           @relation(fields: [createdById], references: [id])
+  policy         EditorialPolicy @relation(fields: [policyId], references: [id], onDelete: Cascade)
+
+  @@unique([policyId, versionNumber])
+  @@index([policyId, isCurrent])
+  @@map("editorial_policy_versions")
+}
+
+model AuthorGuideline {
+  id            String                  @id @default(cuid())
+  title         String
+  slug          String                  @unique
+  category      AuthorGuidelineCategory
+  version       String                  @default("1.0")
+  status        EditorialDocumentStatus @default(DRAFT)
+  contentHtml   String?
+  seoTitle      String?
+  seoDescription String?
+  metaKeywords  String[]                @default([])
+  isCurrent     Boolean                 @default(false)
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+  versions      AuthorGuidelineVersion[]
+  attachments   AuthorGuidelineAttachment[]
+
+  @@index([category, status])
+  @@index([isCurrent])
+  @@map("author_guidelines")
+}
+
+model AuthorGuidelineVersion {
+  id             String          @id @default(cuid())
+  guidelineId    String
+  versionNumber  String
+  title          String
+  contentHtml    String?
+  changeLog      String?
+  seoTitle       String?
+  seoDescription String?
+  metaKeywords   String[]        @default([])
+  isCurrent      Boolean         @default(false)
+  createdById    String?
+  createdAt      DateTime        @default(now())
+  createdBy      User?           @relation(fields: [createdById], references: [id])
+  guideline      AuthorGuideline @relation(fields: [guidelineId], references: [id], onDelete: Cascade)
+
+  @@unique([guidelineId, versionNumber])
+  @@index([guidelineId, isCurrent])
+  @@map("author_guideline_versions")
+}
+
+model AuthorGuidelineAttachment {
+  id          String          @id @default(cuid())
+  guidelineId String
+  fileName    String
+  fileUrl     String
+  fileSize    Int?
+  mimeType    String?
+  createdAt   DateTime        @default(now())
+  guideline   AuthorGuideline @relation(fields: [guidelineId], references: [id], onDelete: Cascade)
+
+  @@index([guidelineId])
+  @@map("author_guideline_attachments")
+}
+
+enum OAuthProvider {
+  GOOGLE
+  FACEBOOK
+}
+
+enum UserRole {
+  ADMIN
+  DOCTOR
+  PATIENT
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING
+}
+
+enum AuthorType {
+  DOCTOR
+  MEDICAL_WRITER
+  RESEARCHER
+  HEALTHCARE_PROFESSIONAL
+  EDITOR
+  GUEST_AUTHOR
+  MEDICAL_REVIEWER
+}
+
+enum DoctorAvailability {
+  AVAILABLE
+  BUSY
+  OFFLINE
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum ConsultationType {
+  VIDEO
+  AUDIO
+  CHAT
+  IN_PERSON
+}
+
+enum BlogStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_MEDICAL_REVIEW
+  NEEDS_REVISION
+  APPROVED
+  REJECTED
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ReviewPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum EditorialReviewStageType {
+  SUBMITTED
+  EDITORIAL_SCREENING
+  MEDICAL_REVIEW
+  REVISION_REQUESTED
+  FINAL_EDITORIAL_REVIEW
+  APPROVED
+  PUBLISHED
+}
+
+enum EditorialStageStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+  SKIPPED
+}
+
+enum EditorialDocumentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum EditorialPolicyCategory {
+  EDITORIAL_POLICY
+  PUBLICATION_STANDARDS
+  ETHICS_POLICY
+  CONFLICT_OF_INTEREST
+  CORRECTIONS_POLICY
+  RETRACTION_POLICY
+  PRIVACY_POLICY
+  AI_CONTENT_POLICY
+  ADVERTISEMENT_POLICY
+}
+
+enum AuthorGuidelineCategory {
+  SUBMISSION_GUIDELINES
+  FORMATTING_RULES
+  REFERENCE_STYLE
+  IMAGE_REQUIREMENTS
+  CLINICAL_TRIAL_REQUIREMENTS
+  ETHICS_REQUIREMENTS
+  COPYRIGHT
+  PUBLICATION_FEES
+  OPEN_ACCESS_POLICY
+}
+
+enum ArticleReviewAction {
+  SUBMIT
+  ASSIGN_REVIEWER
+  REASSIGN_REVIEWER
+  APPROVE
+  REJECT
+  REQUEST_REVISION
+  PUBLISH
+  UNPUBLISH
+  ARCHIVE
+  FEATURE
+  UNFEATURE
+  PIN
+  UNPIN
+  DELETE
+  MARK_COMPLETE
+  REQUEST_CHANGES
+  LEAVE_INTERNAL_NOTES
+  LEAVE_MEDICAL_NOTES
+}
+
+enum BlogCommentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  HIDDEN
+}
+
+enum ContactInquiryStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+  ARCHIVED
+}
+
+enum FaqStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ContentPublishStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum AuditResult {
+  SUCCESS
+  FAILED
+  BLOCKED
+}
+
+enum AuditSeverity {
+  INFO
+  WARNING
+  SENSITIVE
+  CRITICAL
+}
+
+enum AuditCategory {
+  ADMIN
+  AUTH
+  DATA_ACCESS
+  PAYMENTS
+  ERROR
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  FILE
+  SYSTEM
+}
+
+enum NotificationType {
+  APPOINTMENT
+  MESSAGE
+  SYSTEM
+  REVIEW
+  PRESCRIPTION
+  PUBLICATION
+  CLINICAL_NOTE
+  CONSULTATION
+  LAB_ORDER
+}
+
+enum MeetingStatus {
+  WAITING
+  LIVE
+  ENDED
+  MISSED
+  CANCELLED
+}
+
+enum MeetingParticipantRole {
+  DOCTOR
+  PATIENT
+  OBSERVER
+}
+
+enum MeetingEventType {
+  CONSULTATION_STARTED
+  CONSULTATION_ENDED
+  PARTICIPANT_JOINED
+  PARTICIPANT_LEFT
+  CAMERA_TOGGLED
+  MIC_TOGGLED
+  SCREEN_SHARE_STARTED
+  SCREEN_SHARE_STOPPED
+  CONNECTION_LOST
+  CONNECTION_RESTORED
+  ICE_RESTART
+  CHAT_MESSAGE
+  PRESCRIPTION_ISSUED
+  LAB_ORDER_CREATED
+  NOTE_SAVED
+}
+
+enum CallLogAction {
+  START
+  JOIN
+  LEAVE
+  END
+  RECONNECT
+  ERROR
+  ICE_FAILURE
+  TURN_FAILURE
+}
+
+enum ConnectionLogState {
+  CONNECTING
+  CONNECTED
+  DISCONNECTED
+  FAILED
+  RECONNECTING
+}
+
+enum NetworkQuality {
+  EXCELLENT
+  GOOD
+  FAIR
+  POOR
+  DISCONNECTED
+}
+
+enum MeetingAuditAction {
+  MEETING_CREATED
+  MEETING_STARTED
+  MEETING_ENDED
+  PARTICIPANT_JOINED
+  PARTICIPANT_LEFT
+  ACCESS_DENIED
+  CHAT_SENT
+  PRESCRIPTION_ISSUED
+  LAB_ORDER_CREATED
+  RECORDING_STARTED
+  RECORDING_STOPPED
+  ERROR
+}
+
+enum RecordingStatus {
+  PENDING
+  RECORDING
+  COMPLETED
+  FAILED
+}
+
+enum LabOrderPriority {
+  ROUTINE
+  URGENT
+  STAT
+}
+
+enum LabOrderStatus {
+  ORDERED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ClinicalNoteAuthorType {
+  DOCTOR
+  PATIENT
+}
+
+enum ClinicalNotePriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum PrescriptionStatus {
+  DRAFT
+  ISSUED
+  PENDING_REVIEW
+}
+
+enum PatientAlertSeverity {
+  CRITICAL
+  URGENT
+  STABLE
+}
+
+enum PatientAlertStatus {
+  ACTIVE
+  RESOLVED
+  REMOVED
+}
+
+enum PublicationStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  NEEDS_REVISION
+}
+
+enum PublicationType {
+  JOURNAL_ARTICLE
+  RESEARCH_PAPER
+  CASE_STUDY
+  CLINICAL_TRIAL
+  REVIEW_ARTICLE
+  CONFERENCE_PAPER
+  BOOK_CHAPTER
+  THESIS
+  EVIDENCE_REVIEW
+  CLINICAL_EXPLAINER
+  META_SUMMARY
+  PRACTICE_GUIDE
+}
+
+enum PublicationVisibility {
+  PUBLIC
+  PRIVATE
+  AFTER_APPROVAL
+}
+
+enum PublicationAttachmentType {
+  PDF
+  COVER_IMAGE
+  SUPPLEMENTARY
+  DATASET
+  FIGURE
+  TABLE
+}
+
+enum PublicationReviewAction {
+  APPROVE
+  REJECT
+  REQUEST_REVISION
+  SUBMIT
+  ASSIGN_REVIEWER
+}
+
 enum VideoProvider {
   WEBRTC
   AGORA
@@ -958,8 +2335,36 @@ enum VideoProvider {
 
 enum QuestionStatus {
   PENDING
+  APPROVED
   ANSWERED
   REJECTED
+}
+
+enum VitalType {
+  BLOOD_PRESSURE
+  HEART_RATE
+  OXYGEN_SATURATION
+  BMI
+  BLOOD_SUGAR
+  TEMPERATURE
+  WEIGHT
+  HEIGHT
+  LDL_CHOLESTEROL
+  STEPS
+}
+
+enum VitalStatus {
+  NORMAL
+  HIGH
+  LOW
+  BORDERLINE
+  GOOD
+}
+
+enum BookingSource {
+  ONLINE
+  WALK_IN
+  PHONE
 }
 
 enum BookingDraftStatus {

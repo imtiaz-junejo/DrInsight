@@ -109,12 +109,12 @@ export function LoginForm() {
   }
 
   return (
-    <div className="w-full max-w-[440px] rounded-[20px] border border-gray-200 bg-white p-6 shadow-[var(--shadow-lg)] sm:p-10 lg:p-11">
-      <div className="mb-6 flex justify-center">
-        <Logo />
+    <div className="w-full max-w-[420px] rounded-[20px] border border-gray-200 bg-white p-5 shadow-[var(--shadow-lg)] sm:p-7">
+      <div className="mb-4 flex justify-center">
+        <Logo imgClassName="!h-[3.75rem] !max-h-[3.75rem] !p-0" />
       </div>
-      <SectionTitle className="text-center">Welcome Back</SectionTitle>
-      <p className="mb-6 text-center text-[.84rem] text-gray-500">Sign in to your patient or doctor account</p>
+      <SectionTitle className="text-center text-[1.35rem]">Welcome Back</SectionTitle>
+      <p className="mb-4 text-center text-[.84rem] text-gray-500">Sign in to your patient or doctor account</p>
 
       {fromBooking && (
         <div className="mb-4 rounded-[10px] border border-[#bfdbfe] bg-[#eff6ff] px-3.5 py-3 text-[.84rem] leading-relaxed text-[#1e40af]">
@@ -134,20 +134,25 @@ export function LoginForm() {
       )}
 
       <AuthSocialButtons
-        className="mb-5"
+        className="mb-4"
         onOAuth={handleOAuth}
         oauthLoading={oauthLoading}
         disabled={loginMutation.isPending}
       />
 
-      <div className="mb-5 flex items-center gap-3 text-[.8rem] text-gray-400">
+      <div className="mb-4 flex items-center gap-3 text-[.8rem] text-gray-400">
         <div className="h-px flex-1 bg-gray-200" />
         or sign in with email
         <div className="h-px flex-1 bg-gray-200" />
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <FloatingInput name="email" type="email" label="Email Address" autoComplete="email" />
+      <form onSubmit={handleSubmit} className="space-y-3.5">
+        <FloatingInput
+          name="email"
+          type="email"
+          label="Email Address"
+          autoComplete="username email"
+        />
 
         <FloatingInput
           name="password"
@@ -174,14 +179,14 @@ export function LoginForm() {
         </Button>
       </form>
 
-      <p className="mt-4 text-center text-[.83rem] text-gray-500">
+      <p className="mt-3 text-center text-[.83rem] text-gray-500">
         Don&apos;t have an account?{" "}
         <Link href={fromBooking ? bookingRegisterUrl() : "/register"} className="font-bold text-blue">
           Create one free
         </Link>
       </p>
 
-      <div className="mt-4 rounded-[10px] border border-gray-200 bg-gray-50 p-3.5 text-[.78rem] leading-relaxed text-gray-500">
+      <div className="mt-3 rounded-[10px] border border-gray-200 bg-gray-50 p-3 text-[.75rem] leading-relaxed text-gray-500">
         🔒 Your login is protected by 256-bit SSL encryption. DrInsight never shares your personal or medical
         information with third parties.
       </div>

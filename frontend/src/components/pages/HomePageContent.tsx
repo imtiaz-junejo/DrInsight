@@ -10,7 +10,7 @@ import {
   mapBlogPostToCard,
 } from "@/lib/data-mappers";
 import { HomeHealthToolsSection } from "@/components/pages/home/HomeHealthToolsSection";
-import { HOME_HEALTH_TOOLS } from "@/components/pages/home/health-tools-data";
+import { HomeResearchPublicationsSection } from "@/components/pages/home/HomeResearchPublicationsSection";
 import { HomeSpecialtiesSection } from "@/components/pages/home/HomeSpecialtiesSection";
 import {
   useDoctorSpecialties,
@@ -19,11 +19,22 @@ import {
   usePlatformStats,
   useRecentReviews,
 } from "@/services/api-hooks";
+import { usePublicHomepageSections, type HomepageSectionConfig } from "@/services/cms-api-hooks";
 
-const tools = HOME_HEALTH_TOOLS;
+function sectionConfig(
+  sections: Array<{ slug: string; config?: HomepageSectionConfig | null }>,
+  slug: string,
+): HomepageSectionConfig {
+  const section = sections.find((s) => s.slug === slug);
+  return (section?.config ?? {}) as HomepageSectionConfig;
+}
 
 export function HomePageContent() {
   const { data: stats } = usePlatformStats();
+  const { data: homepageSections = [] } = usePublicHomepageSections();
+  const heroSection = homepageSections.find((s) => s.slug === "hero-banner");
+  const heroConfig = (heroSection?.config ?? {}) as HomepageSectionConfig;
+  const heroButtons = sectionConfig(homepageSections, "hero-buttons");
   const { data: blogData, isLoading: blogLoading } = useFeaturedBlogPosts(3);
   const { data: reviews, isLoading: reviewsLoading } = useRecentReviews(4);
   const { data: specialties } = useDoctorSpecialties();
@@ -53,31 +64,45 @@ export function HomePageContent() {
 
   return (
     <>
-      <section className="home-section hero-pattern relative overflow-hidden bg-gradient-to-br from-blue-dark via-blue to-teal px-6 py-16 text-white min-[901px]:py-[90px]">
-        <div className="home-hero-inner relative mx-auto grid max-w-[1240px] items-center gap-10 min-[901px]:grid-cols-2 min-[901px]:gap-[60px]">
+      <section className="home-section home-hero-section hero-pattern relative overflow-hidden bg-gradient-to-br from-blue-dark via-blue to-teal px-6 text-white">
+        <div className="home-hero-inner relative mx-auto grid max-w-[1240px] items-center gap-6 min-[901px]:grid-cols-2 min-[901px]:gap-10">
           <div>
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-4 py-1.5 text-[.8rem] font-semibold tracking-wide backdrop-blur-sm">
-              <span>🏥</span> TRUSTED BY {stats ? formatStatCount(stats.patientsServed ?? stats.patientCount) : "—"} PATIENTS WORLDWIDE
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-3.5 py-1 text-[.75rem] font-semibold tracking-wide backdrop-blur-sm">
+              <span>{heroConfig.icon ?? "🏥"}</span>{" "}
+              {heroConfig.subtitle ??
+                `TRUSTED BY ${stats ? formatStatCount(stats.patientsServed ?? stats.patientCount) : "—"} PATIENTS WORLDWIDE`}
             </div>
-            <h1 className="font-display text-[clamp(2rem,4vw,3.2rem)] font-bold leading-tight">
-              Your Trusted Partner in <span className="text-[#93c5fd]">Medical Excellence</span> & Health
+            <h1 className="font-display text-[clamp(1.75rem,3.2vw,2.65rem)] font-bold leading-[1.15]">
+              {heroConfig.headline ? (
+                <span dangerouslySetInnerHTML={{ __html: heroConfig.headline }} />
+              ) : (
+                <>
+                  Your Trusted Partner in <span className="text-[#93c5fd]">Medical Excellence</span> & Health
+                </>
+              )}
             </h1>
-            <p className="mt-5 max-w-[480px] text-[1.05rem] leading-relaxed opacity-90">
-              Evidence-based medical information, AI-powered health tools, and expert doctor
-              consultations — all in one trusted platform. Reviewed by licensed physicians.
+            <p className="mt-4 max-w-[480px] text-[clamp(0.9rem,1.6vw,1rem)] leading-relaxed opacity-90">
+              {heroConfig.description ??
+                "Evidence-based medical information, AI-powered health tools, and expert doctor consultations — all in one trusted platform. Reviewed by licensed physicians."}
             </p>
-            <div className="mt-8 flex flex-wrap gap-3.5">
-              <Button variant="white" asChild>
-                <Link href="/book-consultation">📅 Book a Consultation</Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link href="/ask-doctor">💬 Ask a Doctor</Link>
-              </Button>
+            <div className="mt-5 flex flex-wrap gap-3">
+              {(heroButtons.buttons ?? [
+                { label: "📅 Book a Consultation", href: "/book-consultation", variant: "white" },
+                { label: "💬 Ask a Doctor", href: "/ask-doctor", variant: "outline" },
+              ]).map((btn) => (
+                <Button key={btn.href} variant={btn.variant === "outline" ? "outline" : "white"} asChild>
+                  <Link href={btn.href}>{btn.label}</Link>
+                </Button>
+              ))}
             </div>
-            <div className="mt-9 flex flex-wrap gap-6">
-              {["Board-certified doctors", "Medically reviewed content", "HIPAA compliant", "24/7 support"].map(
-                (item) => (
-                  <div key={item} className="flex items-center gap-2 text-[.85rem] opacity-85">
+            <div className="home-hero-badges mt-5">
+              {(heroConfig.badges ?? [
+                "Board-certified doctors",
+                "Medically reviewed content",
+                "HIPAA compliant",
+                "24/7 support",
+              ]).map((item) => (
+                  <div key={item} className="flex items-center gap-1.5 text-[.8rem] opacity-85">
                     ✅ <span>{item}</span>
                   </div>
                 ),
@@ -85,34 +110,34 @@ export function HomePageContent() {
             </div>
           </div>
 
-          <div className="home-hero-visual hidden flex-col gap-4 min-[901px]:flex">
-            <div className="grid grid-cols-2 gap-3.5">
+          <div className="home-hero-visual hidden flex-col gap-3 min-[901px]:flex">
+            <div className="grid grid-cols-2 gap-3">
               {[
                 ["🩺", "Expert Doctors", `${stats ? formatStatCount(stats.doctorCount) : "—"} specialists across all major fields`],
-                ["🔬", "Health Tools", `${tools.length} free medical calculators`],
+                ["🔬", "Health Tools", `${homepageSections.length ? "Free" : "—"} medical calculators`],
                 ["💊", "Medical Blog", `${stats ? formatStatCount(stats.blogCount) : "—"} reviewed articles`],
                 ["🛡️", "Privacy First", "HIPAA & GDPR compliant"],
               ].map(([icon, title, desc]) => (
                 <div
                   key={title as string}
-                  className="rounded-[20px] border border-white/20 bg-white/12 p-5 backdrop-blur-md transition hover:-translate-y-0.5 hover:bg-white/18"
+                  className="rounded-2xl border border-white/20 bg-white/12 p-4 backdrop-blur-md transition hover:-translate-y-0.5 hover:bg-white/18"
                 >
-                  <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-white/20 text-2xl">
+                  <div className="mb-2.5 flex h-9 w-9 items-center justify-center rounded-lg bg-white/20 text-xl">
                     {icon}
                   </div>
-                  <h3 className="text-base font-semibold">{title}</h3>
-                  <p className="text-[.82rem] opacity-80">{desc}</p>
+                  <h3 className="text-[.95rem] font-semibold">{title}</h3>
+                  <p className="text-[.78rem] leading-snug opacity-80">{desc}</p>
                 </div>
               ))}
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2.5">
               {heroStats.map(([num, label]) => (
                 <div
                   key={label as string}
-                  className="rounded-xl border border-white/15 bg-white/10 p-3.5 text-center"
+                  className="rounded-xl border border-white/15 bg-white/10 p-3 text-center"
                 >
-                  <strong className="font-display block text-2xl font-bold">{num}</strong>
-                  <span className="text-[.75rem] opacity-80">{label}</span>
+                  <strong className="font-display block text-xl font-bold">{num}</strong>
+                  <span className="text-[.7rem] opacity-80">{label}</span>
                 </div>
               ))}
             </div>
@@ -120,8 +145,8 @@ export function HomePageContent() {
         </div>
       </section>
 
-      <div className="bg-white px-6">
-        <div className="relative z-10 mx-auto -mt-10 flex max-w-[1240px] flex-wrap items-center gap-3.5 rounded-xl border-[1.5px] border-[#fecaca] bg-[#fef2f2] p-4 min-[901px]:p-5">
+      <div className="px-6 pb-2">
+        <div className="relative z-10 mx-auto mt-8 flex max-w-[1240px] flex-wrap items-center gap-3.5 rounded-xl border-[1.5px] border-[#fecaca] bg-gray-200 p-4 min-[901px]:p-5">
           <span className="text-2xl">🚨</span>
           <div className="flex-1">
             <strong className="text-red">Medical Emergency? Call 911 immediately.</strong>
@@ -192,6 +217,8 @@ export function HomePageContent() {
           </div>
         </div>
       </section>
+
+      <HomeResearchPublicationsSection />
 
       <section className="home-section bg-gradient-to-br from-[#f0f7ff] to-[#e8f4fd] px-6 py-16 min-[901px]:py-20">
         <div className="home-ask-inner mx-auto grid max-w-[1240px] items-center gap-10 min-[901px]:grid-cols-2 min-[901px]:gap-[60px]">

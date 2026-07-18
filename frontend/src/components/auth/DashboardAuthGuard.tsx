@@ -17,6 +17,8 @@ function matchesPathPrefix(pathname: string, prefix: string) {
 }
 
 function requiredRole(pathname: string) {
+  if (matchesPathPrefix(pathname, "/consultation/patient")) return "PATIENT";
+  if (matchesPathPrefix(pathname, "/consultation/doctor")) return "DOCTOR";
   if (matchesPathPrefix(pathname, "/patient")) return "PATIENT";
   if (matchesPathPrefix(pathname, "/doctor")) return "DOCTOR";
   if (matchesPathPrefix(pathname, "/admin")) return "ADMIN";

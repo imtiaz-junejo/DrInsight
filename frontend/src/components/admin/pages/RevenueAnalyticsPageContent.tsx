@@ -1,115 +1,117 @@
 "use client";
 
+import { useMemo, useState } from "react";
+import { AnalyticsRangeToolbar } from "@/components/admin/analytics/AnalyticsRangeToolbar";
 import {
   AdminPanel,
   BarChart,
   PanelTable,
   StatCardRow,
-  UserCell,
+  StatusChip,
 } from "@/components/admin/ui/AdminPrimitives";
-import { formatNumber } from "@/lib/admin-utils";
-import { formatDate } from "@/lib/data-mappers";
-import { useAdminPayments, usePlatformStats } from "@/services/admin-api-hooks";
-
-function formatCents(cents: number): string {
-  return `$${(cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
-}
+import { exportTableCsv, type AnalyticsRangeParams } from "@/lib/analytics-range";
+import { formatCurrency, formatNumber } from "@/lib/admin-utils";
+import { useRevenueAnalytics } from "@/services/analytics-api-hooks";
 
 export function RevenueAnalyticsPageContent() {
-  const paymentsQuery = useAdminPayments({ limit: 100 });
-  const statsQuery = usePlatformStats();
-  const payments = paymentsQuery.data?.data ?? [];
+  const [rangeParams, setRangeParams] = useState<AnalyticsRangeParams>({ range: "month" });
+  const analyticsQuery = useRevenueAnalytics(rangeParams);
+  const data = analyticsQuery.data;
+  const stats = data?.stats;
+  const loading = analyticsQuery.isLoading;
 
-  const totalCents = payments.reduce((sum, p) => sum + p.amountCents, 0);
-
-  const monthlyMap = new Map<string, number>();
-  for (const p of payments) {
-    if (!p.confirmedAt) continue;
-    const d = new Date(p.confirmedAt);
-    const key = d.toLocaleDateString("en-US", { month: "short" });
-    monthlyMap.set(key, (monthlyMap.get(key) || 0) + p.amountCents);
-  }
-
-  const chartData = Array.from(monthlyMap.entries())
-    .slice(-6)
-    .map(([label, value]) => ({
-      label,
-      value: Math.round(value / 100),
-      display: formatCents(value),
+  const chartData = useMemo(() => {
+    const monthly = data?.monthlyRevenue ?? [];
+    return monthly.map((item) => ({
+      label: item.month,
+      value: Math.round(item.amountCents / 100),
+      display: formatCurrency(item.amountCents),
     }));
+  }, [data?.monthlyRevenue]);
 
-  if (chartData.length === 0) {
-    ["Jan", "Feb", "Mar", "Apr", "May", "Jun"].forEach((label) => {
-      chartData.push({ label, value: 0, display: "$0" });
-    });
-  }
+  const payoutRows = useMemo(
+    () =>
+      (data?.pendingPayouts ?? []).map((p) => [
+        p.doctorName,
+        p.specialty,
+        formatCurrency(p.amountCents),
+        p.period,
+        <StatusChip key={p.doctorName + p.period} label={p.status} className={p.status === "Paid" ? "ch-g" : "ch-a"} />,
+      ]),
+    [data?.pendingPayouts],
+  );
 
-  const rows = payments.slice(0, 20).map((p) => {
-    const doctor = p.bookingDraft?.doctor?.user;
-    const patient = p.bookingDraft?.patient?.user;
-    return [
-      <UserCell
-        key={`d-${p.id}`}
-        firstName={doctor?.firstName}
-        lastName={doctor?.lastName}
-        sub="Consultation"
-      />,
-      doctor ? "Specialist" : "—",
-      formatCents(p.amountCents),
-      p.confirmedAt ? formatDate(p.confirmedAt) : "—",
-      "Paid",
-    ];
-  });
+  const handleExport = () => {
+    exportTableCsv(
+      "doctor-payouts.csv",
+      ["Doctor", "Specialty", "Amount Due", "Period", "Status"],
+      (data?.pendingPayouts ?? []).map((p) => [
+        p.doctorName,
+        p.specialty,
+        formatCurrency(p.amountCents),
+        p.period,
+        p.status,
+      ]),
+    );
+  };
 
   return (
     <>
+      <AnalyticsRangeToolbar value={rangeParams} onChange={setRangeParams} onExport={handleExport} />
       <StatCardRow
         items={[
           {
             ic: "ic1",
             icon: "💰",
-            num: paymentsQuery.isLoading ? "—" : formatCents(totalCents),
-            label: "Total Revenue",
-            tag: `${payments.length} payments`,
-            tagClass: "tt-g",
+            num: loading ? "—" : formatCurrency(data?.totalRevenueCents ?? 0),
+            label: "Revenue",
+            tag: loading ? "..." : (stats?.revenueTag ?? "—"),
+            tagClass: stats?.revenueTagClass ?? "tt-b",
           },
           {
             ic: "ic2",
             icon: "🩺",
-            num: statsQuery.data ? formatNumber(statsQuery.data.appointmentCount ?? 0) : "—",
-            label: "Consultations",
-            tag: "All time",
+            num: loading ? "—" : formatCurrency(data?.consultationRevenueCents ?? 0),
+            label: "From Consultations",
+            tag: loading ? "..." : (stats?.consultationShare ?? "—"),
             tagClass: "tt-b",
           },
           {
             ic: "ic3",
-            icon: "👥",
-            num: statsQuery.data ? formatNumber(statsQuery.data.patientCount ?? 0) : "—",
-            label: "Active Patients",
-            tag: "Platform",
-            tagClass: "tt-a",
+            icon: "💳",
+            num: loading ? "—" : formatNumber(data?.succeededPayments ?? 0),
+            label: "Successful Payments",
+            tag: loading ? "..." : `${data?.successRate ?? 0}% success`,
+            tagClass: "tt-g",
           },
           {
             ic: "ic4",
-            icon: "💳",
-            num: paymentsQuery.isLoading ? "—" : formatNumber(payments.length),
-            label: "Successful Payments",
-            tag: "Live data",
+            icon: "🏦",
+            num: loading ? "—" : formatCurrency(data?.platformFeesCents ?? 0),
+            label: "Platform Fees Collected",
+            tag: loading ? "..." : (stats?.platformShare ?? "—"),
             tagClass: "tt-g",
           },
         ]}
       />
       <AdminPanel title="📈 Revenue — Last 6 Months" bodyClassName="panel-bd">
-        <BarChart
-          data={chartData}
-          barStyle={{ background: "linear-gradient(180deg,var(--green),#10b981)" }}
-        />
+        {loading ? (
+          <p style={{ color: "var(--gray-500)" }}>Loading chart...</p>
+        ) : chartData.length === 0 ? (
+          <p style={{ color: "var(--gray-500)" }}>No revenue data for this period</p>
+        ) : (
+          <BarChart
+            data={chartData.slice(-6)}
+            barStyle={{ background: "linear-gradient(180deg,var(--green),#10b981)" }}
+          />
+        )}
       </AdminPanel>
       <PanelTable
-        title="💸 Recent Payments"
-        headers={["Doctor", "Specialty", "Amount", "Period", "Status"]}
-        rows={paymentsQuery.isLoading ? [] : rows}
-        emptyMessage={paymentsQuery.isLoading ? "Loading..." : "No payment data yet"}
+        title="💸 Doctor Payouts"
+        headers={["Doctor", "Specialty", "Amount Due", "Period", "Status"]}
+        rows={loading ? [] : payoutRows}
+        loading={loading}
+        emptyMessage="No payout data for this period"
       />
     </>
   );

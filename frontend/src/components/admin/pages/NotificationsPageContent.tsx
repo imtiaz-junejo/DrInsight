@@ -218,9 +218,15 @@ export function NotificationsPageContent() {
     />,
     <UserCell
       key={`${campaign.id}-recipient`}
-      firstName={recipientLabel(campaign)}
+      firstName={campaign.audience === "INDIVIDUAL" && campaign.audienceUser
+        ? campaign.audienceUser.firstName
+        : recipientLabel(campaign)}
+      lastName={campaign.audience === "INDIVIDUAL" && campaign.audienceUser
+        ? campaign.audienceUser.lastName
+        : undefined}
       sub={campaign.type}
-      seed={campaign.id}
+      seed={campaign.audienceUser?.id ?? campaign.id}
+      userId={campaign.audienceUser?.id}
     />,
     campaign.type,
     formatChannels(campaign.channels),

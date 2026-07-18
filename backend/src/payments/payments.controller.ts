@@ -136,8 +136,12 @@ export class PaymentsController {
   @Get('admin/analytics')
   @ApiBearerAuth()
   @Roles(UserRole.ADMIN)
-  getAdminAnalytics() {
-    return this.paymentsService.getPaymentAnalytics();
+  getAdminAnalytics(
+    @Query('range') range?: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ) {
+    return this.paymentsService.getPaymentAnalytics({ range, from, to });
   }
 
   @Get('admin/export')

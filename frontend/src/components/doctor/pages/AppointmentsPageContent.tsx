@@ -19,6 +19,7 @@ import {
 import { todayFormatted } from "@/lib/doctor-utils";
 import { useDoctorAppointments, useUpdateAppointmentStatus } from "@/services/doctor-api-hooks";
 import { useDoctorUiStore } from "@/store/doctor-ui.store";
+import { ConsultationScheduleButton } from "@/components/doctor/ConsultationScheduleButton";
 
 function EmptyState({ loading, message }: { loading?: boolean; message: string }) {
   return (
@@ -94,13 +95,10 @@ export function AppointmentsPageContent() {
                     Confirm
                   </button>
                 ) : (
-                  <button
-                    type="button"
-                    className={`sch-btn${live ? " go" : ""}`}
-                    onClick={() => showToast(live ? "Joining call..." : "Preparing...")}
-                  >
-                    {live ? "Join →" : "Prep"}
-                  </button>
+                  <ConsultationScheduleButton
+                    appointment={appt}
+                    onPrepFallback={() => showToast("Open patient chart to prepare for this visit")}
+                  />
                 )}
               </div>
             );

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
   AdminButton,
@@ -9,7 +10,14 @@ import {
   StatusChip,
   UserCell,
 } from "@/components/admin/ui/AdminPrimitives";
-import { formatRelativeTime, userRoleChip, userStatusChip } from "@/lib/admin-utils";
+import { adminUserProfileHref } from "@/lib/admin-routes";
+import {
+  formatNumber,
+  formatRelativeTime,
+  formatSharePercent,
+  userRoleChip,
+  userStatusChip,
+} from "@/lib/admin-utils";
 import { useAdminUiStore } from "@/store/admin-ui.store";
 import {
   useAdminUsers,
@@ -33,6 +41,8 @@ export function UsersPageContent() {
   const usersQuery = useAdminUsers({ role: roleParam, limit: 100 });
   const stats = statsQuery.data;
   const users = usersQuery.data?.data ?? [];
+  const totalUsers =
+    stats?.userCount ?? (stats?.patientCount ?? 0) + (stats?.doctorCount ?? 0) + (stats?.adminCount ?? 0);
 
   const filtered = users.filter((user) => {
     if (filterIndex === 4) return user.status === "SUSPENDED";
@@ -43,12 +53,15 @@ export function UsersPageContent() {
     const role = userRoleChip(user.role, user.status);
     const status = userStatusChip(user.status);
     return [
-      <UserCell key={user.id} firstName={user.firstName} lastName={user.lastName} sub={`#USR-${user.id.slice(-4)}`} seed={user.id} />,
+      <UserCell key={user.id} firstName={user.firstName} lastName={user.lastName} sub={`#USR-${user.id.slice(-4)}`} seed={user.id} userId={user.id} />,
       <StatusChip key={`${user.id}-r`} label={role.label} className={role.className} />,
       user.email,
       <StatusChip key={`${user.id}-s`} label={status.label} className={status.className} />,
       formatRelativeTime(user.createdAt),
       <div key={`${user.id}-a`} className="btn-row">
+        <Link href={adminUserProfileHref(user.id)} className="btn">
+          View
+        </Link>
         {user.status === "PENDING" && user.role === "DOCTOR" ? (
           <AdminButton
             variant="green"
@@ -97,14 +110,35 @@ export function UsersPageContent() {
           {
             ic: "ic1",
             icon: "👥",
-            num: stats ? String(stats.userCount ?? (stats.patientCount + stats.doctorCount + (stats.adminCount ?? 0))) : "—",
+            num: statsQuery.isLoading ? "—" : formatNumber(totalUsers),
             label: "Total Users",
-            tag: "Live data",
+            tag: "All roles",
             tagClass: "tt-b",
           },
-          { ic: "ic2", icon: "🧑‍🤝‍🧑", num: stats ? String(stats.patientCount) : "—", label: "Patients", tag: "Platform stats", tagClass: "tt-g" },
-          { ic: "ic3", icon: "👨‍⚕️", num: stats ? String(stats.doctorCount) : "—", label: "Doctors", tag: "Platform stats", tagClass: "tt-a" },
-          { ic: "ic4", icon: "🛡️", num: stats ? String(stats.adminCount ?? 0) : "—", label: "Admins/Staff", tag: "Platform stats", tagClass: "tt-b" },
+          {
+            ic: "ic2",
+            icon: "🧑‍🤝‍🧑",
+            num: statsQuery.isLoading ? "—" : formatNumber(stats?.patientCount ?? 0),
+            label: "Patients",
+            tag: statsQuery.isLoading ? "—" : formatSharePercent(stats?.patientCount ?? 0, totalUsers),
+            tagClass: "tt-g",
+          },
+          {
+            ic: "ic3",
+            icon: "👨‍⚕️",
+            num: statsQuery.isLoading ? "—" : formatNumber(stats?.doctorCount ?? 0),
+            label: "Doctors",
+            tag: statsQuery.isLoading ? "—" : formatSharePercent(stats?.doctorCount ?? 0, totalUsers),
+            tagClass: "tt-a",
+          },
+          {
+            ic: "ic4",
+            icon: "🛡️",
+            num: statsQuery.isLoading ? "—" : formatNumber(stats?.adminCount ?? 0),
+            label: "Admins/Staff",
+            tag: statsQuery.isLoading ? "—" : formatSharePercent(stats?.adminCount ?? 0, totalUsers),
+            tagClass: "tt-b",
+          },
         ]}
       />
       <FilterPills

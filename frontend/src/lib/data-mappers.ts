@@ -136,7 +136,9 @@ export function mapAppointmentToConsultation(appt: Appointment, perspective: "pa
 
   const statusInfo = appointmentStatusChip(appt.status);
   const isPast = ["COMPLETED", "CANCELLED"].includes(appt.status);
-  const canJoin = !isPast && appt.status === "IN_PROGRESS";
+  const isOnline = ["VIDEO", "AUDIO", "CHAT"].includes(appt.consultationType);
+  const meetingLive = appt.meetingStatus === "LIVE" || appt.status === "IN_PROGRESS";
+  const canJoin = !isPast && isOnline && meetingLive;
 
   return {
     id: appt.id,
@@ -160,6 +162,7 @@ export function mapAppointmentToConsultation(appt: Appointment, perspective: "pa
 
 export interface MappedDoctorCard {
   id: string;
+  profileSlug?: string | null;
   init: string;
   name: string;
   spec: string;
@@ -193,6 +196,7 @@ export function mapDoctorProfile(d: DoctorProfile): MappedDoctorCard {
   const countryKey = country.toLowerCase();
   return {
     id: d.id,
+    profileSlug: d.profileSlug,
     init: getInitials(d.user?.firstName, d.user?.lastName),
     name: doctorFullName(d.user),
     spec: d.specialty.toLowerCase(),

@@ -10,7 +10,8 @@ import {
   StatusChip,
   UserCell,
 } from "@/components/admin/ui/AdminPrimitives";
-import { formatNumber } from "@/lib/admin-utils";
+import { adminDoctorArticlesHref, adminUserProfileHref } from "@/lib/admin-routes";
+import { formatNumber, formatSignedChange } from "@/lib/admin-utils";
 import { useAdminUiStore } from "@/store/admin-ui.store";
 import {
   useAdminDoctors,
@@ -18,21 +19,23 @@ import {
   usePlatformStats,
   useUpdateUserStatus,
 } from "@/services/admin-api-hooks";
-import { useDoctorSpecialties } from "@/services/api-hooks";
 
 export function DoctorsPageContent() {
   const showToast = useAdminUiStore((s) => s.showToast);
   const [filterIndex, setFilterIndex] = useState(0);
   const [page, setPage] = useState(1);
   const doctorsQuery = useAdminDoctors({ page, limit: 10 });
-  const specialtiesQuery = useDoctorSpecialties();
   const statsQuery = usePlatformStats();
   const pendingQuery = usePendingUsers();
   const updateStatus = useUpdateUserStatus();
 
+  const stats = statsQuery.data;
   const doctors = doctorsQuery.data?.data ?? [];
   const pendingDoctors = (pendingQuery.data ?? []).filter((u) => u.role === "DOCTOR");
-  const avgRating = statsQuery.data?.averageRating ?? 0;
+  const totalDoctors = stats?.doctorCount ?? doctorsQuery.data?.meta.total ?? 0;
+  const verifiedDoctors = stats?.verifiedDoctorCount ?? Math.max(0, totalDoctors - pendingDoctors.length);
+  const avgRating = stats?.averageRating ?? 0;
+  const ratingChange = stats?.averageRatingChange ?? 0;
 
   const filteredDoctors = doctors.filter((doctor) => {
     const userId = doctor.user?.id;
@@ -53,6 +56,7 @@ export function DoctorsPageContent() {
         lastName={user?.lastName}
         sub={`${doctor.specialty} · ${doctor.experienceYears} yrs`}
         seed={doctor.id}
+        userId={user?.id}
       />,
       doctor.specialty,
       doctor.hospital ?? "—",
@@ -60,7 +64,11 @@ export function DoctorsPageContent() {
       doctor.reviewCount > 0 ? `⭐ ${doctor.rating.toFixed(1)} (${doctor.reviewCount})` : "— (0)",
       <StatusChip key={`${doctor.id}-s`} label={isPending ? "Pending Verification" : "Verified"} className={isPending ? "ch-a" : "ch-g"} />,
       <div key={`${doctor.id}-a`} className="btn-row">
-        <AdminButton onClick={() => showToast("Opening profile...")}>View</AdminButton>
+        {user?.id ? (
+          <Link href={adminUserProfileHref(user.id)} className="btn">
+            View
+          </Link>
+        ) : null}
         {isPending && user?.id ? (
           <AdminButton
             variant="green"
@@ -70,11 +78,11 @@ export function DoctorsPageContent() {
           >
             Verify
           </AdminButton>
-        ) : (
-          <Link href="/admin/authors" className="btn">
+        ) : user?.id ? (
+          <Link href={adminDoctorArticlesHref(user.id)} className="btn">
             Articles
           </Link>
-        )}
+        ) : null}
       </div>,
     ];
   });
@@ -86,28 +94,35 @@ export function DoctorsPageContent() {
           {
             ic: "ic1",
             icon: "👨‍⚕️",
-            num: formatNumber(doctorsQuery.data?.meta.total ?? 0),
+            num: statsQuery.isLoading ? "—" : formatNumber(totalDoctors),
             label: "Total Doctors",
-            tag: `${specialtiesQuery.data?.length ?? 0} specialties`,
+            tag: statsQuery.isLoading ? "—" : `${stats?.specialtyCount ?? 0} specialties`,
             tagClass: "tt-b",
           },
           {
             ic: "ic2",
             icon: "✅",
-            num: formatNumber(Math.max(0, (doctorsQuery.data?.meta.total ?? 0) - pendingDoctors.length)),
+            num: statsQuery.isLoading ? "—" : formatNumber(verifiedDoctors),
             label: "Verified",
-            tag: "Live data",
+            tag: statsQuery.isLoading ? "—" : `${stats?.verifiedDoctorPercent ?? 0}%`,
             tagClass: "tt-g",
           },
           {
             ic: "ic3",
             icon: "⏳",
-            num: String(pendingDoctors.length),
+            num: statsQuery.isLoading ? "—" : formatNumber(stats?.pendingDoctors ?? pendingDoctors.length),
             label: "Pending Verification",
-            tag: pendingDoctors.length > 0 ? "Action needed" : "None",
+            tag: (stats?.pendingDoctors ?? pendingDoctors.length) > 0 ? "Action needed" : "Clear",
             tagClass: "tt-a",
           },
-          { ic: "ic4", icon: "⭐", num: avgRating.toFixed(2), label: "Avg. Rating", tag: "Platform stats", tagClass: "tt-g" },
+          {
+            ic: "ic4",
+            icon: "⭐",
+            num: statsQuery.isLoading ? "—" : avgRating.toFixed(2),
+            label: "Avg. Rating",
+            tag: statsQuery.isLoading ? "—" : formatSignedChange(ratingChange),
+            tagClass: "tt-g",
+          },
         ]}
       />
       <FilterPills filters={["All", "Verified", "Pending", "Suspended", "By Specialty"]} activeIndex={filterIndex} onChange={setFilterIndex} />

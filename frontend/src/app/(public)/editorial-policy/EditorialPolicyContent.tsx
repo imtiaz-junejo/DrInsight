@@ -81,12 +81,12 @@ const TEAM = [
 ];
 
 const CONTACTS = [
-  { title: "✉️ General Editorial", email: "editorial@drinsight.org", note: "General editorial enquiries" },
-  { title: "🔍 Corrections & Inaccuracies", email: "corrections@drinsight.org", note: "Report inaccurate content" },
-  { title: "✍️ Author Applications", email: "authors@drinsight.org", note: "Join as a medical author" },
-  { title: "🔬 Reviewer Applications", email: "reviewers@drinsight.org", note: "Join as a medical reviewer" },
-  { title: "📣 Sponsored Content", email: "partnerships@drinsight.org", note: "Partnership & advertising enquiries" },
-  { title: "🧠 Safe Messaging", email: "safemessaging@drinsight.org", note: "Safe messaging concerns" },
+  { title: "✉️ General Editorial", email: "drinsightofficial@gmail.com", note: "General editorial enquiries" },
+  { title: "🔍 Corrections & Inaccuracies", email: "drinsightofficial@gmail.com", note: "Report inaccurate content" },
+  { title: "✍️ Author Applications", email: "drinsightofficial@gmail.com", note: "Join as a medical author" },
+  { title: "🔬 Reviewer Applications", email: "drinsightofficial@gmail.com", note: "Join as a medical reviewer" },
+  { title: "📣 Sponsored Content", email: "drinsightofficial@gmail.com", note: "Partnership & advertising enquiries" },
+  { title: "🧠 Safe Messaging", email: "drinsightofficial@gmail.com", note: "Safe messaging concerns" },
 ];
 
 function Accordion({ id, title, open, onToggle, children }: { id: string; title: string; open: boolean; onToggle: (id: string) => void; children: React.ReactNode }) {
@@ -102,7 +102,6 @@ function Accordion({ id, title, open, onToggle, children }: { id: string; title:
 }
 
 export function EditorialPolicyContent() {
-  const [progress, setProgress] = useState(0);
   const [activeSection, setActiveSection] = useState("s1");
   const [accordions, setAccordions] = useState<Record<string, boolean>>({
     "s8-clinical": true,
@@ -114,9 +113,6 @@ export function EditorialPolicyContent() {
 
   useEffect(() => {
     const onScroll = () => {
-      const d = document.documentElement;
-      const pct = (d.scrollTop / (d.scrollHeight - d.clientHeight)) * 100;
-      setProgress(Number.isFinite(pct) ? pct : 0);
       let active = "s1";
       sectionIds.forEach((id) => {
         const el = document.getElementById(id);
@@ -139,9 +135,6 @@ export function EditorialPolicyContent() {
 
   return (
     <div className="editorial-policy-page">
-      <div className="progress-bar">
-        <div className="progress-fill" style={{ width: `${progress}%` }} />
-      </div>
 
       <div className="page-hero">
         <div className="hero-inner">
@@ -592,7 +585,7 @@ export function EditorialPolicyContent() {
               <p>Full article removal when content is fundamentally flawed or clinically unsafe. A retraction notice is published at the original URL. If author misconduct is identified, the matter is reported to relevant professional regulatory bodies. All retractions are permanently logged in editorial records.</p>
             </div>
             <div className="prose">
-              <p>📧 To report a correction: <strong>corrections@drinsight.org</strong> · Response commitment: within 5 business days</p>
+              <p>📧 To report a correction: <strong>drinsightofficial@gmail.com</strong> · Response commitment: within 5 business days</p>
             </div>
           </div>
 

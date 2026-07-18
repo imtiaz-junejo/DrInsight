@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { VideoProvider } from '@prisma/client';
 import { randomBytes } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
+import { WebrtcIceService } from '../meeting/webrtc-ice.service';
 
 export interface VideoTokenResult {
   provider: VideoProvider;
@@ -19,6 +20,7 @@ export class VideoService {
   constructor(
     private config: ConfigService,
     private prisma: PrismaService,
+    private iceService: WebrtcIceService,
   ) {
     this.provider = (this.config.get('VIDEO_PROVIDER') as VideoProvider) || VideoProvider.WEBRTC;
   }
@@ -49,10 +51,7 @@ export class VideoService {
       roomId,
       expiresAt: expiresAt.toISOString(),
       config: {
-        iceServers: [
-          { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' },
-        ],
+        iceServers: this.iceService.getIceServers(userId),
         userId,
         role,
       },
@@ -111,8 +110,9 @@ export class VideoService {
   private async assertRoomAccess(roomId: string, userId: string) {
     const appointment = await this.prisma.appointment.findFirst({
       where: {
-        meetingRoomId: roomId,
+        OR: [{ meetingRoomId: roomId }, { roomId: roomId }],
         status: { in: ['CONFIRMED', 'IN_PROGRESS'] },
+        meetingStatus: { in: ['WAITING', 'LIVE'] },
       },
       include: { patient: true, doctor: true },
     });

@@ -106,7 +106,7 @@ type CookiePrefs = {
 };
 
 export function CookiePolicyPageClient() {
-  const { progress, activeSection, scrollToSection, scrollToTop } = usePolicyPageScroll(SECTION_IDS, 120);
+  const { activeSection, scrollToSection, scrollToTop } = usePolicyPageScroll(SECTION_IDS, 120);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [prefs, setPrefs] = useState<CookiePrefs>({
@@ -159,9 +159,6 @@ export function CookiePolicyPageClient() {
 
   return (
     <div className="cookie-policy-page">
-      <div className="progress-bar">
-        <div className="progress-fill" style={{ width: `${progress}%` }} />
-      </div>
 
       <div className={`modal-overlay${modalOpen ? "" : " hidden"}`}>
         <div className="modal" role="dialog" aria-modal="true" aria-labelledby="cookie-modal-title">
@@ -1314,12 +1311,12 @@ export function CookiePolicyPageClient() {
             <div className="contact-grid">
               <div className="contact-card">
                 <h4>🍪 Cookie Enquiries</h4>
-                <a href="#">privacy@drinsight.org</a>
+                <a href="#">drinsightofficial@gmail.com</a>
                 <p>For cookie questions or to request active cookie list</p>
               </div>
               <div className="contact-card">
                 <h4>🛡️ Data Protection Officer</h4>
-                <a href="#">dpo@drinsight.org</a>
+                <a href="#">drinsightofficial@gmail.com</a>
                 <p>For GDPR-related data concerns</p>
               </div>
               <div className="contact-card">

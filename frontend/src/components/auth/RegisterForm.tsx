@@ -23,66 +23,18 @@ import {
 } from "@/lib/oauth";
 import { BOOKING_RETURN_PATH, isBookingAuthFlow } from "@/lib/booking-auth";
 import { invalidateAuthProfile } from "@/services/patient-api-hooks";
-
-type AccountType = "patient" | "physician" | "";
-type SubType =
-  | "indiv"
-  | "parent"
-  | "caregiver"
-  | "student"
-  | "specialist"
-  | "gp"
-  | "surgeon"
-  | "resident"
-  | "";
+import {
+  PATIENT_HEALTH_TAGS,
+  PATIENT_SUBS,
+  PHYSICIAN_CLINICAL_TAGS,
+  PHYSICIAN_SUBS,
+  type AccountType,
+  type SubType,
+} from "@/components/auth/registration-constants";
 
 type RegisterResponse =
   | { accessToken: string; refreshToken: string; user: AuthUser }
   | { requiresApproval: true; message: string; user: AuthUser };
-
-const PATIENT_SUBS = [
-  { id: "indiv" as const, icon: "👤", title: "Individual Patient", desc: "Managing my own health" },
-  { id: "parent" as const, icon: "👨‍👩‍👦", title: "Parent / Guardian", desc: "Managing health of a child" },
-  { id: "caregiver" as const, icon: "👴", title: "Caregiver for Elder", desc: "Caring for an elderly family member" },
-  { id: "student" as const, icon: "🎓", title: "Medical Student", desc: "Studying medicine or health science" },
-];
-
-const PHYSICIAN_SUBS = [
-  { id: "specialist" as const, icon: "🩺", title: "Specialist Doctor", desc: "Board-certified in a specialty" },
-  { id: "gp" as const, icon: "🔬", title: "General Practitioner", desc: "Primary care / family medicine" },
-  { id: "surgeon" as const, icon: "💊", title: "Surgeon", desc: "Surgical specialty practice" },
-  { id: "resident" as const, icon: "🏥", title: "Resident / Fellow", desc: "Postgraduate training" },
-];
-
-const PATIENT_HEALTH_TAGS = [
-  "❤️ Cardiology",
-  "🧠 Neurology",
-  "🦋 Endocrinology",
-  "🍽️ Gastroenterology",
-  "🫘 Nephrology",
-  "🧴 Dermatology",
-  "🧠 Mental Health",
-  "🧒 Pediatrics",
-  "🦴 Rheumatology",
-  "🫁 Pulmonology",
-  "🎗️ Oncology",
-  "🦠 Infectious Disease",
-  "💊 Medications",
-  "🏃 Sports Medicine",
-  "😴 Sleep Medicine",
-  "🧬 Genetics",
-];
-
-const PHYSICIAN_CLINICAL_TAGS = [
-  "❤️ Cardiology",
-  "🧠 Neurology",
-  "🦋 Endocrinology",
-  "🍽️ Gastroenterology",
-  "🧴 Dermatology",
-  "🧠 Mental Health",
-  "🫁 Pulmonology",
-  "🎗️ Oncology",
-];
 
 const LEFT_DEFAULT = {
   eyebrow: "FREE ACCOUNT — NO CREDIT CARD REQUIRED",
@@ -144,7 +96,7 @@ export function RegisterForm() {
   const setAuth = useAuthStore((state) => state.setAuth);
 
   const [currentStep, setCurrentStep] = useState(1);
-  const [accountType, setAccountType] = useState<AccountType>("");
+  const [accountType, setAccountType] = useState<AccountType | "">("");
   const [subType, setSubType] = useState<SubType>("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);

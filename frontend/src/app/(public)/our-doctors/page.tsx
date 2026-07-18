@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "@/styles/doctors-page.css";
 import { formatCurrency, formatStatCount, mapDoctorProfile, specialtyEmoji } from "@/lib/data-mappers";
+import { authorProfileHref } from "@/lib/author-profile-url";
 import type { MappedDoctorCard } from "@/lib/data-mappers";
 import { useDoctors, useDoctorSpecialties, usePlatformStats } from "@/services/api-hooks";
 
@@ -17,11 +18,11 @@ function DoctorCard({
   onBook,
 }: {
   doctor: MappedDoctorCard;
-  onProfile: (id: string) => void;
+  onProfile: (doctor: MappedDoctorCard) => void;
   onBook: (id: string) => void;
 }) {
   return (
-    <div className="doc-card" onClick={() => onProfile(doctor.id)} role="button" tabIndex={0}>
+    <div className="doc-card" onClick={() => onProfile(doctor)} role="button" tabIndex={0}>
       <div className="doc-cover" style={{ background: doctor.bg }}>
         <div className="doc-cover-header">
           <div className="doc-cover-badges-left">
@@ -97,7 +98,7 @@ function DoctorCard({
             className="doc-btn outline"
             onClick={(e) => {
               e.stopPropagation();
-              onProfile(doctor.id);
+              onProfile(doctor);
             }}
           >
             View Profile
@@ -313,7 +314,8 @@ export default function DoctorsPage() {
     return list;
   }, [search, sort, activeFilters, onlineNow, rating4Plus, doctors]);
 
-  const goProfile = (id: string) => router.push(`/our-doctors/${id}`);
+  const goProfile = (doctor: MappedDoctorCard) =>
+    router.push(authorProfileHref({ id: doctor.id, profileSlug: doctor.profileSlug }));
   const goBook = (id: string) => router.push(`/book-consultation?doctorId=${id}`);
 
   return (

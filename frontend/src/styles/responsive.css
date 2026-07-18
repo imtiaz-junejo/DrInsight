@@ -124,6 +124,10 @@ figcaption,
   top: 0;
   z-index: 100;
   background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow:
+    0 4px 10px -4px rgba(15, 23, 42, 0.12),
+    0 2px 4px -2px rgba(15, 23, 42, 0.06);
 }
 
 .site-nav .nav-links .nav-link,
@@ -132,11 +136,11 @@ figcaption,
 }
 
 .site-nav .nav-links .nav-link {
-  padding: 8px 14px;
+  padding: 6px 12px;
 }
 
 .site-nav .nav-links .nav-link-cta {
-  padding: 8px 20px;
+  padding: 6px 16px;
 }
 
 /* Public mobile nav — matches reference .mobile-menu */
@@ -241,6 +245,7 @@ figcaption,
     top: auto;
     transform: none;
     width: auto;
+    height: auto;
     max-height: none;
     overflow: visible;
     border-radius: var(--radius-lg, 20px);
@@ -476,7 +481,7 @@ figcaption,
 /* ─── Mobile (max 640px) ─── */
 @media (max-width: 640px) {
   .public-section,
-  .home-section {
+  .home-section:not(.home-hero-section) {
     padding-top: 56px !important;
     padding-bottom: 56px !important;
     padding-left: 20px !important;
@@ -490,7 +495,7 @@ figcaption,
   .doctor-root .dash-body,
   .patient-root .dash-body {
     padding: 0 16px;
-    margin: 20px auto;
+    margin: 10px auto 20px;
   }
 
   .doctor-root .form-row,
@@ -683,14 +688,23 @@ figcaption,
   .doctor-root .dash-sidebar,
   .patient-root .dash-sidebar {
     position: sticky;
-    top: 88px;
     transform: none;
     width: auto;
     border-radius: var(--radius-lg, 20px);
   }
 
+  .doctor-root .dash-sidebar,
+  .patient-root .dash-sidebar {
+    top: 76px;
+    max-height: calc(100vh - 92px);
+    overflow-y: auto;
+    align-self: start;
+  }
+
   .doctor-root .dash-main,
-  .patient-root .dash-main {
+  .doctor-root .dash-main-col,
+  .patient-root .dash-main,
+  .patient-root .dash-main-col {
     min-width: 0;
   }
 }

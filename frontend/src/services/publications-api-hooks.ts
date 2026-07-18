@@ -20,7 +20,11 @@ export type PublicationType =
   | "REVIEW_ARTICLE"
   | "CONFERENCE_PAPER"
   | "BOOK_CHAPTER"
-  | "THESIS";
+  | "THESIS"
+  | "EVIDENCE_REVIEW"
+  | "CLINICAL_EXPLAINER"
+  | "META_SUMMARY"
+  | "PRACTICE_GUIDE";
 
 export type PublicationVisibility = "PUBLIC" | "PRIVATE" | "AFTER_APPROVAL";
 
@@ -56,6 +60,13 @@ export interface PublicationKeyword {
   keyword: string;
 }
 
+export interface PublicationReference {
+  id?: string;
+  citation: string;
+  doi?: string | null;
+  sortOrder?: number;
+}
+
 export interface PublicationReview {
   id: string;
   action: string;
@@ -75,6 +86,31 @@ export interface Publication {
   results?: string | null;
   discussion?: string | null;
   conclusion?: string | null;
+  articleId?: string | null;
+  license?: string | null;
+  abstractBackground?: string | null;
+  abstractMethods?: string | null;
+  abstractResults?: string | null;
+  abstractConclusions?: string | null;
+  objectives?: string | null;
+  methodsContent?: string | null;
+  methodsTable?: string | null;
+  figureData?: string | null;
+  figureCaption?: string | null;
+  resultSummary?: string | null;
+  practiceImplications?: string | null;
+  limitations?: string | null;
+  keyFindings?: string | null;
+  authorContributions?: string | null;
+  ethicsStatement?: string | null;
+  dataAvailabilityStatement?: string | null;
+  conflictsOfInterest?: string | null;
+  acknowledgments?: string | null;
+  abbreviations?: string | null;
+  lastReviewedDate?: string | null;
+  peerReviewOutcome?: string | null;
+  nextScheduledReview?: string | null;
+  evidenceGrade?: string | null;
   researchCategory?: string | null;
   medicalSpecialty?: string | null;
   publicationType: PublicationType;
@@ -131,6 +167,7 @@ export interface Publication {
   updatedAt: string;
   authors?: PublicationAuthor[];
   keywords?: PublicationKeyword[];
+  references?: PublicationReference[];
   attachments?: PublicationAttachment[];
   reviews?: PublicationReview[];
   doctor?: {
@@ -166,7 +203,32 @@ export interface PublicationPayload {
   title: string;
   slug?: string;
   subtitle?: string;
-  abstract: string;
+  abstract?: string;
+  introduction?: string;
+  results?: string;
+  discussion?: string;
+  conclusion?: string;
+  articleId?: string;
+  license?: string;
+  abstractBackground?: string;
+  abstractMethods?: string;
+  abstractResults?: string;
+  abstractConclusions?: string;
+  objectives?: string;
+  methodsContent?: string;
+  methodsTable?: string;
+  figureData?: string;
+  figureCaption?: string;
+  resultSummary?: string;
+  practiceImplications?: string;
+  limitations?: string;
+  keyFindings?: string;
+  authorContributions?: string;
+  ethicsStatement?: string;
+  dataAvailabilityStatement?: string;
+  conflictsOfInterest?: string;
+  acknowledgments?: string;
+  abbreviations?: string;
   researchCategory?: string;
   medicalSpecialty?: string;
   publicationType: PublicationType;
@@ -210,6 +272,7 @@ export interface PublicationPayload {
   seoTitle?: string;
   metaDescription?: string;
   keywords?: string[];
+  references?: PublicationReference[];
   attachments?: PublicationAttachment[];
   readTimeMinutes?: number;
   submitForReview?: boolean;
@@ -237,7 +300,18 @@ export const PUBLICATION_TYPE_LABELS: Record<PublicationType, string> = {
   CONFERENCE_PAPER: "Conference Paper",
   BOOK_CHAPTER: "Book Chapter",
   THESIS: "Thesis",
+  EVIDENCE_REVIEW: "Evidence Review",
+  CLINICAL_EXPLAINER: "Clinical Explainer",
+  META_SUMMARY: "Meta-Summary",
+  PRACTICE_GUIDE: "Practice Guide",
 };
+
+export const RESEARCH_PUBLICATION_TYPES: PublicationType[] = [
+  "EVIDENCE_REVIEW",
+  "CLINICAL_EXPLAINER",
+  "META_SUMMARY",
+  "PRACTICE_GUIDE",
+];
 
 export const PUBLICATION_STATUS_LABELS: Record<PublicationStatus, string> = {
   DRAFT: "Draft",
@@ -483,6 +557,13 @@ export function useReviewPublication() {
       visibility,
       featured,
       pinned,
+      reviewingPhysician,
+      lastReviewedDate,
+      peerReviewOutcome,
+      nextScheduledReview,
+      evidenceGrade,
+      openAccess,
+      physicianReviewed,
       assignedReviewerId,
     }: {
       id: string;
@@ -493,6 +574,13 @@ export function useReviewPublication() {
       featured?: boolean;
       pinned?: boolean;
       assignedReviewerId?: string;
+      reviewingPhysician?: string;
+      lastReviewedDate?: string;
+      peerReviewOutcome?: string;
+      nextScheduledReview?: string;
+      evidenceGrade?: string;
+      openAccess?: boolean;
+      physicianReviewed?: boolean;
     }) => {
       const { data } = await api.post<Publication>(`/publications/admin/${id}/review`, {
         action,
@@ -502,6 +590,13 @@ export function useReviewPublication() {
         featured,
         pinned,
         assignedReviewerId,
+        reviewingPhysician,
+        lastReviewedDate,
+        peerReviewOutcome,
+        nextScheduledReview,
+        evidenceGrade,
+        openAccess,
+        physicianReviewed,
       });
       return data;
     },
@@ -509,6 +604,20 @@ export function useReviewPublication() {
       qc.invalidateQueries({ queryKey: ["admin-publications"] });
       qc.invalidateQueries({ queryKey: ["admin-publication-stats"] });
       qc.invalidateQueries({ queryKey: ["publications"] });
+    },
+  });
+}
+
+export function useUpdatePublicationFlags() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...body }: { id: string; featured?: boolean; pinned?: boolean }) => {
+      const { data } = await api.patch<Publication>(`/publications/admin/${id}/flags`, body);
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-publications"] });
+      qc.invalidateQueries({ queryKey: ["admin-publication-stats"] });
     },
   });
 }

@@ -1,23 +1,11 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Query,
-  HttpCode,
-  HttpStatus,
-  Req,
-  Res,
-  UseGuards,
-  Logger,
-} from '@nestjs/common';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { Controller, Get, Patch, Post, Body, Query, HttpCode, HttpStatus, Req, Res, UseGuards, Logger } from '@nestjs/common';import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import * as express from 'express';
 import { User } from '@prisma/client';
 import { AuthService } from './auth.service';
 import { OAuthService } from './oauth.service';
 import { LoginDto, RegisterDto, RefreshTokenDto, ForgotPasswordDto, ResetPasswordDto } from './dto/auth.dto';
+import { CompleteProfileDto } from './dto/complete-profile.dto';
 import { OAuthExchangeDto, CompleteOAuthRegistrationDto } from './dto/oauth.dto';
 import { Public } from '../common/decorators/auth.decorators';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -42,8 +30,12 @@ export class AuthController {
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
+  login(@Body() dto: LoginDto, @Req() req: express.Request) {
+    const ip =
+      (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+      req.socket.remoteAddress ||
+      undefined;
+    return this.authService.login(dto, ip);
   }
 
   @Public()
@@ -85,6 +77,44 @@ export class AuthController {
   @ApiBearerAuth()
   me(@CurrentUser('id') userId: string) {
     return this.authService.getProfile(userId);
+  }
+
+  @Get('profile-completeness')
+  @ApiBearerAuth()
+  profileCompleteness(@CurrentUser('id') userId: string) {
+    return this.authService.getProfileCompleteness(userId);
+  }
+
+  @Patch('complete-profile')
+  @ApiBearerAuth()
+  completeProfile(@CurrentUser('id') userId: string, @Body() dto: CompleteProfileDto) {
+    return this.authService.completeProfile(userId, dto);
+  }
+
+  @Get('email-verification/status')
+  @ApiBearerAuth()
+  emailVerificationStatus(@CurrentUser('id') userId: string) {
+    return this.authService.getEmailVerificationStatus(userId);
+  }
+
+  @Post('email-verification/send')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  sendEmailVerification(@CurrentUser('id') userId: string) {
+    return this.authService.sendEmailVerification(userId);
+  }
+
+  @Public()
+  @Get('email-verification/validate')
+  validateEmailVerificationToken(@Query('token') token: string) {
+    return this.authService.validateEmailVerificationToken(token ?? '');
+  }
+
+  @Public()
+  @Post('email-verification/verify')
+  @HttpCode(HttpStatus.OK)
+  verifyEmail(@Body() body: { token: string }) {
+    return this.authService.verifyEmail(body.token ?? '');
   }
 
   @Public()

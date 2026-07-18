@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const roleRoutes = [
+  { prefix: "/consultation/patient", role: "PATIENT" },
+  { prefix: "/consultation/doctor", role: "DOCTOR" },
   { prefix: "/patient", role: "PATIENT" },
   { prefix: "/doctor", role: "DOCTOR" },
   { prefix: "/admin", role: "ADMIN" },
@@ -67,11 +69,14 @@ async function verifyJwt(token?: string): Promise<JwtPayload | null> {
   );
   if (!valid) return null;
 
-  const parsed = JSON.parse(new TextDecoder().decode(base64UrlToBytes(payload))) as JwtPayload;
-  if (!parsed.sub || !parsed.role) return null;
-  if (parsed.exp && parsed.exp * 1000 <= Date.now()) return null;
-
-  return parsed;
+  try {
+    const parsed = JSON.parse(new TextDecoder().decode(base64UrlToBytes(payload))) as JwtPayload;
+    if (!parsed.sub || !parsed.role) return null;
+    if (parsed.exp && parsed.exp * 1000 <= Date.now()) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
 }
 
 export async function proxy(request: NextRequest) {

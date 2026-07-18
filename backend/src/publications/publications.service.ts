@@ -31,6 +31,7 @@ const PUBLICATION_INCLUDE = {
   authors: { orderBy: { sortOrder: 'asc' as const } },
   keywords: true,
   attachments: true,
+  references: { orderBy: { sortOrder: 'asc' as const } },
   reviews: {
     orderBy: { createdAt: 'desc' as const },
     include: { reviewer: { select: { id: true, firstName: true, lastName: true } } },
@@ -47,6 +48,29 @@ function slugify(text: string): string {
 }
 
 const EDITABLE_STATUSES: PublicationStatus[] = [PublicationStatus.DRAFT, PublicationStatus.NEEDS_REVISION];
+
+function composeAbstract(dto: CreatePublicationDto | UpdatePublicationDto): string | undefined {
+  const structured = [
+    dto.abstractBackground,
+    dto.abstractMethods,
+    dto.abstractResults,
+    dto.abstractConclusions,
+  ]
+    .map((part) => part?.trim())
+    .filter(Boolean);
+  if (structured.length) return structured.join('\n\n');
+  return dto.abstract?.trim() || undefined;
+}
+
+function validateAbstract(dto: CreatePublicationDto | UpdatePublicationDto) {
+  const abstract = composeAbstract(dto);
+  if (!abstract || abstract.length < 10) {
+    throw new BadRequestException(
+      'Abstract must be at least 10 characters (provide structured abstract sections or a summary)',
+    );
+  }
+  return abstract;
+}
 
 @Injectable()
 export class PublicationsService {
@@ -87,15 +111,28 @@ export class PublicationsService {
       'reviewingPhysician', 'physicianReviewed', 'evidenceBased', 'openAccess',
       'fullyReferenced', 'coiDisclosed', 'doiUrl', 'journalUrl', 'pubmedUrl',
       'googleScholarUrl', 'visibility', 'seoTitle', 'metaDescription', 'readTimeMinutes',
+      'introduction', 'results', 'discussion', 'conclusion',
+      'articleId', 'license', 'abstractBackground', 'abstractMethods', 'abstractResults',
+      'abstractConclusions', 'objectives', 'methodsContent', 'methodsTable', 'figureData',
+      'figureCaption', 'resultSummary', 'practiceImplications', 'limitations',
+      'keyFindings', 'authorContributions', 'ethicsStatement', 'dataAvailabilityStatement',
+      'conflictsOfInterest', 'acknowledgments', 'abbreviations',
     ] as const;
 
     for (const field of scalarFields) {
       if (dto[field] !== undefined) (data as Record<string, unknown>)[field] = dto[field];
     }
 
+    const composedAbstract = composeAbstract(dto);
+    if (composedAbstract) data.abstract = composedAbstract;
+
     if (dto.publicationDate) data.publicationDate = new Date(dto.publicationDate);
     if (dto.acceptanceDate) data.acceptanceDate = new Date(dto.acceptanceDate);
     if (dto.submissionDate) data.submissionDate = new Date(dto.submissionDate);
+
+    if (dto.references) {
+      data.referenceCount = dto.references.filter((ref) => ref.citation?.trim()).length;
+    }
 
     return data;
   }
@@ -147,6 +184,22 @@ export class PublicationsService {
     }
   }
 
+  private async syncReferences(publicationId: string, references?: CreatePublicationDto['references']) {
+    if (!references) return;
+    await this.prisma.publicationReference.deleteMany({ where: { publicationId } });
+    const valid = references.filter((ref) => ref.citation?.trim());
+    if (valid.length) {
+      await this.prisma.publicationReference.createMany({
+        data: valid.map((ref, index) => ({
+          publicationId,
+          citation: ref.citation.trim(),
+          doi: ref.doi?.trim() || null,
+          sortOrder: ref.sortOrder ?? index,
+        })),
+      });
+    }
+  }
+
   private async notifyAdminsNewSubmission(publication: { id: string; title: string }) {
     const admins = await this.prisma.user.findMany({
       where: { role: UserRole.ADMIN, status: 'ACTIVE' },
@@ -189,64 +242,36 @@ export class PublicationsService {
     const doctorId = await this.getDoctorProfileId(userId);
     const slug = await this.uniqueSlug(dto.slug ?? dto.title);
     const submit = dto.submitForReview === true;
+    const abstract = validateAbstract(dto);
+    const publicationData = this.buildPublicationData(dto);
 
     const publication = await this.prisma.publication.create({
       data: {
-        doctorId,
+        doctor: { connect: { id: doctorId } },
         slug,
         title: dto.title,
-        subtitle: dto.subtitle,
-        abstract: dto.abstract,
-        researchCategory: dto.researchCategory,
-        medicalSpecialty: dto.medicalSpecialty,
+        abstract,
         publicationType: dto.publicationType,
         language: dto.language ?? 'English',
-        institution: dto.institution,
-        department: dto.department,
-        orcid: dto.orcid,
-        correspondingAuthor: dto.correspondingAuthor,
-        journalName: dto.journalName,
-        publisher: dto.publisher,
-        volume: dto.volume,
-        issue: dto.issue,
-        pages: dto.pages,
-        doi: dto.doi,
-        issn: dto.issn,
-        publicationDate: dto.publicationDate ? new Date(dto.publicationDate) : undefined,
-        acceptanceDate: dto.acceptanceDate ? new Date(dto.acceptanceDate) : undefined,
-        submissionDate: dto.submissionDate ? new Date(dto.submissionDate) : undefined,
-        researchMethodology: dto.researchMethodology,
-        studyDesign: dto.studyDesign,
-        sampleSize: dto.sampleSize,
-        fundingSource: dto.fundingSource,
-        ethicalApprovalNumber: dto.ethicalApprovalNumber,
-        clinicalTrialRegistration: dto.clinicalTrialRegistration,
-        researchOverview: dto.researchOverview,
-        methodologySteps: dto.methodologySteps,
-        partners: dto.partners,
-        referenceCount: dto.referenceCount,
-        reviewingPhysician: dto.reviewingPhysician,
+        visibility: dto.visibility ?? PublicationVisibility.AFTER_APPROVAL,
+        seoTitle: dto.seoTitle ?? dto.title,
+        metaDescription: dto.metaDescription ?? abstract.slice(0, 160),
+        readTimeMinutes: dto.readTimeMinutes ?? 5,
         physicianReviewed: dto.physicianReviewed ?? false,
         evidenceBased: dto.evidenceBased ?? false,
         openAccess: dto.openAccess ?? false,
         fullyReferenced: dto.fullyReferenced ?? false,
         coiDisclosed: dto.coiDisclosed ?? false,
-        doiUrl: dto.doiUrl,
-        journalUrl: dto.journalUrl,
-        pubmedUrl: dto.pubmedUrl,
-        googleScholarUrl: dto.googleScholarUrl,
-        visibility: dto.visibility ?? PublicationVisibility.AFTER_APPROVAL,
-        seoTitle: dto.seoTitle ?? dto.title,
-        metaDescription: dto.metaDescription ?? dto.abstract.slice(0, 160),
-        readTimeMinutes: dto.readTimeMinutes ?? 5,
         status: submit ? PublicationStatus.SUBMITTED : PublicationStatus.DRAFT,
         submittedAt: submit ? new Date() : undefined,
-      },
+        ...publicationData,
+      } as Prisma.PublicationCreateInput,
     });
 
     await this.syncAuthors(publication.id, dto.authors);
     await this.syncKeywords(publication.id, dto.keywords);
     await this.syncAttachments(publication.id, dto.attachments);
+    await this.syncReferences(publication.id, dto.references);
 
     if (submit) {
       await this.prisma.publicationReview.create({
@@ -297,6 +322,7 @@ export class PublicationsService {
     await this.syncAuthors(id, dto.authors);
     await this.syncKeywords(id, dto.keywords);
     await this.syncAttachments(id, dto.attachments);
+    await this.syncReferences(id, dto.references);
 
     if (submit && pub.status !== PublicationStatus.SUBMITTED) {
       await this.prisma.publicationReview.create({
@@ -734,7 +760,9 @@ export class PublicationsService {
       updateData.status = PublicationStatus.UNDER_REVIEW;
     }
 
-    if (dto.action === PublicationReviewAction.APPROVE) {
+    if (dto.action === PublicationReviewAction.ASSIGN_REVIEWER) {
+      // assignment only — status set above
+    } else if (dto.action === PublicationReviewAction.APPROVE) {
       updateData.status = PublicationStatus.APPROVED;
       updateData.approvedAt = new Date();
       updateData.publishedAt = new Date();
@@ -742,6 +770,13 @@ export class PublicationsService {
       if (dto.visibility) updateData.visibility = dto.visibility;
       if (dto.featured !== undefined) updateData.featured = dto.featured;
       if (dto.pinned !== undefined) updateData.pinned = dto.pinned;
+      if (dto.reviewingPhysician !== undefined) updateData.reviewingPhysician = dto.reviewingPhysician;
+      if (dto.lastReviewedDate) updateData.lastReviewedDate = new Date(dto.lastReviewedDate);
+      if (dto.peerReviewOutcome !== undefined) updateData.peerReviewOutcome = dto.peerReviewOutcome;
+      if (dto.nextScheduledReview) updateData.nextScheduledReview = new Date(dto.nextScheduledReview);
+      if (dto.evidenceGrade !== undefined) updateData.evidenceGrade = dto.evidenceGrade;
+      if (dto.openAccess !== undefined) updateData.openAccess = dto.openAccess;
+      if (dto.physicianReviewed !== undefined) updateData.physicianReviewed = dto.physicianReviewed;
     } else if (dto.action === PublicationReviewAction.REJECT) {
       updateData.status = PublicationStatus.REJECTED;
       updateData.rejectedAt = new Date();
@@ -777,11 +812,34 @@ export class PublicationsService {
           ? PublicationStatus.REJECTED
           : dto.action === PublicationReviewAction.REQUEST_REVISION
             ? PublicationStatus.NEEDS_REVISION
-            : PublicationStatus.UNDER_REVIEW;
+            : dto.action === PublicationReviewAction.ASSIGN_REVIEWER
+              ? PublicationStatus.UNDER_REVIEW
+              : PublicationStatus.UNDER_REVIEW;
 
-    await this.notifyDoctorStatus(pub.doctor.userId, pub, newStatus, dto.feedback);
+    if (dto.action !== PublicationReviewAction.ASSIGN_REVIEWER || dto.feedback) {
+      await this.notifyDoctorStatus(pub.doctor.userId, pub, newStatus, dto.feedback);
+    }
+
+    if (dto.assignedReviewerId && dto.action === PublicationReviewAction.ASSIGN_REVIEWER) {
+      await this.notifications.create(dto.assignedReviewerId, {
+        type: NotificationType.PUBLICATION,
+        title: 'Publication assigned for review',
+        body: `"${pub.title}" has been assigned to you for medical review.`,
+      });
+    }
 
     return this.findById(id, reviewerId, UserRole.ADMIN);
+  }
+
+  async updateAdminFlags(id: string, flags: { featured?: boolean; pinned?: boolean }) {
+    return this.prisma.publication.update({
+      where: { id },
+      data: {
+        ...(flags.featured !== undefined && { featured: flags.featured }),
+        ...(flags.pinned !== undefined && { pinned: flags.pinned }),
+      },
+      include: PUBLICATION_INCLUDE,
+    });
   }
 
   async trackView(publicationId: string, viewerKey: string) {

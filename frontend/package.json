@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "polish-branding": "node scripts/polish-branding.mjs"
+    "polish-branding": "node scripts/polish-branding.mjs",
+    "prisma:create-test-consultation": "npm run prisma:create-test-consultation --prefix ../backend"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.2.0",

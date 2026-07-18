@@ -62,9 +62,10 @@ function normalizePartnerCategory(description?: string | null): PartnerCategory 
 export function resolvePartnerDisplay(partner: {
   companyName: string;
   description?: string | null;
+  logoUrl?: string | null;
 }) {
   const category = normalizePartnerCategory(partner.description);
-  const icon =
+  const fallbackIcon =
     PARTNER_ICONS_BY_NAME[partner.companyName] ??
     (category ? CATEGORY_DEFAULT_ICONS[category] : "🤝");
   const badge = category
@@ -72,7 +73,8 @@ export function resolvePartnerDisplay(partner: {
     : { className: "badge-hospital", label: "Partner" };
 
   return {
-    icon,
+    icon: fallbackIcon,
+    logoUrl: partner.logoUrl?.trim() || null,
     badgeClass: badge.className,
     badgeLabel: badge.label,
   };

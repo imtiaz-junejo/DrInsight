@@ -55,7 +55,7 @@
 .patient-root .site-topbar-right a{color:#93c5fd;margin-left:20px;transition:var(--transition)}
 .patient-root .site-topbar-right a:hover{color:#fff}
 .patient-root .site-nav{background:var(--white);border-bottom:1px solid var(--gray-200);position:sticky;top:0;z-index:200;box-shadow:var(--shadow-sm)}
-.patient-root .nav-inner{max-width:1240px;margin:auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:70px}
+.patient-root .nav-inner{max-width:1240px;margin:auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:80px}
 .patient-root .logo{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-size:1.5rem;font-weight:700;color:var(--blue-dark)}
 .patient-root .logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--blue),var(--teal));border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.25rem;flex-shrink:0}
 .patient-root .nav-links{display:flex;align-items:center;gap:4px}
@@ -84,9 +84,20 @@
 .patient-root .dash-btn:hover{background:rgba(255,255,255,.26)}
 .patient-root .dash-btn.solid{background:#fff;color:var(--blue-dark)}
 .patient-root .dash-btn.solid:hover{background:var(--blue-light)}
-.patient-root .dash-body{flex:1;max-width:1240px;margin:28px auto;padding:0 24px;width:100%}
-.patient-root .dash-grid{display:grid;grid-template-columns:282px 1fr;gap:28px;align-items:start}
-.patient-root .dash-sidebar{background:var(--white);border-radius:var(--radius-lg);border:1.5px solid var(--gray-200);overflow:hidden;position:sticky;top:88px;box-shadow:var(--shadow-sm)}
+.patient-root .dash-body{flex:1;max-width:1440px;margin:16px auto 0;padding:0 12px;width:100%}
+.patient-root .dash-grid{display:grid;grid-template-columns:282px 1fr;gap:20px;align-items:start}
+.patient-root .dash-sidebar,.patient-root .sidebar{background:var(--white);border-radius:var(--radius-lg);border:1.5px solid var(--gray-200);overflow:hidden;position:sticky;top:76px;box-shadow:var(--shadow-sm);align-self:start;max-height:calc(100vh - 92px);overflow-y:auto;scrollbar-width:none;-ms-overflow-style:none}
+.patient-root .dash-sidebar::-webkit-scrollbar{display:none;width:0;height:0}
+.patient-root .dash-main-col{display:flex;flex-direction:column;gap:0;min-width:0}
+.patient-root .dash-main-col .dash-main{margin-bottom:20px}
+.patient-root .dash-main-col .site-footer{margin:0;border-radius:0;overflow:visible;padding:72px 24px 0}
+.patient-root .dash-main-col .site-footer .footer-grid{gap:28px}
+.patient-root .dash-main-col .site-footer .footer-grid > *{min-width:0}
+.patient-root .dash-main-col .site-footer .footer-brand-meta{max-width:100%;gap:10px}
+.patient-root .dash-main-col .site-footer .footer-compliance-badges{gap:6px}
+.patient-root .dash-main-col .site-footer .hipaa-badge{padding:3px 6px;font-size:.62rem;gap:4px}
+.patient-root .dash-main-col .site-footer .footer-social{gap:6px}
+.patient-root .dash-main-col .site-footer .social-btn{width:28px;height:28px;font-size:.72rem;border-radius:6px}
 .patient-root .sidebar-profile{background:linear-gradient(160deg,var(--blue-dark) 0%,var(--blue) 60%,var(--teal) 100%);padding:26px 20px 20px;text-align:center;color:#fff;position:relative;overflow:hidden}
 .patient-root .sidebar-profile::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
 .patient-root .sidebar-avatar-ring{width:82px;height:82px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;border:3px solid rgba(255,255,255,.38);position:relative;z-index:1}
@@ -170,7 +181,14 @@
 .patient-root .btn-w:hover{background:var(--blue-light);transform:translateY(-1px)}
 .patient-root .btn-wo{background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.45);padding:10px 20px;border-radius:10px;font-family:var(--font-body);font-size:.84rem;font-weight:600;cursor:pointer;transition:var(--transition);display:inline-flex;align-items:center;gap:7px;backdrop-filter:blur(4px)}
 .patient-root .btn-wo:hover{background:rgba(255,255,255,.26)}
-.patient-root .alert-banner{background:linear-gradient(135deg,#eff6ff,#f0f7ff);border:1.5px solid #bfdbfe;border-radius:var(--radius-lg);padding:14px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.patient-root .alert-banner{background:linear-gradient(135deg,#eff6ff,#f0f7ff);border:1.5px solid #bfdbfe;border-radius:var(--radius-lg);padding:14px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.patient-root .patient-live-consultation-banner{background:linear-gradient(135deg,#ecfdf5,#d1fae5);border:2px solid #10b981;border-radius:var(--radius-lg);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px;box-shadow:0 4px 20px rgba(16,185,129,.15)}
+.patient-root .plcb-content{display:flex;align-items:flex-start;gap:12px;flex:1;min-width:200px}
+.patient-root .plcb-pulse{width:12px;height:12px;border-radius:50%;background:#ef4444;margin-top:6px;flex-shrink:0;animation:blink 1.5s infinite}
+.patient-root .plcb-content strong{display:block;font-size:.95rem;color:var(--gray-900);margin-bottom:4px}
+.patient-root .plcb-content p{margin:0;font-size:.82rem;color:var(--gray-600)}
+.patient-root .plcb-join-btn{background:#10b981;color:#fff;padding:10px 20px;border-radius:10px;font-weight:700;font-size:.88rem;text-decoration:none;white-space:nowrap;transition:var(--transition)}
+.patient-root .plcb-join-btn:hover{background:#059669;color:#fff}
 .patient-root .ab-ico{font-size:1.5rem;flex-shrink:0}
 .patient-root .ab-text strong{display:block;font-size:.88rem;font-weight:700;color:var(--blue-dark);margin-bottom:2px}
 .patient-root .ab-text span{font-size:.78rem;color:var(--gray-600)}
@@ -208,7 +226,8 @@
 .patient-root .cons-dr-name{font-size:.9rem;font-weight:700;color:var(--gray-900)}
 .patient-root .cons-dr-spec{font-size:.74rem;color:var(--blue);font-weight:600}
 .patient-root .cons-chip{font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:50px}
-.patient-root .cc-up{background:var(--blue-light);color:var(--blue)}.cc-live{background:#fef2f2;color:var(--red);animation:blink 2s infinite}.cc-done{background:#f0fdf4;color:var(--green)}.cc-cancel{background:var(--gray-100);color:var(--gray-600)}
+.patient-root .cc-up{background:var(--blue-light);color:var(--blue)}.cc-live{background:#fef2f2;color:var(--red);animation:blink 2s infinite}.cc-done{background:#f0fdf4;color:var(--green)}.cc-cancel{background:var(--gray-100);color:var(--gray-600)}.cc-pending{background:#fffbeb;color:#d97706}
+.patient-root .cons-card.pending{border-left:4px solid var(--amber)}
 .patient-root .cons-details{display:flex;gap:14px;flex-wrap:wrap;font-size:.75rem;color:var(--gray-600);padding:9px 12px;background:var(--gray-50);border-radius:9px;margin-bottom:10px}
 .patient-root .cons-note{font-size:.79rem;color:var(--gray-700);line-height:1.6;padding:10px 13px;background:var(--blue-light);border-radius:9px;border-left:3px solid var(--blue);margin-bottom:10px}
 .patient-root .cons-note.green{background:#f0fdf4;border-left-color:var(--green)}
@@ -401,7 +420,7 @@
 .patient-root .toast{position:fixed;bottom:24px;right:24px;background:var(--gray-900);color:#fff;padding:13px 22px;border-radius:12px;font-size:.85rem;font-weight:500;z-index:999;opacity:0;transform:translateY(10px);transition:all .3s ease;pointer-events:none;max-width:320px}
 .patient-root .toast.show{opacity:1;transform:translateY(0)}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
-.patient-root footer{background:#0a1224;color:#94a3b8;font-size:.85rem;margin-top:auto}
+.patient-root footer{background:#01112e;color:#94a3b8;font-size:.85rem;margin-top:auto}
 .patient-root .footer-main{max-width:1240px;margin:auto;padding:64px 24px 0}
 .patient-root .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1.5fr 1.5fr;gap:48px;padding-bottom:48px}
 .patient-root .footer-brand p{line-height:1.7;margin-bottom:18px;font-size:.84rem}

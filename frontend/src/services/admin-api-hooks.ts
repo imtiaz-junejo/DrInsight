@@ -12,6 +12,17 @@ export interface PlatformStats {
   patientCount: number;
   userCount?: number;
   adminCount?: number;
+  usersThisWeek?: number;
+  pendingDoctors?: number;
+  patientsThisWeek?: number;
+  patientsWithActiveBookings?: number;
+  patientsWithActiveBookingsPercent?: number;
+  askDoctorQuestionCount?: number;
+  patientsAskedQuestionPercent?: number;
+  publicationBookmarkCount?: number;
+  savedArticlesAvgPerPatient?: number;
+  verifiedDoctorPercent?: number;
+  averageRatingChange?: number;
   answeredQuestions: number;
   pendingQuestions?: number;
   averageRating: number;
@@ -20,12 +31,14 @@ export interface PlatformStats {
   pendingAppointments?: number;
   cancelledAppointments?: number;
   appointmentsLast30Days?: number;
+  appointmentsGrowthPercent?: number;
   reviewCount?: number;
   specialtyCount?: number;
   prescriptionCount?: number;
   paymentCount?: number;
   revenueCents?: number;
   revenueLast30DaysCents?: number;
+  revenueGrowthPercent?: number;
   paymentsLast30Days?: number;
   notificationCount?: number;
   messageCount?: number;
@@ -84,12 +97,131 @@ export function useAdminUsers(params?: { role?: string; page?: number; limit?: n
   });
 }
 
-export function useAdminAppointments(params?: { page?: number; limit?: number; status?: string }) {
+export function useAdminAppointments(params?: {
+  page?: number;
+  limit?: number;
+  status?: string;
+  kind?: "PHYSICAL" | "ONLINE";
+  range?: "today" | "upcoming" | "past";
+  search?: string;
+}) {
   return useQuery({
     queryKey: ["admin-appointments", params],
     queryFn: async () => {
       const { data } = await api.get<Paginated<Appointment>>("/appointments", { params });
       return data;
+    },
+  });
+}
+
+export interface AdminQuestion {
+  id: string;
+  category: string;
+  title?: string | null;
+  question: string;
+  answer?: string | null;
+  status: string;
+  rejectReason?: string | null;
+  createdAt: string;
+  answeredAt?: string | null;
+  approvedAt?: string | null;
+  submitterName?: string | null;
+  attachments?: unknown;
+  submitter?: { id: string; firstName: string; lastName: string; email: string } | null;
+  doctor?: {
+    id: string;
+    specialty: string;
+    user?: { id: string; firstName: string; lastName: string };
+  } | null;
+  answeredBy?: { firstName: string; lastName: string } | null;
+}
+
+export function useAdminQuestions(params?: {
+  view?: "pending" | "approved" | "rejected" | "answered" | "reports";
+  page?: number;
+  limit?: number;
+  search?: string;
+  category?: string;
+  doctorId?: string;
+  from?: string;
+  to?: string;
+}) {
+  return useQuery({
+    queryKey: ["admin-questions", params],
+    queryFn: async () => {
+      const { data } = await api.get<{
+        data?: AdminQuestion[];
+        meta?: { total: number; page: number; limit: number; totalPages: number };
+        stats?: { pending: number; approved: number; answered: number; rejected: number };
+        totals?: { pending: number; approved: number; answered: number; rejected: number };
+        byCategory?: Array<{ category: string; count: number }>;
+        byMonth?: Array<{ month: string; count: number }>;
+      }>("/ask-doctor/admin", { params });
+      return data;
+    },
+  });
+}
+
+export function useApproveQuestion() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, doctorId }: { id: string; doctorId?: string }) => {
+      const { data } = await api.patch(`/ask-doctor/${id}/approve`, { doctorId });
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-questions"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-nav-badges"] });
+    },
+  });
+}
+
+export function useAdminRejectQuestion() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
+      const { data } = await api.patch(`/ask-doctor/${id}/admin-reject`, { reason });
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-questions"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-nav-badges"] });
+    },
+  });
+}
+
+export function useReassignQuestion() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, doctorId }: { id: string; doctorId: string }) => {
+      const { data } = await api.patch(`/ask-doctor/${id}/reassign`, { doctorId });
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-questions"] });
+    },
+  });
+}
+
+export function useUpdateDoctorSeo() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      doctorId,
+      ...body
+    }: {
+      doctorId: string;
+      profileSlug?: string;
+      seoFocusKeyword?: string;
+      seoMetaTitle?: string;
+      seoMetaDescription?: string;
+      seoSchemaJson?: unknown;
+    }) => {
+      const { data } = await api.patch(`/doctors/${doctorId}/seo`, body);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-doctors"] });
     },
   });
 }
@@ -116,6 +248,7 @@ export function useUpdateUserStatus() {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
       queryClient.invalidateQueries({ queryKey: ["doctors"] });
       queryClient.invalidateQueries({ queryKey: ["platform-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-user-profile"] });
     },
   });
 }
@@ -127,9 +260,12 @@ export function useUpdateAppointmentStatus() {
       const { data } = await api.patch(`/appointments/${id}/status`, { status });
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["admin-appointments"] });
       queryClient.invalidateQueries({ queryKey: ["appointments"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-appointment", variables.id] });
+      queryClient.invalidateQueries({ queryKey: ["admin-user-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-nav-badges"] });
     },
   });
 }
@@ -150,6 +286,11 @@ export function useAdminBlogPosts(params?: {
   search?: string;
   category?: string;
   status?: string;
+  authorId?: string;
+  tag?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  sort?: string;
 }) {
   return useQuery({
     queryKey: ["admin-blog", params],
@@ -220,6 +361,8 @@ export function useAdminContactSubmissions() {
         email: string;
         subject?: string | null;
         message: string;
+        isRead?: boolean;
+        status?: string;
         createdAt: string;
       }>>("/contact/submissions");
       return data;
@@ -254,9 +397,9 @@ export function useAdminPayments(params?: { page?: number; limit?: number; statu
   });
 }
 
-export function useAdminPaymentAnalytics() {
+export function useAdminPaymentAnalytics(params?: { range?: string; from?: string; to?: string }) {
   return useQuery({
-    queryKey: ["admin-payment-analytics"],
+    queryKey: ["admin-payment-analytics", params],
     queryFn: async () => {
       const { data } = await api.get<{
         totalPayments: number;
@@ -265,10 +408,26 @@ export function useAdminPaymentAnalytics() {
         pendingPayments: number;
         refundedPayments: number;
         totalRevenueCents: number;
+        consultationRevenueCents: number;
+        platformFeesCents: number;
         successRate: number;
         monthlyRevenue: Array<{ month: string; amountCents: number }>;
         dailyRevenue: Array<{ day: string; amountCents: number }>;
-      }>("/payments/admin/analytics");
+        pendingPayouts: Array<{
+          doctorName: string;
+          specialty: string;
+          amountCents: number;
+          period: string;
+          status: string;
+        }>;
+        stats: {
+          revenueChange: number;
+          revenueTag: string;
+          revenueTagClass: string;
+          consultationShare: string;
+          platformShare: string;
+        };
+      }>("/payments/admin/analytics", { params });
       return data;
     },
   });
@@ -432,6 +591,205 @@ export function useUpsertFounderMessage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-founder-message"] });
       queryClient.invalidateQueries({ queryKey: ["founder-message"] });
+    },
+  });
+}
+
+export interface AdminUserProfile {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  status: string;
+  avatarUrl?: string | null;
+  phone?: string | null;
+  emailVerified: boolean;
+  isOnline: boolean;
+  lastSeenAt?: string | null;
+  createdAt: string;
+  doctorProfile?: Record<string, unknown> | null;
+  patientProfile?: Record<string, unknown> | null;
+  stats: {
+    appointmentCount: number;
+    completedAppointments: number;
+    upcomingAppointments: number;
+    blogPostCount: number;
+    publicationCount: number;
+    publicationBookmarkCount: number;
+  };
+  recentAppointments: Array<Record<string, unknown>>;
+  recentBlogPosts: Array<Record<string, unknown>>;
+  recentPublications: Array<Record<string, unknown>>;
+  auditLogs: Array<{
+    id: string;
+    action: string;
+    target?: string | null;
+    severity: string;
+    result: string;
+    createdAt: string;
+  }>;
+}
+
+export interface AdminAppointmentDetail {
+  id: string;
+  scheduledAt: string;
+  durationMinutes: number;
+  consultationType: string;
+  status: string;
+  reason?: string | null;
+  notes?: string | null;
+  meetingRoomId?: string | null;
+  videoProvider?: string | null;
+  cancelledAt?: string | null;
+  cancelReason?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  doctor?: {
+    id: string;
+    specialty: string;
+    userId: string;
+    user?: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+      phone?: string | null;
+      avatarUrl?: string | null;
+      status: string;
+    };
+  };
+  patient?: {
+    id: string;
+    userId: string;
+    user?: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+      phone?: string | null;
+      avatarUrl?: string | null;
+      status: string;
+    };
+  };
+  payment?: {
+    id: string;
+    status: string;
+    amountCents: number;
+    currency: string;
+    providerIntentId: string;
+    receiptUrl?: string | null;
+    invoiceNumber?: string | null;
+    confirmedAt?: string | null;
+    paymentMethod?: string | null;
+    billingName?: string | null;
+    billingEmail?: string | null;
+    createdAt: string;
+  } | null;
+  prescription?: {
+    id: string;
+    diagnosis?: string | null;
+    items: unknown;
+    notes?: string | null;
+    pdfUrl?: string | null;
+    createdAt: string;
+  } | null;
+  review?: {
+    id: string;
+    rating: number;
+    comment?: string | null;
+    createdAt: string;
+  } | null;
+  auditLogs: Array<{
+    id: string;
+    action: string;
+    actorName: string;
+    target?: string | null;
+    severity: string;
+    result: string;
+    createdAt: string;
+  }>;
+}
+
+export interface AdminBlogPostDetail {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  coverImageUrl?: string | null;
+  status: string;
+  viewCount: number;
+  shareCount: number;
+  helpfulYes: number;
+  helpfulNo: number;
+  peerReviewed: boolean;
+  publishedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  specialty?: string | null;
+  citationCount?: number;
+  bookmarkCount?: number;
+  downloadCount?: number;
+  category?: { id: string; name: string; slug: string };
+  author?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatarUrl?: string | null;
+    doctorProfile?: { specialty?: string };
+  };
+  reviewer?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+  } | null;
+  _count?: { comments: number; ratings: number };
+}
+
+export function useAdminUserProfile(userId: string) {
+  return useQuery({
+    queryKey: ["admin-user-profile", userId],
+    queryFn: async () => {
+      const { data } = await api.get<AdminUserProfile>(`/users/${userId}/profile`);
+      return data;
+    },
+    enabled: Boolean(userId),
+  });
+}
+
+export function useAdminAppointment(appointmentId: string) {
+  return useQuery({
+    queryKey: ["admin-appointment", appointmentId],
+    queryFn: async () => {
+      const { data } = await api.get<AdminAppointmentDetail>(`/appointments/${appointmentId}`);
+      return data;
+    },
+    enabled: Boolean(appointmentId),
+  });
+}
+
+export function useAdminBlogPost(slug: string) {
+  return useQuery({
+    queryKey: ["admin-blog-post", slug],
+    queryFn: async () => {
+      const { data } = await api.get<AdminBlogPostDetail>(`/blog/manage/${slug}`);
+      return data;
+    },
+    enabled: Boolean(slug),
+  });
+}
+
+export function useDeleteBlogPost() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (slug: string) => {
+      const { data } = await api.delete(`/blog/manage/${slug}`);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-blog"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-user-profile"] });
     },
   });
 }

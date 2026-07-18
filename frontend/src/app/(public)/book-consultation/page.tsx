@@ -5,10 +5,27 @@ import { useSearchParams } from "next/navigation";
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "@/styles/book-consultation-page.css";
 import { SectionTitle } from "@/components/public/section-heading";
-import { formatCurrency, mapDoctorProfile, specialtyEmoji } from "@/lib/data-mappers";
+import { formatCurrency, mapDoctorProfile } from "@/lib/data-mappers";
 import { CONTACT_PHONE, CONTACT_PHONE_TEL } from "@/lib/site-contact";
 import type { DoctorScheduleDay } from "@/services/api-hooks";
 import { StripePaymentWrapper } from "@/components/payments/StripePaymentWrapper";
+import { BookingStep1 } from "@/components/booking/BookingStep1";
+import { BookingStep2 } from "@/components/booking/BookingStep2";
+import {
+  CONSULTATION_TYPE_MAP,
+  getDoctorFees,
+  getSelectedFee,
+  resolveConsultTypeLabel,
+  asScheduleDays,
+  type BookingCategory,
+  type ConsultTypeKey,
+} from "@/lib/booking-flow";
+import {
+  extractApiErrorMessage,
+  validatePatientInfoForm,
+  type PatientInfoErrors,
+  type PatientInfoField,
+} from "@/lib/booking-validation";
 import {
   bookingLoginUrl,
   bookingRegisterUrl,
@@ -44,14 +61,6 @@ const MONTHS = [
 ];
 
 const WEEKDAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-
-const CONSULTATION_TYPE_MAP: Record<string, "VIDEO" | "AUDIO" | "CHAT"> = {
-  "Video Consultation": "VIDEO",
-  "Phone Consultation": "AUDIO",
-  "Chat Consultation": "CHAT",
-};
-
-const SPEC_BG = ["#fee2e2", "#f3f0ff", "#fff7ed", "#fffbeb", "#eef2ff", "#fdf2f8", "#f0fdf4", "#e0f7fa", "#f1f5f9", "#fafafa", "#fdf4ff"];
 
 function parseTimeToMinutes(token: string): number | null {
   const match = token.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
@@ -101,11 +110,18 @@ function isDayAvailable(schedule: DoctorScheduleDay[] | null | undefined, date: 
 const STEPS = [
   { num: 1, label: "Specialty & Doctor", sublabel: "Choose your specialist" },
   { num: 2, label: "Date & Time", sublabel: "Pick a convenient slot" },
-  { num: 3, label: "Patient Details", sublabel: "Your information" },
+  { num: 3, label: "Patient Info", sublabel: "Your information" },
   { num: 4, label: "Payment", sublabel: "Secure checkout" },
 ];
 
 type UploadedFile = { name: string; size: number };
+
+type Step3Alert = {
+  title: string;
+  messages: string[];
+  actionHref?: string;
+  actionLabel?: string;
+};
 
 function calcPayment(fee: number) {
   const platform = 5;
@@ -136,29 +152,22 @@ export default function BookConsultationPage() {
   const createDraft = useCreateBookingDraft();
   const createIntent = useCreatePaymentIntent();
 
+  const rawDoctors = doctorsData?.data ?? [];
   const allDoctors = useMemo(
-    () => (doctorsData?.data ?? []).map(mapDoctorProfile),
-    [doctorsData],
-  );
-
-  const specialties = useMemo(
-    () =>
-      (specialtiesData ?? []).map((s, i) => ({
-        name: s.name,
-        emoji: specialtyEmoji(s.name),
-        bg: SPEC_BG[i % SPEC_BG.length],
-        count: s.count,
-      })),
-    [specialtiesData],
+    () => rawDoctors.map(mapDoctorProfile),
+    [rawDoctors],
   );
 
   const [currentStep, setCurrentStep] = useState(1);
   const [confirmed, setConfirmed] = useState(false);
   const [bookingRef, setBookingRef] = useState("");
 
+  const [bookingCategory, setBookingCategory] = useState<BookingCategory>("");
+  const [consultTypeKey, setConsultTypeKey] = useState<ConsultTypeKey | null>(null);
   const [spec, setSpec] = useState("");
   const [doctorId, setDoctorId] = useState("");
   const [consultType, setConsultType] = useState("Video Consultation");
+  const [selectedFee, setSelectedFee] = useState(0);
 
   const [billingName, setBillingName] = useState("");
   const [billingEmail, setBillingEmail] = useState("");
@@ -166,6 +175,9 @@ export default function BookConsultationPage() {
   const [patientPhone, setPatientPhone] = useState("");
   const [patientDob, setPatientDob] = useState("");
   const [patientGender, setPatientGender] = useState("");
+  const [consultationReason, setConsultationReason] = useState("");
+  const [patientFormErrors, setPatientFormErrors] = useState<PatientInfoErrors>({});
+  const [step3Alert, setStep3Alert] = useState<Step3Alert | null>(null);
   const [bookingDraftId, setBookingDraftId] = useState("");
   const [clientSecret, setClientSecret] = useState("");
   const [providerIntentId, setProviderIntentId] = useState("");
@@ -198,57 +210,23 @@ export default function BookConsultationPage() {
   const shouldLoadProfile = isBootstrapped && isAuthenticated && user?.role === "PATIENT" && currentStep >= 3;
   const profileQuery = useAuthProfile({ enabled: shouldLoadProfile });
 
-  const matchingDoctors = useMemo(
-    () =>
-      allDoctors.filter(
-        (d) =>
-          !spec ||
-          d.specialtyName.toLowerCase() === spec.toLowerCase() ||
-          d.spec === spec.toLowerCase() ||
-          d.specLabel.toLowerCase().includes(spec.toLowerCase()),
-      ),
-    [allDoctors, spec],
-  );
-
-  const sortedDoctors = useMemo(
-    () => [...matchingDoctors].sort((a, b) => b.rating - a.rating || b.reviews - a.reviews),
-    [matchingDoctors],
-  );
-
   const selectedDoctor = useMemo(
     () => allDoctors.find((d) => d.id === doctorId) ?? null,
     [allDoctors, doctorId],
   );
 
-  const consultationTypes = useMemo(() => {
-    const fee = selectedDoctor?.fee ?? 0;
-    return [
-      {
-        name: "Video Consultation",
-        label: "Video",
-        icon: "ti-video",
-        desc: "Face-to-face via secure video call",
-        price: formatCurrency(fee),
-        amount: fee,
-      },
-      {
-        name: "Phone Consultation",
-        label: "Phone",
-        icon: "ti-phone-call",
-        desc: "Speak directly by telephone",
-        price: formatCurrency(Math.round(fee * 0.75)),
-        amount: Math.round(fee * 0.75),
-      },
-      {
-        name: "Chat Consultation",
-        label: "Chat",
-        icon: "ti-message-2",
-        desc: "Real-time secure text messaging",
-        price: formatCurrency(Math.round(fee * 0.5)),
-        amount: Math.round(fee * 0.5),
-      },
-    ];
-  }, [selectedDoctor?.fee]);
+  const selectedDoctorProfile = useMemo(
+    () => rawDoctors.find((d) => d.id === doctorId) ?? null,
+    [rawDoctors, doctorId],
+  );
+
+  const activeSchedule = useMemo(() => {
+    if (!selectedDoctorProfile) return selectedDoctor?.weeklySchedule;
+    if (bookingCategory === "physical") {
+      return asScheduleDays(selectedDoctorProfile.clinicSchedule) ?? selectedDoctorProfile.weeklySchedule;
+    }
+    return asScheduleDays(selectedDoctorProfile.onlineSchedule) ?? selectedDoctorProfile.weeklySchedule;
+  }, [bookingCategory, selectedDoctor?.weeklySchedule, selectedDoctorProfile]);
 
   const availableTimes = useMemo(() => {
     if (!selDate) return [];
@@ -257,12 +235,11 @@ export default function BookConsultationPage() {
     const day = parseInt(parts[1], 10);
     const year = parseInt(parts[2], 10);
     const date = new Date(year, month, day);
-    return slotsFromSchedule(selectedDoctor?.weeklySchedule, WEEKDAY_NAMES[date.getDay()]);
-  }, [selDate, selectedDoctor?.weeklySchedule]);
+    return slotsFromSchedule(activeSchedule, WEEKDAY_NAMES[date.getDay()]);
+  }, [selDate, activeSchedule]);
 
   const doc = selectedDoctor?.name ?? "Select a doctor";
-  const fee =
-    consultationTypes.find((t) => t.name === consultType)?.amount ?? selectedDoctor?.fee ?? 0;
+  const fee = selectedFee || (selectedDoctor ? getSelectedFee(getDoctorFees(selectedDoctor.fee), bookingCategory, consultTypeKey) : 0);
 
   const { platform, tax, total } = calcPayment(fee);
 
@@ -273,21 +250,44 @@ export default function BookConsultationPage() {
       const found = allDoctors.find((d) => d.id === paramId);
       if (found) {
         setDoctorId(found.id);
-        const specialtyName = found.specLabel.replace(/^[^\s]+\s/, "").split(" · ")[0];
-        setSpec(specialtyName);
+        setSpec(found.specialtyName);
+        setBookingCategory("online");
+        setConsultTypeKey("video");
+        setConsultType("Video Consultation");
+        setSelectedFee(found.fee);
       }
     }
   }, [searchParams, allDoctors]);
 
-  useEffect(() => {
-    if (!doctorsLoading && allDoctors.length > 0 && doctorId && !matchingDoctors.some((d) => d.id === doctorId)) {
-      setDoctorId("");
+  const handleCategoryChange = useCallback((category: BookingCategory) => {
+    setBookingCategory(category);
+    setConsultTypeKey(null);
+    setDoctorId("");
+    setSelectedFee(0);
+    if (category === "physical") {
+      setConsultType("Physical Appointment");
+    } else {
+      setConsultType("");
     }
-  }, [allDoctors.length, doctorId, doctorsLoading, matchingDoctors]);
+  }, []);
+
+  const handleConsultTypeKeyChange = useCallback((key: ConsultTypeKey) => {
+    setConsultTypeKey(key);
+    setDoctorId("");
+    setSelectedFee(0);
+    setConsultType(resolveConsultTypeLabel("online", key));
+  }, []);
 
   const handleSpecChange = useCallback((value: string) => {
     setSpec(value);
     setDoctorId("");
+    setSelectedFee(0);
+  }, []);
+
+  const handleDoctorSelect = useCallback((id: string, feeAmount: number, label: string) => {
+    setDoctorId(id);
+    setSelectedFee(feeAmount);
+    setConsultType(label);
   }, []);
 
   const goStep = useCallback((n: number) => {
@@ -414,6 +414,28 @@ export default function BookConsultationPage() {
     setUploadedFiles((prev) => [...prev, ...newFiles]);
   };
 
+  const clearPatientFieldError = useCallback((field: PatientInfoField) => {
+    setPatientFormErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  }, []);
+
+  const showStep3ValidationAlert = useCallback((validation: ReturnType<typeof validatePatientInfoForm>) => {
+    setStep3Alert({
+      title: "Please complete the required fields",
+      messages: Object.values(validation.errors),
+    });
+    window.setTimeout(() => {
+      document.querySelector<HTMLElement>(".book-consultation-page .form-group.has-error")?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 0);
+  }, []);
+
   const handleContinueToPatientDetails = async () => {
     if (!selDate || !selTime || !spec || !doctorId) return;
 
@@ -469,34 +491,104 @@ export default function BookConsultationPage() {
   };
 
   const proceedToPayment = async () => {
-    if (!selectedDoctor || !selDate || !selTime) {
-      alert("Please select a doctor, date, and time.");
+    setStep3Alert(null);
+    setPatientFormErrors({});
+    setPaymentError("");
+
+    if (!selectedDoctor || !selDate || !selTime || !spec || !doctorId) {
+      setStep3Alert({
+        title: "Booking details incomplete",
+        messages: ["Please go back and select a doctor, date, and time before continuing to payment."],
+      });
       return;
     }
-    goStep(4);
-    setPaymentError("");
+
+    const validation = validatePatientInfoForm({
+      billingName,
+      billingEmail,
+      phone: patientPhone,
+      dateOfBirth: patientDob,
+      gender: patientGender,
+      reason: consultationReason,
+    });
+
+    if (!validation.valid) {
+      setPatientFormErrors(validation.errors);
+      showStep3ValidationAlert(validation);
+      return;
+    }
+
     setPaymentLoading(true);
-    setClientSecret("");
+
     try {
+      const { status, user: verifiedUser } = await verifyPatientSession();
+
+      if (status === "unauthenticated") {
+        savePendingBooking({
+          spec,
+          doctorId,
+          consultType,
+          selDate,
+          selTime,
+          calMonth,
+          calYear,
+          currentStep: 3,
+          billingName,
+          billingEmail,
+          billingCountry,
+          awaitingAuth: true,
+        });
+        setStep3Alert({
+          title: "Sign in required",
+          messages: ["Please sign in with a patient account to continue to payment."],
+          actionHref: bookingLoginUrl(),
+          actionLabel: "Sign in to continue",
+        });
+        return;
+      }
+
+      if (status === "non-patient") {
+        setNonPatientBlock(true);
+        setStep3Alert({
+          title: "Patient account required",
+          messages: ["Only patient accounts can book consultations. Register or sign in with a patient account."],
+          actionHref: bookingRegisterUrl(),
+          actionLabel: "Register as patient",
+        });
+        return;
+      }
+
+      if (verifiedUser) {
+        setUser(verifiedUser);
+      }
+
       const scheduledAt = parseScheduledAt(selDate, selTime, MONTHS);
       const draft = await createDraft.mutateAsync({
         doctorId: selectedDoctor.id,
         scheduledAt,
         consultationType: CONSULTATION_TYPE_MAP[consultType] ?? "VIDEO",
         durationMinutes: 30,
+        reason: consultationReason.trim() || undefined,
       });
       setBookingDraftId(draft.id);
       const intent = await createIntent.mutateAsync({
         bookingDraftId: draft.id,
-        billingName: billingName || undefined,
-        billingEmail: billingEmail || undefined,
+        billingName: billingName.trim() || undefined,
+        billingEmail: billingEmail.trim() || undefined,
         billingCountry: billingCountry || undefined,
       });
       setClientSecret(intent.clientSecret);
       setProviderIntentId(intent.providerIntentId);
-    } catch {
-      setPaymentError("Unable to start payment. Please log in as a patient and try again.");
-      goStep(3);
+      goStep(4);
+    } catch (err) {
+      const message = extractApiErrorMessage(
+        err,
+        "Unable to start payment. Please log in as a patient and try again.",
+      );
+      setStep3Alert({
+        title: "Unable to continue to payment",
+        messages: [message],
+      });
     } finally {
       setPaymentLoading(false);
     }
@@ -515,13 +607,20 @@ export default function BookConsultationPage() {
     setNonPatientBlock(false);
     setRestoredBanner(false);
     setCurrentStep(1);
+    setBookingCategory("");
+    setConsultTypeKey(null);
     setSpec("");
     setDoctorId("");
+    setConsultType("Video Consultation");
+    setSelectedFee(0);
     setSelDate("");
     setSelTime("");
     setPatientPhone("");
     setPatientDob("");
     setPatientGender("");
+    setConsultationReason("");
+    setPatientFormErrors({});
+    setStep3Alert(null);
     setUploadedFiles([]);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -538,12 +637,12 @@ export default function BookConsultationPage() {
       const isPast = dt < new Date(today.getFullYear(), today.getMonth(), today.getDate());
       const isToday = d === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear();
       const isSel = selDate === `${MONTHS[calMonth]} ${d}, ${calYear}`;
-      const unavailable = !isDayAvailable(selectedDoctor?.weeklySchedule, dt);
+      const unavailable = !isDayAvailable(activeSchedule, dt);
       days.push({ day: d, past: isPast, unavailable, today: isToday, selected: isSel });
     }
 
     return days;
-  }, [calMonth, calYear, selDate, today, selectedDoctor?.weeklySchedule]);
+  }, [calMonth, calYear, selDate, today, activeSchedule]);
 
   const confirmDateTime = selDate && selTime ? `${selDate} · ${selTime}` : "Select date and time";
 
@@ -638,294 +737,82 @@ export default function BookConsultationPage() {
           <div className="main">
             <div id="step-content" key={currentStep} className="step-panel step-panel-enter">
               {currentStep === 1 && (
-                <div id="step1">
-                  <div className="form-panel form-panel-accent">
-                    <div className="panel-header">
-                      <div className="panel-icon">
-                        <i className="ti ti-stethoscope" aria-hidden="true" />
-                      </div>
-                      <div>
-                        <div className="panel-title">Select Specialty & Doctor</div>
-                        <div className="panel-sub panel-sub-inline">
-                          Choose your specialty, then select a doctor from the list below
-                        </div>
-                      </div>
-                    </div>
-                    <div className="spec-select-wrap">
-                      <select
-                        className="spec-select"
-                        value={spec}
-                        onChange={(e) => handleSpecChange(e.target.value)}
-                        aria-label="Select a specialty"
-                      >
-                        <option value="">Select a specialty</option>
-                        {specialties.map((s) => (
-                          <option key={s.name} value={s.name}>
-                            {s.name}
-                          </option>
-                        ))}
-                      </select>
-                      <i className="ti ti-chevron-down spec-select-chevron" aria-hidden="true" />
-                    </div>
-                  </div>
-
-                  {spec && (
-                    <div className="top-doctors-section step-section-enter">
-                      <div className="top-doctors-head">
-                        <div>
-                          <h3 className="top-doctors-title">Available Doctors</h3>
-                          <p className="top-doctors-sub">
-                            {sortedDoctors.length} specialist{sortedDoctors.length !== 1 ? "s" : ""} in {spec}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="top-doc-grid">
-                        {doctorsLoading ? (
-                          <p style={{ color: "var(--gray-500)" }}>Loading doctors...</p>
-                        ) : sortedDoctors.length > 0 ? (
-                          sortedDoctors.map((d) => (
-                            <div
-                              key={d.id}
-                              className={`top-doc-card${doctorId === d.id ? " sel" : ""}`}
-                              onClick={() => setDoctorId(d.id)}
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter" || e.key === " ") setDoctorId(d.id);
-                              }}
-                              role="button"
-                              tabIndex={0}
-                              aria-pressed={doctorId === d.id}
-                            >
-                              {doctorId === d.id && (
-                                <div className="top-doc-selected-badge" aria-hidden="true">
-                                  <i className="ti ti-check" />
-                                </div>
-                              )}
-                              <div className="top-doc-video">
-                                <i className="ti ti-video" aria-hidden="true" />
-                              </div>
-                              <div className="top-doc-av">
-                                {d.avatarUrl ? (
-                                  <img src={d.avatarUrl} alt="" />
-                                ) : (
-                                  <span style={{ background: d.bg }}>{d.init}</span>
-                                )}
-                              </div>
-                              <h4>{d.name}</h4>
-                              <div className="top-doc-spec">{d.specialtyName}</div>
-                              <div className="top-doc-rating">
-                                <i className="ti ti-star-filled" aria-hidden="true" /> {d.rating.toFixed(1)} ({d.reviews}{" "}
-                                reviews)
-                              </div>
-                              <div className="top-doc-exp">{d.exp} years experience</div>
-                              <div className="top-doc-fee">{formatCurrency(d.fee)} / 30 min</div>
-                              <div className={`top-doc-avail${d.online ? " online" : ""}`}>
-                                <i className="ti ti-circle-check" aria-hidden="true" />{" "}
-                                {d.online ? "Available today" : "Book appointment"}
-                              </div>
-                              <Link
-                                href={`/our-doctors/${d.id}`}
-                                className="top-doc-profile-btn"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                View Profile
-                              </Link>
-                            </div>
-                          ))
-                        ) : (
-                          <p style={{ color: "var(--gray-500)" }}>No doctors available for this specialty.</p>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="nav-btns">
-                    <div />
-                    <button
-                      type="button"
-                      className="btn-next"
-                      onClick={() => goStep(2)}
-                      disabled={!spec || !doctorId}
-                    >
-                      Continue to Date & Time <i className="ti ti-arrow-right" aria-hidden="true" />
-                    </button>
-                  </div>
-                </div>
+                <BookingStep1
+                  category={bookingCategory}
+                  consultTypeKey={consultTypeKey}
+                  spec={spec}
+                  doctorId={doctorId}
+                  doctorsLoading={doctorsLoading}
+                  specialties={(specialtiesData ?? []).map((s) => ({ name: s.name, count: s.count }))}
+                  rawDoctors={rawDoctors}
+                  onCategoryChange={handleCategoryChange}
+                  onConsultTypeKeyChange={handleConsultTypeKeyChange}
+                  onSpecChange={handleSpecChange}
+                  onDoctorSelect={handleDoctorSelect}
+                  onContinue={() => goStep(2)}
+                />
               )}
 
               {currentStep === 2 && selectedDoctor && (
-                <div id="step2">
-                  <div className="selected-doctor-summary step-section-enter">
-                    <div className="sds-avatar">
-                      {selectedDoctor.avatarUrl ? (
-                        <img src={selectedDoctor.avatarUrl} alt="" />
-                      ) : (
-                        <span style={{ background: selectedDoctor.bg }}>{selectedDoctor.init}</span>
-                      )}
-                    </div>
-                    <div className="sds-body">
-                      <div className="sds-header">
-                        <div>
-                          <h3 className="sds-name">{selectedDoctor.name}</h3>
-                          <div className="sds-spec">{selectedDoctor.specialtyName}</div>
-                        </div>
-                        <button type="button" className="sds-change-btn" onClick={() => goStep(1)}>
-                          <i className="ti ti-switch-horizontal" aria-hidden="true" /> Change Doctor
-                        </button>
-                      </div>
-                      <div className="sds-meta">
-                        <div className="sds-meta-item">
-                          <i className="ti ti-star-filled" aria-hidden="true" />
-                          <span>
-                            {selectedDoctor.rating.toFixed(1)} ({selectedDoctor.reviews} reviews)
-                          </span>
-                        </div>
-                        <div className="sds-meta-item">
-                          <i className="ti ti-briefcase" aria-hidden="true" />
-                          <span>{selectedDoctor.exp} yrs experience</span>
-                        </div>
-                        <div className="sds-meta-item">
-                          <i className="ti ti-currency-dollar" aria-hidden="true" />
-                          <span>{formatCurrency(selectedDoctor.fee)} / 30 min</span>
-                        </div>
-                        <div className={`sds-meta-item sds-avail${selectedDoctor.online ? " online" : ""}`}>
-                          <i className="ti ti-circle-check" aria-hidden="true" />
-                          <span>{selectedDoctor.online ? "Available today" : "Book appointment"}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="form-panel panel-spaced step-section-enter">
-                    <div className="panel-title">
-                      <i className="ti ti-device-laptop" aria-hidden="true" /> Consultation Type
-                    </div>
-                    <div className="panel-sub">Select how you&apos;d like to connect with your doctor</div>
-                    <div className="type-grid">
-                      {consultationTypes.map((t) => (
-                        <div
-                          key={t.name}
-                          className={`type-tile${consultType === t.name ? " sel" : ""}`}
-                          onClick={() => setConsultType(t.name)}
-                          onKeyDown={(e) => e.key === "Enter" && setConsultType(t.name)}
-                          role="button"
-                          tabIndex={0}
-                        >
-                          <i className={`ti ${t.icon}`} aria-hidden="true" />
-                          <h4>{t.label}</h4>
-                          <p>{t.desc}</p>
-                          <div className="price">{t.price}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="form-panel panel-spaced step-section-enter">
-                    <div className="panel-title">
-                      <i className="ti ti-calendar" aria-hidden="true" /> Select Date & Time
-                    </div>
-                    <div className="panel-sub">Choose your preferred appointment date and time slot</div>
-                    <div className="cal-wrap">
-                      <div>
-                        <div className="cal-box">
-                          <div className="cal-head">
-                            <button type="button" onClick={() => changeMonth(-1)}>
-                              ‹
-                            </button>
-                            <span>
-                              {MONTHS[calMonth]} {calYear}
-                            </span>
-                            <button type="button" onClick={() => changeMonth(1)}>
-                              ›
-                            </button>
-                          </div>
-                          <div className="cal-grid">
-                            {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
-                              <div key={d} className="cal-day-name">
-                                {d}
-                              </div>
-                            ))}
-                            {calendarDays.map((item, i) =>
-                              item === null ? (
-                                <div key={`empty-${i}`} className="cal-day empty" />
-                              ) : (
-                                <button
-                                  key={item.day}
-                                  type="button"
-                                  className={`cal-day${item.past || item.unavailable ? " past" : ""}${item.today ? " today" : ""}${item.selected ? " sel" : ""}`}
-                                  onClick={() => !item.past && !item.unavailable && pickDate(item.day)}
-                                  disabled={item.past || item.unavailable}
-                                >
-                                  {item.day}
-                                </button>
-                              ),
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <div>
-                        <div className="time-label">Available Times</div>
-                        <div className="cal-box">
-                          <div className="time-grid">
-                            {!selDate ? (
-                              <p style={{ gridColumn: "1 / -1", color: "var(--gray-500)", fontSize: "0.85rem" }}>
-                                Select a date to see available times.
-                              </p>
-                            ) : availableTimes.length === 0 ? (
-                              <p style={{ gridColumn: "1 / -1", color: "var(--gray-500)", fontSize: "0.85rem" }}>
-                                No available times for this day.
-                              </p>
-                            ) : (
-                              availableTimes.map((t) => {
-                                const selected = selTime === t;
-                                return (
-                                  <button
-                                    key={t}
-                                    type="button"
-                                    className={`time-slot${selected ? " sel" : ""}`}
-                                    onClick={() => pickTime(t)}
-                                  >
-                                    {t}
-                                  </button>
-                                );
-                              })
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="nav-btns">
-                    <button type="button" className="btn-back" onClick={() => goStep(1)}>
-                      <i className="ti ti-arrow-left" aria-hidden="true" /> Back
-                    </button>
-                    <button
-                      type="button"
-                      className="btn-next"
-                      onClick={handleContinueToPatientDetails}
-                      disabled={!selDate || !selTime || authVerifying}
-                    >
-                      {authVerifying ? (
-                        "Verifying account..."
-                      ) : (
-                        <>
-                          Continue to Patient Details <i className="ti ti-arrow-right" aria-hidden="true" />
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
+                <BookingStep2
+                  calMonth={calMonth}
+                  calYear={calYear}
+                  selDate={selDate}
+                  selTime={selTime}
+                  calendarDays={calendarDays}
+                  availableTimes={availableTimes}
+                  authVerifying={authVerifying}
+                  onChangeMonth={changeMonth}
+                  onPickDate={pickDate}
+                  onPickTime={pickTime}
+                  onBack={() => goStep(1)}
+                  onContinue={handleContinueToPatientDetails}
+                />
               )}
 
               {currentStep === 3 && (
                 <div id="step3">
+                  {step3Alert && (
+                    <div className="booking-validation-alert step-section-enter" role="alert">
+                      <div className="booking-validation-alert-icon">
+                        <i className="ti ti-alert-circle" aria-hidden="true" />
+                      </div>
+                      <div className="booking-validation-alert-body">
+                        <h3>{step3Alert.title}</h3>
+                        {step3Alert.messages.length === 1 ? (
+                          <p>{step3Alert.messages[0]}</p>
+                        ) : (
+                          <ul className="booking-validation-alert-list">
+                            {step3Alert.messages.map((message) => (
+                              <li key={message}>{message}</li>
+                            ))}
+                          </ul>
+                        )}
+                        <div className="booking-validation-alert-actions">
+                          {step3Alert.actionHref && step3Alert.actionLabel && (
+                            <Link href={step3Alert.actionHref} className="booking-validation-alert-primary">
+                              {step3Alert.actionLabel}
+                            </Link>
+                          )}
+                          <button
+                            type="button"
+                            className="booking-validation-alert-dismiss"
+                            onClick={() => setStep3Alert(null)}
+                          >
+                            Dismiss
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="form-panel step-section-enter">
                     <div className="panel-title">
                       <i className="ti ti-user" aria-hidden="true" /> Patient Information
                     </div>
                     <div className="panel-sub">Your details are encrypted and HIPAA-protected</div>
                     <div className="form-row">
-                      <div className="form-group">
+                      <div className={`form-group${patientFormErrors.firstName ? " has-error" : ""}`}>
                         <label>First Name</label>
                         <input
                           type="text"
@@ -934,10 +821,14 @@ export default function BookConsultationPage() {
                           onChange={(e) => {
                             const last = billingName.split(" ").slice(1).join(" ");
                             setBillingName(last ? `${e.target.value} ${last}` : e.target.value);
+                            clearPatientFieldError("firstName");
                           }}
                         />
+                        {patientFormErrors.firstName && (
+                          <span className="field-error">{patientFormErrors.firstName}</span>
+                        )}
                       </div>
-                      <div className="form-group">
+                      <div className={`form-group${patientFormErrors.lastName ? " has-error" : ""}`}>
                         <label>Last Name</label>
                         <input
                           type="text"
@@ -946,54 +837,95 @@ export default function BookConsultationPage() {
                           onChange={(e) => {
                             const first = billingName.split(" ")[0] ?? "";
                             setBillingName(first ? `${first} ${e.target.value}` : e.target.value);
+                            clearPatientFieldError("lastName");
                           }}
                         />
+                        {patientFormErrors.lastName && (
+                          <span className="field-error">{patientFormErrors.lastName}</span>
+                        )}
                       </div>
                     </div>
                     <div className="form-row">
-                      <div className="form-group">
+                      <div className={`form-group${patientFormErrors.email ? " has-error" : ""}`}>
                         <label>Email Address</label>
                         <input
                           type="email"
                           placeholder="john@example.com"
                           value={billingEmail}
-                          onChange={(e) => setBillingEmail(e.target.value)}
+                          onChange={(e) => {
+                            setBillingEmail(e.target.value);
+                            clearPatientFieldError("email");
+                          }}
                         />
+                        {patientFormErrors.email && (
+                          <span className="field-error">{patientFormErrors.email}</span>
+                        )}
                       </div>
-                      <div className="form-group">
+                      <div className={`form-group${patientFormErrors.phone ? " has-error" : ""}`}>
                         <label>Phone Number</label>
                         <input
                           type="tel"
                           placeholder="+1 (555) 000-0000"
                           value={patientPhone}
-                          onChange={(e) => setPatientPhone(e.target.value)}
+                          onChange={(e) => {
+                            setPatientPhone(e.target.value);
+                            clearPatientFieldError("phone");
+                          }}
                         />
+                        {patientFormErrors.phone && (
+                          <span className="field-error">{patientFormErrors.phone}</span>
+                        )}
                       </div>
                     </div>
                     <div className="form-row">
-                      <div className="form-group">
+                      <div className={`form-group${patientFormErrors.dateOfBirth ? " has-error" : ""}`}>
                         <label>Date of Birth</label>
                         <input
                           type="date"
                           value={patientDob}
-                          onChange={(e) => setPatientDob(e.target.value)}
+                          onChange={(e) => {
+                            setPatientDob(e.target.value);
+                            clearPatientFieldError("dateOfBirth");
+                          }}
                         />
+                        {patientFormErrors.dateOfBirth && (
+                          <span className="field-error">{patientFormErrors.dateOfBirth}</span>
+                        )}
                       </div>
-                      <div className="form-group">
+                      <div className={`form-group${patientFormErrors.gender ? " has-error" : ""}`}>
                         <label>Biological Sex</label>
-                        <select value={patientGender} onChange={(e) => setPatientGender(e.target.value)}>
+                        <select
+                          value={patientGender}
+                          onChange={(e) => {
+                            setPatientGender(e.target.value);
+                            clearPatientFieldError("gender");
+                          }}
+                        >
                           <option value="">Select...</option>
                           <option>Male</option>
                           <option>Female</option>
                           <option>Prefer not to say</option>
                           <option>Other</option>
                         </select>
+                        {patientFormErrors.gender && (
+                          <span className="field-error">{patientFormErrors.gender}</span>
+                        )}
                       </div>
                     </div>
                     <div className="form-row single">
-                      <div className="form-group">
+                      <div className={`form-group${patientFormErrors.reason ? " has-error" : ""}`}>
                         <label>Reason for Consultation</label>
-                        <textarea placeholder="Briefly describe your symptoms, concerns, or what you'd like to discuss with the doctor..." />
+                        <textarea
+                          placeholder="Briefly describe your symptoms, concerns, or what you'd like to discuss with the doctor..."
+                          value={consultationReason}
+                          onChange={(e) => {
+                            setConsultationReason(e.target.value);
+                            clearPatientFieldError("reason");
+                          }}
+                        />
+                        {patientFormErrors.reason && (
+                          <span className="field-error">{patientFormErrors.reason}</span>
+                        )}
                       </div>
                     </div>
                     <div className="form-row single">
@@ -1051,9 +983,17 @@ export default function BookConsultationPage() {
                       type="button"
                       className="btn-next"
                       onClick={proceedToPayment}
-                      disabled={createDraft.isPending || !billingEmail}
+                      disabled={paymentLoading || createDraft.isPending || createIntent.isPending}
                     >
-                      Continue to Payment <i className="ti ti-arrow-right" aria-hidden="true" />
+                      {paymentLoading || createDraft.isPending || createIntent.isPending ? (
+                        <>
+                          <span className="pay-spinner" aria-hidden="true" /> Preparing payment...
+                        </>
+                      ) : (
+                        <>
+                          Continue to Payment <i className="ti ti-arrow-right" aria-hidden="true" />
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>
@@ -1251,7 +1191,7 @@ export default function BookConsultationPage() {
             <span>
               Need help? Call us at{" "}
               <a href={`tel:${CONTACT_PHONE_TEL}`}>{CONTACT_PHONE}</a> or email{" "}
-              <a href="mailto:support@drinsight.org">support@drinsight.org</a>
+              <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
             </span>
           </div>
         </div>

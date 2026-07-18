@@ -15,9 +15,16 @@ export interface FloatingInputProps extends React.InputHTMLAttributes<HTMLInputE
   labelAction?: React.ReactNode;
 }
 
-function getInitialValue(defaultValue?: string | number | readonly string[]) {
-  if (defaultValue === undefined || defaultValue === null) return "";
-  return String(defaultValue);
+function isInputAutofilled(el: HTMLInputElement): boolean {
+  try {
+    return el.matches(":-webkit-autofill") || el.matches(":autofill");
+  } catch {
+    return false;
+  }
+}
+
+function inputHasContent(el: HTMLInputElement): boolean {
+  return el.value.trim().length > 0 || isInputAutofilled(el);
 }
 
 const FloatingInput = React.forwardRef<HTMLInputElement, FloatingInputProps>(
@@ -34,68 +41,97 @@ const FloatingInput = React.forwardRef<HTMLInputElement, FloatingInputProps>(
       onPasswordToggle,
       suffix,
       labelAction,
-      value,
-      defaultValue,
+      onAnimationStart,
       onChange,
-      onBlur,
+      onInput,
       onFocus,
+      onBlur,
       ...props
     },
     ref,
   ) => {
     const generatedId = React.useId();
     const id = idProp ?? generatedId;
-    const isControlled = value !== undefined;
-    const [focused, setFocused] = React.useState(false);
-    const [internalValue, setInternalValue] = React.useState(() => getInitialValue(defaultValue));
+    const inputRef = React.useRef<HTMLInputElement | null>(null);
+    const [floated, setFloated] = React.useState(false);
 
-    const currentValue = isControlled ? String(value ?? "") : internalValue;
-    const hasValue = currentValue.length > 0;
-    const floated = focused || hasValue;
+    const setRefs = React.useCallback(
+      (node: HTMLInputElement | null) => {
+        inputRef.current = node;
+        if (typeof ref === "function") {
+          ref(node);
+        } else if (ref) {
+          ref.current = node;
+        }
+      },
+      [ref],
+    );
+
+    const syncFloatedState = React.useCallback(() => {
+      const el = inputRef.current;
+      if (!el) return;
+      setFloated(inputHasContent(el));
+    }, []);
+
+    React.useLayoutEffect(() => {
+      syncFloatedState();
+
+      const el = inputRef.current;
+      if (!el) return;
+
+      const onFieldUpdate = () => syncFloatedState();
+      el.addEventListener("input", onFieldUpdate);
+      el.addEventListener("change", onFieldUpdate);
+
+      const pollMs = [0, 50, 100, 200, 400, 700, 1000, 1500, 2500, 4000, 6000];
+      const timers = pollMs.map((delay) => window.setTimeout(syncFloatedState, delay));
+
+      return () => {
+        el.removeEventListener("input", onFieldUpdate);
+        el.removeEventListener("change", onFieldUpdate);
+        timers.forEach((timer) => window.clearTimeout(timer));
+      };
+    }, [syncFloatedState]);
+
+    const handleAnimationStart = (e: React.AnimationEvent<HTMLInputElement>) => {
+      if (
+        e.animationName === "floating-input-autofill-start" ||
+        e.animationName === "floating-input-autofill-cancel"
+      ) {
+        syncFloatedState();
+      }
+      onAnimationStart?.(e);
+    };
+
     const hasSuffix = showPasswordToggle || suffix;
     const inputPadding =
       showPasswordToggle && suffix ? "pr-16" : hasSuffix ? "pr-10" : undefined;
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (!isControlled) {
-        setInternalValue(e.target.value);
-      }
-      onChange?.(e);
-    };
-
-    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-      setFocused(false);
-      if (!isControlled) {
-        setInternalValue(e.target.value);
-      }
-      onBlur?.(e);
-    };
-
-    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-      setFocused(true);
-      onFocus?.(e);
-    };
-
-    const handleInput = (e: React.FormEvent<HTMLInputElement>) => {
-      if (!isControlled) {
-        setInternalValue(e.currentTarget.value);
-      }
-    };
-
     return (
       <div className={cn("relative", containerClassName)}>
         <input
-          ref={ref}
+          ref={setRefs}
           id={id}
           placeholder=" "
-          value={value}
-          defaultValue={defaultValue}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          onFocus={handleFocus}
-          onInput={handleInput}
+          onAnimationStart={handleAnimationStart}
+          onChange={(e) => {
+            syncFloatedState();
+            onChange?.(e);
+          }}
+          onInput={(e) => {
+            syncFloatedState();
+            onInput?.(e);
+          }}
+          onFocus={(e) => {
+            setFloated(true);
+            onFocus?.(e);
+          }}
+          onBlur={(e) => {
+            syncFloatedState();
+            onBlur?.(e);
+          }}
           className={cn(
-            "peer block h-11 w-full rounded-xl border border-gray-400 bg-gray-200 px-3.5 pb-2 pt-5 text-sm text-gray-900 outline-none transition placeholder:text-transparent",
+            "floating-input peer block h-11 w-full rounded-xl border border-gray-400 bg-gray-200 px-3.5 pb-2 pt-5 text-sm text-gray-900 outline-none transition placeholder:text-transparent",
             "focus:border-blue focus:bg-white focus:ring-[3px] focus:ring-blue/10",
             error && "border-red focus:border-red focus:ring-red/10",
             inputPadding,
@@ -106,12 +142,9 @@ const FloatingInput = React.forwardRef<HTMLInputElement, FloatingInputProps>(
         <label
           htmlFor={id}
           className={cn(
-            "pointer-events-none absolute z-10 text-gray-500 transition-all duration-200",
-            floated
-              ? "top-[-6px] left-2.5 translate-y-0 bg-white px-2 text-xs"
-              : "left-3.5 top-1/2 -translate-y-1/2 bg-transparent text-sm",
-            focused && floated && "text-blue",
-            error && focused && "text-red",
+            "floating-input-label pointer-events-none absolute z-10 text-gray-500 transition-all duration-200",
+            floated && "floating-input-label--floated",
+            error && floated && "text-red",
           )}
         >
           {label}

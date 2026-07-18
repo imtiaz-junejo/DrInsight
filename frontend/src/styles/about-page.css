@@ -564,6 +564,13 @@
   animation-play-state: paused;
 }
 
+.about-page .marquee-track-static {
+  flex-wrap: wrap;
+  width: 100%;
+  justify-content: center;
+  animation: none;
+}
+
 @keyframes marquee-scroll {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
@@ -595,6 +602,13 @@
 .about-page .partner-tile-icon {
   font-size: 2rem;
   line-height: 1;
+}
+
+.about-page .partner-tile-logo {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  border-radius: 8px;
 }
 
 .about-page .partner-tile-name {

@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import { AuthLeftPanel } from "@/components/auth/AuthLeftPanel";
+import { AuthPageBodyFlag } from "@/components/auth/AuthPageBodyFlag";
 import { LoginForm } from "@/components/auth/LoginForm";
+import "@/styles/auth-pages.css";
 
 export const metadata = {
   title: "Login — DrInsight",
@@ -9,7 +11,9 @@ export const metadata = {
 
 export default function LoginPage() {
   return (
-    <div className="grid min-h-[calc(100vh-112px)] min-[861px]:grid-cols-2">
+    <>
+      <AuthPageBodyFlag />
+      <div className="auth-page-shell">
         <AuthLeftPanel
           eyebrow="PATIENT & DOCTOR PORTAL"
           title={
@@ -21,17 +25,16 @@ export default function LoginPage() {
           features={[
             { icon: "📋", text: "View your consultation history and doctor responses" },
             { icon: "🔖", text: "Access your saved articles and health guides" },
-            { icon: "🔧", text: "Track your health tool results over time" },
             { icon: "📅", text: "Manage upcoming and past consultations" },
-            { icon: "🔔", text: "Get alerts when followed articles are updated" },
           ]}
           pills={["🛡️ HIPAA Compliant", "🔒 256-bit SSL", "🇪🇺 GDPR Compliant"]}
         />
-        <div className="flex items-center justify-center bg-gray-50 px-6 py-10">
+        <div className="auth-page-panel">
           <Suspense fallback={<div className="text-[.9rem] text-gray-500">Loading...</div>}>
             <LoginForm />
           </Suspense>
         </div>
       </div>
+    </>
   );
 }

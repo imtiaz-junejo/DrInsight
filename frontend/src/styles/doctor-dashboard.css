@@ -55,7 +55,7 @@
 .doctor-root .site-topbar-right a{color:#93c5fd;margin-left:20px;transition:var(--transition)}
 .doctor-root .site-topbar-right a:hover{color:#fff}
 .doctor-root .site-nav{background:var(--white);border-bottom:1px solid var(--gray-200);position:sticky;top:0;z-index:200;box-shadow:var(--shadow-sm)}
-.doctor-root .nav-inner{max-width:1240px;margin:auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:70px}
+.doctor-root .nav-inner{max-width:1240px;margin:auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:80px}
 .doctor-root .logo{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-size:1.5rem;font-weight:700;color:var(--blue-dark)}
 .doctor-root .logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--blue),var(--teal));border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.25rem;flex-shrink:0}
 .doctor-root .nav-links{display:flex;align-items:center;gap:4px}
@@ -84,9 +84,20 @@
 .doctor-root .dash-btn:hover{background:rgba(255,255,255,.26)}
 .doctor-root .dash-btn.solid{background:#fff;color:var(--blue-dark)}
 .doctor-root .dash-btn.solid:hover{background:var(--blue-light)}
-.doctor-root .dash-body{flex:1;max-width:1240px;margin:28px auto;padding:0 24px;width:100%}
-.doctor-root .dash-grid{display:grid;grid-template-columns:282px 1fr;gap:28px;align-items:start}
-.doctor-root .dash-sidebar{background:var(--white);border-radius:var(--radius-lg);border:1.5px solid var(--gray-200);overflow:hidden;position:sticky;top:88px;box-shadow:var(--shadow-sm)}
+.doctor-root .dash-body{flex:1;max-width:1440px;margin:16px auto 0;padding:0 12px;width:100%}
+.doctor-root .dash-grid{display:grid;grid-template-columns:282px 1fr;gap:20px;align-items:start}
+.doctor-root .dash-sidebar{background:var(--gray-200);border-radius:var(--radius-lg);border:1.5px solid var(--gray-200);position:sticky;top:76px;max-height:calc(100vh - 92px);overflow-x:hidden;overflow-y:auto;box-shadow:var(--shadow-sm);align-self:start;scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch}
+.doctor-root .dash-sidebar::-webkit-scrollbar{display:none;width:0;height:0}
+.doctor-root .dash-main-col{display:flex;flex-direction:column;gap:0;min-width:0}
+.doctor-root .dash-main-col .dash-main{margin-bottom:20px}
+.doctor-root .dash-main-col .site-footer{margin:0;border-radius:0;overflow:visible;padding:72px 24px 0}
+.doctor-root .dash-main-col .site-footer .footer-grid{gap:28px}
+.doctor-root .dash-main-col .site-footer .footer-grid > *{min-width:0}
+.doctor-root .dash-main-col .site-footer .footer-brand-meta{max-width:100%;gap:10px}
+.doctor-root .dash-main-col .site-footer .footer-compliance-badges{gap:6px}
+.doctor-root .dash-main-col .site-footer .hipaa-badge{padding:3px 6px;font-size:.62rem;gap:4px}
+.doctor-root .dash-main-col .site-footer .footer-social{gap:6px}
+.doctor-root .dash-main-col .site-footer .social-btn{width:28px;height:28px;font-size:.72rem;border-radius:6px}
 .doctor-root .sidebar-profile{background:linear-gradient(160deg,var(--blue-dark) 0%,var(--blue) 60%,var(--teal) 100%);padding:26px 20px 20px;text-align:center;color:#fff;position:relative;overflow:hidden}
 .doctor-root .sidebar-profile::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
 .doctor-root .sidebar-avatar-ring{width:82px;height:82px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;border:3px solid rgba(255,255,255,.38);position:relative;z-index:1}
@@ -278,6 +289,7 @@
 .doctor-root .sch-btn{padding:5px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:.72rem;font-weight:600;cursor:pointer;background:var(--white);color:var(--gray-600);transition:var(--transition);flex-shrink:0;font-family:var(--font-body)}
 .doctor-root .sch-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
 .doctor-root .sch-btn.go{background:var(--green);color:#fff;border-color:var(--green)}
+.doctor-root .sch-btn-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;flex-shrink:0}
 .doctor-root .search-bar{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
 .doctor-root .search-ico-w{position:relative;flex:1;min-width:180px}
 .doctor-root .search-ico-w::before{content:'🔍';position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:.8rem;pointer-events:none}
@@ -292,12 +304,28 @@
 .doctor-root .pt-table td{padding:13px 14px;border-bottom:1px solid var(--gray-100);font-size:.84rem;vertical-align:middle}
 .doctor-root .pt-table tr:last-child td{border-bottom:none}
 .doctor-root .pt-table tr:hover td{background:#fafbff}
-.doctor-root .pt-name-cell{display:flex;align-items:center;gap:10px}
+.doctor-root .pt-name-cell{display:flex;align-items:center;gap:12px;min-width:0}
+.doctor-root .pt-name-meta{min-width:0;flex:1}
+.doctor-root .pt-n{font-weight:700;color:var(--gray-900);font-size:.88rem;line-height:1.35;word-break:break-word}
+.doctor-root .pt-id{font-size:.7rem;color:var(--gray-400);margin-top:2px;letter-spacing:.02em}
+.doctor-root .pt-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.doctor-root .pt-table-records{table-layout:fixed;min-width:1080px}
+.doctor-root .pt-table-records .pt-col-patient{width:24%;min-width:220px}
+.doctor-root .pt-table-records .pt-col-age{width:8%;min-width:78px}
+.doctor-root .pt-table-records .pt-col-condition{width:22%;min-width:200px}
+.doctor-root .pt-table-records .pt-col-date{width:11%;min-width:108px}
+.doctor-root .pt-table-records .pt-col-status{width:10%;min-width:108px}
+.doctor-root .pt-table-records .pt-col-actions{width:auto;min-width:420px}
+.doctor-root .pt-table-records .pt-cell-patient{padding-right:18px}
+.doctor-root .pt-table-records .pt-cell-condition{padding-right:16px}
+.doctor-root .pt-table-records .pt-cell-compact{white-space:nowrap;font-size:.82rem;color:var(--gray-700)}
+.doctor-root .pt-condition{display:block;font-size:.84rem;font-weight:500;color:var(--gray-800);line-height:1.45;word-break:break-word}
 .doctor-root .pt-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.74rem;font-weight:700;flex-shrink:0}
-.doctor-root .pt-n{font-weight:700;color:var(--gray-900);font-size:.85rem}
-.doctor-root .pt-id{font-size:.68rem;color:var(--gray-400)}
 .doctor-root .st-chip{font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:50px}
-.doctor-root .st-active{background:#f0fdf4;color:var(--green)}.st-critical{background:#fef2f2;color:var(--red)}.st-followup{background:#fffbeb;color:#d97706}.st-new{background:var(--blue-light);color:var(--blue)}
+.doctor-root .st-active{background:#f0fdf4;color:var(--green)}
+.doctor-root .st-critical{background:#fef2f2;color:var(--red)}
+.doctor-root .st-followup{background:#fffbeb;color:#d97706}
+.doctor-root .st-new{background:var(--blue-light);color:var(--blue)}
 .doctor-root .tbl-btn{padding:4px 10px;border:1.5px solid var(--gray-200);border-radius:7px;font-size:.7rem;font-weight:600;cursor:pointer;background:var(--white);color:var(--gray-600);transition:var(--transition);margin-right:4px;font-family:var(--font-body)}
 .doctor-root .tbl-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
 .doctor-root .tbl-btn.view{background:var(--blue);color:#fff;border-color:var(--blue)}
@@ -401,7 +429,7 @@
 .doctor-root .toast{position:fixed;bottom:24px;right:24px;background:var(--gray-900);color:#fff;padding:13px 22px;border-radius:12px;font-size:.85rem;font-weight:500;z-index:999;opacity:0;transform:translateY(10px);transition:all .3s ease;pointer-events:none;max-width:320px}
 .doctor-root .toast.show{opacity:1;transform:translateY(0)}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
-.doctor-root footer{background:#0a1224;color:#94a3b8;font-size:.85rem;margin-top:auto}
+.doctor-root footer{background:#01112e;color:#94a3b8;font-size:.85rem;margin-top:auto}
 .doctor-root .footer-main{max-width:1240px;margin:auto;padding:64px 24px 0}
 .doctor-root .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1.5fr 1.5fr;gap:48px;padding-bottom:48px}
 .doctor-root .footer-brand p{line-height:1.7;margin-bottom:18px;font-size:.84rem}
@@ -505,3 +533,78 @@
 .doctor-root .file-upload-box{border:2px dashed var(--gray-200);border-radius:var(--radius);padding:16px;text-align:center;background:var(--gray-50);cursor:pointer}
 .doctor-root .file-upload-box:hover{border-color:var(--blue);background:var(--blue-light)}
 .doctor-root .file-chip{display:inline-flex;align-items:center;gap:6px;background:var(--blue-light);color:var(--blue);padding:4px 10px;border-radius:50px;font-size:.74rem;font-weight:600;margin:4px 4px 0 0}
+
+/* Patient action sub-modals */
+.doctor-root .af-field{margin-bottom:14px}
+.doctor-root .af-field>label{display:block;font-size:.74rem;font-weight:600;color:var(--gray-600);margin-bottom:6px}
+.doctor-root .af-input,.doctor-root .af-select,.doctor-root .af-ta{width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:9px;font-family:var(--font-body);font-size:.85rem;color:var(--gray-900);outline:none;background:#fff;transition:var(--transition)}
+.doctor-root .af-input:focus,.doctor-root .af-select:focus,.doctor-root .af-ta:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,160,.1)}
+.doctor-root .af-ta{min-height:78px;resize:vertical;line-height:1.6}
+.doctor-root .af-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.doctor-root .af-pills{display:flex;gap:8px;flex-wrap:wrap}
+.doctor-root .af-pill{flex:1;min-width:88px;text-align:center;padding:11px 8px;border:1.5px solid var(--gray-200);border-radius:10px;font-size:.82rem;font-weight:600;color:var(--gray-600);cursor:pointer;background:#fff;transition:var(--transition)}
+.doctor-root .af-pill:hover{border-color:var(--blue-mid,#5b8fc9)}
+.doctor-root .af-pill.on{border-color:var(--blue);background:var(--blue-light);color:var(--blue)}
+.doctor-root .af-pill.crit.on{border-color:var(--red);background:#fef2f2;color:var(--red)}
+.doctor-root .pa-tabs{display:flex;gap:8px;margin-bottom:18px;border-bottom:1px solid var(--gray-100);padding-bottom:10px}
+.doctor-root .pa-tab{border:none;background:transparent;padding:8px 14px;border-radius:8px;font-size:.82rem;font-weight:600;color:var(--gray-500);cursor:pointer;transition:var(--transition)}
+.doctor-root .pa-tab.on{background:var(--blue-light);color:var(--blue)}
+.doctor-root .note-history-list,.doctor-root .alert-history-list{display:flex;flex-direction:column;gap:12px;max-height:420px;overflow-y:auto}
+.doctor-root .note-history-item,.doctor-root .alert-history-item{border:1.5px solid var(--gray-200);border-radius:12px;padding:14px;background:var(--gray-50)}
+.doctor-root .alert-history-item.active{border-color:#fecaca;background:#fff5f5}
+.doctor-root .note-history-top,.doctor-root .alert-history-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:6px}
+.doctor-root .note-type-chip{font-size:.64rem;font-weight:700;padding:2px 8px;border-radius:50px;background:var(--blue-light);color:var(--blue);margin-left:8px}
+.doctor-root .note-history-meta,.doctor-root .alert-history-meta{font-size:.72rem;color:var(--gray-400);margin-bottom:8px}
+.doctor-root .note-history-preview{font-size:.8rem;color:var(--gray-700);line-height:1.55;max-height:90px;overflow:hidden}
+.doctor-root .note-history-actions,.doctor-root .alert-clinical{display:flex;gap:6px}
+.doctor-root .alert-clinical{font-size:.8rem;color:var(--gray-600);margin:6px 0}
+.doctor-root .alert-audit-trail{margin-top:10px;border-top:1px solid var(--gray-200);padding-top:8px;display:flex;flex-direction:column;gap:4px}
+.doctor-root .alert-audit-row{display:grid;grid-template-columns:130px 120px 1fr;gap:8px;font-size:.7rem;color:var(--gray-500)}
+.doctor-root .pt-row-clickable{cursor:pointer;transition:var(--transition)}
+.doctor-root .pt-row-clickable:hover td{background:#fafbff}
+.doctor-root .critical-patient-badge{margin-left:6px;font-size:.85rem}
+.doctor-root .pt-table-records th:last-child,.doctor-root .pt-table-records td:last-child{white-space:nowrap;min-width:max-content}
+.doctor-root .pt-actions{display:flex;flex-direction:row;flex-wrap:nowrap;gap:6px;align-items:center;width:max-content}
+.doctor-root .pt-act-btn{background:var(--white);color:var(--blue);border:1.5px solid var(--blue);padding:7px 10px;border-radius:8px;font-family:var(--font-body);font-size:.72rem;font-weight:600;cursor:pointer;transition:var(--transition);text-align:center;white-space:nowrap;flex-shrink:0}
+.doctor-root .pt-act-btn:hover{background:var(--blue-light)}
+.doctor-root .pt-act-btn-critical{background:#fef2f2;color:var(--red);border-color:#fecaca}
+.doctor-root .pt-act-btn-critical:hover{background:#fee2e2}
+@media(max-width:1100px){.doctor-root .pt-act-btn{font-size:.68rem;padding:6px 8px}}
+@media(max-width:560px){.doctor-root .af-row{grid-template-columns:1fr}}
+
+/* ===== Consultation action modal (cons-box) — from doctor-dashboard.html ===== */
+#consOverlay{position:fixed;inset:0;z-index:4200;background:rgba(10,25,47,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:20px}
+#consOverlay.open{display:flex}
+.cons-box{background:#fff;width:100%;max-width:440px;border-radius:16px;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.35);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;animation:consPop .18s ease}
+@keyframes consPop{from{transform:translateY(14px) scale(.97);opacity:0}to{transform:none;opacity:1}}
+.cons-hd{display:flex;align-items:center;gap:10px;padding:15px 18px;color:#fff;background:linear-gradient(135deg,#0f3d7a,#1a56a0)}
+.cons-hd.warn{background:linear-gradient(135deg,#b91c1c,#dc2626)}
+.cons-hd .cons-ic{width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:1rem}
+.cons-hd h4{margin:0;font-size:.98rem;font-weight:700;flex:1}
+.cons-hd .cons-x{background:rgba(255,255,255,.14);border:none;color:#fff;width:28px;height:28px;border-radius:8px;cursor:pointer;font-size:.9rem}
+.cons-hd .cons-x:hover{background:rgba(255,255,255,.28)}
+.cons-bd{padding:18px;max-height:70vh;overflow-y:auto}
+.cons-bd label{display:block;font-size:.72rem;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:#5b7089;margin-bottom:6px}
+.cons-bd textarea{width:100%;min-height:110px;resize:vertical;border:1.5px solid #dbe6f2;border-radius:11px;padding:11px 13px;font-family:inherit;font-size:.9rem;color:#0f2b4c;line-height:1.5;box-sizing:border-box}
+.cons-bd textarea:focus{outline:none;border-color:#1a56a0;box-shadow:0 0 0 3px rgba(26,86,160,.12)}
+.cons-bd p{margin:0;font-size:.9rem;color:#33465c;line-height:1.6}
+.cons-bd .cons-sub{margin-top:8px;font-size:.8rem;color:#8296ac}
+.cons-note-list{margin-top:12px;display:flex;flex-direction:column;gap:7px}
+.cons-note-item{background:#f4f8fd;border:1px solid #e3ecf5;border-left:3px solid #1a56a0;border-radius:9px;padding:9px 12px;font-size:.82rem;color:#2c4258;line-height:1.5}
+.cons-note-item .cons-note-time{display:block;font-size:.66rem;color:#8296ac;margin-top:3px}
+.cons-ft{display:flex;gap:10px;padding:0 18px 18px}
+.cons-btn{flex:1;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:.86rem;padding:11px 16px;border-radius:11px;transition:.15s}
+.cons-btn.ghost{background:#f1f5f9;color:#334155}.cons-btn.ghost:hover{background:#e2e8f0}
+.cons-btn.blue{background:#1a56a0;color:#fff}.cons-btn.blue:hover{background:#0f3d7a}
+.cons-btn.red{background:#dc2626;color:#fff}.cons-btn.red:hover{filter:brightness(1.07)}
+
+/* ===== Online consultation extras — from doctor-dashboard.html ===== */
+.doctor-root .cc-pending{background:#fffbeb;color:var(--amber,#d97706)}
+.oc-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+@media(max-width:560px){.oc-grid2{grid-template-columns:1fr}}
+.oc-field label{display:block;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:#5b7089;margin-bottom:5px}
+.oc-field input,.oc-field select{width:100%;border:1.5px solid #dbe6f2;border-radius:10px;padding:9px 11px;font-family:inherit;font-size:.86rem;color:#0f2b4c;box-sizing:border-box;background:#fff}
+.oc-field input:focus,.oc-field select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,160,.12)}
+.doctor-root .oc-empty{padding:34px 16px;text-align:center;color:var(--gray-400);font-size:.86rem}
+.doctor-root .oc-empty .big{font-size:1.9rem;display:block;margin-bottom:8px}
+.doctor-root .oc-att{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;font-weight:600;background:var(--gray-100);color:var(--gray-600);border-radius:50px;padding:3px 10px;margin:6px 6px 0 0}

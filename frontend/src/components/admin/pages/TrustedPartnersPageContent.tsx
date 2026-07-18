@@ -189,12 +189,9 @@ export function TrustedPartnersPageContent() {
       <AdminPanel
         title="🤝 Trusted Partners & Affiliates"
         actions={
-          <>
-            <AdminButton onClick={() => window.open("/about", "_blank")}>👁 Preview Live Section</AdminButton>
-            <AdminButton variant="primary" onClick={openCreate}>
-              + Add Partner
-            </AdminButton>
-          </>
+          <AdminButton variant="primary" onClick={openCreate}>
+            + Add Partner
+          </AdminButton>
         }
         bodyClassName="panel-bd"
       >

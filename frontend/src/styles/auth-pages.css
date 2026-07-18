@@ -1,0 +1,87 @@
+/* Login page — professional split layout (matches drinsight-responsive/login.html) */
+body:has(.auth-page-shell),
+body.auth-login-active {
+  background: var(--color-gray-50);
+}
+
+body:has(.auth-page-shell) .site-footer,
+body.auth-login-active .site-footer {
+  display: none !important;
+}
+
+/* Main fills viewport below header; shell fills main so columns share full height */
+main:has(.auth-page-shell),
+main.auth-login-main {
+  flex: 1 1 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100%;
+  min-height: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+.auth-page-shell {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  background: var(--color-gray-50);
+}
+
+@media (min-width: 861px) {
+  .auth-page-shell {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: 1fr;
+    align-items: stretch;
+  }
+}
+
+.auth-page-left {
+  display: none;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    var(--color-blue-dark) 0%,
+    var(--color-blue) 55%,
+    var(--color-teal) 100%
+  );
+}
+
+@media (min-width: 861px) {
+  .auth-page-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100%;
+  }
+}
+
+.auth-page-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-gray-50);
+  padding: 2rem 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .auth-page-panel {
+    padding: 2.5rem 1.5rem;
+  }
+}
+
+@media (min-width: 861px) {
+  .auth-page-panel {
+    min-height: 100%;
+    padding: 2.5rem 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .auth-page-panel {
+    padding: 3.75rem 2.5rem;
+  }
+}

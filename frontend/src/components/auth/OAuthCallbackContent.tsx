@@ -9,6 +9,7 @@ import {
   consumeOAuthRedirect,
   resolvePostLoginPath,
 } from "@/lib/oauth";
+import { completeProfileUrl } from "@/lib/profile-completeness";
 import { useAuthStore, type AuthUser } from "@/store/auth.store";
 
 function OAuthCallbackContent() {
@@ -56,6 +57,20 @@ function OAuthCallbackContent() {
         clearOAuthLoadingProvider();
 
         const redirect = consumeOAuthRedirect();
+
+        try {
+          const { data: completeness } = await api.get<{
+            requiresCompletion: boolean;
+          }>("/auth/profile-completeness");
+
+          if (completeness.requiresCompletion) {
+            window.location.assign(completeProfileUrl(redirect));
+            return;
+          }
+        } catch {
+          // Fall through to default redirect if completeness check fails.
+        }
+
         const destination = resolvePostLoginPath(data.user.role, redirect);
         window.location.assign(destination);
       } catch (err) {

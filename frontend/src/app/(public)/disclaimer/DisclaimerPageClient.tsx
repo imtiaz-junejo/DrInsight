@@ -113,7 +113,7 @@ const PLAIN_LIST_ITEMS = [
 const FOOTER_LINKS = DEFAULT_LINKS.filter((link) => link.href !== "/disclaimer");
 
 export default function DisclaimerPageClient() {
-  const { progress, activeSection, scrollToSection, scrollToTop } = usePolicyPageScroll([...SECTION_IDS]);
+  const { activeSection, scrollToSection, scrollToTop } = usePolicyPageScroll([...SECTION_IDS]);
   const [fontSize, setFontSize] = useState(14);
   const [openAccords, setOpenAccords] = useState<Set<number>>(() => new Set([0]));
 
@@ -140,9 +140,6 @@ export default function DisclaimerPageClient() {
 
   return (
     <div className="disclaimer-page">
-      <div className="progress-bar">
-        <div className="progress-fill" style={{ width: `${progress}%` }} />
-      </div>
 
       <div className="critical-banner">
         <div className="cb-inner">
@@ -424,7 +421,7 @@ export default function DisclaimerPageClient() {
               </p>
               <p>
                 To report potentially outdated content: 📧{" "}
-                <a href="mailto:editorial@drinsight.org">editorial@drinsight.org</a>
+                <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
               </p>
             </div>
           </div>
@@ -653,7 +650,7 @@ export default function DisclaimerPageClient() {
             <div className="prose">
               <p>
                 To report a broken or inappropriate external link: 📧{" "}
-                <a href="mailto:editorial@drinsight.org">editorial@drinsight.org</a>
+                <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
               </p>
             </div>
           </div>
@@ -812,17 +809,17 @@ export default function DisclaimerPageClient() {
             <div className="contact-grid">
               <div className="contact-card">
                 <h4>📝 Corrections & Inaccuracies</h4>
-                <a href="mailto:corrections@drinsight.org">corrections@drinsight.org</a>
+                <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
                 <p>Reviewed within 5 business days</p>
               </div>
               <div className="contact-card">
                 <h4>✍️ General Editorial</h4>
-                <a href="mailto:editorial@drinsight.org">editorial@drinsight.org</a>
+                <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
                 <p>All editorial enquiries</p>
               </div>
               <div className="contact-card">
                 <h4>🧠 Safe Messaging Concerns</h4>
-                <a href="mailto:safemessaging@drinsight.org">safemessaging@drinsight.org</a>
+                <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
                 <p>Mental health content issues</p>
               </div>
               <div className="contact-card">

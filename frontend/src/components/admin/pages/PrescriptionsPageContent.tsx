@@ -10,17 +10,25 @@ export function PrescriptionsPageContent() {
 
   const rows = prescriptions.map((rx) => {
     const firstItem = rx.items?.[0];
-    const doctorName = rx.doctor?.user
-      ? `Dr. ${rx.doctor.user.firstName} ${rx.doctor.user.lastName}`
-      : "—";
     return [
       <UserCell
         key={`p-${rx.id}`}
         firstName={rx.patient?.user?.firstName}
         lastName={rx.patient?.user?.lastName}
         sub={rx.diagnosis ?? "Prescription"}
+        userId={(rx.patient?.user as { id?: string })?.id}
       />,
-      doctorName,
+      rx.doctor?.user ? (
+        <UserCell
+          key={`d-${rx.id}`}
+          firstName={rx.doctor.user.firstName}
+          lastName={rx.doctor.user.lastName}
+          sub="Doctor"
+          userId={(rx.doctor.user as { id?: string }).id}
+        />
+      ) : (
+        "—"
+      ),
       firstItem?.medication ?? "—",
       firstItem?.dosage ?? "—",
       formatDate(rx.createdAt),

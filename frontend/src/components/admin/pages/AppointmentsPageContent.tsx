@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
   AdminButton,
@@ -7,7 +8,9 @@ import {
   PanelTable,
   StatCardRow,
   StatusChip,
+  UserCell,
 } from "@/components/admin/ui/AdminPrimitives";
+import { adminAppointmentDetailHref, adminUserProfileHref } from "@/lib/admin-routes";
 import {
   appointmentStatusChip,
   consultationTypeIcon,
@@ -47,16 +50,39 @@ export function AppointmentsPageContent() {
 
   const rows = filtered.map((a) => {
     const status = appointmentStatusChip(a.status);
-    const patientName = `${a.patient?.user?.firstName ?? ""} ${a.patient?.user?.lastName ?? ""}`.trim();
-    const doctorName = `Dr. ${a.doctor?.user?.firstName ?? ""} ${a.doctor?.user?.lastName ?? ""}`.trim();
+    const patientUser = a.patient?.user;
+    const doctorUser = a.doctor?.user;
     return [
-      patientName || "—",
-      doctorName || "—",
+      patientUser ? (
+        <UserCell
+          key={`${a.id}-p`}
+          firstName={patientUser.firstName}
+          lastName={patientUser.lastName}
+          userId={(patientUser as { id?: string }).id}
+          seed={(patientUser as { id?: string }).id}
+        />
+      ) : (
+        "—"
+      ),
+      doctorUser ? (
+        <UserCell
+          key={`${a.id}-d`}
+          firstName={doctorUser.firstName}
+          lastName={doctorUser.lastName}
+          sub="Doctor"
+          userId={(doctorUser as { id?: string }).id}
+          seed={(doctorUser as { id?: string }).id}
+        />
+      ) : (
+        "—"
+      ),
       consultationTypeIcon(a.consultationType),
       formatDateTime(a.scheduledAt),
       <StatusChip key={`${a.id}-s`} label={status.label} className={status.className} />,
       <div key={`${a.id}-a`} className="btn-row">
-        <AdminButton onClick={() => showToast("Opening details...")}>Details</AdminButton>
+        <Link href={adminAppointmentDetailHref(a.id)} className="btn">
+          Details
+        </Link>
         {a.status !== "CANCELLED" && a.status !== "COMPLETED" ? (
           <AdminButton
             variant="danger"

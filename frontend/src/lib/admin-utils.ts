@@ -30,6 +30,16 @@ export function formatNumber(value: number): string {
   return new Intl.NumberFormat("en-US").format(value);
 }
 
+export function formatSharePercent(part: number, total: number): string {
+  if (total <= 0) return "0%";
+  return `${Math.round((part / total) * 1000) / 10}%`;
+}
+
+export function formatSignedChange(value: number, suffix = ""): string {
+  const sign = value >= 0 ? "+" : "";
+  return `${sign}${value}${suffix}`;
+}
+
 export function formatCurrency(cents: number): string {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(
     cents / 100,

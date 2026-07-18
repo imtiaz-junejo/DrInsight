@@ -2,14 +2,16 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { patientNav } from "@/config/patient-nav";
+import { patientNav, patientRouteId, type PatientBadgeKey } from "@/config/patient-nav";
 import { formatDate } from "@/lib/data-mappers";
 import { getInitials, patientDisplayName } from "@/lib/patient-utils";
-import { useAuthProfile, usePatientAppointments } from "@/services/patient-api-hooks";
+import {
+  useAuthProfile,
+  usePatientDashboardCounts,
+  usePatientHealthScore,
+} from "@/services/patient-api-hooks";
 import { useAuthStore } from "@/store/auth.store";
 import { usePatientUiStore } from "@/store/patient-ui.store";
-
-const UPCOMING_STATUSES = new Set(["CONFIRMED", "PENDING", "IN_PROGRESS"]);
 
 export function PatientSidebar() {
   const pathname = usePathname();
@@ -18,17 +20,21 @@ export function PatientSidebar() {
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const showToast = usePatientUiStore((s) => s.showToast);
   const profileQuery = useAuthProfile();
-  const appointmentsQuery = usePatientAppointments({ limit: 50 });
+  const countsQuery = usePatientDashboardCounts();
+  const healthScoreQuery = usePatientHealthScore();
 
   const profile = profileQuery.data;
   const initials = getInitials(profile?.firstName ?? user?.firstName, profile?.lastName ?? user?.lastName);
   const fullName = patientDisplayName(profile?.firstName ?? user?.firstName, profile?.lastName ?? user?.lastName);
   const memberSince = profile?.createdAt ? formatDate(profile.createdAt, { month: "short", year: "numeric" }) : "—";
 
-  const appointments = appointmentsQuery.data?.data ?? [];
-  const upcomingCount = appointments.filter((a) => UPCOMING_STATUSES.has(a.status)).length;
-  const totalCount = appointmentsQuery.data?.meta.total ?? appointments.length;
-  const completedCount = appointments.filter((a) => a.status === "COMPLETED").length;
+  const healthScore = healthScoreQuery.data;
+  const routeId = patientRouteId(pathname);
+
+  const badgeValue = (key: PatientBadgeKey | undefined): number => {
+    if (!key || !countsQuery.data) return 0;
+    return countsQuery.data[key] ?? 0;
+  };
 
   const handleSignOut = () => {
     showToast("Signing out...");
@@ -37,7 +43,7 @@ export function PatientSidebar() {
   };
 
   return (
-    <aside className="dash-sidebar">
+    <aside className="dash-sidebar sidebar">
       <div className="sidebar-profile">
         <div className="sidebar-avatar-ring">
           <div className="sidebar-avatar">{initials}</div>
@@ -49,44 +55,34 @@ export function PatientSidebar() {
       </div>
 
       <div className="hs-panel">
-        <div className="hs-label">My Consultations</div>
+        <div className="hs-label">Overall Health Score</div>
         <div className="hs-row">
           <div
             className="hs-circle"
             style={{
-              background: `conic-gradient(var(--green) 0% ${totalCount > 0 ? Math.min(100, (upcomingCount / totalCount) * 100) : 0}%, var(--gray-200) ${totalCount > 0 ? Math.min(100, (upcomingCount / totalCount) * 100) : 0}%)`,
+              background: `conic-gradient(var(--green) 0% ${healthScore?.score ?? 0}%, var(--gray-200) ${healthScore?.score ?? 0}%)`,
             }}
           >
             <div className="hs-inner">
-              <div className="hs-num">{upcomingCount}</div>
-              <div className="hs-sub">upcoming</div>
+              <div className="hs-num">{healthScore?.score ?? "—"}</div>
+              <div className="hs-sub">/ 100</div>
             </div>
           </div>
           <div>
-            <div className="hs-status">{upcomingCount > 0 ? "Scheduled 🟢" : "All clear 🟢"}</div>
+            <div className="hs-status">{healthScore?.status ?? "Loading..."}</div>
             <div className="hs-desc">
-              {appointmentsQuery.isLoading
-                ? "Loading appointments..."
-                : `${totalCount} total consultation${totalCount === 1 ? "" : "s"}`}
+              {healthScoreQuery.isLoading
+                ? "Calculating your health metrics..."
+                : `${healthScore?.attentionCount ?? 0} metric${healthScore?.attentionCount === 1 ? "" : "s"} need attention`}
             </div>
           </div>
         </div>
         <div className="mb-rows">
-          {[
-            { label: "Total", value: totalCount, color: "var(--blue)" },
-            { label: "Upcoming", value: upcomingCount, color: "var(--green)" },
-            { label: "Completed", value: completedCount, color: "var(--teal)" },
-          ].map((m) => (
+          {(healthScore?.dimensions ?? []).map((m) => (
             <div key={m.label} className="mb-row">
               <span className="mb-lbl">{m.label}</span>
               <div className="mb-bar">
-                <div
-                  className="mb-fill"
-                  style={{
-                    width: totalCount > 0 ? `${Math.min(100, (m.value / totalCount) * 100)}%` : "0%",
-                    background: m.color,
-                  }}
-                />
+                <div className="mb-fill" style={{ width: `${m.value}%`, background: m.color }} />
               </div>
               <span className="mb-v">{m.value}</span>
             </div>
@@ -99,18 +95,14 @@ export function PatientSidebar() {
           <div key={group.lbl}>
             <div className="snav-label">{group.lbl}</div>
             {group.items.map((item) => {
-              const active =
-                pathname === item.href || (item.href !== "/patient" && pathname.startsWith(item.href));
+              const active = routeId === item.id;
+              const badge = badgeValue(item.badgeKey);
               return (
-                <Link
-                  key={item.id}
-                  href={item.href}
-                  className={`snav-item${active ? " active" : ""}`}
-                >
+                <Link key={item.id} href={item.href} className={`snav-item${active ? " active" : ""}`}>
                   <span className="snav-ico">{item.ico}</span>
                   {item.name}
-                  {item.badge ? (
-                    <span className={`snav-badge ${item.badgeClass ?? ""}`}>{item.badge}</span>
+                  {item.badgeKey && badge > 0 ? (
+                    <span className={`snav-badge ${item.badgeClass ?? ""}`}>{badge}</span>
                   ) : null}
                 </Link>
               );

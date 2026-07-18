@@ -22,6 +22,14 @@ import { AskDoctorModule } from './ask-doctor/ask-doctor.module';
 import { CommunicationModule } from './communication/communication.module';
 import { PlatformModule } from './platform/platform.module';
 import { PublicationsModule } from './publications/publications.module';
+import { AuditLogModule } from './audit-log/audit-log.module';
+import { SiteAdminModule } from './site-admin/site-admin.module';
+import { ContactModule } from './contact/contact.module';
+import { EditorialModule } from './editorial/editorial.module';
+import { NewsletterModule } from './newsletter/newsletter.module';
+import { ClinicalRecordsModule } from './clinical-records/clinical-records.module';
+import { MeetingModule } from './meeting/meeting.module';
+import { PatientHealthModule } from './patient-health/patient-health.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
@@ -48,6 +56,14 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
     CommunicationModule,
     PlatformModule,
     PublicationsModule,
+    AuditLogModule,
+    SiteAdminModule,
+    ContactModule,
+    EditorialModule,
+    NewsletterModule,
+    ClinicalRecordsModule,
+    MeetingModule,
+    PatientHealthModule,
     AiModule,
     GatewayModule,
   ],

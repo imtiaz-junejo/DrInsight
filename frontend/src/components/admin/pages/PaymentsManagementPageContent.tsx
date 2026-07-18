@@ -11,6 +11,7 @@ import {
   StatusChip,
   UserCell,
 } from "@/components/admin/ui/AdminPrimitives";
+import { adminUserProfileHref } from "@/lib/admin-routes";
 import { formatNumber } from "@/lib/admin-utils";
 import { formatDate } from "@/lib/data-mappers";
 import {
@@ -93,8 +94,8 @@ export function PaymentsManagementPageContent() {
     const patient = p.bookingDraft?.patient?.user;
     const chip = paymentStatusChip(p.status);
     return [
-      <UserCell key={`p-${p.id}`} firstName={patient?.firstName} lastName={patient?.lastName} sub={patient?.email} />,
-      <UserCell key={`d-${p.id}`} firstName={doctor?.firstName} lastName={doctor?.lastName} sub="Doctor" />,
+      <UserCell key={`p-${p.id}`} firstName={patient?.firstName} lastName={patient?.lastName} sub={patient?.email} userId={(patient as { id?: string })?.id} />,
+      <UserCell key={`d-${p.id}`} firstName={doctor?.firstName} lastName={doctor?.lastName} sub="Doctor" userId={(doctor as { id?: string })?.id} />,
       formatCents(p.amountCents),
       p.confirmedAt ? formatDate(p.confirmedAt) : formatDate(p.createdAt),
       <StatusChip key={`s-${p.id}`} label={chip.label} className={chip.className} />,

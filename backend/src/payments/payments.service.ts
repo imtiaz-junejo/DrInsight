@@ -17,6 +17,7 @@ import Stripe from 'stripe';
 import { EmailService } from '../email/email.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { percentChange, resolveAnalyticsRange, trendTagClass } from '../common/utils/analytics-range.util';
 import { CreatePaymentIntentDto } from './dto/create-payment-intent.dto';
 import { InvoiceService } from './invoice.service';
 
@@ -519,23 +520,57 @@ export class PaymentsService {
     return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
   }
 
-  async getPaymentAnalytics() {
-    const [all, succeeded, failed, pending, refunded] = await Promise.all([
-      this.prisma.payment.count(),
-      this.prisma.payment.count({ where: { status: 'SUCCEEDED' } }),
-      this.prisma.payment.count({ where: { status: 'FAILED' } }),
-      this.prisma.payment.count({
-        where: { status: { in: ['REQUIRES_PAYMENT_METHOD', 'REQUIRES_CONFIRMATION', 'PROCESSING'] } },
-      }),
-      this.prisma.payment.count({ where: { status: 'REFUNDED' } }),
-    ]);
+  async getPaymentAnalytics(query: { range?: string; from?: string; to?: string } = {}) {
+    const range = resolveAnalyticsRange(query);
+    const dateFilter = { gte: range.start, lte: range.end };
+    const prevDateFilter = { gte: range.prevStart, lte: range.prevEnd };
 
-    const succeededPayments = await this.prisma.payment.findMany({
-      where: { status: 'SUCCEEDED', confirmedAt: { not: null } },
-      select: { amountCents: true, confirmedAt: true },
-    });
+    const [all, succeeded, failed, pending, refunded, succeededPayments, prevSucceededPayments] =
+      await Promise.all([
+        this.prisma.payment.count({ where: { createdAt: dateFilter } }),
+        this.prisma.payment.count({ where: { status: 'SUCCEEDED', confirmedAt: dateFilter } }),
+        this.prisma.payment.count({ where: { status: 'FAILED', createdAt: dateFilter } }),
+        this.prisma.payment.count({
+          where: {
+            status: { in: ['REQUIRES_PAYMENT_METHOD', 'REQUIRES_CONFIRMATION', 'PROCESSING'] },
+            createdAt: dateFilter,
+          },
+        }),
+        this.prisma.payment.count({ where: { status: 'REFUNDED', updatedAt: dateFilter } }),
+        this.prisma.payment.findMany({
+          where: { status: 'SUCCEEDED', confirmedAt: dateFilter },
+          select: {
+            amountCents: true,
+            consultationFeeCents: true,
+            platformFeeCents: true,
+            taxCents: true,
+            confirmedAt: true,
+            doctorId: true,
+          },
+        }),
+        this.prisma.payment.aggregate({
+          where: { status: 'SUCCEEDED', confirmedAt: prevDateFilter },
+          _sum: { amountCents: true },
+        }),
+      ]);
+
+    const doctorIds = [...new Set(succeededPayments.map((p) => p.doctorId).filter((id): id is string => !!id))];
+    const doctors = doctorIds.length
+      ? await this.prisma.doctorProfile.findMany({
+          where: { id: { in: doctorIds } },
+          select: {
+            id: true,
+            specialty: true,
+            user: { select: { firstName: true, lastName: true } },
+          },
+        })
+      : [];
+    const doctorById = new Map(doctors.map((d) => [d.id, d]));
 
     const totalRevenueCents = succeededPayments.reduce((s, p) => s + p.amountCents, 0);
+    const prevRevenueCents = prevSucceededPayments._sum.amountCents ?? 0;
+    const consultationRevenueCents = succeededPayments.reduce((s, p) => s + p.consultationFeeCents, 0);
+    const platformFeesCents = succeededPayments.reduce((s, p) => s + p.platformFeeCents, 0);
     const successRate = all > 0 ? Math.round((succeeded / all) * 100) : 0;
 
     const monthlyMap = new Map<string, number>();
@@ -543,32 +578,82 @@ export class PaymentsService {
 
     for (const p of succeededPayments) {
       if (!p.confirmedAt) continue;
-      const monthKey = `${p.confirmedAt.getFullYear()}-${String(p.confirmedAt.getMonth() + 1).padStart(2, '0')}`;
+      const monthKey = p.confirmedAt.toLocaleDateString('en-US', { month: 'short' });
       const dayKey = p.confirmedAt.toISOString().slice(0, 10);
       monthlyMap.set(monthKey, (monthlyMap.get(monthKey) || 0) + p.amountCents);
       dailyMap.set(dayKey, (dailyMap.get(dayKey) || 0) + p.amountCents);
     }
 
-    const monthlyRevenue = Array.from(monthlyMap.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
-      .slice(-12)
-      .map(([month, amountCents]) => ({ month, amountCents }));
+    const monthlyRevenue = Array.from(monthlyMap.entries()).map(([month, amountCents]) => ({
+      month,
+      amountCents,
+    }));
 
     const dailyRevenue = Array.from(dailyMap.entries())
       .sort(([a], [b]) => a.localeCompare(b))
-      .slice(-30)
       .map(([day, amountCents]) => ({ day, amountCents }));
 
+    const doctorPayoutMap = new Map<
+      string,
+      { doctorName: string; specialty: string; amountCents: number; period: string; status: string }
+    >();
+
+    for (const payment of succeededPayments) {
+      if (!payment.doctorId) continue;
+      const doctor = doctorById.get(payment.doctorId);
+      if (!doctor) continue;
+      const period = payment.confirmedAt
+        ? payment.confirmedAt.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+        : '—';
+      const existing = doctorPayoutMap.get(payment.doctorId);
+      const due = payment.consultationFeeCents || 0;
+      const doctorName = `Dr. ${doctor.user.firstName} ${doctor.user.lastName}`;
+      if (existing) {
+        existing.amountCents += due;
+      } else {
+        doctorPayoutMap.set(payment.doctorId, {
+          doctorName,
+          specialty: doctor.specialty,
+          amountCents: due,
+          period,
+          status: 'Paid',
+        });
+      }
+    }
+
+    const pendingPayouts = Array.from(doctorPayoutMap.values())
+      .sort((a, b) => b.amountCents - a.amountCents)
+      .slice(0, 20);
+
+    const revenueChange = percentChange(totalRevenueCents, prevRevenueCents);
+    const consultationShare =
+      totalRevenueCents > 0
+        ? Math.round((consultationRevenueCents / totalRevenueCents) * 1000) / 10
+        : 0;
+    const platformShare =
+      totalRevenueCents > 0 ? Math.round((platformFeesCents / totalRevenueCents) * 1000) / 10 : 0;
+
     return {
+      range: range.key,
       totalPayments: all,
       succeededPayments: succeeded,
       failedPayments: failed,
       pendingPayments: pending,
       refundedPayments: refunded,
       totalRevenueCents,
+      consultationRevenueCents,
+      platformFeesCents,
       successRate,
       monthlyRevenue,
       dailyRevenue,
+      pendingPayouts,
+      stats: {
+        revenueChange,
+        revenueTag: `${revenueChange >= 0 ? '+' : ''}${revenueChange}%`,
+        revenueTagClass: trendTagClass(revenueChange),
+        consultationShare: `${consultationShare}%`,
+        platformShare: `${platformShare}%`,
+      },
     };
   }
 
@@ -699,6 +784,7 @@ export class PaymentsService {
     const invoiceNumber = payment.invoiceNumber ?? this.generateInvoiceNumber();
 
     const confirmed = await this.prisma.$transaction(async (tx) => {
+      const roomId = `room_${payment.bookingDraft.id}`;
       const appointment = await tx.appointment.create({
         data: {
           patientId: payment.bookingDraft.patientId,
@@ -708,7 +794,9 @@ export class PaymentsService {
           consultationType: payment.bookingDraft.consultationType,
           reason: payment.bookingDraft.reason,
           status: AppointmentStatus.CONFIRMED,
-          meetingRoomId: `room_${payment.bookingDraft.id}`,
+          meetingRoomId: roomId,
+          roomId,
+          meetingStatus: 'WAITING',
         },
       });
 

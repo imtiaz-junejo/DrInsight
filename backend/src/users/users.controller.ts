@@ -59,8 +59,18 @@ export class UsersController {
 
   @Patch(':id/status')
   @Roles(UserRole.ADMIN)
-  updateStatus(@Param('id') id: string, @Body('status') status: UserStatus) {
-    return this.usersService.setUserStatus(id, status);
+  updateStatus(
+    @Param('id') id: string,
+    @Body('status') status: UserStatus,
+    @CurrentUser() actor: { id: string; firstName: string; lastName: string; role: string },
+  ) {
+    return this.usersService.setUserStatus(id, status, actor);
+  }
+
+  @Get(':id/profile')
+  @Roles(UserRole.ADMIN)
+  findAdminProfile(@Param('id') id: string) {
+    return this.usersService.findAdminProfile(id);
   }
 
   @Get(':id')

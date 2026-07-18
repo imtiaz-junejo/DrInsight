@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { OAuthProvider, User, UserRole, UserStatus } from '@prisma/client';
 import { randomBytes } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
+import { ProfileNumberService } from '../prisma/profile-number.service';
 import { RedisService } from '../redis/redis.service';
 import { OAuthEmailRequiredException } from './exceptions/oauth.exceptions';
 import {
@@ -27,6 +28,7 @@ export class OAuthService {
     private prisma: PrismaService,
     private redis: RedisService,
     private config: ConfigService,
+    private profileNumbers: ProfileNumberService,
   ) {}
 
   async validateOAuthUser(profile: OAuthProfile): Promise<User> {
@@ -189,6 +191,7 @@ export class OAuthService {
     }
 
     try {
+      const patientNumber = await this.profileNumbers.allocatePatientNumber();
       const user = await this.prisma.user.create({
         data: {
           email,
@@ -204,7 +207,9 @@ export class OAuthService {
               providerId: profile.providerId,
             },
           },
-          patientProfile: { create: {} },
+          patientProfile: {
+            create: { patientNumber },
+          },
         },
       });
 

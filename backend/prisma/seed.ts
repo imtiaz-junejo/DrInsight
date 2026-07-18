@@ -44,6 +44,7 @@ import { seedOperationalPhase } from './seed-operational';
 import { seedSiteSettings } from './seed-site-settings';
 import { seedAboutContent } from './seed-about';
 import { seedPublications } from './seed-publications';
+import { seedAdminCms } from './seed-admin-cms';
 import { assertDevelopmentEnvironment } from './seed-shared';
 
 const prisma = createPrismaClient();
@@ -266,6 +267,7 @@ async function ensureDoctorProfiles(): Promise<EnsureStats> {
         specialty: specialtyInfo.specialty,
         subSpecialty,
         licenseNumber,
+        doctorNumber: `DOC-${String(1000 + i).padStart(4, '0')}`,
         bio: doctorBio(
           user.firstName,
           user.lastName,
@@ -323,6 +325,7 @@ async function ensurePatientProfiles(): Promise<EnsureStats> {
     await prisma.patientProfile.create({
       data: {
         userId: user.id,
+        patientNumber: `PT-${String(1000 + i).padStart(4, '0')}`,
         dateOfBirth: dateOfBirth(i),
         gender: pick(GENDERS, i),
         bloodGroup: pick(BLOOD_GROUPS, i),
@@ -477,6 +480,7 @@ async function main() {
 
   await seedSiteSettings(prisma);
   await seedAboutContent(prisma);
+  await seedAdminCms(prisma);
 
   const contentStats = await seedContentPhase(prisma);
   const operationalStats = await seedOperationalPhase(prisma);

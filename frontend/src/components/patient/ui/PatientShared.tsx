@@ -1,5 +1,8 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { patientConsultationPath } from "@/lib/consultation-utils";
+
 import { ActionButton } from "@/components/patient/ui/PatientPrimitives";
 import { doctorFullName, formatDate, type MappedConsultation } from "@/lib/data-mappers";
 import type { Prescription } from "@/services/patient-api-hooks";
@@ -15,6 +18,7 @@ export interface VitalItem {
 }
 
 export function ConsultationCard({ item, variant = "overview" }: { item: MappedConsultation; variant?: "overview" | "full" }) {
+  const router = useRouter();
   const showToast = usePatientUiStore((s) => s.showToast);
   const openConsultationModal = usePatientUiStore((s) => s.openConsultationModal);
   const openReviewModal = usePatientUiStore((s) => s.openReviewModal);
@@ -56,7 +60,7 @@ export function ConsultationCard({ item, variant = "overview" }: { item: MappedC
       ) : null}
       <div className="cons-actions">
         {item.canJoin ? (
-          <ActionButton variant="primary" onClick={() => showToast("Joining video call...")}>
+          <ActionButton variant="primary" onClick={() => router.push(patientConsultationPath(item.id))}>
             📹 Join Call
           </ActionButton>
         ) : null}

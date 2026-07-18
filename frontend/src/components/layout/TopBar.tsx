@@ -35,7 +35,7 @@ export function TopBar() {
   }
 
   return (
-    <div className="bg-blue-dark py-[.15rem] text-[.8rem] text-[#cbd5e1]">
+    <div className="site-top-bar bg-blue-dark py-[.15rem] text-[.8rem] text-[#cbd5e1]">
       <div className="topbar-inner mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-3 px-6">
         <div className="flex min-w-0 flex-1 items-center gap-2 text-[0.72rem] font-semibold text-[#fca5a5] sm:text-[.8rem]">
           <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20" className="shrink-0">

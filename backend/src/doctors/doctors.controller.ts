@@ -45,10 +45,42 @@ export class DoctorsController {
     return this.doctorsService.getPatients(userId);
   }
 
+  @Get('me/schedules')
+  @ApiBearerAuth()
+  @Roles(UserRole.DOCTOR)
+  getMySchedules(@CurrentUser('id') userId: string) {
+    return this.doctorsService.getSchedules(userId);
+  }
+
+  @Patch('me/schedules')
+  @ApiBearerAuth()
+  @Roles(UserRole.DOCTOR)
+  updateMySchedules(
+    @CurrentUser('id') userId: string,
+    @Body() body: Record<string, unknown>,
+  ) {
+    return this.doctorsService.updateSchedules(userId, body as Parameters<DoctorsService['updateSchedules']>[1]);
+  }
+
+  @Public()
+  @Get('by-slug/:slug')
+  findBySlug(@Param('slug') slug: string) {
+    return this.doctorsService.findBySlug(slug);
+  }
+
   @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.doctorsService.findById(id);
+  }
+
+  @Public()
+  @Patch(':id/profile-feedback')
+  submitProfileFeedback(
+    @Param('id') id: string,
+    @Body() body: { helpful: boolean; viewerKey?: string },
+  ) {
+    return this.doctorsService.submitProfileFeedback(id, body.helpful, body.viewerKey);
   }
 
   @Patch('profile')
@@ -56,5 +88,12 @@ export class DoctorsController {
   @Roles(UserRole.DOCTOR)
   updateProfile(@CurrentUser('id') userId: string, @Body() body: Record<string, unknown>) {
     return this.doctorsService.updateProfile(userId, body as Parameters<DoctorsService['updateProfile']>[1]);
+  }
+
+  @Patch(':id/seo')
+  @ApiBearerAuth()
+  @Roles(UserRole.ADMIN)
+  updateDoctorSeo(@Param('id') id: string, @Body() body: Record<string, unknown>) {
+    return this.doctorsService.updateAdminSeo(id, body as Parameters<DoctorsService['updateAdminSeo']>[1]);
   }
 }

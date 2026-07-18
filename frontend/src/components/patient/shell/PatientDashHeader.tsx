@@ -2,18 +2,27 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { formatDate } from "@/lib/data-mappers";
+import { getInitials, patientDisplayName, todayFormatted } from "@/lib/patient-utils";
+import { useAuthProfile } from "@/services/patient-api-hooks";
 import { useAuthStore } from "@/store/auth.store";
 import { usePatientUiStore } from "@/store/patient-ui.store";
-import { getInitials, patientDisplayName, todayFormatted } from "@/lib/patient-utils";
 
 export function PatientDashHeader() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const showToast = usePatientUiStore((s) => s.showToast);
+  const profileQuery = useAuthProfile();
 
-  const initials = getInitials(user?.firstName, user?.lastName);
-  const displayName = patientDisplayName(user?.firstName, user?.lastName);
+  const profile = profileQuery.data;
+  const fullName = patientDisplayName(profile?.firstName ?? user?.firstName, profile?.lastName ?? user?.lastName);
+  const initials = getInitials(profile?.firstName ?? user?.firstName, profile?.lastName ?? user?.lastName);
+  const lastLogin = profile?.lastSeenAt
+    ? formatDate(profile.lastSeenAt, { month: "short", day: "numeric", year: "numeric" })
+    : profile?.createdAt
+      ? formatDate(profile.createdAt, { month: "short", day: "numeric", year: "numeric" })
+      : "Recently";
 
   const handleSignOut = () => {
     showToast("Signing out...");
@@ -26,9 +35,9 @@ export function PatientDashHeader() {
       <div className="dash-header-inner">
         <div className="dash-welcome">
           <div className="dash-welcome-sub">Patient Dashboard</div>
-          <h1>Welcome back, {displayName} 👋</h1>
+          <h1>Welcome back, {fullName} 👋</h1>
           <p>
-            {todayFormatted()} &nbsp;·&nbsp; Last login: 2 days ago
+            {todayFormatted()} &nbsp;·&nbsp; Last login: {lastLogin}
           </p>
         </div>
         <div className="dash-header-right">

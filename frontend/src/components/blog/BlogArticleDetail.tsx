@@ -47,6 +47,7 @@ import { AdIcon, AdIconLabel, AdSectionHeading, AdFacebookIcon, AdLinkedInIcon, 
 import { getBlogCategoryVisuals } from "@/lib/blog-category";
 import { getBlogVisitorKey, getStoredArticleRating, storeArticleRating } from "@/lib/blog-visitor";
 import { extractTocFromHtml, injectHeadingIds } from "@/lib/blog-toc";
+import { authorProfileHref } from "@/lib/author-profile-url";
 import {
   doctorFullName,
   formatDate,
@@ -67,6 +68,12 @@ import {
 
 const DEFAULT_DISCLAIMER =
   "This article is for informational purposes only and does not constitute medical advice, diagnosis, or treatment. Always consult a qualified healthcare professional regarding any medical condition.";
+
+function blogAuthorHref(author?: BlogAuthorProfile | null): string | null {
+  const profile = author?.doctorProfile;
+  if (profile?.id) return authorProfileHref({ id: profile.id, profileSlug: profile.profileSlug });
+  return null;
+}
 
 const REACTIONS = [
   { id: "informative", label: "Informative", icon: Lightbulb, accent: "informative" },
@@ -126,7 +133,6 @@ export function BlogArticleDetail({ slug }: Props) {
   const [tocOpen, setTocOpen] = useState(false);
   const [glossaryOpen, setGlossaryOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("");
-  const [progress, setProgress] = useState(0);
   const [showBackTop, setShowBackTop] = useState(false);
   const [helpfulChoice, setHelpfulChoice] = useState<"yes" | "no" | null>(null);
   const [userRating, setUserRating] = useState(0);
@@ -160,8 +166,6 @@ export function BlogArticleDetail({ slug }: Props) {
   useEffect(() => {
     const onScroll = () => {
       const doc = document.documentElement;
-      const pct = (doc.scrollTop / (doc.scrollHeight - doc.clientHeight)) * 100;
-      setProgress(Number.isFinite(pct) ? pct : 0);
       setShowBackTop(doc.scrollTop > 400);
 
       if (toc.length) {
@@ -373,9 +377,6 @@ export function BlogArticleDetail({ slug }: Props) {
 
   return (
     <div className={`article-detail-page${highContrast ? " high-contrast" : ""}`}>
-      {/* <div className="ad-sticky-progress">
-        <div className="ad-progress-fill" style={{ width: `${progress}%` }} />
-      </div> */}
 
       {/* <div className="ad-breadcrumb">
         <div className="ad-bc">
@@ -491,8 +492,8 @@ export function BlogArticleDetail({ slug }: Props) {
                 <div className="ad-author-creds">{post.author.doctorProfile.credentials}</div>
               )}
               {authorRole && <div className="ad-author-role">{authorRole}</div>}
-              {post.author?.id && (
-                <Link href={`/our-doctors/${post.author.id}`} className="ad-author-link">
+              {blogAuthorHref(post.author) && (
+                <Link href={blogAuthorHref(post.author)!} className="ad-author-link">
                   View full bio →
                 </Link>
               )}
@@ -509,8 +510,8 @@ export function BlogArticleDetail({ slug }: Props) {
                   <div className="ad-author-creds">{post.reviewer.doctorProfile.credentials}</div>
                 )}
                 {reviewerRole && <div className="ad-author-role">{reviewerRole}</div>}
-                {post.reviewer?.id && (
-                  <Link href={`/our-doctors/${post.reviewer.id}`} className="ad-author-link">
+                {blogAuthorHref(post.reviewer) && (
+                  <Link href={blogAuthorHref(post.reviewer)!} className="ad-author-link">
                     View full bio →
                   </Link>
                 )}

@@ -5,13 +5,15 @@ import { create } from "zustand";
 export type DoctorAvailability = "online" | "busy" | "off";
 
 export interface PatientModalData {
+  patientId?: string;
   initials: string;
   name: string;
   age: string;
-  gender: "M" | "F";
+  gender: "M" | "F" | string;
   diagnosis: string;
   status: "Critical" | "Active" | "Follow-up" | "New";
   avatarBg: string;
+  isCritical?: boolean;
 }
 
 interface DoctorUiState {
@@ -21,6 +23,7 @@ interface DoctorUiState {
   toastVisible: boolean;
   availability: DoctorAvailability;
   patientModal: PatientModalData | null;
+  activePatientPanel: "note" | "prescription" | "flag" | null;
   setMobileMenuOpen: (open: boolean) => void;
   toggleMobileMenu: () => void;
   setMobileSidebarOpen: (open: boolean) => void;
@@ -29,6 +32,9 @@ interface DoctorUiState {
   setAvailability: (value: DoctorAvailability) => void;
   openPatientModal: (data: PatientModalData) => void;
   closePatientModal: () => void;
+  openPatientPanel: (panel: "note" | "prescription" | "flag") => void;
+  openPatientAction: (data: PatientModalData, panel: "note" | "prescription" | "flag") => void;
+  closePatientPanel: () => void;
 }
 
 let toastTimer: ReturnType<typeof setTimeout> | null = null;
@@ -40,6 +46,7 @@ export const useDoctorUiStore = create<DoctorUiState>((set) => ({
   toastVisible: false,
   availability: "online",
   patientModal: null,
+  activePatientPanel: null,
   setMobileMenuOpen: (open) => set({ mobileMenuOpen: open }),
   toggleMobileMenu: () => set((state) => ({ mobileMenuOpen: !state.mobileMenuOpen })),
   setMobileSidebarOpen: (open) => set({ mobileSidebarOpen: open }),
@@ -53,6 +60,9 @@ export const useDoctorUiStore = create<DoctorUiState>((set) => ({
   },
   hideToast: () => set({ toastVisible: false, toastMessage: null }),
   setAvailability: (value) => set({ availability: value }),
-  openPatientModal: (data) => set({ patientModal: data }),
-  closePatientModal: () => set({ patientModal: null }),
+  openPatientModal: (data) => set({ patientModal: data, activePatientPanel: null }),
+  closePatientModal: () => set({ patientModal: null, activePatientPanel: null }),
+  openPatientPanel: (panel) => set({ activePatientPanel: panel }),
+  openPatientAction: (data, panel) => set({ patientModal: data, activePatientPanel: panel }),
+  closePatientPanel: () => set({ patientModal: null, activePatientPanel: null }),
 }));

@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import {
-  PublicationPreview,
-  type PublicationPreviewData,
+  ResearchArticlePreview,
+  publicationToPreviewData,
 } from "@/components/publications/PublicationPreview";
 import {
   DashButton,
@@ -56,38 +56,8 @@ function publicationStatusMeta(status: PublicationStatus): { statusClass: string
   return { statusClass: "as-review", statusLabel: PUBLICATION_STATUS_LABELS[status] };
 }
 
-function publicationToPreview(pub: Publication): PublicationPreviewData {
-  return {
-    title: pub.title,
-    subtitle: pub.subtitle ?? undefined,
-    abstract: pub.abstract,
-    publicationType: pub.publicationType,
-    medicalSpecialty: pub.medicalSpecialty ?? undefined,
-    publicationDate: pub.publicationDate?.slice(0, 10),
-    physicianReviewed: pub.physicianReviewed,
-    evidenceBased: pub.evidenceBased,
-    openAccess: pub.openAccess,
-    fullyReferenced: pub.fullyReferenced,
-    coiDisclosed: pub.coiDisclosed,
-    referenceCount: pub.referenceCount,
-    readTimeMinutes: pub.readTimeMinutes,
-    journalName: pub.journalName,
-    doi: pub.doi,
-    reviewingPhysician: pub.reviewingPhysician,
-    researchOverview: pub.researchOverview,
-    methodologySteps: pub.methodologySteps,
-    partners: pub.partners,
-    keywords: pub.keywords?.map((keyword) => keyword.keyword) ?? [],
-    authors: pub.authors?.map((author) => ({
-      name: author.name,
-      role: author.role,
-      isPrimary: author.isPrimary,
-    })),
-    teamMembers: pub.authors?.map((author) => ({
-      name: author.name,
-      role: author.role,
-    })),
-  };
+function publicationToPreview(pub: Publication) {
+  return publicationToPreviewData(pub);
 }
 
 export function PublicationsPageContent() {
@@ -396,7 +366,7 @@ export function PublicationsPageContent() {
               </button>
             </div>
             <div className="modal-bd">
-              <PublicationPreview data={publicationToPreview(previewPublication)} />
+              <ResearchArticlePreview data={publicationToPreview(previewPublication)} />
             </div>
           </div>
         </div>

@@ -1,9 +1,9 @@
 /* Site footer — matches home_page.html */
 .site-footer {
-  background: #0a1224;
+  background: #01112e;
   color: #94a3b8;
   font-size: 0.85rem;
-  padding: 64px 24px 0;
+  padding: 72px 24px 0;
 }
 
 .site-footer .footer-grid {
@@ -11,7 +11,7 @@
   margin: auto;
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1.5fr 1.5fr;
-  gap: 48px;
+  gap: 54px;
 }
 
 .site-footer ul {
@@ -29,14 +29,29 @@
   margin-bottom: 20px;
 }
 
+.site-footer .footer-brand-meta {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: stretch;
+}
+
+.site-footer .footer-compliance-badges {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+
 .site-footer .footer-social {
   display: flex;
+  flex-wrap: nowrap;
   gap: 10px;
 }
 
 .site-footer .social-btn {
   width: 36px;
   height: 36px;
+  flex-shrink: 0;
   background: #1e293b;
   border-radius: 8px;
   display: flex;
@@ -115,10 +130,20 @@
 
 .site-footer .footer-contact-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   margin-bottom: 10px;
   font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.site-footer .footer-contact-item a {
+  color: inherit;
+  transition: color 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.site-footer .footer-contact-item a:hover {
+  color: #93c5fd;
 }
 
 .site-footer .footer-contact-item svg {
@@ -126,6 +151,23 @@
   height: 16px;
   color: #4a90d9;
   flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+.site-footer .footer-contact-item-hours span:last-child {
+  display: inline-block;
+}
+
+.site-footer .footer-contact-item-whatsapp {
+  color: #25d366;
+}
+
+.site-footer .footer-contact-item-whatsapp a {
+  color: #25d366;
+}
+
+.site-footer .footer-contact-item-whatsapp a:hover {
+  color: #4ade80;
 }
 
 .site-footer .hipaa-badge {
@@ -138,15 +180,16 @@
   padding: 4px 10px;
   font-size: 0.72rem;
   color: #64748b;
-  margin-top: 8px;
+  margin-top: 0;
+  white-space: nowrap;
 }
 
 .site-footer .footer-bottom {
   max-width: 1240px;
   margin: auto;
-  padding: 24px 0;
+  padding: 27px 0;
   border-top: 1px solid #1e293b;
-  margin-top: 48px;
+  margin-top: 54px;
   display: flex;
   justify-content: space-between;
   align-items: center;

@@ -240,7 +240,6 @@ function PublicationCard({
 
 export function ResearchPublicationsPageContent() {
   const isLoggedIn = useAuthStore((s) => s.isAuthenticated);
-  const [progress, setProgress] = useState(0);
   const [activeSection, setActiveSection] = useState("s1");
   const [accordions, setAccordions] = useState<Record<string, boolean>>({ "pub-type-0": true });
   const [search, setSearch] = useState("");
@@ -308,9 +307,6 @@ export function ResearchPublicationsPageContent() {
 
   useEffect(() => {
     const onScroll = () => {
-      const d = document.documentElement;
-      const pct = (d.scrollTop / (d.scrollHeight - d.clientHeight)) * 100;
-      setProgress(Number.isFinite(pct) ? pct : 0);
       let active = "s1";
       sectionIds.forEach((id) => {
         const el = document.getElementById(id);
@@ -360,9 +356,6 @@ export function ResearchPublicationsPageContent() {
 
   return (
     <div className="research-pub-page">
-      <div className="progress-bar">
-        <div className="progress-fill" style={{ width: `${progress}%` }} />
-      </div>
 
       <div className="page-hero">
         <div className="hero-inner">
@@ -894,8 +887,8 @@ export function ResearchPublicationsPageContent() {
             </div>
             <div className="contact-grid">
               {[
-                ["📧 Research Enquiries", "mailto:research@drinsight.org", "Collaborations & submissions"],
-                ["✏️ Corrections", "mailto:corrections@drinsight.org", "Report an error in an article"],
+                ["📧 Research Enquiries", "mailto:drinsightofficial@gmail.com", "Collaborations & submissions"],
+                ["✏️ Corrections", "mailto:drinsightofficial@gmail.com", "Report an error in an article"],
                 ["📞 Editorial Desk", "tel:+923353545545", "Mon–Fri, 8AM–8PM"],
                 ["💬 General Contact", "/contact", "Everything else"],
               ].map(([title, href, note]) => (

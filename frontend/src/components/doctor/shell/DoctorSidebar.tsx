@@ -2,8 +2,14 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { doctorNav } from "@/config/doctor-nav";
+import { doctorNav, doctorRouteId, type DoctorBadgeKey } from "@/config/doctor-nav";
 import { getInitials } from "@/lib/doctor-utils";
+import {
+  useDoctorBlogPosts,
+  useDoctorDashboardCounts,
+  useDoctorPatients,
+  useDoctorProfile,
+} from "@/services/doctor-api-hooks";
 import { useAuthStore } from "@/store/auth.store";
 import { useDoctorUiStore, type DoctorAvailability } from "@/store/doctor-ui.store";
 
@@ -26,6 +32,21 @@ export function DoctorSidebar() {
   const initials = getInitials(user?.firstName, user?.lastName);
   const fullName = `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim() || "Doctor";
 
+  const { data: profile } = useDoctorProfile();
+  const { data: counts } = useDoctorDashboardCounts();
+  const { data: patients } = useDoctorPatients();
+  const { data: blog } = useDoctorBlogPosts(user?.id);
+
+  const articleCount = blog?.meta?.total ?? blog?.data?.length ?? 0;
+
+  const badgeValue = (key: DoctorBadgeKey | undefined): number => {
+    if (!key) return 0;
+    if (key === "articles") return articleCount;
+    return counts?.[key] ?? 0;
+  };
+
+  const routeId = doctorRouteId(pathname);
+
   const handleAvailability = (value: DoctorAvailability) => {
     setAvailability(value);
     const label = value === "online" ? "Available" : value === "busy" ? "Busy" : "Offline";
@@ -46,25 +67,25 @@ export function DoctorSidebar() {
           <div className="sidebar-online" />
         </div>
         <div className="sidebar-name">{fullName.startsWith("Dr.") ? fullName : `Dr. ${fullName}`}</div>
-        <div className="sidebar-role">Cardiologist</div>
-        <div className="sidebar-spec">Cardiology · PMC Verified ✓</div>
+        <div className="sidebar-role">{profile?.professionalTitle || profile?.specialty || "Physician"}</div>
+        <div className="sidebar-spec">{profile?.specialty || "Medicine"} · PMC Verified ✓</div>
       </div>
 
       <div className="dr-stats">
         <div className="dstat">
-          <div className="dstat-n">142</div>
+          <div className="dstat-n">{patients?.length ?? 0}</div>
           <div className="dstat-l">Patients</div>
         </div>
         <div className="dstat">
-          <div className="dstat-n">6</div>
+          <div className="dstat-n">{counts?.consultationsToday ?? 0}</div>
           <div className="dstat-l">Today</div>
         </div>
         <div className="dstat">
-          <div className="dstat-n">47</div>
+          <div className="dstat-n">{articleCount}</div>
           <div className="dstat-l">Articles</div>
         </div>
         <div className="dstat">
-          <div className="dstat-n">4.9★</div>
+          <div className="dstat-n">{profile?.rating ? `${Number(profile.rating).toFixed(1)}★` : "—"}</div>
           <div className="dstat-l">Rating</div>
         </div>
       </div>
@@ -74,8 +95,8 @@ export function DoctorSidebar() {
           <div key={group.lbl}>
             <div className="snav-label">{group.lbl}</div>
             {group.items.map((item) => {
-              const active =
-                pathname === item.href || (item.href !== "/doctor" && pathname.startsWith(item.href));
+              const active = routeId === item.id;
+              const badge = badgeValue(item.badgeKey);
               return (
                 <Link
                   key={item.id}
@@ -84,8 +105,8 @@ export function DoctorSidebar() {
                 >
                   <span className="snav-ico">{item.ico}</span>
                   {item.name}
-                  {item.badge ? (
-                    <span className={`snav-badge ${item.badgeClass ?? ""}`}>{item.badge}</span>
+                  {item.badgeKey && badge > 0 ? (
+                    <span className={`snav-badge ${item.badgeClass ?? ""}`}>{badge}</span>
                   ) : null}
                 </Link>
               );

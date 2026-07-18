@@ -1,3 +1,4 @@
+/** @deprecated Superseded by seed-publication-content.ts + seed-publications.ts */
 import {
   PublicationAttachmentType,
   PublicationReviewAction,

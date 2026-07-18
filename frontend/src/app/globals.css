@@ -40,6 +40,44 @@ body {
   font-size: 16px;
 }
 
+/* Floating input labels — CSS handles autofill/focus/value states reliably */
+@keyframes floating-input-autofill-start {
+  from {
+  }
+  to {
+  }
+}
+
+.floating-input:-webkit-autofill {
+  animation-name: floating-input-autofill-start;
+}
+
+.floating-input-label {
+  left: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  font-size: 0.875rem;
+}
+
+.floating-input-label--floated,
+.floating-input:focus + .floating-input-label,
+.floating-input:not(:placeholder-shown) + .floating-input-label,
+.floating-input:-webkit-autofill + .floating-input-label,
+.floating-input:autofill + .floating-input-label {
+  top: -6px;
+  left: 0.625rem;
+  transform: translateY(0);
+  background: #fff;
+  padding: 0 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.floating-input:focus + .floating-input-label {
+  color: var(--color-blue);
+}
+
 .font-display {
   font-family: var(--font-playfair), Georgia, serif;
 }
@@ -80,4 +118,49 @@ body {
   inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   pointer-events: none;
+}
+
+:root {
+  --site-topbar-height: 1.75rem;
+  --site-navbar-height: 4rem;
+  --site-header-height: calc(var(--site-topbar-height) + var(--site-navbar-height));
+}
+
+.home-hero-section {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: calc(100svh - var(--site-header-height));
+  min-height: calc(100dvh - var(--site-header-height));
+  padding-top: clamp(1rem, 2vh, 1.5rem);
+  padding-bottom: clamp(1rem, 2vh, 1.5rem);
+}
+
+@media (min-width: 901px) {
+  .home-hero-section {
+    height: calc(100svh - var(--site-header-height));
+    height: calc(100dvh - var(--site-header-height));
+  }
+}
+
+.site-top-bar {
+  min-height: var(--site-topbar-height);
+}
+
+.home-hero-section .home-hero-inner {
+  width: 100%;
+}
+
+.home-hero-section .home-hero-badges {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem 1.25rem;
+}
+
+@media (min-width: 901px) {
+  .home-hero-section .home-hero-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.5rem;
+  }
 }

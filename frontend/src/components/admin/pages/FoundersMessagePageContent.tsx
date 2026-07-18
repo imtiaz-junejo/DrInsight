@@ -200,12 +200,9 @@ export function FoundersMessagePageContent() {
       <AdminPanel
         title="🩺 A Message from Our Founder"
         actions={
-          <>
-            <AdminButton onClick={() => window.open("/about", "_blank")}>👁 Preview Live Page</AdminButton>
-            <AdminButton variant="primary" onClick={handleSave}>
-              Save & Publish
-            </AdminButton>
-          </>
+          <AdminButton variant="primary" onClick={handleSave}>
+            Save & Publish
+          </AdminButton>
         }
         bodyClassName="panel-bd"
       >

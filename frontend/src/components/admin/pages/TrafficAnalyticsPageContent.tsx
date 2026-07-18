@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { AnalyticsRangeToolbar } from "@/components/admin/analytics/AnalyticsRangeToolbar";
 import {
   AdminPanel,
   BarChart,
@@ -7,35 +9,93 @@ import {
   PanelTable,
   StatCardRow,
 } from "@/components/admin/ui/AdminPrimitives";
+import { exportTableCsv, type AnalyticsRangeParams } from "@/lib/analytics-range";
+import { formatNumber } from "@/lib/admin-utils";
+import { useTrafficAnalytics } from "@/services/analytics-api-hooks";
 
-// TODO: connect traffic analytics API when backend exists
 export function TrafficAnalyticsPageContent() {
-  const chartData = [
-    { label: "Mon", value: 0, display: "0K" },
-    { label: "Tue", value: 0, display: "0K" },
-    { label: "Wed", value: 0, display: "0K" },
-    { label: "Thu", value: 0, display: "0K" },
-    { label: "Fri", value: 0, display: "0K" },
-    { label: "Sat", value: 0, display: "0K" },
-    { label: "Sun", value: 0, display: "0K" },
-  ];
+  const [rangeParams, setRangeParams] = useState<AnalyticsRangeParams>({ range: "month" });
+  const analyticsQuery = useTrafficAnalytics(rangeParams);
+  const data = analyticsQuery.data;
+  const stats = data?.stats;
+  const loading = analyticsQuery.isLoading;
+
+  const topPageRows = data?.topPages ?? [];
+  const sourceRows = (data?.trafficSources ?? []).map((source) => [
+    source.source,
+    formatNumber(source.visitors),
+    `${source.pct}%`,
+  ]);
+
+  const handleExport = () => {
+    exportTableCsv(
+      "traffic-top-pages.csv",
+      ["Page", "Views", "Avg Time", "Bounce Rate"],
+      topPageRows,
+    );
+  };
 
   return (
     <>
+      <AnalyticsRangeToolbar value={rangeParams} onChange={setRangeParams} onExport={handleExport} />
       <StatCardRow
         items={[
-          { ic: "ic1", icon: "👁️", num: "—", label: "Page Views (30d)", tag: "No API", tagClass: "tt-g" },
-          { ic: "ic2", icon: "👥", num: "—", label: "Unique Visitors", tag: "No API", tagClass: "tt-g" },
-          { ic: "ic3", icon: "⏱️", num: "—", label: "Avg Session Duration", tag: "No API", tagClass: "tt-g" },
-          { ic: "ic4", icon: "📉", num: "—", label: "Bounce Rate", tag: "No API", tagClass: "tt-g" },
+          {
+            ic: "ic1",
+            icon: "👁️",
+            num: loading ? "—" : formatNumber(stats?.pageViews30d ?? 0),
+            label: "Page Views",
+            tag: loading ? "..." : (stats?.pageViewsTag ?? "—"),
+            tagClass: stats?.pageViewsTagClass ?? "tt-b",
+          },
+          {
+            ic: "ic2",
+            icon: "👥",
+            num: loading ? "—" : formatNumber(stats?.uniqueVisitors ?? 0),
+            label: "Unique Visitors",
+            tag: loading ? "..." : (stats?.visitorsTag ?? "—"),
+            tagClass: stats?.visitorsTagClass ?? "tt-b",
+          },
+          {
+            ic: "ic3",
+            icon: "⏱️",
+            num: loading ? "—" : (stats?.avgSessionDuration ?? "—"),
+            label: "Avg Session Duration",
+            tag: loading ? "..." : (stats?.durationTag ?? "—"),
+            tagClass: stats?.durationTagClass ?? "tt-b",
+          },
+          {
+            ic: "ic4",
+            icon: "📉",
+            num: loading ? "—" : (stats?.bounceRate ?? "—"),
+            label: "Bounce Rate",
+            tag: loading ? "..." : (stats?.bounceTag ?? "—"),
+            tagClass: stats?.bounceTagClass ?? "tt-b",
+          },
         ]}
       />
       <AdminPanel title="📈 Visitors — Last 7 Days" bodyClassName="panel-bd">
-        <BarChart data={chartData} />
+        {loading ? (
+          <p style={{ color: "var(--gray-500)" }}>Loading chart...</p>
+        ) : (
+          <BarChart data={data?.visitorsByDay ?? []} />
+        )}
       </AdminPanel>
       <GridTwo>
-        <PanelTable title="🔝 Top Pages" headers={["Page", "Views", "Avg Time", "Bounce Rate"]} rows={[]} emptyMessage="No traffic data — TODO: analytics API" />
-        <PanelTable title="🌍 Traffic Sources" headers={["Source", "Visitors", "% of Total"]} rows={[]} emptyMessage="No traffic data — TODO: analytics API" />
+        <PanelTable
+          title="🔝 Top Pages"
+          headers={["Page", "Views", "Avg Time", "Bounce Rate"]}
+          rows={topPageRows}
+          loading={loading}
+          emptyMessage="No traffic data yet"
+        />
+        <PanelTable
+          title="🌍 Traffic Sources"
+          headers={["Source", "Visitors", "% of Total"]}
+          rows={sourceRows}
+          loading={loading}
+          emptyMessage="No traffic data yet"
+        />
       </GridTwo>
     </>
   );

@@ -185,6 +185,16 @@ export class PublicationsController {
     return this.publicationsService.review(id, reviewerId, body);
   }
 
+  @Patch('admin/:id/flags')
+  @ApiBearerAuth()
+  @Roles(UserRole.ADMIN)
+  updateFlags(
+    @Param('id') id: string,
+    @Body() body: { featured?: boolean; pinned?: boolean },
+  ) {
+    return this.publicationsService.updateAdminFlags(id, body);
+  }
+
   @Public()
   @Post(':slug/download')
   trackDownload(@Param('slug') slug: string, @Req() req: Request) {

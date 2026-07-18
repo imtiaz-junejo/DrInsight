@@ -1,0 +1,460 @@
+.consultation-room {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  min-height: 100vh;
+  background: #0f172a;
+  color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+}
+
+.consultation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.consultation-header h1 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.consultation-sub {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin: 0.25rem 0 0;
+}
+
+.consultation-timer {
+  font-family: ui-monospace, monospace;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #38bdf8;
+}
+
+.consultation-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 320px 280px;
+  gap: 0;
+  min-height: 0;
+}
+
+.consultation-main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.video-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr auto;
+  gap: 0.5rem;
+  padding: 1rem;
+  min-height: 0;
+}
+
+.video-tile {
+  position: relative;
+  background: #1e293b;
+  border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 16/9;
+}
+
+.video-tile:last-child {
+  max-height: 140px;
+  width: 200px;
+  position: absolute;
+  bottom: 5rem;
+  right: 1rem;
+  z-index: 2;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.video-tile video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.video-tile video.mirrored {
+  transform: scaleX(-1);
+}
+
+.video-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.video-label {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.consultation-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.95);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ctrl-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: #334155;
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.ctrl-btn:hover {
+  background: #475569;
+}
+
+.ctrl-btn.off {
+  background: #7f1d1d;
+}
+
+.ctrl-btn.leave {
+  width: auto;
+  padding: 0 1rem;
+  border-radius: 24px;
+  background: #b45309;
+}
+
+.ctrl-btn.end {
+  width: auto;
+  padding: 0 1rem;
+  border-radius: 24px;
+  background: #dc2626;
+}
+
+.consultation-join-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.7);
+  z-index: 5;
+}
+
+.consultation-join-btn {
+  padding: 0.875rem 2rem;
+  border-radius: 8px;
+  border: none;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.consultation-side-panel,
+.consultation-chat {
+  background: #1e293b;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.panel-tabs {
+  display: flex;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.panel-tabs button {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.panel-tabs button.active {
+  color: #38bdf8;
+  border-bottom: 2px solid #38bdf8;
+}
+
+.panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.panel-section h4 {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+}
+
+.panel-section p {
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  margin: 0.5rem 0;
+}
+
+.notes-textarea {
+  width: 100%;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  color: #f8fafc;
+  padding: 0.75rem;
+  font-size: 0.85rem;
+  resize: vertical;
+}
+
+.lab-order-btn {
+  display: inline-block;
+  margin-top: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.consultation-chat h3 {
+  padding: 1rem;
+  margin: 0;
+  font-size: 0.95rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.chat-msg {
+  max-width: 85%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  position: relative;
+}
+
+.chat-msg.mine {
+  align-self: flex-end;
+  background: #2563eb;
+  border-bottom-right-radius: 4px;
+}
+
+.chat-msg.theirs {
+  align-self: flex-start;
+  background: #334155;
+  border-bottom-left-radius: 4px;
+}
+
+.chat-msg p {
+  margin: 0;
+  word-break: break-word;
+}
+
+.chat-msg-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.chat-msg time {
+  font-size: 0.7rem;
+  opacity: 0.7;
+}
+
+.chat-reply-btn {
+  border: none;
+  background: transparent;
+  color: inherit;
+  opacity: 0.6;
+  font-size: 0.65rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.chat-reply-btn:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+.chat-reply-preview {
+  border-left: 3px solid rgba(255, 255, 255, 0.4);
+  padding-left: 0.5rem;
+  margin-bottom: 0.35rem;
+  opacity: 0.85;
+}
+
+.chat-reply-author {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+}
+
+.chat-reply-text {
+  display: block;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.chat-reply-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: #0f172a;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.8rem;
+}
+
+.chat-reply-bar p {
+  margin: 0.15rem 0 0;
+  opacity: 0.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+.chat-reply-bar button {
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 1.25rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.chat-input-row {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.chat-input-row input {
+  flex: 1;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  color: #fff;
+  padding: 0.5rem 0.75rem;
+}
+
+.chat-input-row button {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0 1rem;
+  cursor: pointer;
+}
+
+.conn-badge {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.conn-excellent,
+.conn-good {
+  background: #166534;
+  color: #bbf7d0;
+}
+
+.conn-fair {
+  background: #a16207;
+  color: #fef08a;
+}
+
+.conn-poor,
+.conn-disconnected {
+  background: #991b1b;
+  color: #fecaca;
+}
+
+.consultation-banner {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.85rem;
+}
+
+.consultation-banner.error {
+  background: #7f1d1d;
+  color: #fecaca;
+}
+
+.consultation-loading,
+.consultation-error {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+}
+
+@media (max-width: 1024px) {
+  .consultation-body {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto auto;
+  }
+
+  .consultation-side-panel,
+  .consultation-chat {
+    max-height: 280px;
+  }
+}
+
+@media (max-width: 640px) {
+  .video-tile:last-child {
+    width: 120px;
+    max-height: 90px;
+    bottom: 4.5rem;
+  }
+
+  .ctrl-btn {
+    width: 42px;
+    height: 42px;
+    font-size: 1rem;
+  }
+}

@@ -20,19 +20,6 @@
   background: #fff;
 }
 
-.research-pub-detail .detail-breadcrumb {
-  background: var(--gray-50);
-  border-bottom: 1px solid var(--gray-200);
-  padding: 8px 18px;
-  font-size: 0.72rem;
-  color: var(--gray-400);
-}
-
-.research-pub-detail .detail-breadcrumb a {
-  color: var(--blue);
-  font-weight: 500;
-}
-
 .research-pub-detail .detail-hero {
   background: linear-gradient(135deg, var(--blue-dark), var(--blue) 55%, var(--teal));
   color: #fff;
@@ -94,6 +81,11 @@
   grid-template-columns: 1fr 300px;
   gap: 28px;
   align-items: start;
+}
+
+.research-pub-detail .detail-layout--solo {
+  grid-template-columns: 1fr;
+  max-width: 900px;
 }
 
 .research-pub-detail .detail-main {
@@ -318,75 +310,6 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-.research-pub-detail .doctor-card {
-  background: #fff;
-  border: 1.5px solid var(--gray-200);
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  text-align: center;
-}
-
-.research-pub-detail .doctor-av {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  margin: 0 auto 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-weight: 700;
-  font-size: 1.2rem;
-  background: linear-gradient(135deg, var(--blue), var(--teal));
-}
-
-.research-pub-detail .doctor-card h3 {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--gray-900);
-  margin-bottom: 4px;
-}
-
-.research-pub-detail .doctor-card h3 a {
-  color: inherit;
-}
-
-.research-pub-detail .doctor-spec {
-  font-size: 0.76rem;
-  color: var(--blue);
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.research-pub-detail .doctor-meta {
-  font-size: 0.74rem;
-  color: var(--gray-500);
-  line-height: 1.6;
-  margin-bottom: 14px;
-}
-
-.research-pub-detail .sidebar-btn {
-  display: block;
-  width: 100%;
-  text-align: center;
-  padding: 10px;
-  border-radius: 9px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  margin-bottom: 8px;
-  text-decoration: none;
-}
-
-.research-pub-detail .sidebar-btn.primary {
-  background: var(--blue);
-  color: #fff;
-}
-
-.research-pub-detail .sidebar-btn.ghost {
-  background: var(--blue-light);
-  color: var(--blue);
 }
 
 .research-pub-detail .related-card {

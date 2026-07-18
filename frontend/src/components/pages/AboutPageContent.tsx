@@ -10,7 +10,8 @@ import {
   SectionTitle,
 } from "@/components/public/section-heading";
 import { formatStatCount, getInitials, mapDoctorProfile, specialtyEmoji } from "@/lib/data-mappers";
-import { resolvePartnerDisplay } from "@/lib/partner-category";
+import { FounderMessageSection } from "@/components/about/FounderMessageSection";
+import { TrustedPartnersMarquee } from "@/components/about/TrustedPartnersMarquee";
 import { useDoctors, useFounderMessage, usePlatformStats, useRecentReviews, useTrustedPartners } from "@/services/api-hooks";
 
 const BG_CLASSES = ["bg1", "bg2", "bg3", "bg4", "bg5", "bg6"];
@@ -88,8 +89,6 @@ export function AboutPageContent() {
     [reviews],
   );
 
-  const founderCredentials = founderMessage?.credentials ?? [];
-  const founderTags = founderMessage?.tags ?? [];
   const partners = trustedPartners ?? [];
 
   const doctors = useMemo(() => {
@@ -160,90 +159,8 @@ export function AboutPageContent() {
       </section>
 
       {founderMessage ? (
-        <div className="founder-section">
-          <div className="founder-inner">
-            <div className="founder-left">
-              <div className="founder-avatar-wrap">
-                <div className="founder-avatar">
-                  {founderMessage.imageUrl ? (
-                    <img
-                      src={founderMessage.imageUrl}
-                      alt={founderMessage.founderName}
-                      style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}
-                    />
-                  ) : (
-                    "👨‍⚕️"
-                  )}
-                </div>
-                {founderMessage.badgeText ? <div className="founder-badge">{founderMessage.badgeText}</div> : null}
-              </div>
-              <div className="founder-name">{founderMessage.founderName}</div>
-              <div className="founder-title">{founderMessage.designation}</div>
-              {founderMessage.subline ? <div className="founder-sub">{founderMessage.subline}</div> : null}
-              <div className="founder-credentials">
-                {founderCredentials.length > 0 ? (
-                  founderCredentials.map((cred) => (
-                    <div key={cred.text} className="cred-item">
-                      <span>{cred.icon}</span>
-                      {cred.text}
-                    </div>
-                  ))
-                ) : (
-                  <div className="cred-item">
-                    <span>🩺</span>
-                    Credentials coming soon
-                  </div>
-                )}
-              </div>
-              {founderTags.length > 0 ? (
-                <div className="founder-tags" style={{ marginTop: 16, justifyContent: "center" }}>
-                  {founderTags.map((tag) => (
-                    <span key={tag} className="founder-tag">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-
-            <div className="founder-right">
-              <div className="founder-message">
-                <SectionEyebrow className="eyebrow">
-                  {founderMessage.eyebrow ?? "A Message from Our Founder"}
-                </SectionEyebrow>
-                <div className="founder-quote-mark">&quot;</div>
-                <SectionTitle>{founderMessage.headline}</SectionTitle>
-                <div dangerouslySetInnerHTML={{ __html: founderMessage.messageHtml }} />
-                {founderMessage.videoUrl ? (
-                  <div style={{ marginTop: 20 }}>
-                    <a href={founderMessage.videoUrl} target="_blank" rel="noopener noreferrer" className="btn-blue">
-                      ▶ Watch Founder Video
-                    </a>
-                  </div>
-                ) : null}
-                <div className="founder-signature">
-                  {founderMessage.signatureImageUrl ? (
-                    <img
-                      src={founderMessage.signatureImageUrl}
-                      alt="Signature"
-                      style={{ height: 48, objectFit: "contain" }}
-                    />
-                  ) : (
-                    <div className="sig-icon">✚</div>
-                  )}
-                  <div className="sig-text">
-                    <strong>{founderMessage.signatureName ?? founderMessage.founderName}</strong>
-                    {founderMessage.signatureTitle ? <span>{founderMessage.signatureTitle}</span> : null}
-                    {founderMessage.locationLine ? (
-                      <span style={{ fontSize: "0.74rem", color: "var(--blue)", marginTop: 2, display: "block" }}>
-                        {founderMessage.locationLine}
-                      </span>
-                    ) : null}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div id="founder-message">
+          <FounderMessageSection data={founderMessage} />
         </div>
       ) : founderLoading ? (
         <p style={{ textAlign: "center", color: "var(--gray-500)", padding: "48px 20px" }}>Loading founder message...</p>
@@ -321,36 +238,13 @@ export function AboutPageContent() {
         </div>
       </div>
 
-      <section className="partners-section">
-        <div className="section-inner">
-          <SectionHeading
-            className="section-header"
-            eyebrow="Trusted Partners & Affiliates"
-            title="Platforms & Resources We Work With"
-            description="We collaborate with leading healthcare platforms, research institutions, and technology partners to deliver the highest standard of medical care."
-          />
+      {partnersLoading ? (
+        <p style={{ textAlign: "center", color: "var(--gray-500)", padding: "48px 20px" }}>Loading partners...</p>
+      ) : (
+        <div id="trusted-partners">
+          <TrustedPartnersMarquee partners={partners} showHeader animate={partners.length > 0} />
         </div>
-        <div className="marquee-track-wrap">
-          {partnersLoading ? (
-            <p style={{ textAlign: "center", color: "var(--gray-500)" }}>Loading partners...</p>
-          ) : partners.length > 0 ? (
-            <div className="marquee-track">
-              {[...partners, ...partners].map((partner, i) => {
-                const { icon, badgeClass, badgeLabel } = resolvePartnerDisplay(partner);
-                return (
-                <div key={`${partner.id}-${i}`} className="partner-tile">
-                  <span className="partner-tile-icon">{icon}</span>
-                  <span className="partner-tile-name">{partner.companyName}</span>
-                  <span className={`partner-badge ${badgeClass}`}>{badgeLabel}</span>
-                </div>
-                );
-              })}
-            </div>
-          ) : (
-            <p style={{ textAlign: "center", color: "var(--gray-500)" }}>No partners to display yet.</p>
-          )}
-        </div>
-      </section>
+      )}
 
       <section>
         <div className="section-inner">

@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState } from "react";
+import { AnalyticsRangeToolbar } from "@/components/admin/analytics/AnalyticsRangeToolbar";
 import {
   AdminPanel,
   GridTwo,
@@ -8,92 +9,95 @@ import {
   ProgressBar,
   StatCardRow,
 } from "@/components/admin/ui/AdminPrimitives";
+import { exportTableCsv, type AnalyticsRangeParams } from "@/lib/analytics-range";
 import { formatNumber } from "@/lib/admin-utils";
-import { useAdminAppointments, usePlatformStats } from "@/services/admin-api-hooks";
+import { useConsultationAnalytics } from "@/services/analytics-api-hooks";
 
 export function ConsultationAnalyticsPageContent() {
-  const appointmentsQuery = useAdminAppointments({ limit: 100 });
-  const statsQuery = usePlatformStats();
-  const appointments = useMemo(() => appointmentsQuery.data?.data ?? [], [appointmentsQuery.data?.data]);
-  const total = appointmentsQuery.data?.meta.total ?? 0;
+  const [rangeParams, setRangeParams] = useState<AnalyticsRangeParams>({ range: "month" });
+  const analyticsQuery = useConsultationAnalytics(rangeParams);
+  const data = analyticsQuery.data;
+  const stats = data?.stats;
+  const loading = analyticsQuery.isLoading;
 
-  const byType = useMemo(() => {
-    const counts = { VIDEO: 0, AUDIO: 0, CHAT: 0, IN_PERSON: 0 };
-    appointments.forEach((a) => {
-      const key = a.consultationType as keyof typeof counts;
-      if (key in counts) counts[key] += 1;
-    });
-    const sum = Object.values(counts).reduce((a, b) => a + b, 0) || 1;
-    return [
-      { label: "📹 Video", count: counts.VIDEO, pct: Math.round((counts.VIDEO / sum) * 100) },
-      { label: "📞 Phone", count: counts.AUDIO, pct: Math.round((counts.AUDIO / sum) * 100) },
-      { label: "💬 Chat", count: counts.CHAT, pct: Math.round((counts.CHAT / sum) * 100) },
-    ];
-  }, [appointments]);
-
-  const completed = appointments.filter((a) => a.status === "COMPLETED").length;
-  const completionRate = appointments.length > 0 ? ((completed / appointments.length) * 100).toFixed(1) : "0";
-  const avgDuration =
-    appointments.length > 0
-      ? Math.round(appointments.reduce((sum, a) => sum + (a.durationMinutes || 0), 0) / appointments.length)
-      : 0;
-
-  const specialtyMap = appointments.reduce<Record<string, number>>((acc, a) => {
-    const spec = a.doctor?.specialty ?? "Unknown";
-    acc[spec] = (acc[spec] ?? 0) + 1;
-    return acc;
-  }, {});
-
-  const specialtyRows = Object.entries(specialtyMap).map(([specialty, count]) => [
-    specialty,
-    String(count),
-    (statsQuery.data?.averageRating ?? 0).toFixed(1),
+  const byType = data?.consultationsByType ?? [];
+  const specialtyRows = (data?.bySpecialty ?? []).map((row) => [
+    row.specialty,
+    String(row.consultations),
+    row.avgRating,
   ]);
+
+  const handleExport = () => {
+    exportTableCsv(
+      "consultations-by-specialty.csv",
+      ["Specialty", "Consultations", "Avg Rating"],
+      specialtyRows.map((row) => row.map(String)),
+    );
+  };
 
   return (
     <>
+      <AnalyticsRangeToolbar value={rangeParams} onChange={setRangeParams} onExport={handleExport} />
       <StatCardRow
         items={[
           {
             ic: "ic1",
             icon: "📅",
-            num: formatNumber(statsQuery.data?.appointmentsLast30Days ?? total),
-            label: "Consultations (30d)",
-            tag: "Live data",
-            tagClass: "tt-g",
+            num: loading ? "—" : formatNumber(stats?.consultations ?? 0),
+            label: "Consultations",
+            tag: loading ? "..." : (stats?.consultationsTag ?? "—"),
+            tagClass: stats?.consultationsTagClass ?? "tt-b",
           },
           {
             ic: "ic2",
             icon: "✅",
-            num: statsQuery.data?.completedAppointments != null
-              ? `${((statsQuery.data.completedAppointments / Math.max(statsQuery.data.appointmentCount ?? 1, 1)) * 100).toFixed(1)}%`
-              : `${completionRate}%`,
+            num: loading ? "—" : `${stats?.completionRate ?? 0}%`,
             label: "Completion Rate",
-            tag: "All appointments",
-            tagClass: "tt-g",
+            tag: loading ? "..." : (stats?.completionTag ?? "—"),
+            tagClass: stats?.completionTagClass ?? "tt-b",
           },
-          { ic: "ic3", icon: "⭐", num: (statsQuery.data?.averageRating ?? 0).toFixed(2), label: "Avg Rating", tag: "Platform stats", tagClass: "tt-g" },
-          { ic: "ic4", icon: "⏱️", num: `${avgDuration} min`, label: "Avg Duration", tag: "From appointments", tagClass: "tt-b" },
+          {
+            ic: "ic3",
+            icon: "⭐",
+            num: loading ? "—" : (stats?.avgRating ?? 0).toFixed(2),
+            label: "Avg Rating",
+            tag: loading ? "..." : (stats?.ratingTag ?? "—"),
+            tagClass: stats?.ratingTagClass ?? "tt-b",
+          },
+          {
+            ic: "ic4",
+            icon: "⏱️",
+            num: loading ? "—" : `${stats?.avgDuration ?? 0} min`,
+            label: "Avg Duration",
+            tag: loading ? "..." : (stats?.durationTag ?? "—"),
+            tagClass: stats?.durationTagClass ?? "tt-b",
+          },
         ]}
       />
       <GridTwo>
         <AdminPanel title="📊 Consultations by Type" bodyClassName="panel-bd">
-          {byType.map((item, i) => (
-            <div key={item.label} style={{ marginBottom: 14 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.84rem", marginBottom: 5 }}>
-                <span>
-                  {item.label} — {item.count} ({item.pct}%)
-                </span>
+          {loading ? (
+            <p style={{ color: "var(--gray-500)" }}>Loading...</p>
+          ) : byType.length === 0 ? (
+            <p style={{ color: "var(--gray-500)" }}>No consultation data for this period</p>
+          ) : (
+            byType.map((item, i) => (
+              <div key={item.label} style={{ marginBottom: 14 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.84rem", marginBottom: 5 }}>
+                  <span>
+                    {item.label} — {item.count} ({item.pct}%)
+                  </span>
+                </div>
+                <ProgressBar percent={item.pct} color={["var(--blue)", "var(--teal)", "var(--purple)"][i % 3]} />
               </div>
-              <ProgressBar percent={item.pct} color={["var(--blue)", "var(--teal)", "var(--purple)"][i]} />
-            </div>
-          ))}
+            ))
+          )}
         </AdminPanel>
         <PanelTable
           title="🩺 By Specialty"
           headers={["Specialty", "Consultations", "Avg Rating"]}
           rows={specialtyRows}
-          loading={appointmentsQuery.isLoading}
+          loading={loading}
           emptyMessage="No consultation data"
         />
       </GridTwo>

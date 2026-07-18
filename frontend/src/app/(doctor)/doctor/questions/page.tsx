@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { doctorPageMeta } from "@/config/doctor-nav";
-import { QuestionsPageContent } from "@/components/doctor/pages/QuestionsPageContent";
+import { DoctorQAContent } from "@/components/doctor/pages/DoctorQAContent";
 
-const routeId = "questions" as const;
+const routeId = "qa-new" as const;
 
 export const metadata: Metadata = {
   title: `${doctorPageMeta[routeId][0]} — DrInsight`,
@@ -10,5 +10,5 @@ export const metadata: Metadata = {
 };
 
 export default function DoctorQuestionsPage() {
-  return <QuestionsPageContent />;
+  return <DoctorQAContent view="new" />;
 }

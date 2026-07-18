@@ -37,7 +37,7 @@ export class EmailService {
     const from =
       this.config.get<string>('SMTP_FROM')?.trim() ||
       user ||
-      'noreply@drinsight.org';
+      'drinsightofficial@gmail.com';
     const secure = this.resolveSmtpSecure(port);
 
     return { host, port, user, pass, passRaw, from, secure };
@@ -165,6 +165,58 @@ export class EmailService {
     } catch (error) {
       this.logSmtpError('sendMail() failed', error);
       this.logger.error('sendPasswordResetEmail() failed — rethrowing error');
+      throw error;
+    }
+  }
+
+  async sendEmailVerificationEmail(to: string, verifyUrl: string): Promise<void> {
+    this.logger.log(`sendEmailVerificationEmail() started for recipient=${to}`);
+    this.logSmtpEnvironment();
+
+    if (!this.isSmtpConfigured()) {
+      this.logger.warn(
+        'SMTP not fully configured — skipping sendMail(), logging verification URL to console instead',
+      );
+      this.logger.log(`[DEV] Email verification link for ${to}: ${verifyUrl}`);
+      this.logger.log('sendEmailVerificationEmail() finished (dev console fallback)');
+      return;
+    }
+
+    const { from } = this.getSmtpConfig();
+    const transporter = this.getTransporter();
+
+    try {
+      await this.verifyTransporter(transporter);
+
+      this.logger.log(`Calling sendMail() -> from=${from}, to=${to}`);
+
+      const info = await transporter.sendMail({
+        from,
+        to,
+        subject: 'Verify your DrInsight email address',
+        text: [
+          'Please verify your email address for your DrInsight account.',
+          '',
+          'Verify your email using this link (expires in 24 hours):',
+          verifyUrl,
+          '',
+          'If you did not create this account, you can safely ignore this email.',
+        ].join('\n'),
+        html: `
+          <p>Please verify your email address for your DrInsight account.</p>
+          <p><a href="${verifyUrl}">Verify your email</a></p>
+          <p>This link expires in 24 hours and can only be used once.</p>
+          <p>If you did not create this account, you can safely ignore this email.</p>
+        `,
+      });
+
+      this.logger.log('✓ Email successfully sent');
+      this.logger.log(`  Message ID: ${info.messageId ?? '(none)'}`);
+      this.logger.log(`  Recipient: ${to}`);
+      this.logger.log('sendEmailVerificationEmail() finished');
+    } catch (error) {
+      this.logSmtpError('sendMail() failed', error);
+      this.logger.error('sendEmailVerificationEmail() failed — rethrowing error');
       throw error;
     }
   }

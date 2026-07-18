@@ -3,15 +3,10 @@
 import { useCallback, useEffect, useState } from "react";
 
 export function usePolicyPageScroll(sectionIds: string[], scrollOffset = 130) {
-  const [progress, setProgress] = useState(0);
   const [activeSection, setActiveSection] = useState(sectionIds[0] ?? "s1");
 
   useEffect(() => {
     const onScroll = () => {
-      const doc = document.documentElement;
-      const scrollHeight = doc.scrollHeight - doc.clientHeight;
-      setProgress(scrollHeight > 0 ? (doc.scrollTop / scrollHeight) * 100 : 0);
-
       let active = sectionIds[0] ?? "s1";
       sectionIds.forEach((id) => {
         const el = document.getElementById(id);
@@ -33,5 +28,5 @@ export function usePolicyPageScroll(sectionIds: string[], scrollOffset = 130) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  return { progress, activeSection, scrollToSection, scrollToTop };
+  return { activeSection, scrollToSection, scrollToTop };
 }

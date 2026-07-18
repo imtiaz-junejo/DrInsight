@@ -4,24 +4,21 @@ import Link from "next/link";
 import { useState } from "react";
 import "@/styles/site-footer.css";
 import { phoneHref, whatsappHref } from "@/lib/contact-utils";
-import { CONTACT_PHONE } from "@/lib/site-contact";
+import { CONTACT_ADDRESS, CONTACT_EMAIL, CONTACT_HOURS, CONTACT_PHONE_DISPLAY } from "@/lib/site-contact";
+import { BRAND_LOGO_ALT, FOOTER_LOGO_SRC } from "@/config/brand-logos";
 import { useNewsletterSubscribe } from "@/services/api-hooks";
-
-const CONTACT_EMAIL = "contact@drinsight.org";
-const BUSINESS_HOURS = "Mon–Fri: 8AM–8PM | Sat: 9AM–5PM";
+import { usePublicSiteConfig } from "@/services/configuration-api-hooks";
 
 const QUICK_LINKS = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About Us" },
   { href: "/health-tools", label: "Health Tools" },
+  { href: "/our-doctors", label: "Our Doctors" },
   { href: "/ask-doctor", label: "Ask the Doctor" },
   { href: "/blog", label: "Blog" },
-  { href: "/research-publications", label: "Research & Publications" },
   { href: "/book-consultation", label: "Book Consultation" },
   { href: "/contact", label: "Contact Us" },
-  { href: "/privacy-policy", label: "Privacy Policy" },
-  { href: "/terms-conditions", label: "Terms & Conditions" },
-  { href: "/disclaimer", label: "Disclaimer" },
+  { href: "/research-publications", label: "Research & Publications" },
 ] as const;
 
 const MEDICAL_CATEGORIES = [
@@ -41,8 +38,8 @@ const BOTTOM_LINKS = [
   { href: "/terms-conditions", label: "Terms of Service" },
   { href: "/disclaimer", label: "Medical Disclaimer" },
   { href: "/cookie-policy", label: "Cookie Policy" },
-  { href: "/faq", label: "FAQs" },
   { href: "/sitemap", label: "Sitemap" },
+  { href: "/faq", label: "FAQ" },
 ] as const;
 
 const SOCIAL_LINKS = ["𝕏", "f", "in", "▶", "📸"] as const;
@@ -90,8 +87,27 @@ function ClockIcon() {
 
 export function Footer() {
   const newsletter = useNewsletterSubscribe();
+  const siteConfig = usePublicSiteConfig();
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+
+  const phone = CONTACT_PHONE_DISPLAY;
+  const emailAddr = CONTACT_EMAIL;
+  const hours = CONTACT_HOURS;
+  const address = CONTACT_ADDRESS;
+  const whatsapp = CONTACT_PHONE_DISPLAY;
+  const footerLogo = siteConfig.data?.footerLogoUrl?.trim() || FOOTER_LOGO_SRC;
+  const tagline =
+    siteConfig.data?.tagline ||
+    "Your trusted platform for evidence-based medical information, expert doctor consultations, and health tools — reviewed and approved by licensed physicians.";
+  const social = siteConfig.data?.socialLinks;
+  const socialItems = [
+    { key: "twitter", label: "𝕏", href: social?.twitter },
+    { key: "facebook", label: "f", href: social?.facebook },
+    { key: "linkedin", label: "in", href: social?.linkedin },
+    { key: "youtube", label: "▶", href: social?.youtube },
+    { key: "instagram", label: "📸", href: social?.instagram },
+  ].filter((s) => s.href);
 
   const handleSubscribe = async () => {
     if (!email.trim()) return;
@@ -110,8 +126,8 @@ export function Footer() {
         <div className="footer-brand">
           <div className="logo" style={{ marginBottom: 14 }}>
             <img
-              src="/assets/logo/footer-logo.png"
-              alt="DrInsight"
+              src={footerLogo}
+              alt={BRAND_LOGO_ALT}
               style={{
                 maxWidth: 220,
                 width: "100%",
@@ -121,20 +137,28 @@ export function Footer() {
               }}
             />
           </div>
-          <p>
-            Your trusted platform for evidence-based medical information, expert doctor consultations, and health
-            tools — reviewed and approved by licensed physicians.
-          </p>
-          <div className="hipaa-badge">🛡️ HIPAA Compliant</div>
-          <div className="hipaa-badge" style={{ marginTop: 6 }}>
-            🇪🇺 GDPR Compliant
-          </div>
-          <div className="footer-social" style={{ marginTop: 16 }}>
-            {SOCIAL_LINKS.map((icon) => (
-              <a key={icon} href="#" className="social-btn" aria-label="Social link">
-                {icon}
-              </a>
-            ))}
+          <p>{tagline}</p>
+          <div className="footer-brand-meta">
+            <div className="footer-compliance-badges">
+              <div className="hipaa-badge">🛡️ HIPAA Compliant</div>
+              <div className="hipaa-badge">🇪🇺 GDPR Compliant</div>
+            </div>
+            <div className="footer-social">
+            {(socialItems.length ? socialItems : SOCIAL_LINKS.map((icon) => ({ key: icon, label: icon, href: "#" }))).map(
+              (item) => (
+                <a
+                  key={item.key}
+                  href={item.href || "#"}
+                  className="social-btn"
+                  aria-label="Social link"
+                  target={item.href && item.href !== "#" ? "_blank" : undefined}
+                  rel={item.href && item.href !== "#" ? "noopener noreferrer" : undefined}
+                >
+                  {item.label}
+                </a>
+              ),
+            )}
+            </div>
           </div>
         </div>
 
@@ -160,33 +184,30 @@ export function Footer() {
           </ul>
         </div>
 
-        <div className="footer-col">
+        <div className="footer-col footer-col-contact">
           <h4>Contact Information</h4>
           <div className="footer-contact-item">
             <PhoneIcon />
-            <a href={phoneHref(CONTACT_PHONE)}>{CONTACT_PHONE}</a>
+            <a href={phoneHref(phone)}>{phone}</a>
           </div>
           <div className="footer-contact-item">
             <EmailIcon />
-            <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+            <a href={`mailto:${emailAddr}`}>{emailAddr}</a>
           </div>
           <div className="footer-contact-item">
             <LocationIcon />
-            <span>
-              123 Medical Plaza, Suite 400
-              <br />
-              New York, NY 10001, USA
-            </span>
+            <span>{address}</span>
           </div>
-          <div className="footer-contact-item">
+          <div className="footer-contact-item footer-contact-item-hours">
             <ClockIcon />
-            {BUSINESS_HOURS}
+            <span>{hours}</span>
           </div>
-          <div className="footer-contact-item" style={{ color: "#25d366" }}>
-            📱 WhatsApp:{" "}
-            <a href={whatsappHref(CONTACT_PHONE)} style={{ color: "#25d366" }}>
-              {CONTACT_PHONE}
-            </a>
+          <div className="footer-contact-item footer-contact-item-whatsapp">
+            <span aria-hidden="true">📱</span>
+            <span>
+              WhatsApp:{" "}
+              <a href={whatsappHref(whatsapp)}>{whatsapp}</a>
+            </span>
           </div>
         </div>
 

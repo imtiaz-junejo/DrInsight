@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { avatarGradient, hashString, getInitials } from "@/lib/admin-utils";
+import { adminUserProfileHref } from "@/lib/admin-routes";
 
 export function UserAvatar({
   firstName,
@@ -34,13 +36,15 @@ export function UserCell({
   lastName,
   sub,
   seed,
+  userId,
 }: {
   firstName?: string | null;
   lastName?: string | null;
   sub?: string;
   seed?: string;
+  userId?: string;
 }) {
-  return (
+  const content = (
     <div className="cell-user">
       <UserAvatar firstName={firstName} lastName={lastName} seed={seed} />
       <div>
@@ -51,6 +55,16 @@ export function UserCell({
       </div>
     </div>
   );
+
+  if (userId) {
+    return (
+      <Link href={adminUserProfileHref(userId)} className="cell-user-link">
+        {content}
+      </Link>
+    );
+  }
+
+  return content;
 }
 
 export interface StatCardItem {
@@ -289,10 +303,23 @@ export function AdminButton({
   );
 }
 
-export function ToggleSwitch({ defaultChecked, onChange }: { defaultChecked?: boolean; onChange?: (checked: boolean) => void }) {
+export function ToggleSwitch({
+  checked,
+  defaultChecked,
+  onChange,
+}: {
+  checked?: boolean;
+  defaultChecked?: boolean;
+  onChange?: (checked: boolean) => void;
+}) {
   return (
     <label className="switch">
-      <input type="checkbox" defaultChecked={defaultChecked} onChange={(e) => onChange?.(e.target.checked)} />
+      <input
+        type="checkbox"
+        checked={checked}
+        defaultChecked={checked === undefined ? defaultChecked : undefined}
+        onChange={(e) => onChange?.(e.target.checked)}
+      />
       <span className="slider" />
     </label>
   );

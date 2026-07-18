@@ -5,14 +5,20 @@ import { EmptyState } from "@/components/patient/ui/PatientShared";
 import { ActionButton, DashButton, DashCard, DashPageHeader } from "@/components/patient/ui/PatientPrimitives";
 import { mapBlogPostToCard } from "@/lib/data-mappers";
 import { todayFormatted } from "@/lib/patient-utils";
-import { useBlogPosts } from "@/services/api-hooks";
+import { useSavedBlogPosts, useToggleBlogBookmark } from "@/services/patient-api-hooks";
 import { usePatientUiStore } from "@/store/patient-ui.store";
 
 export function ArticlesPageContent() {
   const showToast = usePatientUiStore((s) => s.showToast);
-  const blogQuery = useBlogPosts({ limit: 20 });
-  const articles = (blogQuery.data?.data ?? []).map(mapBlogPostToCard);
-  const total = blogQuery.data?.meta.total ?? articles.length;
+  const savedQuery = useSavedBlogPosts({ limit: 20 });
+  const toggleBookmark = useToggleBlogBookmark();
+
+  const articles = (savedQuery.data?.data ?? []).map((post) => ({
+    ...mapBlogPostToCard(post),
+    readPercent: post.readPercent ?? 0,
+    slug: post.slug,
+  }));
+  const total = savedQuery.data?.meta.total ?? articles.length;
 
   return (
     <>
@@ -29,10 +35,10 @@ export function ArticlesPageContent() {
 
       <DashCard
         title="🔖 Reading List"
-        headerExtra={<span style={{ fontSize: "0.76rem", color: "var(--gray-400)" }}>{total} articles available</span>}
+        headerExtra={<span style={{ fontSize: "0.76rem", color: "var(--gray-400)" }}>{total} articles saved</span>}
       >
-        {blogQuery.isLoading ? (
-          <EmptyState message="Loading articles..." />
+        {savedQuery.isLoading ? (
+          <EmptyState message="Loading saved articles..." />
         ) : articles.length > 0 ? (
           articles.map((art) => (
             <div key={art.slug} className="art-item">
@@ -46,23 +52,32 @@ export function ArticlesPageContent() {
                   By {art.author} · {art.date} · {art.read}
                 </div>
                 <div className="art-bar">
-                  <div className="art-fill" style={{ width: "0%" }} />
+                  <div className="art-fill" style={{ width: `${art.readPercent}%` }} />
                 </div>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 5, flexShrink: 0 }}>
                 <Link href={`/blog/${art.slug}`}>
-                  <ActionButton variant="primary" onClick={() => showToast("Opening article...")}>
-                    Read →
-                  </ActionButton>
+                  <ActionButton variant="primary">Read →</ActionButton>
                 </Link>
-                <ActionButton variant="danger" onClick={() => showToast("Saved articles are suggested from the blog")}>
+                <ActionButton
+                  variant="danger"
+                  onClick={() =>
+                    toggleBookmark.mutate(
+                      { slug: art.slug, saved: true },
+                      {
+                        onSuccess: () => showToast("Article removed from reading list"),
+                        onError: () => showToast("Could not remove article"),
+                      },
+                    )
+                  }
+                >
                   Remove
                 </ActionButton>
               </div>
             </div>
           ))
         ) : (
-          <EmptyState message="No articles available in the reading list." />
+          <EmptyState message="No saved articles yet. Browse the blog and bookmark articles to read later." />
         )}
       </DashCard>
     </>

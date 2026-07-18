@@ -44,7 +44,7 @@ const CONTENT_TYPES = [
 ];
 
 const CHECKLIST = [
-  { strong: "Topic approval:", text: <>Confirm your topic with our Editorial team before writing — many topics are already covered or assigned. Email: <span style={{ color: "var(--blue)", fontWeight: 600 }}>authors@drinsight.org</span></> },
+  { strong: "Topic approval:", text: <>Confirm your topic with our Editorial team before writing — many topics are already covered or assigned. Email: <span style={{ color: "var(--blue)", fontWeight: 600 }}>drinsightofficial@gmail.com</span></> },
   { strong: "Scope check:", text: "Confirm the article falls within your recognised specialty or professional scope" },
   { strong: "Source gathering:", text: "Identify minimum 5 peer-reviewed sources from the last 10 years (preferably last 5 years) before writing" },
   { strong: "COI self-check:", text: "Identify any financial, professional, or personal conflicts of interest related to the topic" },
@@ -55,7 +55,7 @@ const CHECKLIST = [
 ];
 
 const SUBMISSION_STEPS = [
-  { num: "1", title: "✉️ Topic Proposal", badge: "First step", badgeClass: "sb-blue", text: <>Email your proposed topic to <strong style={{ color: "var(--blue)" }}>authors@drinsight.org</strong> with a 2–3 sentence outline. Receive approval or feedback within 3–5 business days before writing.</> },
+  { num: "1", title: "✉️ Topic Proposal", badge: "First step", badgeClass: "sb-blue", text: <>Email your proposed topic to <strong style={{ color: "var(--blue)" }}>drinsightofficial@gmail.com</strong> with a 2–3 sentence outline. Receive approval or feedback within 3–5 business days before writing.</> },
   { num: "2", title: "📋 Author Brief Received", text: "Receive your detailed author brief — including target audience, required word count, source requirements, safe messaging guidance if applicable, COI disclosure form, and submission deadline." },
   { num: "3", title: "✍️ Write Your Article", badge: "You are here", badgeClass: "sb-blue", text: "Write using the required structure for your article type. Submit as a Google Doc or Word document (.docx). Include all inline citations. Complete and attach the COI disclosure form." },
   { num: "4", title: "🖊️ Editorial Pre-Screen", text: "Our editorial team reviews your submission within 3–5 business days for structure, completeness, source quality, and style guide compliance. Returned with feedback if pre-screen fails." },
@@ -75,11 +75,11 @@ const COI_ITEMS = [
 ];
 
 const CONTACTS = [
-  { title: "✍️ New Author Applications", email: "authors@drinsight.org", note: "Apply to join our author network. Response within 3–5 business days." },
-  { title: "📋 Topic Proposals & Briefs", email: "editorial@drinsight.org", note: "Submit topic ideas or request a writing brief. Response within 3–5 business days." },
-  { title: "📤 Article Submissions", email: "submissions@drinsight.org", note: "Submit completed articles for editorial pre-screen and peer review." },
-  { title: "💰 Payments & Contracts", email: "payments@drinsight.org", note: "Queries about honoraria, author agreements, and CPD/CME letters." },
-  { title: "📝 Corrections & Updates", email: "corrections@drinsight.org", note: "Request corrections or updates to your published articles." },
+  { title: "✍️ New Author Applications", email: "drinsightofficial@gmail.com", note: "Apply to join our author network. Response within 3–5 business days." },
+  { title: "📋 Topic Proposals & Briefs", email: "drinsightofficial@gmail.com", note: "Submit topic ideas or request a writing brief. Response within 3–5 business days." },
+  { title: "📤 Article Submissions", email: "drinsightofficial@gmail.com", note: "Submit completed articles for editorial pre-screen and peer review." },
+  { title: "💰 Payments & Contracts", email: "drinsightofficial@gmail.com", note: "Queries about honoraria, author agreements, and CPD/CME letters." },
+  { title: "📝 Corrections & Updates", email: "drinsightofficial@gmail.com", note: "Request corrections or updates to your published articles." },
 ];
 
 function Accordion({ id, title, open, onToggle, children }: { id: string; title: string; open: boolean; onToggle: (id: string) => void; children: React.ReactNode }) {
@@ -116,7 +116,6 @@ export function AuthorGuidelinesContent() {
     return WHY_CARD_TEMPLATES.map((card) => ({ ...card, text: texts[card.key] }));
   }, [stats]);
 
-  const [progress, setProgress] = useState(0);
   const [activeSection, setActiveSection] = useState("s1");
   const [toast, setToast] = useState("");
   const [accordions, setAccordions] = useState<Record<string, boolean>>({
@@ -128,9 +127,6 @@ export function AuthorGuidelinesContent() {
 
   useEffect(() => {
     const onScroll = () => {
-      const d = document.documentElement;
-      const pct = (d.scrollTop / (d.scrollHeight - d.clientHeight)) * 100;
-      setProgress(Number.isFinite(pct) ? pct : 0);
       let active = "s1";
       sectionIds.forEach((id) => {
         const el = document.getElementById(id);
@@ -158,9 +154,6 @@ export function AuthorGuidelinesContent() {
 
   return (
     <div className="author-guidelines-page">
-      <div className="reading-progress">
-        <div className="progress-fill" style={{ width: `${progress}%` }} />
-      </div>
 
       <div className="page-hero">
         <div className="page-hero-inner">
@@ -599,8 +592,8 @@ export function AuthorGuidelinesContent() {
                 <button type="button" className="btn-apply" onClick={() => showToast("Opening application form...")}>
                   ✍️ Apply to Become an Author →
                 </button>
-                <a href="mailto:authors@drinsight.org" className="btn-apply-ghost">
-                  📧 authors@drinsight.org
+                <a href="mailto:drinsightofficial@gmail.com" className="btn-apply-ghost">
+                  📧 drinsightofficial@gmail.com
                 </a>
               </div>
             </div>

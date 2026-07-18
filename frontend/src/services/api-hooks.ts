@@ -58,6 +58,8 @@ export interface DoctorArticleSummary {
   coverImageUrl?: string | null;
   readTimeMinutes: number;
   viewCount: number;
+  averageRating?: number | null;
+  ratingCount?: number;
   publishedAt?: string | null;
   tags?: string[];
   category?: { id?: string; name: string; slug: string };
@@ -95,6 +97,7 @@ export interface RelatedDoctorSummary {
 
 export interface DoctorProfile {
   id: string;
+  doctorNumber?: string | null;
   specialty: string;
   subSpecialty?: string | null;
   bio?: string | null;
@@ -105,11 +108,13 @@ export interface DoctorProfile {
   licenseNumber?: string;
   experienceYears: number;
   consultationFee: string | number;
-  consultationFees?: { video: number; phone: number; chat: number };
+  consultationFees?: { video: number; phone: number; chat: number; slotMinutes?: number };
   rating: number;
   reviewCount: number;
   patientsTreated?: number;
   consultationCount?: number;
+  commentCount?: number;
+  publicationCount?: number;
   articleCount?: number;
   successRate?: number | null;
   responseTime?: string | null;
@@ -124,14 +129,34 @@ export interface DoctorProfile {
   awards?: DoctorAwardItem[] | null;
   speakingEngagements?: DoctorSpeakingItem[] | null;
   weeklySchedule?: DoctorScheduleDay[] | null;
+  clinicSchedule?: unknown;
+  onlineSchedule?: unknown;
   hospital?: string | null;
   city?: string | null;
   country?: string | null;
+  profileSlug?: string | null;
+  seoFocusKeyword?: string | null;
+  seoMetaTitle?: string | null;
+  seoMetaDescription?: string | null;
   gender?: string | null;
   address?: string | null;
   coverImageUrl?: string | null;
   linkedinUrl?: string | null;
   twitterUrl?: string | null;
+  youtubeUrl?: string | null;
+  websiteUrl?: string | null;
+  orcidUrl?: string | null;
+  researchGateUrl?: string | null;
+  googleScholarUrl?: string | null;
+  facebookUrl?: string | null;
+  instagramUrl?: string | null;
+  authorType?: string | null;
+  bookingEnabled?: boolean;
+  onlineAvailEnabled?: boolean;
+  physicalAvailEnabled?: boolean;
+  researchGrantsTotal?: string | null;
+  licenseBoard?: string | null;
+  verificationNote?: string | null;
   platformRole?: string | null;
   editorialBoard?: boolean;
   medicalReviewerFor?: string | null;
@@ -147,6 +172,7 @@ export interface DoctorProfile {
     isOnline?: boolean;
     email?: string;
     phone?: string | null;
+    status?: string;
     createdAt?: string;
   };
   reviews?: DoctorReviewItem[];
@@ -164,6 +190,8 @@ export interface BlogAuthorProfile {
   avatarUrl?: string | null;
   role?: string;
   doctorProfile?: {
+    id?: string;
+    profileSlug?: string | null;
     specialty?: string | null;
     subSpecialty?: string | null;
     hospital?: string | null;
@@ -275,13 +303,32 @@ export interface Appointment {
   durationMinutes: number;
   consultationType: string;
   status: string;
+  bookingSource?: string;
   reason?: string | null;
   notes?: string | null;
+  cancelReason?: string | null;
+  cancelledAt?: string | null;
+  createdAt?: string;
   meetingRoomId?: string | null;
+  roomId?: string | null;
+  meetingStatus?: string | null;
   payment?: { status: string; amountCents?: number; currency?: string } | null;
-  doctor?: DoctorProfile;
+  prescription?: { id: string } | null;
+  doctor?: DoctorProfile & {
+    user?: { id?: string; firstName: string; lastName: string; avatarUrl?: string | null };
+  };
   patient?: {
-    user?: { firstName: string; lastName: string; avatarUrl?: string | null };
+    id?: string;
+    patientNumber?: string | null;
+    gender?: string | null;
+    dateOfBirth?: string | null;
+    user?: {
+      id?: string;
+      firstName: string;
+      lastName: string;
+      avatarUrl?: string | null;
+      phone?: string | null;
+    };
   };
 }
 
@@ -426,10 +473,32 @@ export function useNotifications() {
   return useQuery({
     queryKey: ["notifications"],
     queryFn: async () => {
-      const { data } = await api.get<Paginated<{ id: string; title: string; body: string; readAt?: string | null }>>(
-        "/notifications",
-      );
+      const { data } = await api.get<
+        Paginated<{
+          id: string;
+          title: string;
+          body: string;
+          type?: string;
+          data?: { noteId?: string; patientId?: string; doctorId?: string; appointmentId?: string };
+          readAt?: string | null;
+          createdAt?: string;
+        }>
+      >("/notifications");
       return data;
+    },
+  });
+}
+
+export function useMarkNotificationRead() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (notificationId: string) => {
+      const { data } = await api.patch(`/notifications/${notificationId}/read`);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["doctor-notifications"] });
     },
   });
 }
@@ -531,6 +600,29 @@ export function useDoctor(id: string) {
       return data;
     },
     enabled: !!id,
+  });
+}
+
+export function useAuthorBySlug(slug: string) {
+  return useQuery({
+    queryKey: ["author", slug],
+    queryFn: async () => {
+      const { data } = await api.get<DoctorProfile>(`/doctors/by-slug/${encodeURIComponent(slug)}`);
+      return data;
+    },
+    enabled: !!slug,
+  });
+}
+
+export function useSubmitAuthorProfileFeedback() {
+  return useMutation({
+    mutationFn: async (payload: { doctorId: string; helpful: boolean; viewerKey?: string }) => {
+      const { data } = await api.patch(`/doctors/${payload.doctorId}/profile-feedback`, {
+        helpful: payload.helpful,
+        viewerKey: payload.viewerKey,
+      });
+      return data;
+    },
   });
 }
 
@@ -727,7 +819,14 @@ export function useFeaturedHospitals() {
 
 export function useContactSubmit() {
   return useMutation({
-    mutationFn: async (body: { name: string; email: string; subject: string; message: string }) => {
+    mutationFn: async (body: {
+      name: string;
+      email: string;
+      phone?: string;
+      subject: string;
+      message: string;
+      inquiryType?: string;
+    }) => {
       const { data } = await api.post("/contact", body);
       return data;
     },
@@ -736,8 +835,9 @@ export function useContactSubmit() {
 
 export function useNewsletterSubscribe() {
   return useMutation({
-    mutationFn: async (email: string) => {
-      const { data } = await api.post("/contact/newsletter", { email });
+    mutationFn: async (payload: string | { email: string; source?: string }) => {
+      const body = typeof payload === "string" ? { email: payload } : payload;
+      const { data } = await api.post("/contact/newsletter", body);
       return data;
     },
   });

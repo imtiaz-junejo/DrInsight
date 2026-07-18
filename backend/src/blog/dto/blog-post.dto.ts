@@ -37,7 +37,9 @@ export type CreateBlogPostDto = {
   readTimeMinutes?: number;
   status?: BlogStatus;
   featured?: boolean;
+  pinned?: boolean;
   publishedAt?: string;
+  authorId?: string;
 };
 
 export type UpdateBlogPostDto = Partial<CreateBlogPostDto>;

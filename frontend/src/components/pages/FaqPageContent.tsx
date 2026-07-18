@@ -1,11 +1,21 @@
 "use client";
 
-import { useCallback, useMemo, useState, type ReactElement, type ReactNode } from "react";
 import Link from "next/link";
-import { FAQ_CATEGORIES, FAQ_SECTIONS } from "@/components/pages/faq-data";
+import { useCallback, useMemo, useState } from "react";
 import { SectionTitle } from "@/components/public/section-heading";
 import { CONTACT_PHONE, CONTACT_PHONE_TEL } from "@/lib/site-contact";
+import { usePublicFaqs } from "@/services/cms-api-hooks";
 import "@/styles/faq-page.css";
+
+const CATEGORY_ICONS: Record<string, string> = {
+  Editorial: "📋",
+  Consultations: "📅",
+  "Privacy & Security": "🔒",
+  Authors: "✍️",
+  Billing: "💳",
+  Account: "👤",
+  General: "❓",
+};
 
 function ChevronIcon() {
   return (
@@ -24,27 +34,48 @@ function SearchIcon() {
   );
 }
 
-function getItemSearchText(question: string, answer: ReactNode): string {
-  const extractText = (node: ReactNode): string => {
-    if (typeof node === "string" || typeof node === "number") return String(node);
-    if (Array.isArray(node)) return node.map(extractText).join(" ");
-    if (node && typeof node === "object" && "props" in node) {
-      const element = node as ReactElement<{ children?: ReactNode }>;
-      return extractText(element.props.children);
-    }
-    return "";
-  };
-
-  return `${question} ${extractText(answer)}`.toLowerCase();
-}
-
 export function FaqPageContent() {
+  const { data: faqs = [], isLoading } = usePublicFaqs();
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [openItems, setOpenItems] = useState<Set<string>>(new Set());
 
-  const trimmedSearch = searchQuery.trim();
+  const trimmedSearch = searchQuery.trim().toLowerCase();
   const isSearching = trimmedSearch.length > 0;
+
+  const sections = useMemo(() => {
+    const grouped = new Map<string, typeof faqs>();
+    faqs.forEach((faq) => {
+      const cat = faq.category || "General";
+      if (!grouped.has(cat)) grouped.set(cat, []);
+      grouped.get(cat)!.push(faq);
+    });
+    return Array.from(grouped.entries()).map(([category, items]) => ({
+      category: category.toLowerCase().replace(/\s+/g, "-"),
+      categoryLabel: category,
+      icon: CATEGORY_ICONS[category] ?? "❓",
+      title: category,
+      countLabel: `${items.length} question${items.length === 1 ? "" : "s"}`,
+      items: items.map((item) => ({
+        id: item.id,
+        question: item.question,
+        answerHtml: item.answer,
+      })),
+    }));
+  }, [faqs]);
+
+  const categories = useMemo(
+    () => [
+      { id: "all", label: "All Questions", icon: "📚", count: faqs.length },
+      ...sections.map((s) => ({
+        id: s.category,
+        label: s.categoryLabel,
+        icon: s.icon,
+        count: s.items.length,
+      })),
+    ],
+    [faqs.length, sections],
+  );
 
   const filterCategory = useCallback((cat: string) => {
     setActiveCategory(cat);
@@ -54,59 +85,53 @@ export function FaqPageContent() {
 
   const toggleAccordion = useCallback((sectionCategory: string, itemId: string) => {
     setOpenItems((prev) => {
-      const sectionItemIds = FAQ_SECTIONS.find((s) => s.category === sectionCategory)?.items.map((i) => i.id) ?? [];
+      const sectionItemIds = sections.find((s) => s.category === sectionCategory)?.items.map((i) => i.id) ?? [];
       const next = new Set(prev);
-
       sectionItemIds.forEach((id) => next.delete(id));
-
-      if (!prev.has(itemId)) {
-        next.add(itemId);
-      }
-
+      if (!prev.has(itemId)) next.add(itemId);
       return next;
     });
-  }, []);
+  }, [sections]);
 
-  const handleSearch = useCallback((query: string) => {
-    setSearchQuery(query);
-    const q = query.trim().toLowerCase();
-
-    if (!q) {
-      setActiveCategory("all");
-      setOpenItems(new Set());
-      return;
-    }
-
-    const matchingIds = new Set<string>();
-    FAQ_SECTIONS.forEach((section) => {
-      section.items.forEach((item) => {
-        if (getItemSearchText(item.question, item.answer).includes(q)) {
-          matchingIds.add(item.id);
-        }
+  const handleSearch = useCallback(
+    (query: string) => {
+      setSearchQuery(query);
+      const q = query.trim().toLowerCase();
+      if (!q) {
+        setActiveCategory("all");
+        setOpenItems(new Set());
+        return;
+      }
+      const matchingIds = new Set<string>();
+      sections.forEach((section) => {
+        section.items.forEach((item) => {
+          const text = `${item.question} ${item.answerHtml}`.toLowerCase();
+          if (text.includes(q)) matchingIds.add(item.id);
+        });
       });
-    });
-    setOpenItems(matchingIds);
-  }, []);
+      setOpenItems(matchingIds);
+    },
+    [sections],
+  );
 
   const { visibleSections, showNoResults } = useMemo(() => {
     if (!isSearching) {
-      const sections =
+      const filtered =
         activeCategory === "all"
-          ? FAQ_SECTIONS
-          : FAQ_SECTIONS.filter((section) => section.category === activeCategory);
-      return { visibleSections: sections, showNoResults: false };
+          ? sections
+          : sections.filter((section) => section.category === activeCategory);
+      return { visibleSections: filtered, showNoResults: false };
     }
-
-    const sections = FAQ_SECTIONS.map((section) => ({
-      ...section,
-      items: section.items.filter((item) => getItemSearchText(item.question, item.answer).includes(trimmedSearch.toLowerCase())),
-    })).filter((section) => section.items.length > 0);
-
-    return {
-      visibleSections: sections,
-      showNoResults: sections.length === 0,
-    };
-  }, [activeCategory, isSearching, trimmedSearch]);
+    const filtered = sections
+      .map((section) => ({
+        ...section,
+        items: section.items.filter((item) =>
+          `${item.question} ${item.answerHtml}`.toLowerCase().includes(trimmedSearch),
+        ),
+      }))
+      .filter((section) => section.items.length > 0);
+    return { visibleSections: filtered, showNoResults: filtered.length === 0 };
+  }, [activeCategory, isSearching, sections, trimmedSearch]);
 
   return (
     <div className="faq-page">
@@ -141,7 +166,7 @@ export function FaqPageContent() {
         <aside className="faq-sidebar">
           <h3>Browse by Category</h3>
           <div className="category-nav">
-            {FAQ_CATEGORIES.map((cat) => (
+            {categories.map((cat) => (
               <button
                 key={cat.id}
                 type="button"
@@ -163,6 +188,10 @@ export function FaqPageContent() {
         </aside>
 
         <div className="faq-content">
+          {isLoading ? <p className="empty-state">Loading FAQs...</p> : null}
+          {!isLoading && faqs.length === 0 ? (
+            <p className="empty-state">No FAQs published yet.</p>
+          ) : null}
           {visibleSections.map((section) => (
             <div key={section.category} className="faq-section" data-category={section.category}>
               <div className="section-title">
@@ -185,7 +214,10 @@ export function FaqPageContent() {
                           <ChevronIcon />
                         </span>
                       </button>
-                      <div className="accordion-body">{item.answer}</div>
+                      <div
+                        className="accordion-body"
+                        dangerouslySetInnerHTML={{ __html: item.answerHtml }}
+                      />
                     </div>
                   );
                 })}
@@ -220,7 +252,7 @@ export function FaqPageContent() {
               <h4>Live Chat</h4>
               <p>Mon–Fri, 8AM–8PM</p>
             </Link>
-            <a href="mailto:support@drinsight.org" className="contact-option">
+            <a href="mailto:drinsightofficial@gmail.com" className="contact-option">
               <div className="opt-icon">✉️</div>
               <h4>Email Support</h4>
               <p>Reply within 24 hours</p>

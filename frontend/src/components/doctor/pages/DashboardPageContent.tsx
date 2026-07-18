@@ -25,6 +25,7 @@ import {
   starsDisplay,
 } from "@/lib/data-mappers";
 import { doctorDisplayName, todayFormatted, todayShortFormatted } from "@/lib/doctor-utils";
+import { findNextJoinableAppointment, doctorConsultationPath } from "@/lib/consultation-utils";
 import {
   useDoctorAppointments,
   useDoctorBlogPosts,
@@ -37,6 +38,7 @@ import {
 } from "@/services/doctor-api-hooks";
 import type { Appointment } from "@/services/api-hooks";
 import { useDoctorUiStore } from "@/store/doctor-ui.store";
+import { ConsultationScheduleButton } from "@/components/doctor/ConsultationScheduleButton";
 import { useAuthStore } from "@/store/auth.store";
 
 function EmptyState({ loading, message }: { loading?: boolean; message: string }) {
@@ -97,12 +99,11 @@ function ScheduleList({
                 Confirm
               </button>
             ) : (
-              <button
-                type="button"
-                className={`sch-btn${live ? " go" : ""}`}
-                onClick={() => {
-                  if (live) showToast("Joining video call...");
-                  else if (user) {
+              <ConsultationScheduleButton
+                appointment={appt}
+                compact={compact}
+                onPrepFallback={() => {
+                  if (user) {
                     openPatientModal({
                       initials,
                       name,
@@ -112,11 +113,9 @@ function ScheduleList({
                       status: "Active",
                       avatarBg,
                     });
-                  } else showToast("Preparing...");
+                  }
                 }}
-              >
-                {live ? "Join →" : compact ? "Prep" : "Prep"}
-              </button>
+              />
             )}
           </div>
         );
@@ -156,6 +155,10 @@ export function DashboardPageContent() {
   const pendingCount = questionsQuery.data?.meta.total ?? 0;
   const patientCount = patientsQuery.data?.length ?? 0;
   const remainingToday = todayAppointments.filter((a) => !["COMPLETED", "CANCELLED"].includes(a.status)).length;
+  const nextVideoConsultation = useMemo(
+    () => findNextJoinableAppointment(todayAppointments),
+    [todayAppointments],
+  );
   const reviews = reviewsQuery.data?.data ?? [];
   const articles = blogQuery.data?.data ?? [];
 
@@ -167,9 +170,15 @@ export function DashboardPageContent() {
         dateStr={todayFormatted()}
         actions={
           <>
-            <DashButton variant="outline" onClick={() => showToast("Opening video call...")}>
-              📹 Start Consultation
-            </DashButton>
+            {nextVideoConsultation ? (
+              <Link href={doctorConsultationPath(nextVideoConsultation.id)}>
+                <DashButton variant="outline">📹 Start Consultation</DashButton>
+              </Link>
+            ) : (
+              <Link href="/doctor/appointments">
+                <DashButton variant="outline">📹 Start Consultation</DashButton>
+              </Link>
+            )}
             <Link href="/doctor/submit-article">
               <DashButton variant="solid">✍️ Submit Article</DashButton>
             </Link>

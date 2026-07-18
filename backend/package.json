@@ -25,9 +25,12 @@
     "prisma:seed:content": "ts-node --transpile-only prisma/seed-content.ts",
     "prisma:seed:featured": "ts-node --transpile-only prisma/seed-featured-blog-only.ts",
     "prisma:seed:about": "ts-node --transpile-only prisma/seed-about.ts",
+    "prisma:seed:admin-cms": "ts-node --transpile-only prisma/seed-admin-cms.ts",
+    "prisma:seed:publications": "ts-node --transpile-only prisma/seed-publications-only.ts",
     "prisma:seed:operational": "ts-node --transpile-only prisma/seed-operational.ts",
     "prisma:seed:finalize": "ts-node --transpile-only prisma/seed-finalize.ts",
-    "prisma:merge-heart-health": "ts-node --transpile-only prisma/scripts/merge-heart-health-to-cardiology.ts"
+    "prisma:merge-heart-health": "ts-node --transpile-only prisma/scripts/merge-heart-health-to-cardiology.ts",
+    "prisma:create-test-consultation": "ts-node --transpile-only prisma/scripts/create-test-consultation.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

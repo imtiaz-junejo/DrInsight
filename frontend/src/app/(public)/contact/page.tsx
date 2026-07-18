@@ -108,7 +108,7 @@ export default function ContactPage() {
   const businessHours = useMemo(() => parseBusinessHours(contact?.businessHours), [contact?.businessHours]);
   const today = weekdayName();
   const openNow = isOpenNow(businessHours);
-  const contactEmail = contact?.contactEmail ?? "contact@drinsight.org";
+  const contactEmail = contact?.contactEmail ?? "drinsightofficial@gmail.com";
   const faqItems = useMemo(() => buildFaqItems(contactEmail), [contactEmail]);
 
   const contactCards = useMemo<ContactCard[]>(() => {
@@ -194,8 +194,10 @@ export default function ContactPage() {
       await contactSubmit.mutateAsync({
         name: `${firstName.trim()} ${lastName.trim()}`,
         email: email.trim(),
+        phone: phone.trim() || undefined,
         subject: subject.trim(),
         message: message.trim(),
+        inquiryType: activeSubject.replace(/\s+/g, "_").toUpperCase(),
       });
       if (newsletter && email.trim()) {
         await newsletterSubscribe.mutateAsync(email.trim());

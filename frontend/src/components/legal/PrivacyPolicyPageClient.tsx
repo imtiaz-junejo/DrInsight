@@ -216,7 +216,7 @@ const VERSION_ROWS = [
 const FOOTER_LINKS = DEFAULT_LINKS.filter((link) => link.href !== "/privacy-policy");
 
 export default function PrivacyPolicyPageClient() {
-  const { progress, activeSection, scrollToSection, scrollToTop } = usePolicyPageScroll([...SECTION_IDS]);
+  const { activeSection, scrollToSection, scrollToTop } = usePolicyPageScroll([...SECTION_IDS]);
   const [versionOpen, setVersionOpen] = useState(true);
 
   const handlePrint = useCallback(() => {
@@ -229,9 +229,6 @@ export default function PrivacyPolicyPageClient() {
 
   return (
     <div className="privacy-policy-page">
-      <div className="progress-bar">
-        <div className="progress-fill" style={{ width: `${progress}%` }} />
-      </div>
 
       <div className="page-hero">
         <div className="hero-inner">
@@ -324,7 +321,7 @@ export default function PrivacyPolicyPageClient() {
               </p>
               <p>
                 <strong>Data Protection Officer (DPO):</strong> Dr. Javed Kumbhar —{" "}
-                <a href="mailto:privacy@drinsight.org">privacy@drinsight.org</a>
+                <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
               </p>
             </div>
           </div>
@@ -598,7 +595,7 @@ export default function PrivacyPolicyPageClient() {
               <div className="ch">📬 How to Exercise Your Rights</div>
               <ul>
                 <li>
-                  Email: <a href="mailto:privacy@drinsight.org">privacy@drinsight.org</a>
+                  Email: <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
                 </li>
                 <li>
                   Response time: Within <strong>30 days</strong>
@@ -630,7 +627,7 @@ export default function PrivacyPolicyPageClient() {
                 </li>
                 <li>
                   Parents or guardians may contact us at{" "}
-                  <a href="mailto:privacy@drinsight.org">privacy@drinsight.org</a>
+                  <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
                 </li>
                 <li>
                   Medical content is written for adult healthcare professionals and informed adult readers
@@ -749,17 +746,17 @@ export default function PrivacyPolicyPageClient() {
             <div className="contact-grid">
               <div className="contact-card">
                 <h4>🛡️ Data Protection Officer</h4>
-                <a href="mailto:privacy@drinsight.org">privacy@drinsight.org</a>
+                <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
                 <p>All privacy & data requests</p>
               </div>
               <div className="contact-card">
                 <h4>✉️ General Inquiries</h4>
-                <a href="mailto:contact@drinsight.org">contact@drinsight.org</a>
+                <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
                 <p>All general enquiries</p>
               </div>
               <div className="contact-card">
                 <h4>⚖️ Legal Department</h4>
-                <a href="mailto:legal@drinsight.org">legal@drinsight.org</a>
+                <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
                 <p>Legal and compliance matters</p>
               </div>
               <div className="contact-card">

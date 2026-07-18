@@ -69,6 +69,20 @@ export class PublicationAttachmentDto {
   storageKey?: string;
 }
 
+export class PublicationReferenceDto {
+  @IsString()
+  @MinLength(1)
+  citation!: string;
+
+  @IsOptional()
+  @IsString()
+  doi?: string;
+
+  @IsOptional()
+  @IsInt()
+  sortOrder?: number;
+}
+
 export class CreatePublicationDto {
   @IsString()
   @MinLength(3)
@@ -82,9 +96,110 @@ export class CreatePublicationDto {
   @IsString()
   subtitle?: string;
 
+  @IsOptional()
   @IsString()
   @MinLength(10)
-  abstract!: string;
+  abstract?: string;
+
+  @IsOptional()
+  @IsString()
+  introduction?: string;
+
+  @IsOptional()
+  @IsString()
+  results?: string;
+
+  @IsOptional()
+  @IsString()
+  discussion?: string;
+
+  @IsOptional()
+  @IsString()
+  conclusion?: string;
+
+  @IsOptional()
+  @IsString()
+  articleId?: string;
+
+  @IsOptional()
+  @IsString()
+  license?: string;
+
+  @IsOptional()
+  @IsString()
+  abstractBackground?: string;
+
+  @IsOptional()
+  @IsString()
+  abstractMethods?: string;
+
+  @IsOptional()
+  @IsString()
+  abstractResults?: string;
+
+  @IsOptional()
+  @IsString()
+  abstractConclusions?: string;
+
+  @IsOptional()
+  @IsString()
+  objectives?: string;
+
+  @IsOptional()
+  @IsString()
+  methodsContent?: string;
+
+  @IsOptional()
+  @IsString()
+  methodsTable?: string;
+
+  @IsOptional()
+  @IsString()
+  figureData?: string;
+
+  @IsOptional()
+  @IsString()
+  figureCaption?: string;
+
+  @IsOptional()
+  @IsString()
+  resultSummary?: string;
+
+  @IsOptional()
+  @IsString()
+  practiceImplications?: string;
+
+  @IsOptional()
+  @IsString()
+  limitations?: string;
+
+  @IsOptional()
+  @IsString()
+  keyFindings?: string;
+
+  @IsOptional()
+  @IsString()
+  authorContributions?: string;
+
+  @IsOptional()
+  @IsString()
+  ethicsStatement?: string;
+
+  @IsOptional()
+  @IsString()
+  dataAvailabilityStatement?: string;
+
+  @IsOptional()
+  @IsString()
+  conflictsOfInterest?: string;
+
+  @IsOptional()
+  @IsString()
+  acknowledgments?: string;
+
+  @IsOptional()
+  @IsString()
+  abbreviations?: string;
 
   @IsOptional()
   @IsString()
@@ -268,6 +383,12 @@ export class CreatePublicationDto {
   attachments?: PublicationAttachmentDto[];
 
   @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PublicationReferenceDto)
+  references?: PublicationReferenceDto[];
+
+  @IsOptional()
   @IsInt()
   @Min(1)
   readTimeMinutes?: number;
@@ -306,6 +427,34 @@ export class ReviewPublicationDto {
   @IsOptional()
   @IsString()
   assignedReviewerId?: string;
+
+  @IsOptional()
+  @IsString()
+  reviewingPhysician?: string;
+
+  @IsOptional()
+  @IsDateString()
+  lastReviewedDate?: string;
+
+  @IsOptional()
+  @IsString()
+  peerReviewOutcome?: string;
+
+  @IsOptional()
+  @IsDateString()
+  nextScheduledReview?: string;
+
+  @IsOptional()
+  @IsString()
+  evidenceGrade?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  openAccess?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  physicianReviewed?: boolean;
 }
 
 export class PublicationQueryDto {
