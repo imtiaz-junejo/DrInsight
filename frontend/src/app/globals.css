@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Limit Tailwind content scanning to active application source (excludes archived prototypes). */
+@source "../**/*.{ts,tsx}";
+
 @theme inline {
   --color-blue: #1a56a0;
   --color-blue-dark: #0f3d7a;

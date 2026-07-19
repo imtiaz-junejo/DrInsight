@@ -253,7 +253,7 @@ export const ArticleRichTextEditor = forwardRef<ArticleRichTextEditorHandle, Art
           suppressContentEditableWarning
           onInput={updateWordCount}
           onKeyDown={handleKeyDown}
-          placeholder="Start writing your full article here. Use the toolbar above to format headings, bold text, bullet lists, and more..."
+          data-placeholder="Start writing your full article here. Use the toolbar above to format headings, bold text, bullet lists, and more..."
         />
         <div className="rte-footer">
           <span style={{ fontSize: ".72rem", color: "var(--gray-400)" }}>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DashboardAuthGuard } from "@/components/auth/DashboardAuthGuard";
 import { PatientShell } from "@/components/patient/shell/PatientShell";
+import { DashboardProviders } from "@/components/providers/DashboardProviders";
 import "@/styles/patient-dashboard.css";
 import "@/styles/dashboard-shared-icons.css";
 import "@/styles/clinical-notes.css";
@@ -12,8 +13,10 @@ export const metadata: Metadata = {
 
 export default function PatientLayout({ children }: { children: React.ReactNode }) {
   return (
-    <DashboardAuthGuard>
-      <PatientShell>{children}</PatientShell>
-    </DashboardAuthGuard>
+    <DashboardProviders>
+      <DashboardAuthGuard>
+        <PatientShell>{children}</PatientShell>
+      </DashboardAuthGuard>
+    </DashboardProviders>
   );
 }

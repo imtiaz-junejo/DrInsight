@@ -1,10 +1,10 @@
 "use client";
 
-import { usePublicAdvertisements } from "@/services/configuration-api-hooks";
+import { usePublicAdvertisementsData } from "@/components/layout/PublicAdvertisementsProvider";
 
 export function SiteAdBanner({ placement }: { placement: "banner" | "sidebar" | "inarticle" }) {
-  const adsQuery = usePublicAdvertisements();
-  const html = adsQuery.data?.[placement];
+  const ads = usePublicAdvertisementsData();
+  const html = ads?.[placement];
   if (!html?.trim()) return null;
 
   return (
@@ -16,8 +16,8 @@ export function SiteAdBanner({ placement }: { placement: "banner" | "sidebar" | 
 }
 
 export function SiteAdSenseScript() {
-  const adsQuery = usePublicAdvertisements();
-  const code = adsQuery.data?.adsense?.trim();
+  const ads = usePublicAdvertisementsData();
+  const code = ads?.adsense?.trim();
   if (!code) return null;
 
   return (

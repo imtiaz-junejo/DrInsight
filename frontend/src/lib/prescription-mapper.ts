@@ -1,4 +1,4 @@
-import type { PrescriptionMed, PrescriptionPreviewData } from "@/components/doctor/patient/EPrescriptionBuilder";
+import type { PrescriptionMed, PrescriptionPreviewData } from "@/components/doctor/patient/EPrescriptionBuilder.types";
 import type { Prescription } from "@/services/doctor-api-hooks";
 import { consultationTypeLabel } from "@/lib/data-mappers";
 import { doctorDisplayName, formatDateTime } from "@/lib/doctor-utils";

@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { DashCard, DashPageHeader } from "@/components/doctor/ui/DoctorPrimitives";
-import { ArticleRichTextEditor, type ArticleRichTextEditorHandle } from "@/components/blog/ArticleRichTextEditor";
+import type { ArticleRichTextEditorHandle } from "@/components/blog/ArticleRichTextEditor";
 import { buildArticlePreviewHtml, type ArticlePreviewData } from "@/components/blog/article-preview-html";
 import { DEFAULT_ARTICLE_DISCLAIMER } from "@/components/blog/SubmitArticleForm";
 import { slugifyTitle } from "@/lib/blog-toc";
@@ -11,6 +12,11 @@ import { uploadFile } from "@/lib/upload";
 import { useBlogCategories } from "@/services/api-hooks";
 import { useCreateBlogPost, useDoctorProfile } from "@/services/doctor-api-hooks";
 import { useDoctorUiStore } from "@/store/doctor-ui.store";
+
+const ArticleRichTextEditor = dynamic(
+  () => import("@/components/blog/ArticleRichTextEditor").then((m) => m.ArticleRichTextEditor),
+  { ssr: false },
+);
 
 const SPECIALTIES = [
   "Cardiology",

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Playfair_Display, DM_Sans } from "next/font/google";
-import { Providers } from "@/components/providers/Providers";
+import { QueryProvider } from "@/components/providers/QueryProvider";
 import "./globals.css";
 import "@/styles/responsive.css";
 
@@ -38,7 +38,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" className={`${playfair.variable} ${dmSans.variable}`}>
       <body className="flex min-h-screen flex-col antialiased">
-        <Providers>{children}</Providers>
+        <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
   );

@@ -7,8 +7,8 @@ import "@/styles/book-consultation-page.css";
 import { SectionTitle } from "@/components/public/section-heading";
 import { formatCurrency, mapDoctorProfile } from "@/lib/data-mappers";
 import { CONTACT_PHONE, CONTACT_PHONE_TEL } from "@/lib/site-contact";
-import type { DoctorScheduleDay } from "@/services/api-hooks";
-import { StripePaymentWrapper } from "@/components/payments/StripePaymentWrapper";
+import type { DoctorScheduleDay } from "@/services/api-hooks.types";
+import dynamic from "next/dynamic";
 import { BookingStep1 } from "@/components/booking/BookingStep1";
 import { BookingStep2 } from "@/components/booking/BookingStep2";
 import {
@@ -44,6 +44,11 @@ import {
   useDoctors,
 } from "@/services/api-hooks";
 import { useAuthProfile } from "@/services/patient-api-hooks";
+
+const StripePaymentWrapper = dynamic(
+  () => import("@/components/payments/StripePaymentWrapper").then((m) => m.StripePaymentWrapper),
+  { ssr: false },
+);
 
 const MONTHS = [
   "January",

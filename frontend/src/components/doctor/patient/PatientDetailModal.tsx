@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
 import {
   AlertTriangle,
@@ -18,8 +19,13 @@ import { usePatientDetail } from "@/services/doctor-api-hooks";
 import { useDoctorUiStore } from "@/store/doctor-ui.store";
 import { AddNoteModal } from "./AddNoteModal";
 import { FlagCriticalModal } from "./FlagCriticalModal";
-import { EPrescriptionBuilder, type PrescriptionPreviewData } from "./EPrescriptionBuilder";
+import type { PrescriptionPreviewData } from "./EPrescriptionBuilder.types";
 import { EPrescriptionViewer } from "./EPrescriptionViewer";
+
+const EPrescriptionBuilder = dynamic(
+  () => import("./EPrescriptionBuilder").then((m) => m.EPrescriptionBuilder),
+  { ssr: false },
+);
 
 function calcAge(dateOfBirth?: string | null) {
   if (!dateOfBirth) return "—";

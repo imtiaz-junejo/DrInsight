@@ -301,7 +301,7 @@
 }
 
 .doctor-root .rte-editor:empty::before {
-  content: attr(placeholder);
+  content: attr(data-placeholder);
   color: var(--gray-400);
   pointer-events: none;
 }
@@ -671,7 +671,7 @@
 .doctor-root .rte-wordcount-wrap{margin-left:auto;border-right:none}
 .doctor-root .rte-wc-label{font-size:.74rem;color:var(--gray-500);white-space:nowrap}
 .doctor-root .rte-editor{min-height:320px;padding:18px 20px;font-family:var(--font-body);font-size:.88rem;color:var(--gray-800);line-height:1.75;outline:none;background:var(--white)}
-.doctor-root .rte-editor:empty::before{content:attr(placeholder);color:var(--gray-400);pointer-events:none}
+.doctor-root .rte-editor:empty::before{content:attr(data-placeholder);color:var(--gray-400);pointer-events:none}
 .doctor-root .rte-editor h2{font-family:var(--font-display);font-size:1.2rem;font-weight:700;color:var(--gray-900);margin:18px 0 8px;border-bottom:2px solid var(--blue-light);padding-bottom:5px}
 .doctor-root .rte-editor h3{font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--gray-800);margin:14px 0 6px}
 .doctor-root .rte-editor h4{font-size:.9rem;font-weight:700;color:var(--gray-700);margin:12px 0 4px}

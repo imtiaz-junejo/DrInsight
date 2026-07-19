@@ -1,17 +1,7 @@
-import { Footer } from "./Footer";
-import { SiteAdBanner, SiteAdSenseScript } from "./SiteAdvertisements";
-import { SiteHeader } from "./SiteHeader";
+import { SiteChrome } from "./SiteChrome";
 
 export function SiteLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <>
-      <SiteAdSenseScript />
-      <SiteHeader />
-      <SiteAdBanner placement="banner" />
-      <main className="flex-1">{children}</main>
-      <Footer />
-    </>
-  );
+  return <SiteChrome>{children}</SiteChrome>;
 }
 
 export { SiteHeader } from "./SiteHeader";
