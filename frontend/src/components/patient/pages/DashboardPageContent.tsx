@@ -27,6 +27,20 @@ import {
 import { useAuthStore } from "@/store/auth.store";
 import { usePatientUiStore } from "@/store/patient-ui.store";
 import { PatientUpcomingConsultationBanner } from "@/components/consultation/PatientConsultationJoinPrompt";
+import {
+  Bolt,
+  Book,
+  CalendarDate,
+  ChatRound,
+  DoctorIcon,
+  DoctorIconInline,
+  Hospital,
+  Pill,
+  QuestionCircle,
+  Widget,
+  Zap,
+} from "@/components/doctor/icons/DoctorIcons";
+import { resolveEmojiIcon } from "@/components/doctor/icons/resolveEmojiIcon";
 
 const HEALTH_TOOLS = [
   { icon: "⚖️", name: "BMI Calculator", sub: "Check your BMI", href: "/health-tools/bmi-calculator" },
@@ -96,16 +110,26 @@ export function DashboardPageContent() {
   return (
     <>
       <DashPageHeader
-        subtitle="🏥 Patient Dashboard"
-        title={`Good morning, ${firstName} 👋`}
+        subtitle={
+          <DoctorIconInline icon={Hospital} size="header" tone="indigo">
+            Patient Dashboard
+          </DoctorIconInline>
+        }
+        title={`Good morning, ${firstName}`}
         dateStr={todayFormatted()}
         actions={
           <>
             <DashButton variant="outline" onClick={() => router.push("/patient/questions/ask")}>
-              ❓ Ask a Doctor
+              <DoctorIconInline icon={QuestionCircle} size="button">
+                Ask a Doctor
+              </DoctorIconInline>
             </DashButton>
             <Link href="/book-consultation">
-              <DashButton variant="solid">📅 Book Consultation</DashButton>
+              <DashButton variant="solid">
+                <DoctorIconInline icon={CalendarDate} size="button">
+                  Book Consultation
+                </DoctorIconInline>
+              </DashButton>
             </Link>
           </>
         }
@@ -115,7 +139,9 @@ export function DashboardPageContent() {
 
       {tomorrowAppt ? (
         <div className="alert-banner">
-          <div className="ab-ico">📅</div>
+          <div className="ab-ico">
+            <DoctorIcon icon={CalendarDate} size="stat" tone="indigo" />
+          </div>
           <div className="ab-text">
             <strong>
               Consultation Tomorrow — {doctorFullName(tomorrowAppt.doctor?.user)} ({tomorrowAppt.doctor?.specialty})
@@ -172,7 +198,14 @@ export function DashboardPageContent() {
       />
 
       <div className="g21">
-        <DashCard title="📅 Upcoming Consultations" actions={<CardLink href="/patient/consultations/upcoming">View All →</CardLink>}>
+        <DashCard
+          title={
+            <DoctorIconInline icon={CalendarDate} size="button" tone="indigo">
+              Upcoming Consultations
+            </DoctorIconInline>
+          }
+          actions={<CardLink href="/patient/consultations/upcoming">View All →</CardLink>}
+        >
           <div className="cons-list">
             {appointmentsQuery.isLoading ? (
               <EmptyState message="Loading consultations..." />
@@ -185,7 +218,14 @@ export function DashboardPageContent() {
         </DashCard>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          <DashCard title="📊 My Latest Vitals" actions={<CardLink href="/patient/health">Update →</CardLink>}>
+          <DashCard
+            title={
+              <DoctorIconInline icon={Widget} size="button" tone="blue">
+                My Latest Vitals
+              </DoctorIconInline>
+            }
+            actions={<CardLink href="/patient/health">Update →</CardLink>}
+          >
             {vitalsQuery.isLoading ? (
               <EmptyState message="Loading vitals..." />
             ) : vitals.length > 0 ? (
@@ -202,7 +242,14 @@ export function DashboardPageContent() {
             )}
           </DashCard>
 
-          <DashCard title="💊 Current Medications" actions={<CardLink href="/patient/consultations/completed">Manage →</CardLink>}>
+          <DashCard
+            title={
+              <DoctorIconInline icon={Pill} size="button" tone="red">
+                Current Medications
+              </DoctorIconInline>
+            }
+            actions={<CardLink href="/patient/consultations/completed">Manage →</CardLink>}
+          >
             <MedicationsList prescriptions={prescriptions} loading={prescriptionsQuery.isLoading} />
           </DashCard>
         </div>
@@ -210,7 +257,11 @@ export function DashboardPageContent() {
 
       <GridThree>
         <DashCard
-          title="💬 Doctor Replies"
+          title={
+            <DoctorIconInline icon={ChatRound} size="button" tone="cyan">
+              Doctor Replies
+            </DoctorIconInline>
+          }
           headerExtra={
             doctorReplies.length > 0 ? (
               <span style={{ fontSize: "0.7rem", background: "var(--green)", color: "#fff", padding: "2px 9px", borderRadius: 50, fontWeight: 700 }}>
@@ -242,7 +293,14 @@ export function DashboardPageContent() {
           )}
         </DashCard>
 
-        <DashCard title="🔖 Saved Articles" actions={<CardLink href="/patient/articles">All →</CardLink>}>
+        <DashCard
+          title={
+            <DoctorIconInline icon={Book} size="button" tone="orange">
+              Saved Articles
+            </DoctorIconInline>
+          }
+          actions={<CardLink href="/patient/articles">All →</CardLink>}
+        >
           {savedArticlesQuery.isLoading ? (
             <EmptyState message="Loading articles..." />
           ) : savedArticles.length > 0 ? (
@@ -268,7 +326,14 @@ export function DashboardPageContent() {
           )}
         </DashCard>
 
-        <DashCard title="⚡ Recent Activity" actions={<CardLink href="/patient/settings">All →</CardLink>}>
+        <DashCard
+          title={
+            <DoctorIconInline icon={Zap} size="button" tone="warning">
+              Recent Activity
+            </DoctorIconInline>
+          }
+          actions={<CardLink href="/patient/settings">All →</CardLink>}
+        >
           {notificationsQuery.isLoading ? (
             <EmptyState message="Loading activity..." />
           ) : notifications.length > 0 ? (
@@ -281,11 +346,18 @@ export function DashboardPageContent() {
         </DashCard>
       </GridThree>
 
-      <DashCard title="🔧 Health Tools" actions={<CardLink href="/health-tools">All tools →</CardLink>}>
+      <DashCard
+        title={
+          <DoctorIconInline icon={Bolt} size="button" tone="warning">
+            Health Tools
+          </DoctorIconInline>
+        }
+        actions={<CardLink href="/health-tools">All tools →</CardLink>}
+      >
         <div className="tools-grid">
           {HEALTH_TOOLS.map((tool) => (
             <Link key={tool.name} href={tool.href} className="tool-card" onClick={() => showToast(`Opening ${tool.name}...`)}>
-              <div className="tc-ico">{tool.icon}</div>
+              <div className="tc-ico">{resolveEmojiIcon(tool.icon, "button")}</div>
               <div className="tc-text">
                 <strong>{tool.name}</strong>
                 <span>{toolSub(tool.href.split("/").pop() ?? "")}</span>

@@ -4,6 +4,13 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
+  DoctorIconInline,
+  FileText,
+  PhysicianDashboardLabel,
+  Pencil,
+  SearchFieldIcon,
+} from "@/components/doctor/icons/DoctorIcons";
+import {
   DashButton,
   DashCard,
   DashPageHeader,
@@ -103,18 +110,20 @@ export function PatientNotesPageContent() {
   return (
     <>
       <DashPageHeader
-        subtitle="👨‍⚕️ Physician Dashboard"
+        subtitle={<PhysicianDashboardLabel />}
         title="Patient Notes"
         dateStr={todayFormatted()}
         actions={
           <DashButton variant="solid" onClick={handleAddNote}>
-            📝 Add Note
+            <DoctorIconInline icon={Pencil} size="button">
+              Add Note
+            </DoctorIconInline>
           </DashButton>
         }
       />
 
       <DashCard
-        title="📝 Consultation Notes"
+        title={<DoctorIconInline icon={FileText} size="button">Consultation Notes</DoctorIconInline>}
         headerExtra={
           <span style={{ fontSize: "0.76rem", color: "var(--gray-400)" }}>
             {patientId ? `${notesQuery.data?.total ?? 0} notes` : "Select a patient"}
@@ -143,6 +152,7 @@ export function PatientNotesPageContent() {
 
           <div className="search-bar" style={{ flex: 1 }}>
             <div className="search-ico-w">
+              <SearchFieldIcon />
               <input
                 className="search-inp"
                 placeholder="Search notes..."

@@ -335,7 +335,7 @@ export class DoctorsService {
       include: {
         patient: {
           include: {
-            user: { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
+            user: { select: { id: true, firstName: true, lastName: true, avatarUrl: true, phone: true } },
           },
         },
       },
@@ -352,7 +352,7 @@ export class DoctorsService {
     const patients: Array<{
       patientId: string;
       patientNumber: string | null;
-      user: { id: string; firstName: string; lastName: string; avatarUrl: string | null };
+      user: { id: string; firstName: string; lastName: string; avatarUrl: string | null; phone?: string | null };
       lastVisit: Date;
       nextAppt: Date | null;
       appointmentCount: number;
@@ -416,6 +416,7 @@ export class DoctorsService {
       credentials: string;
       professionalTitle: string;
       consultationFee: number;
+      experienceYears: number;
       availability: DoctorAvailability;
       languages: string[];
       expertise: string[];
@@ -439,6 +440,8 @@ export class DoctorsService {
       instagramUrl: string;
       researchGrantsTotal: string;
       licenseBoard: string;
+      licenseNumber: string;
+      dateOfBirth: string;
       verificationNote: string;
       bookingEnabled: boolean;
       onlineAvailEnabled: boolean;
@@ -456,9 +459,16 @@ export class DoctorsService {
       weeklySchedule: Prisma.InputJsonValue;
     }>,
   ) {
+    const { dateOfBirth, licenseNumber, ...rest } = data;
     return this.prisma.doctorProfile.update({
       where: { userId },
-      data,
+      data: {
+        ...rest,
+        ...(dateOfBirth !== undefined && {
+          dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+        }),
+        ...(licenseNumber !== undefined && { licenseNumber }),
+      },
       include: { user: true },
     });
   }

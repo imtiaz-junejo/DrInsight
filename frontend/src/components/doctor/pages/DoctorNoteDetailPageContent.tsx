@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { ClinicalNoteDetailsView } from "@/components/clinical-notes/ClinicalNoteDetailsView";
+import { DoctorIconInline, FileText, PhysicianDashboardLabel } from "@/components/doctor/icons/DoctorIcons";
 import { DashCard, DashPageHeader } from "@/components/doctor/ui/DoctorPrimitives";
 import { todayFormatted } from "@/lib/doctor-utils";
 import { useMarkNotificationRead, useNotifications } from "@/services/api-hooks";
@@ -75,11 +76,11 @@ export function DoctorNoteDetailPageContent({
   return (
     <>
       <DashPageHeader
-        subtitle="👨‍⚕️ Physician Dashboard"
+        subtitle={<PhysicianDashboardLabel />}
         title="Note Details"
         dateStr={todayFormatted()}
       />
-      <DashCard title="📝 Clinical Note">
+      <DashCard title={<DoctorIconInline icon={FileText} size="button">Clinical Note</DoctorIconInline>}>
         {noteQuery.isLoading ? (
           <p style={{ textAlign: "center", color: "var(--gray-400)", padding: 32 }}>Loading note...</p>
         ) : note ? (

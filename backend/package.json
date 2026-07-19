@@ -30,7 +30,8 @@
     "prisma:seed:operational": "ts-node --transpile-only prisma/seed-operational.ts",
     "prisma:seed:finalize": "ts-node --transpile-only prisma/seed-finalize.ts",
     "prisma:merge-heart-health": "ts-node --transpile-only prisma/scripts/merge-heart-health-to-cardiology.ts",
-    "prisma:create-test-consultation": "ts-node --transpile-only prisma/scripts/create-test-consultation.ts"
+    "prisma:create-test-consultation": "ts-node --transpile-only prisma/scripts/create-test-consultation.ts",
+    "prisma:seed-review": "ts-node --transpile-only prisma/scripts/seed-review-accounts.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

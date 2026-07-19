@@ -4,6 +4,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import {
+  BadgeCheck,
+  Clock3,
+  DoctorIcon,
+  DoctorIconInline,
+  FileText,
+  PhysicianDashboardLabel,
+  Pill,
+  SearchFieldIcon,
+} from "@/components/doctor/icons/DoctorIcons";
+import {
   DashButton,
   DashCard,
   DashPageHeader,
@@ -89,39 +99,39 @@ export function PrescriptionsPageContent() {
     () => [
       {
         ic: "ic1",
-        icon: "💊",
+        icon: <DoctorIcon icon={Pill} size="stat" />,
         num: String(stats?.total ?? 0),
         label: "Total Prescriptions",
         tag: "All issued",
         tagClass: "tt-b",
-        bgIcon: "💊",
+        bgIcon: <DoctorIcon icon={Pill} size="stat" />,
       },
       {
         ic: "ic2",
-        icon: "✅",
+        icon: <DoctorIcon icon={BadgeCheck} size="stat" />,
         num: String(stats?.issued ?? 0),
         label: "Active",
         tag: "Currently valid",
         tagClass: "tt-g",
-        bgIcon: "✅",
+        bgIcon: <DoctorIcon icon={BadgeCheck} size="stat" />,
       },
       {
         ic: "ic3",
-        icon: "⏳",
+        icon: <DoctorIcon icon={Clock3} size="stat" />,
         num: String(stats?.pending ?? 0),
         label: "Pending Review",
         tag: "Awaiting approval",
         tagClass: "tt-a",
-        bgIcon: "⏳",
+        bgIcon: <DoctorIcon icon={Clock3} size="stat" />,
       },
       {
         ic: "ic4",
-        icon: "📝",
+        icon: <DoctorIcon icon={FileText} size="stat" />,
         num: String(stats?.draft ?? 0),
         label: "Drafts",
         tag: "Not yet issued",
         tagClass: "tt-gray",
-        bgIcon: "📝",
+        bgIcon: <DoctorIcon icon={FileText} size="stat" />,
       },
     ],
     [stats],
@@ -130,12 +140,16 @@ export function PrescriptionsPageContent() {
   return (
     <>
       <DashPageHeader
-        subtitle="👨‍⚕️ Physician Dashboard"
+        subtitle={<PhysicianDashboardLabel />}
         title="Prescriptions"
         dateStr={todayFormatted()}
         actions={
           <Link href="/doctor/prescriptions/new">
-            <DashButton variant="solid">💊 New Prescription</DashButton>
+            <DashButton variant="solid">
+              <DoctorIconInline icon={Pill} size="button">
+                New Prescription
+              </DoctorIconInline>
+            </DashButton>
           </Link>
         }
       />
@@ -143,7 +157,7 @@ export function PrescriptionsPageContent() {
       <StatCardRow items={statCards} />
 
       <DashCard
-        title="💊 Recent Prescriptions Issued"
+        title={<DoctorIconInline icon={Pill} size="button">Recent Prescriptions Issued</DoctorIconInline>}
         headerExtra={
           <span style={{ fontSize: "0.76rem", color: "var(--gray-400)" }}>
             {listQuery.isLoading ? "Loading..." : `${meta?.total ?? 0} total`}
@@ -152,6 +166,7 @@ export function PrescriptionsPageContent() {
       >
         <div className="search-bar">
           <div className="search-ico-w">
+            <SearchFieldIcon />
             <input
               className="search-inp"
               placeholder="Search by patient, medication, or Rx number..."
@@ -240,7 +255,7 @@ export function PrescriptionsPageContent() {
                       </td>
                       <td>
                         <TableButton variant="view" onClick={() => router.push(`/doctor/prescriptions/${rx.id}`)}>
-                          👁 View
+                          View
                         </TableButton>
                       </td>
                     </tr>

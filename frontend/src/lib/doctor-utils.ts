@@ -27,9 +27,33 @@ export function todayShortFormatted(): string {
   });
 }
 
+const DOCTOR_PREFIX_REGEX = /^dr\.?\s+/i;
+
+/** Removes repeated leading "Dr." / "Dr" prefixes from a name string. */
+export function stripDoctorPrefix(value: string): string {
+  let result = value.trim();
+  while (DOCTOR_PREFIX_REGEX.test(result)) {
+    result = result.replace(DOCTOR_PREFIX_REGEX, "").trim();
+  }
+  return result;
+}
+
+/** Joins first/last name parts without storing honorifics in the database fields. */
+export function joinDoctorName(firstName?: string | null, lastName?: string | null): string {
+  const first = stripDoctorPrefix(firstName ?? "");
+  const last = stripDoctorPrefix(lastName ?? "");
+  return [first, last].filter(Boolean).join(" ");
+}
+
+/** Ensures a display name has exactly one "Dr." prefix. */
+export function ensureDoctorPrefix(value: string): string {
+  const stripped = stripDoctorPrefix(value);
+  return stripped ? `Dr. ${stripped}` : "";
+}
+
 export function doctorDisplayName(firstName?: string | null, lastName?: string | null): string {
-  const name = `${firstName ?? ""} ${lastName ?? ""}`.trim();
-  return name ? `Dr. ${name}` : "Doctor";
+  const name = joinDoctorName(firstName, lastName);
+  return name ? ensureDoctorPrefix(name) : "Doctor";
 }
 
 export function patientStatusLabel(status: string): { label: string; color: string } {

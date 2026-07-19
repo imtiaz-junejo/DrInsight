@@ -1,30 +1,49 @@
 "use client";
 
+import {
+  Bell,
+  DoctorIcon,
+  DoctorIconInline,
+  Globe,
+  Lock,
+  Mail,
+  PhysicianDashboardLabel,
+  Settings2,
+  Shield,
+  Trash2,
+  type DoctorIconComponent,
+} from "@/components/doctor/icons/DoctorIcons";
 import { DashCard, DashPageHeader, SettingsRow } from "@/components/doctor/ui/DoctorPrimitives";
 import { todayFormatted } from "@/lib/doctor-utils";
 import { useDoctorUiStore } from "@/store/doctor-ui.store";
 
-const SETTINGS = [
-  ["🔒", "Change Password", "Update your account password", "Change", false],
-  ["📧", "Email Notifications", "Manage which emails you receive", "Manage", false],
-  ["🔔", "Push Notifications", "Control in-app alert preferences", "Configure", false],
-  ["🛡️", "Two-Factor Authentication", "Add an extra layer of account security", "Enable", false],
-  ["🌍", "Language & Region", "Set your preferred language and timezone", "Update", false],
-  ["🗑️", "Delete Account", "Permanently delete your account and all data", "Delete", true],
-] as const;
+const SETTINGS: Array<{
+  icon: DoctorIconComponent;
+  title: string;
+  description: string;
+  action: string;
+  danger: boolean;
+}> = [
+  { icon: Lock, title: "Change Password", description: "Update your account password", action: "Change", danger: false },
+  { icon: Mail, title: "Email Notifications", description: "Manage which emails you receive", action: "Manage", danger: false },
+  { icon: Bell, title: "Push Notifications", description: "Control in-app alert preferences", action: "Configure", danger: false },
+  { icon: Shield, title: "Two-Factor Authentication", description: "Add an extra layer of account security", action: "Enable", danger: false },
+  { icon: Globe, title: "Language & Region", description: "Set your preferred language and timezone", action: "Update", danger: false },
+  { icon: Trash2, title: "Delete Account", description: "Permanently delete your account and all data", action: "Delete", danger: true },
+];
 
 export function SettingsPageContent() {
   const showToast = useDoctorUiStore((s) => s.showToast);
 
   return (
     <>
-      <DashPageHeader subtitle="👨‍⚕️ Physician Dashboard" title="Settings" dateStr={todayFormatted()} />
+      <DashPageHeader subtitle={<PhysicianDashboardLabel />} title="Settings" dateStr={todayFormatted()} />
 
-      <DashCard title="⚙️ Account Settings">
-        {SETTINGS.map(([icon, title, description, action, danger]) => (
+      <DashCard title={<DoctorIconInline icon={Settings2} size="button">Account Settings</DoctorIconInline>}>
+        {SETTINGS.map(({ icon, title, description, action, danger }) => (
           <SettingsRow
             key={title}
-            icon={icon}
+            icon={<DoctorIcon icon={icon} size="button" />}
             title={title}
             description={description}
             actionLabel={action}

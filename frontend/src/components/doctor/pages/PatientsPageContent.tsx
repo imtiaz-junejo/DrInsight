@@ -2,7 +2,14 @@
 
 import { useMemo, useState } from "react";
 import {
-  DashButton,
+  AlertTriangle,
+  DoctorIcon,
+  DoctorIconInline,
+  PhysicianDashboardLabel,
+  SearchFieldIcon,
+  Users,
+} from "@/components/doctor/icons/DoctorIcons";
+import {
   DashCard,
   DashPageHeader,
   FilterPills,
@@ -31,7 +38,6 @@ export function PatientsPageContent() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 10;
-  const showToast = useDoctorUiStore((s) => s.showToast);
   const openPatientModal = useDoctorUiStore((s) => s.openPatientModal);
   const patientsQuery = useDoctorPatients();
 
@@ -48,10 +54,10 @@ export function PatientsPageContent() {
   const filterLabels = useMemo(
     () => [
       `All (${allPatients.length})`,
-      `🔴 Critical (${counts.critical})`,
-      `🟡 Follow-up (${counts.followup})`,
-      `🟢 Active (${counts.active})`,
-      `🔵 New (${counts.newest})`,
+      `Critical (${counts.critical})`,
+      `Follow-up (${counts.followup})`,
+      `Active (${counts.active})`,
+      `New (${counts.newest})`,
     ],
     [allPatients.length, counts],
   );
@@ -86,14 +92,13 @@ export function PatientsPageContent() {
   return (
     <>
       <DashPageHeader
-        subtitle="👨‍⚕️ Physician Dashboard"
+        subtitle={<PhysicianDashboardLabel />}
         title="My Patients"
         dateStr={todayFormatted()}
-        actions={<DashButton variant="solid" onClick={() => showToast("Exporting...")}>📤 Export</DashButton>}
       />
 
       <DashCard
-        title="👥 Patient Records"
+        title={<DoctorIconInline icon={Users} size="button">Patient Records</DoctorIconInline>}
         headerExtra={
           <span style={{ fontSize: "0.76rem", color: "var(--gray-400)" }}>
             {patientsQuery.isLoading ? "Loading..." : `${allPatients.length} patients`}
@@ -102,6 +107,7 @@ export function PatientsPageContent() {
       >
         <div className="search-bar">
           <div className="search-ico-w">
+            <SearchFieldIcon />
             <input
               className="search-inp"
               placeholder="Search by name, ID, or condition..."
@@ -182,7 +188,7 @@ export function PatientsPageContent() {
                               {name}
                               {patient.isCritical ? (
                                 <span className="critical-patient-badge" title="Critical Patient">
-                                  🚨
+                                  <DoctorIcon icon={AlertTriangle} size="sm" />
                                 </span>
                               ) : null}
                             </div>

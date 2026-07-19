@@ -1,7 +1,25 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
+import {
+  AlertTriangle,
+  BadgeCheck,
+  Calendar,
+  CalendarClock,
+  CircleX,
+  ClipboardList,
+  Clock3,
+  DoctorIcon,
+  DoctorIconInline,
+  FileText,
+  MessageCircleX,
+  MessageSquareMore,
+  PhysicianDashboardLabel,
+  Stethoscope,
+  Bell,
+  X,
+} from "@/components/doctor/icons/DoctorIcons";
 import { ConsModal, ConsModalButton } from "@/components/doctor/ui/ConsModal";
 import { DashCard, DashPageHeader } from "@/components/doctor/ui/DoctorPrimitives";
 import { formatDate, isSameDay } from "@/lib/data-mappers";
@@ -18,12 +36,37 @@ import { useDoctorUiStore } from "@/store/doctor-ui.store";
 
 export type PhysicalView = "requests" | "upcoming" | "today" | "completed" | "cancelled";
 
-const VIEW_META: Record<PhysicalView, [string, string]> = {
-  requests: ["📥 Appointment Requests", "New in-person appointment requests awaiting your decision"],
-  upcoming: ["📅 Upcoming Appointments", "Confirmed in-person appointments scheduled ahead"],
-  today: ["🏥 Today's Appointments", "In-clinic visits scheduled for today"],
-  completed: ["🏁 Completed Appointments", "In-person visits you have completed"],
-  cancelled: ["❌ Cancelled Appointments", "Requests or appointments that were cancelled or rejected"],
+const VIEW_META: Record<PhysicalView, [ReactNode, string]> = {
+  requests: [
+    <DoctorIconInline key="req" icon={MessageSquareMore} size="button">
+      Appointment Requests
+    </DoctorIconInline>,
+    "New in-person appointment requests awaiting your decision",
+  ],
+  upcoming: [
+    <DoctorIconInline key="up" icon={Calendar} size="button">
+      Upcoming Appointments
+    </DoctorIconInline>,
+    "Confirmed in-person appointments scheduled ahead",
+  ],
+  today: [
+    <DoctorIconInline key="today" icon={Stethoscope} size="button">
+      Today&apos;s Appointments
+    </DoctorIconInline>,
+    "In-clinic visits scheduled for today",
+  ],
+  completed: [
+    <DoctorIconInline key="done" icon={BadgeCheck} size="button">
+      Completed Appointments
+    </DoctorIconInline>,
+    "In-person visits you have completed",
+  ],
+  cancelled: [
+    <DoctorIconInline key="cancel" icon={CircleX} size="button">
+      Cancelled Appointments
+    </DoctorIconInline>,
+    "Requests or appointments that were cancelled or rejected",
+  ],
 };
 
 const VIEW_PARAMS: Record<PhysicalView, DoctorAppointmentParams> = {
@@ -36,24 +79,56 @@ const VIEW_PARAMS: Record<PhysicalView, DoctorAppointmentParams> = {
 
 function physChip(view: PhysicalView, appt: Appointment) {
   if (view === "today" && appt.status === "COMPLETED") {
-    return <span className="sch-chip sc-done">✓ Completed</span>;
+    return (
+      <span className="sch-chip sc-done">
+        <DoctorIconInline icon={BadgeCheck} size="sm">
+          Completed
+        </DoctorIconInline>
+      </span>
+    );
   }
   if (view === "today" && appt.status === "CANCELLED") {
     return (
       <span className="sch-chip" style={{ background: "var(--gray-100)", color: "var(--gray-600)" }}>
-        ✕ Cancelled
+        <DoctorIconInline icon={X} size="sm">
+          Cancelled
+        </DoctorIconInline>
       </span>
     );
   }
   switch (view) {
     case "requests":
-      return <span className="sch-chip sc-pend">🕒 Pending</span>;
+      return (
+        <span className="sch-chip sc-pend">
+          <DoctorIconInline icon={Clock3} size="sm">
+            Pending
+          </DoctorIconInline>
+        </span>
+      );
     case "upcoming":
-      return <span className="sch-chip sc-up">📅 Upcoming</span>;
+      return (
+        <span className="sch-chip sc-up">
+          <DoctorIconInline icon={Calendar} size="sm">
+            Upcoming
+          </DoctorIconInline>
+        </span>
+      );
     case "today":
-      return <span className="sch-chip sc-up">📍 Today</span>;
+      return (
+        <span className="sch-chip sc-up">
+          <DoctorIconInline icon={Stethoscope} size="sm">
+            Today
+          </DoctorIconInline>
+        </span>
+      );
     case "completed":
-      return <span className="sch-chip sc-done">✓ Completed</span>;
+      return (
+      <span className="sch-chip sc-done">
+        <DoctorIconInline icon={BadgeCheck} size="sm">
+          Completed
+        </DoctorIconInline>
+      </span>
+    );
     case "cancelled":
       return (
         <span className="sch-chip" style={{ background: "var(--gray-100)", color: "var(--gray-600)" }}>
@@ -249,11 +324,13 @@ export function PhysicalAppointmentsContent({ view }: { view: PhysicalView }) {
 
   return (
     <>
-      <DashPageHeader subtitle="👨‍⚕️ Physician Dashboard" title={meta[0]} dateStr={todayFormatted()} />
+      <DashPageHeader subtitle={<PhysicianDashboardLabel />} title="Physical Appointments" dateStr={todayFormatted()} />
 
       {view === "requests" && list.length > 0 ? (
         <div className="alert-banner">
-          <div className="ab-ico">🔔</div>
+          <div className="ab-ico">
+            <DoctorIcon icon={Bell} size="stat" />
+          </div>
           <div className="ab-text">
             <strong>
               {list.length} new physical appointment request{list.length !== 1 ? "s" : ""}
@@ -298,7 +375,15 @@ export function PhysicalAppointmentsContent({ view }: { view: PhysicalView }) {
                       <strong>{patientName(appt)}</strong>
                       {appt.bookingSource && appt.bookingSource !== "ONLINE" ? (
                         <div style={{ fontSize: ".7rem", color: "var(--gray-400)" }}>
-                          📝 Manual ({appt.bookingSource === "WALK_IN" ? "Walk-in" : "Phone"})
+                          Manual (
+                          {appt.bookingSource === "PHONE"
+                            ? "Phone"
+                            : appt.bookingSource === "CLINIC_VISIT"
+                              ? "Clinic visit"
+                              : appt.bookingSource === "EMERGENCY"
+                                ? "Emergency"
+                                : "Walk-in"}
+                          )
                         </div>
                       ) : null}
                     </td>
@@ -308,7 +393,11 @@ export function PhysicalAppointmentsContent({ view }: { view: PhysicalView }) {
                     <td style={{ fontSize: ".78rem", color: "var(--gray-500)" }}>
                       {appt.reason ?? "—"}
                       {view === "cancelled" && appt.cancelReason ? (
-                        <div style={{ fontSize: ".7rem", color: "var(--gray-400)" }}>❌ {appt.cancelReason}</div>
+                        <div style={{ fontSize: ".7rem", color: "var(--gray-400)" }}>
+                          <DoctorIconInline icon={CircleX} size="sm">
+                            {appt.cancelReason}
+                          </DoctorIconInline>
+                        </div>
                       ) : null}
                     </td>
                     <td>{physChip(view, appt)}</td>
@@ -345,7 +434,7 @@ export function PhysicalAppointmentsContent({ view }: { view: PhysicalView }) {
 
       <ConsModal
         open={modal?.kind === "reject"}
-        icon="⛔"
+        icon={<DoctorIcon icon={MessageCircleX} size="button" />}
         title="Reject Appointment Request"
         warn
         onClose={closeModal}
@@ -355,7 +444,9 @@ export function PhysicalAppointmentsContent({ view }: { view: PhysicalView }) {
               Back
             </ConsModalButton>
             <ConsModalButton variant="red" onClick={doReject} disabled={updateStatus.isPending}>
-              ⛔ Reject Request
+              <DoctorIconInline icon={MessageCircleX} size="sm">
+                Reject Request
+              </DoctorIconInline>
             </ConsModalButton>
           </>
         }
@@ -375,7 +466,7 @@ export function PhysicalAppointmentsContent({ view }: { view: PhysicalView }) {
 
       <ConsModal
         open={modal?.kind === "cancel"}
-        icon="⚠️"
+        icon={<DoctorIcon icon={AlertTriangle} size="button" />}
         title="Cancel Appointment"
         warn
         onClose={closeModal}
@@ -385,7 +476,9 @@ export function PhysicalAppointmentsContent({ view }: { view: PhysicalView }) {
               Keep it
             </ConsModalButton>
             <ConsModalButton variant="red" onClick={doCancel} disabled={updateStatus.isPending}>
-              ✕ Cancel Appointment
+              <DoctorIconInline icon={X} size="sm">
+                Cancel Appointment
+              </DoctorIconInline>
             </ConsModalButton>
           </>
         }
@@ -402,7 +495,7 @@ export function PhysicalAppointmentsContent({ view }: { view: PhysicalView }) {
 
       <ConsModal
         open={modal?.kind === "reschedule"}
-        icon="🗓️"
+        icon={<DoctorIcon icon={CalendarClock} size="button" />}
         title="Reschedule Appointment"
         onClose={closeModal}
         footer={
@@ -411,7 +504,9 @@ export function PhysicalAppointmentsContent({ view }: { view: PhysicalView }) {
               Back
             </ConsModalButton>
             <ConsModalButton variant="blue" onClick={doReschedule} disabled={reschedule.isPending}>
-              🗓️ Confirm New Slot
+              <DoctorIconInline icon={CalendarClock} size="sm">
+                Confirm New Slot
+              </DoctorIconInline>
             </ConsModalButton>
           </>
         }
@@ -433,7 +528,7 @@ export function PhysicalAppointmentsContent({ view }: { view: PhysicalView }) {
 
       <ConsModal
         open={modal?.kind === "details"}
-        icon="📋"
+        icon={<DoctorIcon icon={ClipboardList} size="button" />}
         title={`Appointment Details${modal ? ` — #APT-${modal.appt.id.slice(-4).toUpperCase()}` : ""}`}
         onClose={closeModal}
         footer={
@@ -446,23 +541,37 @@ export function PhysicalAppointmentsContent({ view }: { view: PhysicalView }) {
           <>
             <p>
               <strong>{patientName(modal.appt)}</strong>
-              {modal.appt.patient?.patientNumber ? ` · 🆔 ${modal.appt.patient.patientNumber}` : ""}
+              {modal.appt.patient?.patientNumber ? ` · ID ${modal.appt.patient.patientNumber}` : ""}
             </p>
             <p className="cons-sub">
-              🏥 In-Person · 📅 {formatDate(modal.appt.scheduledAt)} · ⏰ {apptTime(modal.appt)} · ⏱️{" "}
+              In-Person ·{" "}
+              <DoctorIconInline icon={Calendar} size="sm">
+                {formatDate(modal.appt.scheduledAt)}
+              </DoctorIconInline>
+              {" · "}
+              <DoctorIconInline icon={Clock3} size="sm">
+                {apptTime(modal.appt)}
+              </DoctorIconInline>
+              {" · "}
               {modal.appt.durationMinutes} min · {clinicName}
             </p>
             <p className="cons-sub">
-              📋 <strong>Reason:</strong> {modal.appt.reason ?? "—"}
+              <DoctorIconInline icon={ClipboardList} size="sm">
+                <strong>Reason:</strong> {modal.appt.reason ?? "—"}
+              </DoctorIconInline>
             </p>
             {modal.appt.notes ? (
               <p className="cons-sub">
-                🗒️ <strong>Notes:</strong> {modal.appt.notes}
+                <DoctorIconInline icon={FileText} size="sm">
+                  <strong>Notes:</strong> {modal.appt.notes}
+                </DoctorIconInline>
               </p>
             ) : null}
             {modal.appt.cancelReason ? (
               <p className="cons-sub">
-                ❌ <strong>Cancelled:</strong> {modal.appt.cancelReason}
+                <DoctorIconInline icon={CircleX} size="sm">
+                  <strong>Cancelled:</strong> {modal.appt.cancelReason}
+                </DoctorIconInline>
               </p>
             ) : null}
           </>

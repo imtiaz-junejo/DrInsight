@@ -1,6 +1,21 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import type { DoctorIconComponent } from "@/components/doctor/icons/DoctorIcons";
+import {
+  Calendar,
+  CalendarClock,
+  CircleX,
+  Clock3,
+  DoctorIcon,
+  DoctorIconInline,
+  MessageSquare,
+  Phone,
+  PhysicianDashboardLabel,
+  Save,
+  Stethoscope,
+  Video,
+} from "@/components/doctor/icons/DoctorIcons";
 import { DashCard, DashPageHeader } from "@/components/doctor/ui/DoctorPrimitives";
 import { todayFormatted } from "@/lib/doctor-utils";
 import {
@@ -27,10 +42,10 @@ export const DEFAULT_ONLINE_SCHEDULE: OnlineScheduleConfig = {
   },
 };
 
-const TYPE_META: Array<{ key: "video" | "audio" | "chat"; icon: string; label: string; hint: string }> = [
-  { key: "video", icon: "📹", label: "Video Consultation", hint: "HD video call" },
-  { key: "audio", icon: "📞", label: "Voice Consultation", hint: "Voice call" },
-  { key: "chat", icon: "💬", label: "Chat Consultation", hint: "Async · 24h response" },
+const TYPE_META: Array<{ key: "video" | "audio" | "chat"; icon: DoctorIconComponent; label: string; hint: string }> = [
+  { key: "video", icon: Video, label: "Video Consultation", hint: "HD video call" },
+  { key: "audio", icon: Phone, label: "Voice Consultation", hint: "Voice call" },
+  { key: "chat", icon: MessageSquare, label: "Chat Consultation", hint: "Async · 24h response" },
 ];
 
 function pad(n: number): string {
@@ -129,7 +144,7 @@ export function OnlineAvailabilityContent() {
     return (
       <>
         <DashPageHeader
-          subtitle="👨‍⚕️ Physician Dashboard"
+          subtitle={<PhysicianDashboardLabel />}
           title="Online Consultation Availability"
           dateStr={todayFormatted()}
         />
@@ -141,34 +156,24 @@ export function OnlineAvailabilityContent() {
   }
 
   return (
-    <>
+    <div className="cs-form">
       <DashPageHeader
-        subtitle="👨‍⚕️ Physician Dashboard"
+        subtitle={<PhysicianDashboardLabel />}
         title="Online Consultation Availability"
         dateStr={todayFormatted()}
         actions={
           <button type="button" className="btn-w" disabled={updateSchedules.isPending} onClick={() => save()}>
-            💾 Save Availability
+            <DoctorIconInline icon={Save} size="sm">
+              Save Availability
+            </DoctorIconInline>
           </button>
         }
       />
 
-      <DashCard title="📆 Working Days">
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+      <DashCard title={<DoctorIconInline icon={Calendar} size="button">Working Days</DoctorIconInline>}>
+        <div className="cs-day-row">
           {DAY_KEYS.map((d) => (
-            <label
-              key={d}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 7,
-                padding: "8px 14px",
-                border: "1.5px solid var(--gray-200)",
-                borderRadius: 10,
-                fontSize: ".82rem",
-                cursor: "pointer",
-              }}
-            >
+            <label key={d} className="cs-day-check">
               <input
                 type="checkbox"
                 checked={config.days[d] !== false}
@@ -180,21 +185,21 @@ export function OnlineAvailabilityContent() {
         </div>
       </DashCard>
 
-      <DashCard title="⏰ Working Hours">
-        <div className="form-row">
-          <div className="form-group">
+      <DashCard title={<DoctorIconInline icon={Clock3} size="button">Working Hours</DoctorIconInline>}>
+        <div className="cs-compact-row">
+          <div className="form-group cs-field-w">
             <label>Available From</label>
             <input type="time" value={config.start} onChange={(e) => setConfig({ ...config, start: e.target.value })} />
           </div>
-          <div className="form-group">
+          <div className="form-group cs-field-w">
             <label>Available Until</label>
             <input type="time" value={config.end} onChange={(e) => setConfig({ ...config, end: e.target.value })} />
           </div>
         </div>
       </DashCard>
 
-      <DashCard title="🧩 Consultation Slot Duration">
-        <div className="form-group" style={{ maxWidth: 260 }}>
+      <DashCard title={<DoctorIconInline icon={CalendarClock} size="button">Consultation Slot Duration</DoctorIconInline>}>
+        <div className="form-group cs-field-w">
           <label>Minutes per consultation</label>
           <select
             value={String(config.slotMinutes)}
@@ -209,9 +214,9 @@ export function OnlineAvailabilityContent() {
         </div>
       </DashCard>
 
-      <DashCard title="☕ Break Time">
-        <div className="form-row">
-          <div className="form-group">
+      <DashCard title={<DoctorIconInline icon={Clock3} size="button">Break Time</DoctorIconInline>}>
+        <div className="cs-compact-row">
+          <div className="form-group cs-field-w">
             <label>Break Starts</label>
             <input
               type="time"
@@ -219,7 +224,7 @@ export function OnlineAvailabilityContent() {
               onChange={(e) => setConfig({ ...config, breakStart: e.target.value })}
             />
           </div>
-          <div className="form-group">
+          <div className="form-group cs-field-w">
             <label>Break Ends</label>
             <input
               type="time"
@@ -230,7 +235,7 @@ export function OnlineAvailabilityContent() {
         </div>
       </DashCard>
 
-      <DashCard title="🚫 Holidays / Unavailable Dates">
+      <DashCard title={<DoctorIconInline icon={CircleX} size="button">Holidays / Unavailable Dates</DoctorIconInline>}>
         <div>
           {config.holidays.length === 0 ? (
             <div style={{ fontSize: ".8rem", color: "var(--gray-400)", padding: "6px 0" }}>
@@ -249,7 +254,11 @@ export function OnlineAvailabilityContent() {
                   fontSize: ".84rem",
                 }}
               >
-                <span>🗓️ {holidayDisplay(h)}</span>
+                <span>
+                  <DoctorIconInline icon={Calendar} size="sm">
+                    {holidayDisplay(h)}
+                  </DoctorIconInline>
+                </span>
                 <button type="button" className="tbl-btn" onClick={() => removeHoliday(i)}>
                   Remove
                 </button>
@@ -257,8 +266,8 @@ export function OnlineAvailabilityContent() {
             ))
           )}
         </div>
-        <div className="form-row" style={{ marginTop: 14 }}>
-          <div className="form-group">
+        <div className="cs-compact-row" style={{ marginTop: 14 }}>
+          <div className="form-group cs-field-w">
             <label>Add Unavailable Date</label>
             <input type="date" value={newHolidayDate} onChange={(e) => setNewHolidayDate(e.target.value)} />
           </div>
@@ -277,36 +286,20 @@ export function OnlineAvailabilityContent() {
         </button>
       </DashCard>
 
-      <DashCard title="🩺 Consultation Types Offered & Fees">
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <DashCard title={<DoctorIconInline icon={Stethoscope} size="button">Consultation Types Offered & Fees</DoctorIconInline>}>
+        <div className="oa-type-list">
           {TYPE_META.map((t) => {
             const v = config.types[t.key];
             return (
-              <div
-                key={t.key}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 14,
-                  flexWrap: "wrap",
-                  border: "1.5px solid var(--gray-200)",
-                  borderRadius: 12,
-                  padding: "12px 14px",
-                }}
-              >
-                <label
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    fontSize: ".86rem",
-                    fontWeight: 600,
-                    minWidth: 200,
-                    cursor: "pointer",
-                  }}
-                >
+              <div key={t.key} className="oa-type-row">
+                <label className="oa-type-toggle">
+                  <span className="oa-type-toggle-text">
+                    <DoctorIcon icon={t.icon} size="sm" />
+                    {t.label}
+                  </span>
                   <input
                     type="checkbox"
+                    className="oa-type-toggle-check"
                     checked={v.on}
                     onChange={(e) =>
                       setConfig({
@@ -314,12 +307,12 @@ export function OnlineAvailabilityContent() {
                         types: { ...config.types, [t.key]: { ...v, on: e.target.checked } },
                       })
                     }
-                  />{" "}
-                  {t.icon} {t.label}
+                  />
                 </label>
-                <div className="oc-field" style={{ maxWidth: 150 }}>
-                  <label>Fee (USD)</label>
+                <div className="oa-type-fee">
+                  <label htmlFor={`oa-fee-${t.key}`}>Fee (USD)</label>
                   <input
+                    id={`oa-fee-${t.key}`}
                     type="number"
                     min={0}
                     value={v.fee}
@@ -331,7 +324,7 @@ export function OnlineAvailabilityContent() {
                     }
                   />
                 </div>
-                <span style={{ fontSize: ".74rem", color: "var(--gray-400)" }}>{t.hint}</span>
+                <span className="oa-type-hint">{t.hint}</span>
               </div>
             );
           })}
@@ -340,32 +333,22 @@ export function OnlineAvailabilityContent() {
 
       <DashCard
         title={
-          <>
-            🕐 Available Slots Preview{" "}
+          <DoctorIconInline icon={Clock3} size="button">
+            Available Slots Preview{" "}
             <span style={{ fontWeight: 500, fontSize: ".72rem", color: "var(--gray-400)" }}>
               — what patients see on the booking page
             </span>
-          </>
+          </DoctorIconInline>
         }
       >
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <div className="oa-slot-preview">
           {slots.map((s) => (
-            <span
-              key={s}
-              style={{
-                fontSize: ".76rem",
-                fontWeight: 600,
-                border: "1.5px solid var(--gray-200)",
-                borderRadius: 50,
-                padding: "5px 12px",
-                color: "var(--blue)",
-              }}
-            >
+            <span key={s} className="oa-slot-chip">
               {s}
             </span>
           ))}
         </div>
       </DashCard>
-    </>
+    </div>
   );
 }

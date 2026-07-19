@@ -3,6 +3,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { allAdminNavItems } from "@/config/admin-nav";
+import { AdminNavIcon } from "@/components/doctor/icons/DoctorIcons";
 
 export function AdminSearch() {
   const router = useRouter();
@@ -91,7 +92,9 @@ export function AdminSearch() {
                   navigate(item.href);
                 }}
               >
-                <span className="sb-ico">{item.ico}</span>
+                <span className="sb-ico">
+                  <AdminNavIcon id={item.id} />
+                </span>
                 {item.name}
               </li>
             ))

@@ -1,7 +1,7 @@
 "use client";
 
-import { SubmitArticleForm } from "@/components/blog/SubmitArticleForm";
+import { DoctorArticleSubmitForm } from "@/components/blog/DoctorArticleSubmitForm";
 
 export function SubmitArticlePageContent() {
-  return <SubmitArticleForm mode="doctor" />;
+  return <DoctorArticleSubmitForm />;
 }

@@ -14,6 +14,16 @@ import {
   type PatientClinicalNote,
 } from "@/services/doctor-api-hooks";
 import { useDoctorUiStore } from "@/store/doctor-ui.store";
+import {
+  BadgeCheck,
+  ClipboardList,
+  DoctorIcon,
+  DoctorIconInline,
+  FileText,
+  Pencil,
+  SearchFieldIcon,
+  X,
+} from "@/components/doctor/icons/DoctorIcons";
 import { formatDateTime } from "@/lib/data-mappers";
 import { DoctorRichTextEditor } from "./DoctorRichTextEditor";
 
@@ -230,7 +240,7 @@ export function AddNoteModal({
       <div className="modal patient-action-modal" style={{ maxWidth: 720 }}>
         <div className="modal-hd">
           <div className="m-av" style={{ background: "linear-gradient(135deg,#7c3aed,#8b5cf6)" }}>
-            📝
+            <DoctorIcon icon={FileText} size="stat" />
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontFamily: "var(--font-display)", fontSize: "1.05rem", fontWeight: 700, color: "var(--gray-900)" }}>
@@ -241,17 +251,21 @@ export function AddNoteModal({
             </div>
           </div>
           <span style={{ fontSize: "0.68rem", color: "var(--gray-400)", marginRight: 8 }}>{saveState}</span>
-          <button type="button" className="modal-close" onClick={closePatientPanel}>
-            ✕
+          <button type="button" className="modal-close" onClick={closePatientPanel} aria-label="Close">
+            <DoctorIcon icon={X} size="sm" />
           </button>
         </div>
         <div className="modal-bd">
           <div className="pa-tabs">
             <button type="button" className={`pa-tab${tab === "write" ? " on" : ""}`} onClick={() => setTab("write")}>
-              ✏️ Write Note
+              <DoctorIconInline icon={Pencil} size="sm">
+                Write Note
+              </DoctorIconInline>
             </button>
             <button type="button" className={`pa-tab${tab === "history" ? " on" : ""}`} onClick={() => setTab("history")}>
-              📋 Note History
+              <DoctorIconInline icon={ClipboardList} size="sm">
+                Note History
+              </DoctorIconInline>
             </button>
           </div>
 
@@ -310,7 +324,9 @@ export function AddNoteModal({
                   <div className="cnd-attachments">
                     {attachments.map((file, index) => (
                       <span key={`${file.url}-${index}`} className="cnd-attachment">
-                        📎 {file.name}
+                        <DoctorIconInline icon={FileText} size="sm">
+                          {file.name}
+                        </DoctorIconInline>
                       </span>
                     ))}
                   </div>
@@ -318,7 +334,9 @@ export function AddNoteModal({
               </div>
               <div style={{ display: "flex", gap: 10 }}>
                 <button type="button" className="btn-bm" style={{ flex: 1 }} onClick={handleSave} disabled={createNote.isPending || updateNote.isPending}>
-                  ✓ {editingId ? "Update Note" : "Save Note"}
+                  <DoctorIconInline icon={BadgeCheck} size="sm">
+                    {editingId ? "Update Note" : "Save Note"}
+                  </DoctorIconInline>
                 </button>
                 {editingId ? (
                   <button type="button" className="btn-om" onClick={resetForm}>
@@ -334,6 +352,7 @@ export function AddNoteModal({
             <>
               <div className="search-bar" style={{ marginBottom: 14 }}>
                 <div className="search-ico-w">
+                  <SearchFieldIcon />
                   <input
                     className="search-inp"
                     placeholder="Search notes..."

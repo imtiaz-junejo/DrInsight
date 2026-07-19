@@ -4,6 +4,15 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
+  BadgeCheck,
+  BookOpenText,
+  DoctorIcon,
+  DoctorIconInline,
+  FileText,
+  FlaskConical,
+  PhysicianDashboardLabel,
+} from "@/components/doctor/icons/DoctorIcons";
+import {
   EMPTY_AUTHOR,
   EMPTY_REFERENCE,
   MEDICAL_SPECIALTIES,
@@ -291,11 +300,11 @@ export function SubmitPublicationPageContent() {
     return (
       <>
         <DashPageHeader
-          subtitle="👨‍⚕️ Physician Dashboard"
+          subtitle={<PhysicianDashboardLabel />}
           title="Submit Research Publication"
           dateStr={todayFormatted()}
         />
-        <DashCard title="🔬 Loading research...">
+        <DashCard title={<DoctorIconInline icon={FlaskConical} size="button">Loading research...</DoctorIconInline>}>
           <p style={{ color: "var(--gray-400)", padding: 24, textAlign: "center" }}>Loading...</p>
         </DashCard>
       </>
@@ -306,13 +315,15 @@ export function SubmitPublicationPageContent() {
     return (
       <>
         <DashPageHeader
-          subtitle="👨‍⚕️ Physician Dashboard"
+          subtitle={<PhysicianDashboardLabel />}
           title="Submit Research Publication"
           dateStr={todayFormatted()}
         />
-        <DashCard title="🔬 New Research Publication">
+        <DashCard title={<DoctorIconInline icon={FlaskConical} size="button">New Research Publication</DoctorIconInline>}>
           <div className="submit-success show">
-            <div style={{ fontSize: "3.5rem", marginBottom: 14 }}>✅</div>
+            <div style={{ fontSize: "3.5rem", marginBottom: 14 }}>
+              <DoctorIcon icon={BadgeCheck} size="stat" />
+            </div>
             <h3
               style={{
                 fontFamily: "var(--font-display)",
@@ -333,7 +344,9 @@ export function SubmitPublicationPageContent() {
                 className="art-submit-btn"
                 style={{ width: "auto", padding: "10px 24px", textDecoration: "none", display: "inline-block" }}
               >
-                📚 View My Publications
+                <DoctorIconInline icon={BookOpenText} size="sm">
+                  View My Publications
+                </DoctorIconInline>
               </Link>
               <button
                 type="button"
@@ -344,7 +357,9 @@ export function SubmitPublicationPageContent() {
                   setFormState(DEFAULT_FORM_STATE());
                 }}
               >
-                🔬 Submit Another
+                <DoctorIconInline icon={FlaskConical} size="sm">
+                  Submit Another
+                </DoctorIconInline>
               </button>
             </div>
           </div>
@@ -356,18 +371,20 @@ export function SubmitPublicationPageContent() {
   return (
     <>
       <DashPageHeader
-        subtitle="👨‍⚕️ Physician Dashboard"
+        subtitle={<PhysicianDashboardLabel />}
         title="Submit Research Publication"
         dateStr={todayFormatted()}
         actions={
           <Link href="/doctor/publications" className="btn-wo" style={{ textDecoration: "none" }}>
-            📰 My Articles
+            <DoctorIconInline icon={FileText} size="sm">
+              My Articles
+            </DoctorIconInline>
           </Link>
         }
       />
 
       <DashCard
-        title="🔬 New Research Publication"
+        title={<DoctorIconInline icon={FlaskConical} size="button">New Research Publication</DoctorIconInline>}
         headerExtra={
           <span style={{ fontSize: "0.76rem", color: "var(--gray-400)" }}>
             Publishes as a full research article on the Research &amp; Publications page

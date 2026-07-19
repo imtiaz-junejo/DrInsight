@@ -1,6 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import {
+  BadgeCheck,
+  ClipboardList,
+  DoctorIcon,
+  DoctorIconInline,
+  MessageSquare,
+  Pencil,
+  Phone,
+  PhysicianDashboardLabel,
+  Zap,
+} from "@/components/doctor/icons/DoctorIcons";
 import { DashCard, DashPageHeader, PersonAvatar } from "@/components/doctor/ui/DoctorPrimitives";
 import { formatDate, formatRelativeTime, getInitials, gradientForId } from "@/lib/data-mappers";
 import { todayFormatted } from "@/lib/doctor-utils";
@@ -41,12 +52,14 @@ export function QuestionsPageContent() {
 
   return (
     <>
-      <DashPageHeader subtitle="👨‍⚕️ Physician Dashboard" title="Patient Questions" dateStr={todayFormatted()} />
+      <DashPageHeader subtitle={<PhysicianDashboardLabel />} title="Patient Questions" dateStr={todayFormatted()} />
 
       <DashCard
         title={
           <>
-            💬 Pending Your Reply{" "}
+            <DoctorIconInline icon={MessageSquare} size="button">
+              Pending Your Reply{" "}
+            </DoctorIconInline>
             {!questionsQuery.isLoading && pendingCount > 0 ? (
               <span style={{ fontSize: "0.72rem", background: "var(--red)", color: "#fff", padding: "2px 8px", borderRadius: 50, marginLeft: 4 }}>
                 {pendingCount}
@@ -81,7 +94,13 @@ export function QuestionsPageContent() {
                   <div className="qa-meta">
                     <div className="qa-pname">
                       {name}
-                      {q.category.toLowerCase().includes("urgent") ? <span className="qa-urgent">⚡ Urgent</span> : null}
+                      {q.category.toLowerCase().includes("urgent") ? (
+                        <span className="qa-urgent">
+                          <DoctorIconInline icon={Zap} size="sm">
+                            Urgent
+                          </DoctorIconInline>
+                        </span>
+                      ) : null}
                     </div>
                     <div className="qa-spec">
                       {q.category} · {formatRelativeTime(q.createdAt)}
@@ -96,13 +115,19 @@ export function QuestionsPageContent() {
                     disabled={answerQuestion.isPending && replyingId === q.id}
                     onClick={() => handleReply(q.id)}
                   >
-                    ✏️ Reply Now
+                    <DoctorIconInline icon={Pencil} size="sm">
+                      Reply Now
+                    </DoctorIconInline>
                   </button>
                   <button type="button" className="qa-btn" onClick={() => openPatientModal(modal)}>
-                    📋 Patient File
+                    <DoctorIconInline icon={ClipboardList} size="sm">
+                      Patient File
+                    </DoctorIconInline>
                   </button>
                   <button type="button" className="qa-btn" onClick={() => showToast("Calling patient...")}>
-                    📞 Call
+                    <DoctorIconInline icon={Phone} size="sm">
+                      Call
+                    </DoctorIconInline>
                   </button>
                 </div>
               </div>
@@ -111,7 +136,7 @@ export function QuestionsPageContent() {
         )}
       </DashCard>
 
-      <DashCard title="✅ Recently Answered">
+      <DashCard title={<DoctorIconInline icon={BadgeCheck} size="button">Recently Answered</DoctorIconInline>}>
         {pending.filter((q) => q.answer).length === 0 ? (
           <EmptyState message="No recently answered questions in this view" />
         ) : (
@@ -122,7 +147,7 @@ export function QuestionsPageContent() {
               return (
                 <div key={q.id} style={{ padding: "16px 0", borderBottom: "1px solid var(--gray-100)" }}>
                   <div style={{ fontWeight: 600, fontSize: "0.84rem", marginBottom: 8, display: "flex", gap: 7 }}>
-                    <span>✅</span>
+                    <DoctorIcon icon={BadgeCheck} size="sm" />
                     <span>
                       <strong>{name}:</strong> {q.question}
                     </span>

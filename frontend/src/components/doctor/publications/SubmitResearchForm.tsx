@@ -2,6 +2,22 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
+import type { DoctorIconComponent } from "@/components/doctor/icons/DoctorIcons";
+import {
+  AlertTriangle,
+  BookOpenText,
+  DoctorIcon,
+  DoctorIconInline,
+  Eye,
+  FileText,
+  FlaskConical,
+  Image,
+  Info,
+  Save,
+  Shield,
+  Users,
+  X,
+} from "@/components/doctor/icons/DoctorIcons";
 import {
   ResearchArticlePreview,
 } from "@/components/publications/PublicationPreview";
@@ -249,8 +265,14 @@ interface SubmitResearchFormProps {
   onSubmit: () => void;
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return <div className="pub-sec-lbl">{children}</div>;
+function SectionLabel({ icon, children }: { icon: DoctorIconComponent; children: React.ReactNode }) {
+  return (
+    <div className="pub-sec-lbl">
+      <DoctorIconInline icon={icon} size="button">
+        {children}
+      </DoctorIconInline>
+    </div>
+  );
 }
 
 export function SubmitResearchForm({
@@ -292,11 +314,14 @@ export function SubmitResearchForm({
           marginBottom: 4,
         }}
       >
-        ℹ️ <strong>Your research, your credit.</strong> This is your own research — DrInsight reviews and
+        <DoctorIconInline icon={Info} size="sm">
+          <strong>Your research, your credit.</strong>
+        </DoctorIconInline>{" "}
+        This is your own research — DrInsight reviews and
         publishes it as a full peer-reviewed article. Everything below is credited to you.
       </div>
 
-      <SectionLabel>📄 Publication Details</SectionLabel>
+      <SectionLabel icon={FileText}>Publication Details</SectionLabel>
       <div className="form-row">
         <div className="form-group">
           <label htmlFor="pType">Publication Type *</label>
@@ -396,7 +421,7 @@ export function SubmitResearchForm({
         </div>
       </div>
 
-      <SectionLabel>👥 Authors &amp; Affiliations</SectionLabel>
+      <SectionLabel icon={Users}>Authors &amp; Affiliations</SectionLabel>
       <div className="form-group">
         <label>
           Authors{" "}
@@ -442,7 +467,7 @@ export function SubmitResearchForm({
               }
               title="Remove"
             >
-              ✕
+              <DoctorIcon icon={X} size="sm" />
             </button>
           </div>
         ))}
@@ -456,7 +481,7 @@ export function SubmitResearchForm({
         </button>
       </div>
 
-      <SectionLabel>📝 Structured Abstract</SectionLabel>
+      <SectionLabel icon={FileText}>Structured Abstract</SectionLabel>
       {(
         [
           ["abstractBackground", "Background *"],
@@ -487,7 +512,7 @@ export function SubmitResearchForm({
         />
       </div>
 
-      <SectionLabel>📚 Full Text</SectionLabel>
+      <SectionLabel icon={BookOpenText}>Full Text</SectionLabel>
       {(
         [
           ["introduction", "Introduction *", 3],
@@ -540,7 +565,7 @@ export function SubmitResearchForm({
         );
       })}
 
-      <SectionLabel>⚖️ Disclosures &amp; Review</SectionLabel>
+      <SectionLabel icon={Shield}>Disclosures &amp; Review</SectionLabel>
       <div className="form-group">
         <label htmlFor="pContributions">
           Author Contributions <span style={{ fontWeight: 400, color: "var(--gray-400)" }}>(one per line)</span>
@@ -624,7 +649,7 @@ export function SubmitResearchForm({
         />
       </div>
 
-      <SectionLabel>🔖 References</SectionLabel>
+      <SectionLabel icon={BookOpenText}>References</SectionLabel>
       <div className="form-group">
         <label>
           References <span style={{ fontWeight: 400, color: "var(--gray-400)" }}>(full citation + optional DOI)</span>
@@ -667,7 +692,7 @@ export function SubmitResearchForm({
               }
               title="Remove"
             >
-              ✕
+              <DoctorIcon icon={X} size="sm" />
             </button>
           </div>
         ))}
@@ -681,7 +706,7 @@ export function SubmitResearchForm({
         </button>
       </div>
 
-      <SectionLabel>📎 Attachments</SectionLabel>
+      <SectionLabel icon={FileText}>Attachments</SectionLabel>
       <div className="form-group">
         <label>Cover Image</label>
         <div className="file-upload-box" onClick={onUploadCover}>
@@ -695,12 +720,16 @@ export function SubmitResearchForm({
                 style={{ width: "100%", maxHeight: 180, objectFit: "cover", borderRadius: 8 }}
               />
               <span className="file-chip" style={{ marginTop: 8 }}>
-                🖼️ {state.coverImageName}
+                <DoctorIconInline icon={Image} size="sm">
+                  {state.coverImageName}
+                </DoctorIconInline>
               </span>
             </>
           ) : (
             <>
-              <div style={{ fontSize: "2rem", marginBottom: 8 }}>🖼️</div>
+              <div style={{ fontSize: "2rem", marginBottom: 8 }}>
+                <DoctorIcon icon={Image} size="stat" />
+              </div>
               <div style={{ fontWeight: 700, color: "var(--gray-700)", fontSize: "0.88rem" }}>Upload Cover Image</div>
             </>
           )}
@@ -712,7 +741,7 @@ export function SubmitResearchForm({
             style={{ width: "auto", padding: "6px 14px", fontSize: "0.74rem", marginTop: 8 }}
             onClick={onRemoveCover}
           >
-            ✕ Remove Cover
+            Remove Cover
           </button>
         ) : null}
       </div>
@@ -722,10 +751,16 @@ export function SubmitResearchForm({
           {uploading === "pdf" ? (
             <span>Uploading...</span>
           ) : state.pdfFile ? (
-            <span className="file-chip">📄 {state.pdfFile.fileName}</span>
+            <span className="file-chip">
+              <DoctorIconInline icon={FileText} size="sm">
+                {state.pdfFile.fileName}
+              </DoctorIconInline>
+            </span>
           ) : (
             <>
-              <div style={{ fontSize: "2rem", marginBottom: 8 }}>📄</div>
+              <div style={{ fontSize: "2rem", marginBottom: 8 }}>
+                <DoctorIcon icon={FileText} size="stat" />
+              </div>
               <div style={{ fontWeight: 700, color: "var(--gray-700)", fontSize: "0.88rem" }}>Upload PDF</div>
             </>
           )}
@@ -737,7 +772,7 @@ export function SubmitResearchForm({
             style={{ width: "auto", padding: "6px 14px", fontSize: "0.74rem", marginTop: 8 }}
             onClick={onRemovePdf}
           >
-            ✕ Remove PDF
+            Remove PDF
           </button>
         ) : null}
       </div>
@@ -748,7 +783,9 @@ export function SubmitResearchForm({
             <span>Uploading...</span>
           ) : (
             <>
-              <div style={{ fontSize: "2rem", marginBottom: 8 }}>📎</div>
+              <div style={{ fontSize: "2rem", marginBottom: 8 }}>
+                <DoctorIcon icon={FileText} size="stat" />
+              </div>
               <div style={{ fontWeight: 700, color: "var(--gray-700)", fontSize: "0.88rem" }}>Add Supplementary File</div>
             </>
           )}
@@ -757,13 +794,15 @@ export function SubmitResearchForm({
           <div style={{ marginTop: 8 }}>
             {state.supplementaryFiles.map((file, index) => (
               <span key={`${file.fileName}-${index}`} className="file-chip">
-                📎 {file.fileName}
+                <DoctorIconInline icon={FileText} size="sm">
+                  {file.fileName}
+                </DoctorIconInline>
                 <button
                   type="button"
                   style={{ border: "none", background: "transparent", cursor: "pointer", color: "var(--red)", marginLeft: 4 }}
                   onClick={() => onRemoveSupplementary(index)}
                 >
-                  ✕
+                  <DoctorIcon icon={X} size="sm" />
                 </button>
               </span>
             ))}
@@ -772,7 +811,11 @@ export function SubmitResearchForm({
       </div>
 
       <div style={{ marginTop: 22 }}>
-        <div className="pubprev-lbl">👁 Live Preview — full research article as it will publish</div>
+        <div className="pubprev-lbl">
+          <DoctorIconInline icon={Eye} size="sm">
+            Live Preview — full research article as it will publish
+          </DoctorIconInline>
+        </div>
         <ResearchArticlePreview data={previewData} showEditorialStats={false} />
       </div>
 
@@ -788,7 +831,10 @@ export function SubmitResearchForm({
           marginTop: 18,
         }}
       >
-        ⚠️ <strong>Editorial Notice:</strong> All research undergoes multi-stage physician review before going
+        <DoctorIconInline icon={AlertTriangle} size="sm">
+          <strong>Editorial Notice:</strong>
+        </DoctorIconInline>{" "}
+        All research undergoes multi-stage physician review before going
         live. By submitting, you confirm this is original, evidence-based work and that you hold valid medical
         licensure. See our{" "}
         <Link href="/editorial-policy" style={{ color: "var(--blue)", fontWeight: 600 }}>
@@ -798,10 +844,18 @@ export function SubmitResearchForm({
 
       <div className="art-btn-row">
         <button type="button" className="art-submit-btn draft" disabled={isSaving} onClick={onSaveDraft}>
-          {isSaving && isDraft ? "Saving..." : "💾 Save as Draft"}
+          {isSaving && isDraft ? "Saving..." : (
+            <DoctorIconInline icon={Save} size="sm">
+              Save as Draft
+            </DoctorIconInline>
+          )}
         </button>
         <button type="submit" className="art-submit-btn" disabled={isSaving}>
-          {isSaving && !isDraft ? "Submitting..." : "🔬 Submit for Review"}
+          {isSaving && !isDraft ? "Submitting..." : (
+            <DoctorIconInline icon={FlaskConical} size="sm">
+              Submit for Review
+            </DoctorIconInline>
+          )}
         </button>
       </div>
     </form>

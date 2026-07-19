@@ -1,5 +1,8 @@
 # DrInsight
 
+Seed the data to Doctor1, Patient1 and admin1 :
+npm run prisma:seed-review
+
 Production-grade healthcare SaaS platform — medical consultations, doctor directory, real-time chat, health tools, and AI-powered features.
 
 ![Stack](https://img.shields.io/badge/Next.js-16-black)

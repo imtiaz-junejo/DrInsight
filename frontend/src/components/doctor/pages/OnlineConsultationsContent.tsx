@@ -1,8 +1,31 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import type { DoctorIconComponent } from "@/components/doctor/icons/DoctorIcons";
+import {
+  AlertTriangle,
+  BadgeCheck,
+  Calendar,
+  CalendarClock,
+  Circle,
+  CircleX,
+  ClipboardList,
+  Clock3,
+  DoctorIcon,
+  DoctorIconInline,
+  History,
+  MessageSquare,
+  MessageSquareMore,
+  Phone,
+  PhysicianDashboardLabel,
+  Pill,
+  UserRound,
+  Video,
+  Wallet,
+  X,
+} from "@/components/doctor/icons/DoctorIcons";
 import { ConsModal, ConsModalButton } from "@/components/doctor/ui/ConsModal";
 import { DashCard, DashPageHeader, PersonAvatar } from "@/components/doctor/ui/DoctorPrimitives";
 import { formatDate, getInitials, gradientForId } from "@/lib/data-mappers";
@@ -25,14 +48,14 @@ export type OnlineView =
   | "cancelled"
   | "history";
 
-const VIEW_META: Record<OnlineView, [string, string]> = {
-  requests: ["📥 Consultation Requests", "No incoming consultation requests right now."],
-  upcoming: ["📅 Upcoming Consultations", "No accepted consultations scheduled ahead."],
-  today: ["🗓️ Today's Consultations", "No consultations scheduled for today."],
-  ongoing: ["🟢 Ongoing Consultations", "No session is in progress."],
-  completed: ["🏁 Completed Consultations", "No completed consultations yet."],
-  cancelled: ["❌ Cancelled Consultations", "Nothing here — no cancellations."],
-  history: ["📜 Consultation History — audit-tracked", "No consultations recorded yet."],
+const VIEW_META: Record<OnlineView, [ReactNode, string]> = {
+  requests: [<DoctorIconInline key="r" icon={MessageSquareMore} size="button">Consultation Requests</DoctorIconInline>, "No incoming consultation requests right now."],
+  upcoming: [<DoctorIconInline key="u" icon={Calendar} size="button">Upcoming Consultations</DoctorIconInline>, "No accepted consultations scheduled ahead."],
+  today: [<DoctorIconInline key="t" icon={CalendarClock} size="button">Today&apos;s Consultations</DoctorIconInline>, "No consultations scheduled for today."],
+  ongoing: [<DoctorIconInline key="o" icon={Circle} size="button">Ongoing Consultations</DoctorIconInline>, "No session is in progress."],
+  completed: [<DoctorIconInline key="c" icon={BadgeCheck} size="button">Completed Consultations</DoctorIconInline>, "No completed consultations yet."],
+  cancelled: [<DoctorIconInline key="x" icon={CircleX} size="button">Cancelled Consultations</DoctorIconInline>, "Nothing here — no cancellations."],
+  history: [<DoctorIconInline key="h" icon={History} size="button">Consultation History — audit-tracked</DoctorIconInline>, "No consultations recorded yet."],
 };
 
 const VIEW_PARAMS: Record<OnlineView, DoctorAppointmentParams> = {
@@ -45,10 +68,10 @@ const VIEW_PARAMS: Record<OnlineView, DoctorAppointmentParams> = {
   history: { kind: "ONLINE" },
 };
 
-const TYPE_META: Record<string, { icon: string; label: string; start: string }> = {
-  VIDEO: { icon: "📹", label: "Video Consultation", start: "📹 Start Video Call" },
-  AUDIO: { icon: "📞", label: "Voice Consultation", start: "📞 Start Voice Call" },
-  CHAT: { icon: "💬", label: "Chat Consultation", start: "💬 Open Chat" },
+const TYPE_META: Record<string, { icon: DoctorIconComponent; label: string; startIcon: DoctorIconComponent; startLabel: string }> = {
+  VIDEO: { icon: Video, label: "Video Consultation", startIcon: Video, startLabel: "Start Video Call" },
+  AUDIO: { icon: Phone, label: "Voice Consultation", startIcon: Phone, startLabel: "Start Voice Call" },
+  CHAT: { icon: MessageSquare, label: "Chat Consultation", startIcon: MessageSquare, startLabel: "Open Chat" },
 };
 
 function typeMeta(type: string) {
@@ -66,15 +89,45 @@ function apptTime(appt: Appointment): string {
 function ocChip(appt: Appointment) {
   switch (appt.status) {
     case "PENDING":
-      return <span className="cons-chip cc-pending">🕒 Pending Approval</span>;
+      return (
+        <span className="cons-chip cc-pending">
+          <DoctorIconInline icon={Clock3} size="sm">
+            Pending Approval
+          </DoctorIconInline>
+        </span>
+      );
     case "CONFIRMED":
-      return <span className="cons-chip cc-up">📅 Upcoming</span>;
+      return (
+        <span className="cons-chip cc-up">
+          <DoctorIconInline icon={Calendar} size="sm">
+            Upcoming
+          </DoctorIconInline>
+        </span>
+      );
     case "IN_PROGRESS":
-      return <span className="cons-chip cc-live">🟢 Ongoing</span>;
+      return (
+        <span className="cons-chip cc-live">
+          <DoctorIconInline icon={Circle} size="sm">
+            Ongoing
+          </DoctorIconInline>
+        </span>
+      );
     case "COMPLETED":
-      return <span className="cons-chip cc-done">🏁 Completed</span>;
+      return (
+        <span className="cons-chip cc-done">
+          <DoctorIconInline icon={BadgeCheck} size="sm">
+            Completed
+          </DoctorIconInline>
+        </span>
+      );
     case "CANCELLED":
-      return <span className="cons-chip cc-cancel">❌ Cancelled</span>;
+      return (
+        <span className="cons-chip cc-cancel">
+          <DoctorIconInline icon={CircleX} size="sm">
+            Cancelled
+          </DoctorIconInline>
+        </span>
+      );
     default:
       return <span className="cons-chip cc-up">{appt.status}</span>;
   }
@@ -208,16 +261,24 @@ export function OnlineConsultationsContent({ view }: { view: OnlineView }) {
       return (
         <>
           <button type="button" className="ca-btn primary" disabled={updateStatus.isPending} onClick={() => doAccept(appt)}>
-            ✓ Accept
+            <DoctorIconInline icon={BadgeCheck} size="sm">
+              Accept
+            </DoctorIconInline>
           </button>
           <button type="button" className="ca-btn" onClick={() => openReschedule(appt)}>
-            🗓️ Reschedule
+            <DoctorIconInline icon={CalendarClock} size="sm">
+              Reschedule
+            </DoctorIconInline>
           </button>
           <button type="button" className="ca-btn" onClick={() => setModal({ kind: "details", appt })}>
-            📋 Details
+            <DoctorIconInline icon={ClipboardList} size="sm">
+              Details
+            </DoctorIconInline>
           </button>
           <button type="button" className="ca-btn danger" onClick={() => setModal({ kind: "reject", appt })}>
-            ⛔ Reject
+            <DoctorIconInline icon={CircleX} size="sm">
+              Reject
+            </DoctorIconInline>
           </button>
         </>
       );
@@ -226,16 +287,24 @@ export function OnlineConsultationsContent({ view }: { view: OnlineView }) {
       return (
         <>
           <button type="button" className="ca-btn primary" onClick={() => startConsultation(appt)}>
-            {typeMeta(appt.consultationType).start}
+            <DoctorIconInline icon={typeMeta(appt.consultationType).startIcon} size="sm">
+              {typeMeta(appt.consultationType).startLabel}
+            </DoctorIconInline>
           </button>
           <button type="button" className="ca-btn" onClick={() => setModal({ kind: "details", appt })}>
-            📋 Details
+            <DoctorIconInline icon={ClipboardList} size="sm">
+              Details
+            </DoctorIconInline>
           </button>
           <button type="button" className="ca-btn" onClick={() => openReschedule(appt)}>
-            🗓️ Reschedule
+            <DoctorIconInline icon={CalendarClock} size="sm">
+              Reschedule
+            </DoctorIconInline>
           </button>
           <button type="button" className="ca-btn danger" onClick={() => setModal({ kind: "cancel", appt })}>
-            ✕ Cancel
+            <DoctorIconInline icon={X} size="sm">
+              Cancel
+            </DoctorIconInline>
           </button>
         </>
       );
@@ -244,13 +313,19 @@ export function OnlineConsultationsContent({ view }: { view: OnlineView }) {
       return (
         <>
           <button type="button" className="ca-btn primary" onClick={() => startConsultation(appt)}>
-            🟢 Rejoin Session
+            <DoctorIconInline icon={Circle} size="sm">
+              Rejoin Session
+            </DoctorIconInline>
           </button>
           <button type="button" className="ca-btn" onClick={() => setModal({ kind: "complete", appt })}>
-            🏁 Mark Completed
+            <DoctorIconInline icon={BadgeCheck} size="sm">
+              Mark Completed
+            </DoctorIconInline>
           </button>
           <button type="button" className="ca-btn" onClick={() => setModal({ kind: "details", appt })}>
-            📋 Details
+            <DoctorIconInline icon={ClipboardList} size="sm">
+              Details
+            </DoctorIconInline>
           </button>
         </>
       );
@@ -259,15 +334,21 @@ export function OnlineConsultationsContent({ view }: { view: OnlineView }) {
       return (
         <>
           <button type="button" className="ca-btn" onClick={() => setModal({ kind: "details", appt })}>
-            📋 Full Summary
+            <DoctorIconInline icon={ClipboardList} size="sm">
+              Full Summary
+            </DoctorIconInline>
           </button>
           {appt.prescription?.id ? (
             <Link href={`/doctor/prescriptions/${appt.prescription.id}`} className="ca-btn primary" style={{ textDecoration: "none" }}>
-              💊 View e-Prescription
+              <DoctorIconInline icon={Pill} size="sm">
+                View e-Prescription
+              </DoctorIconInline>
             </Link>
           ) : (
             <Link href="/doctor/prescriptions/new" className="ca-btn primary" style={{ textDecoration: "none" }}>
-              💊 Fill e-Prescription
+              <DoctorIconInline icon={Pill} size="sm">
+                Fill e-Prescription
+              </DoctorIconInline>
             </Link>
           )}
         </>
@@ -275,7 +356,9 @@ export function OnlineConsultationsContent({ view }: { view: OnlineView }) {
     }
     return (
       <button type="button" className="ca-btn" onClick={() => setModal({ kind: "details", appt })}>
-        📋 Details
+        <DoctorIconInline icon={ClipboardList} size="sm">
+          Details
+        </DoctorIconInline>
       </button>
     );
   };
@@ -294,27 +377,51 @@ export function OnlineConsultationsContent({ view }: { view: OnlineView }) {
           <div>
             <div className="cons-dr-name">{patientName(appt)}</div>
             <div className="cons-dr-spec">
-              🧑 Patient{appt.patient?.patientNumber ? ` · 🆔 ${appt.patient.patientNumber}` : ""}
+              <DoctorIconInline icon={UserRound} size="sm">
+                Patient{appt.patient?.patientNumber ? ` · ID ${appt.patient.patientNumber}` : ""}
+              </DoctorIconInline>
             </div>
           </div>
           {ocChip(appt)}
         </div>
         <div className="cons-details">
           <span>
-            {t.icon} {t.label}
+            <DoctorIcon icon={t.icon} size="sm" /> {t.label}
           </span>
-          <span>📅 {formatDate(appt.scheduledAt)}</span>
-          <span>⏰ {apptTime(appt)}</span>
-          <span>⏱️ {appt.durationMinutes} min</span>
-          {fee ? <span>💵 {fee}</span> : null}
+          <span>
+            <DoctorIconInline icon={Calendar} size="sm">
+              {formatDate(appt.scheduledAt)}
+            </DoctorIconInline>
+          </span>
+          <span>
+            <DoctorIconInline icon={Clock3} size="sm">
+              {apptTime(appt)}
+            </DoctorIconInline>
+          </span>
+          <span>
+            <DoctorIconInline icon={Clock3} size="sm">
+              {appt.durationMinutes} min
+            </DoctorIconInline>
+          </span>
+          {fee ? (
+            <span>
+              <DoctorIconInline icon={Wallet} size="sm">
+                {fee}
+              </DoctorIconInline>
+            </span>
+          ) : null}
         </div>
         {appt.status === "CANCELLED" ? (
           <div className="cons-note">
-            ❌ <strong>Cancelled:</strong> {appt.cancelReason ?? "Not specified"}
+            <DoctorIconInline icon={CircleX} size="sm">
+              <strong>Cancelled:</strong> {appt.cancelReason ?? "Not specified"}
+            </DoctorIconInline>
           </div>
         ) : (
           <div className="cons-note">
-            📋 <strong>Reason:</strong> {appt.reason ?? "Consultation"}
+            <DoctorIconInline icon={ClipboardList} size="sm">
+              <strong>Reason:</strong> {appt.reason ?? "Consultation"}
+            </DoctorIconInline>
           </div>
         )}
         <div className="cons-actions">{cardActions(appt)}</div>
@@ -327,26 +434,33 @@ export function OnlineConsultationsContent({ view }: { view: OnlineView }) {
   return (
     <>
       <DashPageHeader
-        subtitle="👨‍⚕️ Physician Dashboard"
+        subtitle={<PhysicianDashboardLabel />}
         title="Online Consultation"
         dateStr={todayFormatted()}
         actions={
           <button type="button" className="btn-w" onClick={() => router.push("/doctor/availability")}>
-            🗓️ Availability
+            <DoctorIconInline icon={CalendarClock} size="button">
+              Availability
+            </DoctorIconInline>
           </button>
         }
       />
 
       {(view === "today" || view === "upcoming") && todaysActive.length > 0 ? (
         <div className="alert-banner">
-          <div className="ab-ico">⏰</div>
+          <div className="ab-ico">
+            <DoctorIcon icon={Clock3} size="stat" />
+          </div>
           <div className="ab-text">
             <strong>
               {todaysActive.length} consultation{todaysActive.length > 1 ? "s" : ""} scheduled today
             </strong>
             <span>
               {todaysActive
-                .map((x) => `${typeMeta(x.consultationType).icon} ${patientName(x)} · ${apptTime(x)}`)
+                .map((x) => {
+                  const tm = typeMeta(x.consultationType);
+                  return `${patientName(x)} · ${apptTime(x)}`;
+                })
                 .join("  ·  ")}
             </span>
           </div>
@@ -359,11 +473,11 @@ export function OnlineConsultationsContent({ view }: { view: OnlineView }) {
       {view === "history" ? (
         <DashCard title={meta[0]}>
           <div style={{ overflowX: "auto" }}>
-            <table className="pt-table">
+            <table className="pt-table pt-table-consultations">
               <thead>
                 <tr>
-                  <th>Patient</th>
-                  <th>Type</th>
+                  <th className="pt-col-patient">Patient</th>
+                  <th className="pt-col-type">Type</th>
                   <th>Date &amp; Time</th>
                   <th>Duration</th>
                   <th>Status</th>
@@ -389,15 +503,15 @@ export function OnlineConsultationsContent({ view }: { view: OnlineView }) {
                     const t = typeMeta(appt.consultationType);
                     return (
                       <tr key={appt.id}>
-                        <td>
+                        <td className="pt-cell-patient">
                           <strong>{patientName(appt)}</strong>
                           <div style={{ fontSize: ".72rem", color: "var(--gray-400)" }}>
                             #APT-{appt.id.slice(-4).toUpperCase()}
                           </div>
                         </td>
-                        <td>
+                        <td className="pt-cell-type">
                           <span className="cons-chip cc-up">
-                            {t.icon} {t.label.replace(" Consultation", "")}
+                            <DoctorIcon icon={t.icon} size="sm" /> {t.label.replace(" Consultation", "")}
                           </span>
                         </td>
                         <td>
@@ -410,8 +524,8 @@ export function OnlineConsultationsContent({ view }: { view: OnlineView }) {
                           {appt.notes ?? appt.reason ?? "—"}
                         </td>
                         <td>
-                          <button type="button" className="ca-btn" onClick={() => setModal({ kind: "details", appt })}>
-                            👁
+                          <button type="button" className="ca-btn" onClick={() => setModal({ kind: "details", appt })} aria-label="View details">
+                            <DoctorIcon icon={ClipboardList} size="sm" />
                           </button>
                         </td>
                       </tr>
@@ -430,7 +544,9 @@ export function OnlineConsultationsContent({ view }: { view: OnlineView }) {
             </div>
           ) : list.length === 0 ? (
             <div className="oc-empty">
-              <span className="big">🗂️</span>
+              <span className="big">
+                <DoctorIcon icon={ClipboardList} size="stat" />
+              </span>
               {meta[1]}
             </div>
           ) : (
@@ -457,7 +573,7 @@ export function OnlineConsultationsContent({ view }: { view: OnlineView }) {
 
       <ConsModal
         open={modal?.kind === "reject"}
-        icon="⛔"
+        icon={<DoctorIcon icon={CircleX} size="button" />}
         title="Reject Consultation Request"
         warn
         onClose={closeModal}
@@ -467,7 +583,9 @@ export function OnlineConsultationsContent({ view }: { view: OnlineView }) {
               Back
             </ConsModalButton>
             <ConsModalButton variant="red" onClick={() => doStatusWithReason("reject")} disabled={updateStatus.isPending}>
-              ⛔ Reject Request
+              <DoctorIconInline icon={CircleX} size="sm">
+                Reject Request
+              </DoctorIconInline>
             </ConsModalButton>
           </>
         }
@@ -488,7 +606,7 @@ export function OnlineConsultationsContent({ view }: { view: OnlineView }) {
 
       <ConsModal
         open={modal?.kind === "cancel"}
-        icon="⚠️"
+        icon={<DoctorIcon icon={AlertTriangle} size="button" />}
         title="Cancel Consultation"
         warn
         onClose={closeModal}
@@ -498,7 +616,9 @@ export function OnlineConsultationsContent({ view }: { view: OnlineView }) {
               Keep it
             </ConsModalButton>
             <ConsModalButton variant="red" onClick={() => doStatusWithReason("cancel")} disabled={updateStatus.isPending}>
-              ✕ Cancel Consultation
+              <DoctorIconInline icon={X} size="sm">
+                Cancel Consultation
+              </DoctorIconInline>
             </ConsModalButton>
           </>
         }
@@ -515,7 +635,7 @@ export function OnlineConsultationsContent({ view }: { view: OnlineView }) {
 
       <ConsModal
         open={modal?.kind === "reschedule"}
-        icon="🗓️"
+        icon={<DoctorIcon icon={CalendarClock} size="button" />}
         title="Reschedule Consultation"
         onClose={closeModal}
         footer={
@@ -524,7 +644,9 @@ export function OnlineConsultationsContent({ view }: { view: OnlineView }) {
               Back
             </ConsModalButton>
             <ConsModalButton variant="blue" onClick={doReschedule} disabled={reschedule.isPending}>
-              🗓️ Confirm New Slot
+              <DoctorIconInline icon={CalendarClock} size="sm">
+                Confirm New Slot
+              </DoctorIconInline>
             </ConsModalButton>
           </>
         }
@@ -547,7 +669,7 @@ export function OnlineConsultationsContent({ view }: { view: OnlineView }) {
 
       <ConsModal
         open={modal?.kind === "complete"}
-        icon="🏁"
+        icon={<DoctorIcon icon={BadgeCheck} size="button" />}
         title="Mark Consultation Completed"
         onClose={closeModal}
         footer={
@@ -556,7 +678,9 @@ export function OnlineConsultationsContent({ view }: { view: OnlineView }) {
               Back
             </ConsModalButton>
             <ConsModalButton variant="blue" onClick={doComplete} disabled={updateStatus.isPending}>
-              🏁 Mark Completed
+              <DoctorIconInline icon={BadgeCheck} size="sm">
+                Mark Completed
+              </DoctorIconInline>
             </ConsModalButton>
           </>
         }
@@ -567,14 +691,14 @@ export function OnlineConsultationsContent({ view }: { view: OnlineView }) {
         </p>
         <p className="cons-sub">
           {modal?.kind === "complete" && modal.appt.prescription?.id
-            ? "✓ e-Prescription attached."
-            : "⚠️ No e-prescription attached (optional)."}
+            ? "e-Prescription attached."
+            : "No e-prescription attached (optional)."}
         </p>
       </ConsModal>
 
       <ConsModal
         open={modal?.kind === "details"}
-        icon="📋"
+        icon={<DoctorIcon icon={ClipboardList} size="button" />}
         title={`Consultation Details${modal ? ` — #APT-${modal.appt.id.slice(-4).toUpperCase()}` : ""}`}
         onClose={closeModal}
         footer={
@@ -587,15 +711,18 @@ export function OnlineConsultationsContent({ view }: { view: OnlineView }) {
           <>
             <p>
               <strong>{patientName(modal.appt)}</strong>
-              {modal.appt.patient?.patientNumber ? ` · 🆔 ${modal.appt.patient.patientNumber}` : ""}
+              {modal.appt.patient?.patientNumber ? ` · ID ${modal.appt.patient.patientNumber}` : ""}
             </p>
             <p className="cons-sub">
-              {typeMeta(modal.appt.consultationType).icon} {typeMeta(modal.appt.consultationType).label} · 📅{" "}
-              {formatDate(modal.appt.scheduledAt)} · ⏰ {apptTime(modal.appt)} · ⏱️ {modal.appt.durationMinutes} min
-              {feeLabel(modal.appt) ? ` · 💵 ${feeLabel(modal.appt)}` : ""}
+              <DoctorIcon icon={typeMeta(modal.appt.consultationType).icon} size="sm" />{" "}
+              {typeMeta(modal.appt.consultationType).label} · {formatDate(modal.appt.scheduledAt)} · {apptTime(modal.appt)} ·{" "}
+              {modal.appt.durationMinutes} min
+              {feeLabel(modal.appt) ? ` · ${feeLabel(modal.appt)}` : ""}
             </p>
             <p className="cons-sub">
-              📋 <strong>Reason:</strong> {modal.appt.reason ?? "Consultation"}
+              <DoctorIconInline icon={ClipboardList} size="sm">
+                <strong>Reason:</strong> {modal.appt.reason ?? "Consultation"}
+              </DoctorIconInline>
             </p>
             {modal.appt.notes ? (
               <div className="cons-note-list">
@@ -604,7 +731,9 @@ export function OnlineConsultationsContent({ view }: { view: OnlineView }) {
             ) : null}
             {modal.appt.cancelReason ? (
               <p className="cons-sub">
-                ❌ <strong>Cancelled:</strong> {modal.appt.cancelReason}
+                <DoctorIconInline icon={CircleX} size="sm">
+                  <strong>Cancelled:</strong> {modal.appt.cancelReason}
+                </DoctorIconInline>
               </p>
             ) : null}
           </>

@@ -1,0 +1,179 @@
+/* Solar icon styles — patient & admin dashboards (matches doctor dashboard) */
+
+.patient-root .snav-ico,
+.admin-root .sb-ico {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.patient-root .dr-icon-shell,
+.admin-root .dr-icon-shell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.patient-root .dr-icon,
+.admin-root .dr-icon {
+  flex-shrink: 0;
+  display: block;
+}
+
+.patient-root .dr-icon-shell .dr-icon svg,
+.admin-root .dr-icon-shell .dr-icon svg {
+  overflow: visible;
+}
+
+.patient-root .dr-icon-shell .dr-icon svg :is(path, circle, ellipse, rect),
+.admin-root .dr-icon-shell .dr-icon svg :is(path, circle, ellipse, rect) {
+  stroke: color-mix(in srgb, var(--dr-icon-color, currentColor) 82%, #0f172a 18%);
+  stroke-width: 0.65px;
+  paint-order: stroke fill;
+  vector-effect: non-scaling-stroke;
+}
+
+.patient-root .snav-item:hover .dr-icon-shell,
+.patient-root .snav-item.active .dr-icon-shell,
+.admin-root .sb-item:hover .dr-icon-shell {
+  transform: scale(1.05);
+}
+
+.patient-root .dr-icon-inline,
+.admin-root .dr-icon-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-root .sb-item.active .dr-icon-shell {
+  --dr-icon-color: #fff;
+  transform: scale(1.05);
+}
+
+.admin-root .sb-item.active .dr-icon {
+  color: #fff !important;
+}
+
+.admin-root .sb-item.active .dr-icon-shell .dr-icon svg :is(path, circle, ellipse, rect) {
+  stroke: color-mix(in srgb, #fff 72%, transparent);
+}
+
+/* Context-aware icon colors — dashboard surfaces (sidebar nav uses tone colors) */
+.patient-root .dash-hd,
+.patient-root .btn-wo,
+.patient-root .ca-btn.primary,
+.patient-root .ab-btn {
+  --dr-ctx-icon: #fff;
+}
+
+.patient-root .dash-hd .btn-w,
+.patient-root .btn-w,
+.patient-root .modal-close,
+.patient-root .ca-btn:not(.primary):not(.danger),
+.patient-root .ab-ico,
+.patient-root .tbl-btn,
+.patient-root .qa-btn,
+.patient-root .sch-btn {
+  --dr-ctx-icon: var(--blue-dark, #0f2b4c);
+}
+
+.patient-root .ca-btn.danger {
+  --dr-ctx-icon: var(--red, #dc2626);
+}
+
+.patient-root :is(
+  .dash-hd,
+  .btn-wo,
+  .btn-w,
+  .modal-close,
+  .ca-btn,
+  .ab-ico,
+  .ab-btn,
+  .tbl-btn,
+  .qa-btn,
+  .sch-btn
+) .dr-icon-shell {
+  --dr-icon-color: var(--dr-ctx-icon);
+}
+
+.patient-root :is(
+  .dash-hd,
+  .btn-wo,
+  .btn-w,
+  .modal-close,
+  .ca-btn,
+  .ab-ico,
+  .ab-btn,
+  .tbl-btn,
+  .qa-btn,
+  .sch-btn
+) .dr-icon {
+  color: var(--dr-ctx-icon) !important;
+}
+
+.patient-root :is(.dash-hd, .btn-wo, .ca-btn.primary, .ab-btn)
+  .dr-icon-shell .dr-icon svg :is(path, circle, ellipse, rect) {
+  stroke: color-mix(in srgb, var(--dr-ctx-icon) 72%, transparent);
+}
+
+.patient-root .btn-w .dr-icon-shell,
+.patient-root .ca-btn .dr-icon-shell,
+.patient-root .qa-btn .dr-icon-shell,
+.patient-root .tbl-btn .dr-icon-shell,
+.patient-root .sch-btn .dr-icon-shell {
+  transition: transform 0.2s ease;
+}
+
+.patient-root .btn-w:hover .dr-icon-shell,
+.patient-root .ca-btn:hover .dr-icon-shell,
+.patient-root .qa-btn:hover .dr-icon-shell,
+.patient-root .tbl-btn:hover .dr-icon-shell,
+.patient-root .sch-btn:hover .dr-icon-shell {
+  transform: scale(1.05);
+}
+
+.admin-root .topbar,
+.admin-root .btn.primary,
+.admin-root .btn.green,
+.admin-root .btn.danger {
+  --dr-ctx-icon: #fff;
+}
+
+.admin-root .btn:not(.primary):not(.danger):not(.green),
+.admin-root .modal-close,
+.admin-root .flt:not(.on) {
+  --dr-ctx-icon: var(--blue-dark, #0f3d7a);
+}
+
+.admin-root :is(.topbar, .btn, .modal-close, .flt) .dr-icon-shell {
+  --dr-icon-color: var(--dr-ctx-icon);
+}
+
+.admin-root :is(.topbar, .btn, .modal-close, .flt) .dr-icon {
+  color: var(--dr-ctx-icon) !important;
+}
+
+.admin-root .btn.primary .dr-icon-shell .dr-icon svg :is(path, circle, ellipse, rect),
+.admin-root .btn.green .dr-icon-shell .dr-icon svg :is(path, circle, ellipse, rect) {
+  stroke: color-mix(in srgb, #fff 72%, transparent);
+}
+
+.admin-root .stat-ic .dr-icon-shell .dr-icon,
+.patient-root .stat-ic .dr-icon-shell .dr-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.admin-root .stat-bg .dr-icon-shell .dr-icon,
+.patient-root .stat-bg .dr-icon-shell .dr-icon {
+  width: 56px;
+  height: 56px;
+  opacity: 0.16;
+}

@@ -4,7 +4,6 @@ export type DoctorBadgeKey = keyof DoctorDashboardCounts | "articles";
 
 export interface DoctorNavItem {
   id: string;
-  ico: string;
   name: string;
   badgeKey?: DoctorBadgeKey;
   badgeClass?: string;
@@ -20,75 +19,76 @@ export const doctorNav: DoctorNavGroup[] = [
   {
     lbl: "Physician Panel",
     items: [
-      { id: "dashboard", ico: "📊", name: "Overview", href: "/doctor" },
-      { id: "appointments", ico: "📅", name: "Consultations", badgeKey: "consultationsToday", badgeClass: "sb-a", href: "/doctor/appointments" },
-      { id: "prescriptions", ico: "💊", name: "Prescriptions", href: "/doctor/prescriptions" },
+      { id: "dashboard", name: "Overview", href: "/doctor" },
+      { id: "patients", name: "My Patients", href: "/doctor/patients" },
+      { id: "appointments", name: "Consultations", badgeKey: "consultationsToday", badgeClass: "sb-a", href: "/doctor/appointments" },
+      { id: "prescriptions", name: "Prescriptions", href: "/doctor/prescriptions" },
     ],
   },
   {
     lbl: "Physical Appointments",
     items: [
-      { id: "phys-requests", ico: "📥", name: "Appointment Requests", badgeKey: "physRequests", badgeClass: "sb-r", href: "/doctor/physical/requests" },
-      { id: "phys-upcoming", ico: "📅", name: "Upcoming Appointments", href: "/doctor/physical/upcoming" },
-      { id: "phys-today", ico: "🏥", name: "Today's Appointments", badgeKey: "physToday", badgeClass: "sb-a", href: "/doctor/physical/today" },
-      { id: "phys-manual", ico: "📝", name: "Manual Appointments", badgeKey: "physManual", badgeClass: "sb-g", href: "/doctor/physical/manual" },
-      { id: "phys-completed", ico: "🏁", name: "Completed", href: "/doctor/physical/completed" },
-      { id: "phys-cancelled", ico: "❌", name: "Cancelled", href: "/doctor/physical/cancelled" },
+      { id: "phys-requests", name: "Appointment Requests", badgeKey: "physRequests", badgeClass: "sb-r", href: "/doctor/physical/requests" },
+      { id: "phys-upcoming", name: "Upcoming Appointments", href: "/doctor/physical/upcoming" },
+      { id: "phys-today", name: "Today's Appointments", badgeKey: "physToday", badgeClass: "sb-a", href: "/doctor/physical/today" },
+      { id: "phys-manual", name: "Manual Appointments", badgeKey: "physManual", badgeClass: "sb-g", href: "/doctor/physical/manual" },
+      { id: "phys-completed", name: "Completed", href: "/doctor/physical/completed" },
+      { id: "phys-cancelled", name: "Cancelled", href: "/doctor/physical/cancelled" },
     ],
   },
   {
     lbl: "Clinic Schedule",
     items: [
-      { id: "clinic-schedule", ico: "🗓️", name: "Working Hours & Slots", href: "/doctor/clinic-schedule" },
+      { id: "clinic-schedule", name: "Working Hours & Slots", href: "/doctor/clinic-schedule" },
     ],
   },
   {
     lbl: "Online Consultation",
     items: [
-      { id: "oc-requests", ico: "📥", name: "Consultation Requests", badgeKey: "ocRequests", badgeClass: "sb-r", href: "/doctor/consultations/requests" },
-      { id: "oc-upcoming", ico: "📅", name: "Upcoming Consultations", badgeKey: "ocUpcoming", badgeClass: "sb-a", href: "/doctor/consultations/upcoming" },
-      { id: "oc-today", ico: "🗓️", name: "Today's Consultations", badgeKey: "ocToday", badgeClass: "sb-a", href: "/doctor/consultations/today" },
-      { id: "oc-ongoing", ico: "🟢", name: "Ongoing Consultations", badgeKey: "ocOngoing", badgeClass: "sb-g", href: "/doctor/consultations/ongoing" },
-      { id: "oc-completed", ico: "🏁", name: "Completed", href: "/doctor/consultations/completed" },
-      { id: "oc-cancelled", ico: "❌", name: "Cancelled", href: "/doctor/consultations/cancelled" },
-      { id: "oc-history", ico: "📜", name: "Consultation History", href: "/doctor/consultations/history" },
+      { id: "oc-requests", name: "Consultation Requests", badgeKey: "ocRequests", badgeClass: "sb-r", href: "/doctor/consultations/requests" },
+      { id: "oc-upcoming", name: "Upcoming Consultations", badgeKey: "ocUpcoming", badgeClass: "sb-a", href: "/doctor/consultations/upcoming" },
+      { id: "oc-today", name: "Today's Consultations", badgeKey: "ocToday", badgeClass: "sb-a", href: "/doctor/consultations/today" },
+      { id: "oc-ongoing", name: "Ongoing Consultations", badgeKey: "ocOngoing", badgeClass: "sb-g", href: "/doctor/consultations/ongoing" },
+      { id: "oc-completed", name: "Completed", href: "/doctor/consultations/completed" },
+      { id: "oc-cancelled", name: "Cancelled", href: "/doctor/consultations/cancelled" },
+      { id: "oc-history", name: "Consultation History", href: "/doctor/consultations/history" },
     ],
   },
   {
     lbl: "Doctor Availability",
     items: [
-      { id: "oc-availability", ico: "🗓️", name: "Online Availability & Slots", href: "/doctor/availability" },
+      { id: "oc-availability", name: "Online Availability & Slots", href: "/doctor/availability" },
     ],
   },
   {
     lbl: "Patient Q&A",
     items: [
-      { id: "qa-new", ico: "📥", name: "New Questions", badgeKey: "qaNew", badgeClass: "sb-r", href: "/doctor/questions" },
-      { id: "qa-drafts", ico: "📝", name: "Pending Answers", badgeKey: "qaDrafts", badgeClass: "sb-a", href: "/doctor/questions/drafts" },
-      { id: "qa-answered", ico: "💬", name: "Answered", href: "/doctor/questions/answered" },
-      { id: "qa-rejected", ico: "⛔", name: "Rejected", href: "/doctor/questions/rejected" },
+      { id: "qa-new", name: "New Questions", badgeKey: "qaNew", badgeClass: "sb-r", href: "/doctor/questions" },
+      { id: "qa-drafts", name: "Pending Answers", badgeKey: "qaDrafts", badgeClass: "sb-a", href: "/doctor/questions/drafts" },
+      { id: "qa-answered", name: "Answered", href: "/doctor/questions/answered" },
+      { id: "qa-rejected", name: "Rejected", href: "/doctor/questions/rejected" },
     ],
   },
   {
     lbl: "Content",
     items: [
-      { id: "submit-article", ico: "✍️", name: "Submit Article", href: "/doctor/submit-article" },
-      { id: "submit-publication", ico: "🔬", name: "Submit Research", href: "/doctor/submit-publication" },
-      { id: "articles", ico: "📰", name: "My Articles", badgeKey: "articles", badgeClass: "sb-g", href: "/doctor/articles" },
+      { id: "submit-article", name: "Submit Article", href: "/doctor/submit-article" },
+      { id: "submit-publication", name: "Submit Research", href: "/doctor/submit-publication" },
+      { id: "articles", name: "My Articles", badgeKey: "articles", badgeClass: "sb-g", href: "/doctor/articles" },
     ],
   },
   {
     lbl: "Practice",
     items: [
-      { id: "earnings", ico: "💰", name: "Earnings", href: "/doctor/earnings" },
-      { id: "reviews", ico: "⭐", name: "Reviews & Ratings", href: "/doctor/reviews" },
+      { id: "earnings", name: "Earnings", href: "/doctor/earnings" },
+      { id: "reviews", name: "Reviews & Ratings", href: "/doctor/reviews" },
     ],
   },
   {
     lbl: "Account",
     items: [
-      { id: "profile", ico: "👤", name: "My Profile", href: "/doctor/profile" },
-      { id: "settings", ico: "⚙️", name: "Settings", href: "/doctor/settings" },
+      { id: "profile", name: "My Profile", href: "/doctor/profile" },
+      { id: "settings", name: "Settings", href: "/doctor/settings" },
     ],
   },
 ];

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { BookOpenText, DoctorIconInline, PhysicianDashboardLabel } from "@/components/doctor/icons/DoctorIcons";
 import { DashButton, DashCard, DashPageHeader, TableButton } from "@/components/doctor/ui/DoctorPrimitives";
 import { formatDate } from "@/lib/data-mappers";
 import { todayFormatted } from "@/lib/doctor-utils";
@@ -25,7 +26,7 @@ export function ArticlesPageContent() {
   return (
     <>
       <DashPageHeader
-        subtitle="👨‍⚕️ Physician Dashboard"
+        subtitle={<PhysicianDashboardLabel />}
         title="My Articles"
         dateStr={todayFormatted()}
         actions={
@@ -36,7 +37,7 @@ export function ArticlesPageContent() {
       />
 
       <DashCard
-        title="📰 Published & Draft Articles"
+        title={<DoctorIconInline icon={BookOpenText} size="button">Published & Draft Articles</DoctorIconInline>}
         headerExtra={<span style={{ fontSize: "0.76rem", color: "var(--gray-400)" }}>{blogQuery.isLoading ? "Loading..." : `${total} total`}</span>}
       >
         <div style={{ overflowX: "auto" }}>

@@ -1,6 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import {
+  AlertTriangle,
+  Calendar,
+  ClipboardList,
+  DoctorIcon,
+  DoctorIconInline,
+  Pill,
+  UserRound,
+  X,
+} from "@/components/doctor/icons/DoctorIcons";
 import { formatDate, getInitials, gradientForId } from "@/lib/data-mappers";
 import { formatPatientDisplayId } from "@/lib/member-ids";
 import { patientStatusLabel } from "@/lib/doctor-utils";
@@ -118,7 +128,9 @@ export function PatientDetailModal() {
               </div>
               {display.isCritical ? (
                 <span className="st-chip st-critical" title="Critical Patient">
-                  🚨 Critical Patient
+                  <DoctorIconInline icon={AlertTriangle} size="sm">
+                    Critical Patient
+                  </DoctorIconInline>
                 </span>
               ) : null}
             </div>
@@ -127,8 +139,8 @@ export function PatientDetailModal() {
               {display.patientCode} · Patient since {display.memberSince}
             </div>
           </div>
-          <button type="button" className="modal-close" onClick={closePatientModal}>
-            ✕
+          <button type="button" className="modal-close" onClick={closePatientModal} aria-label="Close">
+            <DoctorIcon icon={X} size="sm" />
           </button>
         </div>
         <div className="modal-bd">
@@ -137,7 +149,11 @@ export function PatientDetailModal() {
           ) : null}
 
           <div className="msec">
-            <h4>👤 Patient Information</h4>
+            <h4>
+              <DoctorIconInline icon={UserRound} size="sm">
+                Patient Information
+              </DoctorIconInline>
+            </h4>
             <div className="info-grid">
               <div className="ii">
                 <label>Full Name</label>
@@ -177,7 +193,11 @@ export function PatientDetailModal() {
           </div>
 
           <div className="msec">
-            <h4>💊 Current Medications</h4>
+            <h4>
+              <DoctorIconInline icon={Pill} size="sm">
+                Current Medications
+              </DoctorIconInline>
+            </h4>
             <div className="med-list">
               {medications.length === 0 ? (
                 <p style={{ fontSize: "0.82rem", color: "var(--gray-400)" }}>No active medications on file</p>
@@ -196,14 +216,20 @@ export function PatientDetailModal() {
           </div>
 
           <div className="msec">
-            <h4>📋 Consultation History</h4>
+            <h4>
+              <DoctorIconInline icon={ClipboardList} size="sm">
+                Consultation History
+              </DoctorIconInline>
+            </h4>
             <div className="hist-list">
               {history.length === 0 ? (
                 <p style={{ fontSize: "0.82rem", color: "var(--gray-400)" }}>No consultations yet</p>
               ) : (
                 history.map((item) => (
                   <div key={item.id} className="hist-item">
-                    <div className="hist-dot">{item.hasPrescription ? "💊" : "📅"}</div>
+                    <div className="hist-dot">
+                      <DoctorIcon icon={item.hasPrescription ? Pill : Calendar} size="sm" />
+                    </div>
                     <div>
                       <div className="hist-t">{item.reason ?? "Consultation"}</div>
                       <div className="hist-s">

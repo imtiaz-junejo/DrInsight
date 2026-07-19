@@ -364,6 +364,7 @@ export class AppointmentsService {
         bookedByUserId: doctorUserId,
         status: AppointmentStatus.CONFIRMED,
         reason: dto.reason ?? null,
+        notes: dto.notes ?? null,
       },
       include: {
         patient: { include: { user: { select: { id: true, firstName: true, lastName: true, phone: true, avatarUrl: true } } } },

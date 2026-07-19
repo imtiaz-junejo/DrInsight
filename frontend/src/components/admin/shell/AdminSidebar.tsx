@@ -7,6 +7,7 @@ import { useAuthStore } from "@/store/auth.store";
 import { useAdminUiStore } from "@/store/admin-ui.store";
 import { getInitials } from "@/lib/admin-utils";
 import { useAdminNavBadges } from "@/services/cms-api-hooks";
+import { AdminNavIcon, DoctorIconInline, LogOut } from "@/components/doctor/icons/DoctorIcons";
 
 export function AdminSidebar() {
   const pathname = usePathname();
@@ -51,7 +52,9 @@ export function AdminSidebar() {
                   data-id={item.id}
                   onClick={() => setSidebarOpen(false)}
                 >
-                  <span className="sb-ico">{item.ico}</span>
+                  <span className="sb-ico">
+                    <AdminNavIcon id={item.id} />
+                  </span>
                   {item.name}
                   {badge ? <span className="sb-badge">{badge}</span> : null}
                 </Link>
@@ -71,7 +74,9 @@ export function AdminSidebar() {
           </div>
         </div>
         <button type="button" className="sb-signout" onClick={handleSignOut}>
-          🚪 Sign Out
+          <DoctorIconInline icon={LogOut} size="sidebar" tone="error">
+            Sign Out
+          </DoctorIconInline>
         </button>
       </div>
     </aside>

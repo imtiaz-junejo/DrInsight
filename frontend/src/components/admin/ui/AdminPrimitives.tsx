@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { avatarGradient, hashString, getInitials } from "@/lib/admin-utils";
 import { adminUserProfileHref } from "@/lib/admin-routes";
+import { resolveDashboardIcon } from "@/components/doctor/icons/resolveEmojiIcon";
 
 export function UserAvatar({
   firstName,
@@ -69,11 +70,12 @@ export function UserCell({
 
 export interface StatCardItem {
   ic: string;
-  icon: string;
+  icon: ReactNode;
   num: string;
   label: string;
   tag: string;
   tagClass: string;
+  bgIcon?: ReactNode;
 }
 
 export function StatCardRow({ items }: { items: StatCardItem[] }) {
@@ -81,10 +83,11 @@ export function StatCardRow({ items }: { items: StatCardItem[] }) {
     <div className="stats-row">
       {items.map((item) => (
         <div key={item.label} className="stat-c">
-          <div className={`stat-ic ${item.ic}`}>{item.icon}</div>
+          <div className={`stat-ic ${item.ic}`}>{resolveDashboardIcon(item.icon)}</div>
           <strong>{item.num}</strong>
           <span>{item.label}</span>
           <div className={`stat-tag ${item.tagClass}`}>{item.tag}</div>
+          {item.bgIcon ? <div className="stat-bg">{resolveDashboardIcon(item.bgIcon)}</div> : null}
         </div>
       ))}
     </div>

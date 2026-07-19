@@ -17,7 +17,7 @@ export function ConsModal({
   footer,
 }: {
   open: boolean;
-  icon: string;
+  icon: ReactNode;
   title: string;
   warn?: boolean;
   onClose: () => void;
@@ -47,7 +47,7 @@ export function ConsModal({
         <div className={`cons-hd${warn ? " warn" : ""}`}>
           <div className="cons-ic">{icon}</div>
           <h4>{title}</h4>
-          <button type="button" className="cons-x" onClick={onClose}>
+          <button type="button" className="cons-x" onClick={onClose} aria-label="Close dialog">
             ✕
           </button>
         </div>

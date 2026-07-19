@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { avatarGradient, getInitials, hashString } from "@/lib/doctor-utils";
+import { resolveDashboardIcon } from "@/components/doctor/icons/resolveEmojiIcon";
 
 export function PersonAvatar({
   initials,
@@ -45,12 +46,12 @@ export function UserAvatarFromName({
 
 export interface DoctorStatCardItem {
   ic: string;
-  icon: string;
+  icon: ReactNode;
   num: string;
   label: string;
   tag: string;
   tagClass: string;
-  bgIcon?: string;
+  bgIcon?: ReactNode;
 }
 
 export function StatCardRow({ items }: { items: DoctorStatCardItem[] }) {
@@ -58,11 +59,11 @@ export function StatCardRow({ items }: { items: DoctorStatCardItem[] }) {
     <div className="stats-row">
       {items.map((item) => (
         <div key={item.label} className="stat-c">
-          <div className={`stat-ic ${item.ic}`}>{item.icon}</div>
+          <div className={`stat-ic ${item.ic}`}>{resolveDashboardIcon(item.icon)}</div>
           <strong>{item.num}</strong>
           <span>{item.label}</span>
           <div className={`stat-tag ${item.tagClass}`}>{item.tag}</div>
-          {item.bgIcon ? <div className="stat-bg">{item.bgIcon}</div> : null}
+          {item.bgIcon ? <div className="stat-bg">{resolveDashboardIcon(item.bgIcon)}</div> : null}
         </div>
       ))}
     </div>
@@ -75,8 +76,8 @@ export function DashPageHeader({
   dateStr,
   actions,
 }: {
-  subtitle: string;
-  title: string;
+  subtitle: ReactNode;
+  title: ReactNode;
   dateStr: string;
   actions?: ReactNode;
 }) {
@@ -135,35 +136,37 @@ export function DashButton({
   variant = "outline",
   onClick,
   type = "button",
+  disabled,
 }: {
   children: ReactNode;
   variant?: "solid" | "outline" | "danger" | "primary";
   onClick?: () => void;
   type?: "button" | "submit";
+  disabled?: boolean;
 }) {
   if (variant === "solid") {
     return (
-      <button type={type} className="btn-w" onClick={onClick}>
+      <button type={type} className="btn-w" onClick={onClick} disabled={disabled}>
         {children}
       </button>
     );
   }
   if (variant === "outline") {
     return (
-      <button type={type} className="btn-wo" onClick={onClick}>
+      <button type={type} className="btn-wo" onClick={onClick} disabled={disabled}>
         {children}
       </button>
     );
   }
   if (variant === "danger") {
     return (
-      <button type={type} className="ca-btn danger" onClick={onClick}>
+      <button type={type} className="ca-btn danger" onClick={onClick} disabled={disabled}>
         {children}
       </button>
     );
   }
   return (
-    <button type={type} className="ca-btn primary" onClick={onClick}>
+    <button type={type} className="ca-btn primary" onClick={onClick} disabled={disabled}>
       {children}
     </button>
   );
@@ -271,7 +274,7 @@ export function SettingsRow({
   danger,
   onAction,
 }: {
-  icon: string;
+  icon: ReactNode;
   title: string;
   description: string;
   actionLabel: string;
@@ -290,7 +293,7 @@ export function SettingsRow({
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <span style={{ fontSize: "1.3rem" }}>{icon}</span>
+        <span className="dr-settings-icon">{icon}</span>
         <div>
           <div style={{ fontWeight: 600, fontSize: "0.9rem" }}>{title}</div>
           <div style={{ fontSize: "0.78rem", color: "var(--gray-400)" }}>{description}</div>

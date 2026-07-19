@@ -3,6 +3,24 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import {
+  BookOpenText,
+  Calendar,
+  ClipboardList,
+  DoctorIcon,
+  DoctorIconInline,
+  FilePenLine,
+  MessageSquare,
+  Pencil,
+  Phone,
+  PhysicianDashboardLabel,
+  Star,
+  Stethoscope,
+  Users,
+  Video,
+  Wallet,
+  Zap,
+} from "@/components/doctor/icons/DoctorIcons";
+import {
   CardLink,
   DashButton,
   DashCard,
@@ -165,22 +183,39 @@ export function DashboardPageContent() {
   return (
     <>
       <DashPageHeader
-        subtitle="👨‍⚕️ Physician Dashboard"
-        title={`Good morning, ${displayName} 👨‍⚕️`}
+        subtitle={<PhysicianDashboardLabel />}
+        title={
+          <>
+            Good morning, {displayName}{" "}
+            <DoctorIcon icon={Stethoscope} size="header" className="dr-icon-inline-title" />
+          </>
+        }
         dateStr={todayFormatted()}
         actions={
           <>
             {nextVideoConsultation ? (
               <Link href={doctorConsultationPath(nextVideoConsultation.id)}>
-                <DashButton variant="outline">📹 Start Consultation</DashButton>
+                <DashButton variant="outline">
+                  <DoctorIconInline icon={Video} size="button">
+                    Start Consultation
+                  </DoctorIconInline>
+                </DashButton>
               </Link>
             ) : (
               <Link href="/doctor/appointments">
-                <DashButton variant="outline">📹 Start Consultation</DashButton>
+                <DashButton variant="outline">
+                  <DoctorIconInline icon={Video} size="button">
+                    Start Consultation
+                  </DoctorIconInline>
+                </DashButton>
               </Link>
             )}
             <Link href="/doctor/submit-article">
-              <DashButton variant="solid">✍️ Submit Article</DashButton>
+              <DashButton variant="solid">
+                <DoctorIconInline icon={FilePenLine} size="button">
+                  Submit Article
+                </DoctorIconInline>
+              </DashButton>
             </Link>
           </>
         }
@@ -190,50 +225,50 @@ export function DashboardPageContent() {
         items={[
           {
             ic: "ic1",
-            icon: "👥",
+            icon: <DoctorIcon icon={Users} size="stat" />,
             num: patientsQuery.isLoading ? "—" : String(patientCount),
             label: "Total Patients",
             tag: patientsQuery.isLoading ? "Loading" : `${patientCount} registered`,
             tagClass: "tt-b",
-            bgIcon: "👥",
+            bgIcon: <DoctorIcon icon={Users} size="stat" />,
           },
           {
             ic: "ic2",
-            icon: "📅",
+            icon: <DoctorIcon icon={Calendar} size="stat" />,
             num: appointmentsQuery.isLoading ? "—" : String(todayAppointments.length),
             label: "Today's Consultations",
             tag: appointmentsQuery.isLoading ? "Loading" : `${remainingToday} remaining`,
             tagClass: "tt-g",
-            bgIcon: "📅",
+            bgIcon: <DoctorIcon icon={Calendar} size="stat" />,
           },
           {
             ic: "ic3",
-            icon: "💬",
+            icon: <DoctorIcon icon={MessageSquare} size="stat" />,
             num: questionsQuery.isLoading ? "—" : String(pendingCount),
             label: "Pending Q&A Replies",
             tag: pendingCount > 0 ? "Needs attention" : "All caught up",
             tagClass: pendingCount > 0 ? "tt-r" : "tt-g",
-            bgIcon: "💬",
+            bgIcon: <DoctorIcon icon={MessageSquare} size="stat" />,
           },
           {
             ic: "ic2",
-            icon: "💰",
+            icon: <DoctorIcon icon={Wallet} size="stat" />,
             num: earningsQuery.isLoading ? "—" : formatCurrency(thisMonthCents / 100),
             label: "This Month's Earnings",
             tag: earningsQuery.isLoading ? "Loading" : `${earnings?.paymentCount ?? 0} payments`,
             tagClass: "tt-g",
-            bgIcon: "💰",
+            bgIcon: <DoctorIcon icon={Wallet} size="stat" />,
           },
         ]}
       />
 
       <div className="g21-dr">
-        <DashCard title={`📅 Today's Schedule — ${todayShortFormatted()}`} actions={<CardLink onClick={() => showToast("Opening calendar...")}>Full calendar →</CardLink>}>
+        <DashCard title={<DoctorIconInline icon={Calendar} size="button">{`Today's Schedule — ${todayShortFormatted()}`}</DoctorIconInline>} actions={<CardLink onClick={() => showToast("Opening calendar...")}>Full calendar →</CardLink>}>
           <ScheduleList appointments={todayAppointments} loading={appointmentsQuery.isLoading} />
         </DashCard>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          <DashCard title="💰 Earnings Overview" actions={<CardLink href="/doctor/earnings">Details →</CardLink>}>
+          <DashCard title={<DoctorIconInline icon={Wallet} size="button">Earnings Overview</DoctorIconInline>} actions={<CardLink href="/doctor/earnings">Details →</CardLink>}>
             {earningsQuery.isLoading ? (
               <EmptyState loading message="" />
             ) : (
@@ -267,7 +302,7 @@ export function DashboardPageContent() {
             )}
           </DashCard>
 
-          <DashCard title="⭐ Patient Reviews" actions={<CardLink href="/doctor/reviews">All →</CardLink>}>
+          <DashCard title={<DoctorIconInline icon={Star} size="button">Patient Reviews</DoctorIconInline>} actions={<CardLink href="/doctor/reviews">All →</CardLink>}>
             {reviewsQuery.isLoading || profileQuery.isLoading ? (
               <EmptyState loading message="" />
             ) : (
@@ -312,7 +347,9 @@ export function DashboardPageContent() {
         <DashCard
           title={
             <>
-              💬 Patient Questions — Awaiting Reply{" "}
+            <DoctorIconInline icon={MessageSquare} size="button">
+              Patient Questions — Awaiting Reply{" "}
+            </DoctorIconInline>
               {!questionsQuery.isLoading && pendingCount > 0 ? (
                 <span style={{ fontSize: "0.72rem", background: "var(--red)", color: "#fff", padding: "2px 8px", borderRadius: 50, marginLeft: 4 }}>
                   {pendingCount}
@@ -338,7 +375,13 @@ export function DashboardPageContent() {
                     <div className="qa-meta">
                       <div className="qa-pname">
                         {name}
-                        {q.category.toLowerCase().includes("urgent") ? <span className="qa-urgent">⚡ Urgent</span> : null}
+                        {q.category.toLowerCase().includes("urgent") ? (
+                          <span className="qa-urgent">
+                            <DoctorIconInline icon={Zap} size="sm">
+                              Urgent
+                            </DoctorIconInline>
+                          </span>
+                        ) : null}
                       </div>
                       <div className="qa-spec">
                         {q.category} · {formatRelativeTime(q.createdAt)}
@@ -348,7 +391,9 @@ export function DashboardPageContent() {
                   <div className="qa-q">&quot;{q.question}&quot;</div>
                   <div className="qa-actions">
                     <button type="button" className="qa-btn reply" onClick={() => showToast("Reply editor opened")}>
-                      ✏️ Reply Now
+                      <DoctorIconInline icon={Pencil} size="sm">
+                        Reply Now
+                      </DoctorIconInline>
                     </button>
                     <button
                       type="button"
@@ -365,10 +410,14 @@ export function DashboardPageContent() {
                         })
                       }
                     >
-                      📋 Patient File
+                      <DoctorIconInline icon={ClipboardList} size="sm">
+                        Patient File
+                      </DoctorIconInline>
                     </button>
                     <button type="button" className="qa-btn" onClick={() => showToast("Calling patient...")}>
-                      📞 Call
+                      <DoctorIconInline icon={Phone} size="sm">
+                        Call
+                      </DoctorIconInline>
                     </button>
                   </div>
                 </div>
@@ -377,7 +426,7 @@ export function DashboardPageContent() {
           )}
         </DashCard>
 
-        <DashCard title="📰 My Articles" actions={<CardLink href="/doctor/articles">All {blogQuery.data?.meta.total ?? 0} →</CardLink>}>
+        <DashCard title={<DoctorIconInline icon={BookOpenText} size="button">My Articles</DoctorIconInline>} actions={<CardLink href="/doctor/articles">All {blogQuery.data?.meta.total ?? 0} →</CardLink>}>
           {blogQuery.isLoading ? (
             <EmptyState loading message="" />
           ) : articles.length === 0 ? (
@@ -394,12 +443,11 @@ export function DashboardPageContent() {
                   : status === "DRAFT"
                     ? "Draft · Last edited recently"
                     : "Under Review";
-              const emoji = "📋";
               const bg = "#dbeafe,#bfdbfe";
               return (
                 <div key={post.id} className="art-item">
                   <div className="art-thumb" style={{ background: `linear-gradient(135deg,${bg})` }}>
-                    {emoji}
+                    <DoctorIcon icon={BookOpenText} size="stat" />
                   </div>
                   <div className="art-info">
                     <div className="art-title">{post.title}</div>

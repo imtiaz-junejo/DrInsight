@@ -2365,6 +2365,8 @@ enum BookingSource {
   ONLINE
   WALK_IN
   PHONE
+  CLINIC_VISIT
+  EMERGENCY
 }
 
 enum BookingDraftStatus {

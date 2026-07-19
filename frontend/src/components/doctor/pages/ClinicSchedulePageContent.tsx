@@ -1,6 +1,20 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import {
+  AlertTriangle,
+  Calendar,
+  CalendarClock,
+  CircleX,
+  Clock3,
+  DoctorIcon,
+  DoctorIconInline,
+  FileText,
+  Globe,
+  PhysicianDashboardLabel,
+  Save,
+  Zap,
+} from "@/components/doctor/icons/DoctorIcons";
 import { DashCard, DashPageHeader } from "@/components/doctor/ui/DoctorPrimitives";
 import { todayFormatted } from "@/lib/doctor-utils";
 import {
@@ -113,7 +127,7 @@ export function ClinicSchedulePageContent() {
   if (isLoading) {
     return (
       <>
-        <DashPageHeader subtitle="👨‍⚕️ Physician Dashboard" title="Clinic Schedule" dateStr={todayFormatted()} />
+        <DashPageHeader subtitle={<PhysicianDashboardLabel />} title="Clinic Schedule" dateStr={todayFormatted()} />
         <div style={{ padding: "24px 0", textAlign: "center", color: "var(--gray-400)", fontSize: "0.84rem" }}>
           Loading...
         </div>
@@ -122,34 +136,24 @@ export function ClinicSchedulePageContent() {
   }
 
   return (
-    <>
+    <div className="cs-form">
       <DashPageHeader
-        subtitle="👨‍⚕️ Physician Dashboard"
+        subtitle={<PhysicianDashboardLabel />}
         title="Clinic Schedule"
         dateStr={todayFormatted()}
         actions={
           <button type="button" className="btn-w" disabled={updateSchedules.isPending} onClick={() => save()}>
-            💾 Save Schedule
+            <DoctorIconInline icon={Save} size="sm">
+              Save Schedule
+            </DoctorIconInline>
           </button>
         }
       />
 
-      <DashCard title="📆 Working Days">
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+      <DashCard title={<DoctorIconInline icon={Calendar} size="button">Working Days</DoctorIconInline>}>
+        <div className="cs-day-row">
           {DAY_KEYS.map((d) => (
-            <label
-              key={d}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 7,
-                padding: "8px 14px",
-                border: "1.5px solid var(--gray-200)",
-                borderRadius: 10,
-                fontSize: ".82rem",
-                cursor: "pointer",
-              }}
-            >
+            <label key={d} className="cs-day-check">
               <input
                 type="checkbox"
                 checked={config.days[d] !== false}
@@ -161,20 +165,20 @@ export function ClinicSchedulePageContent() {
         </div>
       </DashCard>
 
-      <DashCard title="⏰ Working Hours">
-        <div className="form-row">
-          <div className="form-group">
+      <DashCard title={<DoctorIconInline icon={Clock3} size="button">Working Hours</DoctorIconInline>}>
+        <div className="cs-compact-row">
+          <div className="form-group cs-field-w">
             <label>Clinic Opens</label>
             <input type="time" value={config.start} onChange={(e) => setConfig({ ...config, start: e.target.value })} />
           </div>
-          <div className="form-group">
+          <div className="form-group cs-field-w">
             <label>Clinic Closes</label>
             <input type="time" value={config.end} onChange={(e) => setConfig({ ...config, end: e.target.value })} />
           </div>
         </div>
       </DashCard>
 
-      <DashCard title="🧩 Appointment Slot Duration">
+      <DashCard title={<DoctorIconInline icon={CalendarClock} size="button">Appointment Slot Duration</DoctorIconInline>}>
         <div className="form-group" style={{ maxWidth: 260 }}>
           <label>Minutes per appointment</label>
           <select
@@ -190,9 +194,9 @@ export function ClinicSchedulePageContent() {
         </div>
       </DashCard>
 
-      <DashCard title="☕ Break Time">
-        <div className="form-row">
-          <div className="form-group">
+      <DashCard title={<DoctorIconInline icon={Clock3} size="button">Break Time</DoctorIconInline>}>
+        <div className="cs-compact-row">
+          <div className="form-group cs-field-w">
             <label>Break Starts</label>
             <input
               type="time"
@@ -200,7 +204,7 @@ export function ClinicSchedulePageContent() {
               onChange={(e) => setConfig({ ...config, breakStart: e.target.value })}
             />
           </div>
-          <div className="form-group">
+          <div className="form-group cs-field-w">
             <label>Break Ends</label>
             <input
               type="time"
@@ -211,7 +215,7 @@ export function ClinicSchedulePageContent() {
         </div>
       </DashCard>
 
-      <DashCard title="🚫 Holidays / Unavailable Dates">
+      <DashCard title={<DoctorIconInline icon={CircleX} size="button">Holidays / Unavailable Dates</DoctorIconInline>}>
         <div>
           {config.holidays.length === 0 ? (
             <div style={{ fontSize: ".8rem", color: "var(--gray-400)", padding: "6px 0" }}>
@@ -230,7 +234,11 @@ export function ClinicSchedulePageContent() {
                   fontSize: ".84rem",
                 }}
               >
-                <span>🗓️ {holidayDisplay(h)}</span>
+                <span>
+                  <DoctorIconInline icon={Calendar} size="sm">
+                    {holidayDisplay(h)}
+                  </DoctorIconInline>
+                </span>
                 <button type="button" className="tbl-btn" onClick={() => removeHoliday(i)}>
                   Remove
                 </button>
@@ -238,8 +246,8 @@ export function ClinicSchedulePageContent() {
             ))
           )}
         </div>
-        <div className="form-row" style={{ marginTop: 14 }}>
-          <div className="form-group">
+        <div className="cs-compact-row" style={{ marginTop: 14 }}>
+          <div className="form-group cs-field-w">
             <label>Add Unavailable Date</label>
             <input type="date" value={newHolidayDate} onChange={(e) => setNewHolidayDate(e.target.value)} />
           </div>
@@ -260,16 +268,16 @@ export function ClinicSchedulePageContent() {
 
       <DashCard
         title={
-          <>
-            🎯 Daily Appointment Capacity{" "}
+          <DoctorIconInline icon={Zap} size="button">
+            Daily Appointment Capacity{" "}
             <span style={{ fontWeight: 500, fontSize: ".72rem", color: "var(--gray-400)" }}>
               — shared between website bookings &amp; manual appointments
             </span>
-          </>
+          </DoctorIconInline>
         }
       >
-        <div className="form-row" style={{ alignItems: "flex-end" }}>
-          <div className="form-group" style={{ maxWidth: 170 }}>
+        <div className="form-row cs-capacity-row">
+          <div className="form-group cs-field-w">
             <label>Daily Capacity</label>
             <input
               type="number"
@@ -278,31 +286,25 @@ export function ClinicSchedulePageContent() {
               onChange={(e) => setConfig({ ...config, dailyCapacity: Math.max(1, Number(e.target.value) || 30) })}
             />
           </div>
-          <div className="form-group" style={{ maxWidth: 190 }}>
+          <div className="form-group cs-field-w">
             <label>Capacity Date</label>
             <input type="date" value={capDate} onChange={(e) => setCapDate(e.target.value)} />
           </div>
-          <div className="form-group">
-            <label style={{ visibility: "hidden" }}>o</label>
-            <label
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                fontSize: ".82rem",
-                fontWeight: 600,
-                cursor: "pointer",
-                border: "1.5px solid var(--gray-200)",
-                borderRadius: 10,
-                padding: "10px 14px",
-              }}
-            >
+          <div className="form-group cs-field-w-override cs-capacity-override-wrap">
+            <label className="cs-capacity-override-spacer" aria-hidden="true">
+              &nbsp;
+            </label>
+            <label className="cs-capacity-override">
+              <span className="cs-capacity-override-text">
+                <DoctorIcon icon={AlertTriangle} size="sm" tone="amber" label="Warning" />
+                Override Capacity
+              </span>
               <input
                 type="checkbox"
+                className="cs-capacity-override-check"
                 checked={!!config.capacityOverride}
                 onChange={(e) => setConfig({ ...config, capacityOverride: e.target.checked })}
-              />{" "}
-              ⚠️ Override Capacity
+              />
             </label>
           </div>
         </div>
@@ -318,10 +320,14 @@ export function ClinicSchedulePageContent() {
           }}
         >
           <span>
-            🌐 Website Bookings: <b style={{ color: "var(--blue)" }}>{capacityStats.web}</b>
+            <DoctorIconInline icon={Globe} size="sm">
+              Website Bookings: <b style={{ color: "var(--blue)" }}>{capacityStats.web}</b>
+            </DoctorIconInline>
           </span>
           <span>
-            📝 Manual Appointments: <b style={{ color: "var(--blue)" }}>{capacityStats.manual}</b>
+            <DoctorIconInline icon={FileText} size="sm">
+              Manual Appointments: <b style={{ color: "var(--blue)" }}>{capacityStats.manual}</b>
+            </DoctorIconInline>
           </span>
           <span>
             Σ Total:{" "}
@@ -332,11 +338,15 @@ export function ClinicSchedulePageContent() {
           <span>
             {remaining > 0 ? (
               <>
-                🟢 Remaining: <b style={{ color: "var(--green,#059669)" }}>{remaining}</b>
+                <span style={{ color: "var(--green,#059669)" }}>
+                  Remaining: <b style={{ color: "var(--green,#059669)" }}>{remaining}</b>
+                </span>
               </>
             ) : (
               <>
-                🔴 <b style={{ color: "var(--red,#dc2626)" }}>Daily appointment limit has been reached.</b>
+                <DoctorIconInline icon={CircleX} size="sm">
+                  <b style={{ color: "var(--red,#dc2626)" }}>Daily appointment limit has been reached.</b>
+                </DoctorIconInline>
                 {config.capacityOverride ? <span style={{ color: "var(--gray-400)" }}> (override ON)</span> : null}
               </>
             )}
@@ -356,6 +366,6 @@ export function ClinicSchedulePageContent() {
           />
         </div>
       </DashCard>
-    </>
+    </div>
   );
 }

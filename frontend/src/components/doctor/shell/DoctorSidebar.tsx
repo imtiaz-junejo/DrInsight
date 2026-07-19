@@ -3,15 +3,24 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { doctorNav, doctorRouteId, type DoctorBadgeKey } from "@/config/doctor-nav";
-import { getInitials } from "@/lib/doctor-utils";
+import { doctorDisplayName, getInitials } from "@/lib/doctor-utils";
 import {
   useDoctorBlogPosts,
   useDoctorDashboardCounts,
   useDoctorPatients,
   useDoctorProfile,
 } from "@/services/doctor-api-hooks";
+import { useAuthProfile } from "@/services/patient-api-hooks";
 import { useAuthStore } from "@/store/auth.store";
 import { useDoctorUiStore, type DoctorAvailability } from "@/store/doctor-ui.store";
+import {
+  Circle,
+  CircleOff,
+  Clock3,
+  DoctorIconInline,
+  DoctorNavIcon,
+  LogOut,
+} from "@/components/doctor/icons/DoctorIcons";
 
 function availabilityClass(value: DoctorAvailability, current: DoctorAvailability) {
   if (value !== current) return "avail-btn";
@@ -29,13 +38,15 @@ export function DoctorSidebar() {
   const setAvailability = useDoctorUiStore((s) => s.setAvailability);
   const showToast = useDoctorUiStore((s) => s.showToast);
 
-  const initials = getInitials(user?.firstName, user?.lastName);
-  const fullName = `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim() || "Doctor";
-
+  const { data: authProfile } = useAuthProfile();
   const { data: profile } = useDoctorProfile();
   const { data: counts } = useDoctorDashboardCounts();
   const { data: patients } = useDoctorPatients();
   const { data: blog } = useDoctorBlogPosts(user?.id);
+
+  const initials = getInitials(user?.firstName, user?.lastName);
+  const displayName = doctorDisplayName(user?.firstName, user?.lastName);
+  const avatarUrl = authProfile?.avatarUrl ?? profile?.user?.avatarUrl ?? user?.avatarUrl ?? null;
 
   const articleCount = blog?.meta?.total ?? blog?.data?.length ?? 0;
 
@@ -63,10 +74,17 @@ export function DoctorSidebar() {
     <aside className="dash-sidebar">
       <div className="sidebar-profile">
         <div className="sidebar-avatar-ring">
-          <div className="sidebar-avatar">{initials}</div>
+          <div className={`sidebar-avatar${avatarUrl ? " has-img" : ""}`}>
+            {avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={avatarUrl} alt={displayName} />
+            ) : (
+              initials
+            )}
+          </div>
           <div className="sidebar-online" />
         </div>
-        <div className="sidebar-name">{fullName.startsWith("Dr.") ? fullName : `Dr. ${fullName}`}</div>
+        <div className="sidebar-name">{displayName}</div>
         <div className="sidebar-role">{profile?.professionalTitle || profile?.specialty || "Physician"}</div>
         <div className="sidebar-spec">{profile?.specialty || "Medicine"} · PMC Verified ✓</div>
       </div>
@@ -103,7 +121,9 @@ export function DoctorSidebar() {
                   href={item.href}
                   className={`snav-item${active ? " active" : ""}`}
                 >
-                  <span className="snav-ico">{item.ico}</span>
+                  <span className="snav-ico">
+                    <DoctorNavIcon id={item.id} active={active} />
+                  </span>
                   {item.name}
                   {item.badgeKey && badge > 0 ? (
                     <span className={`snav-badge ${item.badgeClass ?? ""}`}>{badge}</span>
@@ -122,29 +142,40 @@ export function DoctorSidebar() {
             type="button"
             className={availabilityClass("online", availability)}
             onClick={() => handleAvailability("online")}
+            aria-label="Set availability to online"
           >
-            🟢 Online
+            <DoctorIconInline icon={Circle} size="sm" tone="success">
+              Online
+            </DoctorIconInline>
           </button>
           <button
             type="button"
             className={availabilityClass("busy", availability)}
             onClick={() => handleAvailability("busy")}
+            aria-label="Set availability to busy"
           >
-            🟡 Busy
+            <DoctorIconInline icon={Clock3} size="sm" tone="warning">
+              Busy
+            </DoctorIconInline>
           </button>
           <button
             type="button"
             className={availabilityClass("off", availability)}
             onClick={() => handleAvailability("off")}
+            aria-label="Set availability to offline"
           >
-            ⚫ Off
+            <DoctorIconInline icon={CircleOff} size="sm" tone="gray">
+              Off
+            </DoctorIconInline>
           </button>
         </div>
       </div>
 
       <div className="sidebar-footer">
-        <button type="button" className="sidebar-signout" onClick={handleSignOut}>
-          🚪 Sign Out
+        <button type="button" className="sidebar-signout" onClick={handleSignOut} aria-label="Sign out">
+          <DoctorIconInline icon={LogOut} size="sidebar" tone="error">
+            Sign Out
+          </DoctorIconInline>
         </button>
       </div>
     </aside>

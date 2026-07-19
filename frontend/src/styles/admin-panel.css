@@ -149,10 +149,12 @@
 }
 
 .admin-root .sb-ico {
-  width: 18px;
-  text-align: center;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  font-size: 0.9rem;
 }
 
 .admin-root .sb-badge {
@@ -1867,5 +1869,32 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   margin-bottom: 6px;
+}
+
+/* Form fields & white action buttons — gray-300 borders (matches doctor dashboard) */
+.admin-root .tb-search input,
+.admin-root .panel-search input,
+.admin-root .fg-item input,
+.admin-root .fg-item select,
+.admin-root .fg-item textarea,
+.admin-root .search-bar input,
+.admin-root .search-bar select,
+.admin-root .repeat-item input,
+.admin-root .repeat-item select,
+.admin-root .repeat-item textarea,
+.admin-root .rte-wrap,
+.admin-root .rte-btn,
+.admin-root .rte-select,
+.admin-root .rte-color,
+.admin-root .upload-btn,
+.admin-root .seo-input,
+.admin-root .seo-textarea {
+  border-color: var(--gray-300);
+}
+
+.admin-root .btn:not(.primary):not(.danger):not(.green),
+.admin-root .flt:not(.on),
+.admin-root .modal-close {
+  border-color: var(--gray-300);
 }
 

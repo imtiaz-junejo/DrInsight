@@ -3,6 +3,13 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
+  DoctorIconInline,
+  PhysicianDashboardLabel,
+  Pill,
+  SearchFieldIcon,
+  UserRound,
+} from "@/components/doctor/icons/DoctorIcons";
+import {
   DashButton,
   DashCard,
   DashPageHeader,
@@ -40,7 +47,7 @@ export function NewPrescriptionPageContent() {
   return (
     <>
       <DashPageHeader
-        subtitle="👨‍⚕️ Physician Dashboard"
+        subtitle={<PhysicianDashboardLabel />}
         title="New Prescription"
         dateStr={todayFormatted()}
         actions={
@@ -51,7 +58,7 @@ export function NewPrescriptionPageContent() {
       />
 
       <DashCard
-        title="👤 Select Patient"
+        title={<DoctorIconInline icon={UserRound} size="button">Select Patient</DoctorIconInline>}
         headerExtra={
           <span style={{ fontSize: "0.76rem", color: "var(--gray-400)" }}>
             Choose a patient to write an e-prescription
@@ -60,6 +67,7 @@ export function NewPrescriptionPageContent() {
       >
         <div className="search-bar">
           <div className="search-ico-w">
+            <SearchFieldIcon />
             <input
               className="search-inp"
               placeholder="Search patients by name..."
@@ -113,7 +121,9 @@ export function NewPrescriptionPageContent() {
                     </div>
                   </div>
                   <span className="ca-btn primary" style={{ pointerEvents: "none" }}>
-                    💊 Write Rx
+                    <DoctorIconInline icon={Pill} size="sm">
+                      Write Rx
+                    </DoctorIconInline>
                   </span>
                 </button>
               );

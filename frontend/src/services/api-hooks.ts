@@ -156,6 +156,7 @@ export interface DoctorProfile {
   physicalAvailEnabled?: boolean;
   researchGrantsTotal?: string | null;
   licenseBoard?: string | null;
+  dateOfBirth?: string | null;
   verificationNote?: string | null;
   platformRole?: string | null;
   editorialBoard?: boolean;

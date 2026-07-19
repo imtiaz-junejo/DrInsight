@@ -8,6 +8,16 @@ import {
   publicationToPreviewData,
 } from "@/components/publications/PublicationPreview";
 import {
+  BadgeCheck,
+  BookOpenText,
+  DoctorIcon,
+  DoctorIconInline,
+  FileText,
+  FlaskConical,
+  PhysicianDashboardLabel,
+  SearchFieldIcon,
+} from "@/components/doctor/icons/DoctorIcons";
+import {
   DashButton,
   DashCard,
   DashPageHeader,
@@ -107,39 +117,39 @@ export function PublicationsPageContent() {
     () => [
       {
         ic: "ic1",
-        icon: "📚",
+        icon: <DoctorIcon icon={BookOpenText} size="stat" />,
         num: String(stats?.total ?? 0),
         label: "Total Publications",
         tag: "All submissions",
         tagClass: "tt-b",
-        bgIcon: "📚",
+        bgIcon: <DoctorIcon icon={BookOpenText} size="stat" />,
       },
       {
         ic: "ic2",
-        icon: "✅",
+        icon: <DoctorIcon icon={BadgeCheck} size="stat" />,
         num: String(stats?.approved ?? 0),
         label: "Published",
         tag: "Approved & live",
         tagClass: "tt-g",
-        bgIcon: "✅",
+        bgIcon: <DoctorIcon icon={BadgeCheck} size="stat" />,
       },
       {
         ic: "ic3",
-        icon: "🔬",
+        icon: <DoctorIcon icon={FlaskConical} size="stat" />,
         num: String(stats?.pending ?? 0),
         label: "In Review",
         tag: "Awaiting decision",
         tagClass: "tt-a",
-        bgIcon: "🔬",
+        bgIcon: <DoctorIcon icon={FlaskConical} size="stat" />,
       },
       {
         ic: "ic4",
-        icon: "📝",
+        icon: <DoctorIcon icon={FileText} size="stat" />,
         num: String(stats?.drafts ?? 0),
         label: "Drafts",
         tag: `${stats?.rejected ?? 0} rejected`,
         tagClass: "tt-gray",
-        bgIcon: "📝",
+        bgIcon: <DoctorIcon icon={FileText} size="stat" />,
       },
     ],
     [stats],
@@ -172,7 +182,7 @@ export function PublicationsPageContent() {
   return (
     <>
       <DashPageHeader
-        subtitle="👨‍⚕️ Physician Dashboard"
+        subtitle={<PhysicianDashboardLabel />}
         title="My Publications"
         dateStr={todayFormatted()}
         actions={
@@ -185,7 +195,7 @@ export function PublicationsPageContent() {
       <StatCardRow items={statCards} />
 
       <DashCard
-        title="📚 Research & Publications"
+        title={<DoctorIconInline icon={BookOpenText} size="button">Research & Publications</DoctorIconInline>}
         headerExtra={
           <span style={{ fontSize: "0.76rem", color: "var(--gray-400)" }}>
             {publicationsQuery.isLoading ? "Loading..." : `${meta?.total ?? 0} total`}
@@ -194,6 +204,7 @@ export function PublicationsPageContent() {
       >
         <div className="search-bar">
           <div className="search-ico-w">
+            <SearchFieldIcon />
             <input
               className="search-inp"
               placeholder="Search by title, journal, or keyword..."

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DashboardAuthGuard } from "@/components/auth/DashboardAuthGuard";
 import { PatientShell } from "@/components/patient/shell/PatientShell";
 import "@/styles/patient-dashboard.css";
+import "@/styles/dashboard-shared-icons.css";
 import "@/styles/clinical-notes.css";
 
 export const metadata: Metadata = {

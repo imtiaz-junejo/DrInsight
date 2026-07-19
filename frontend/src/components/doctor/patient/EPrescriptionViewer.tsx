@@ -2,7 +2,35 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { HEADER_LOGO_SRC } from "@/config/brand-logos";
+import type { DoctorIconComponent } from "@/components/doctor/icons/DoctorIcons";
+import {
+  AlertTriangle,
+  BadgeCheck,
+  ClipboardList,
+  Copy,
+  DoctorIcon,
+  DoctorIconInline,
+  Download,
+  Eye,
+  FileText,
+  FlaskConical,
+  Globe,
+  Link,
+  Lock,
+  Mail,
+  MessageSquare,
+  Pencil,
+  Pill,
+  Printer,
+  RotateCw,
+  Shield,
+  Stethoscope,
+  Trash2,
+  UserRound,
+  Video,
+  X,
+} from "@/components/doctor/icons/DoctorIcons";
+import { HEADER_LOGO_WHITE_SRC } from "@/config/brand-logos";
 import { formatDateTime } from "@/lib/doctor-utils";
 import { useDoctorUiStore } from "@/store/doctor-ui.store";
 import type { PrescriptionPreviewData } from "./EPrescriptionBuilder";
@@ -93,12 +121,14 @@ function InfoCell({ label, value, warn }: { label: string; value?: string | null
   );
 }
 
-function Section({ icon, title, children }: { icon: string; title: string; children?: ReactNode }) {
+function Section({ icon, title, children }: { icon: DoctorIconComponent; title: string; children?: ReactNode }) {
   if (!children) return null;
   return (
     <div className="rx-sec">
       <div className="rx-sec-hd">
-        <div className="rx-sec-ic">{icon}</div>
+        <div className="rx-sec-ic">
+          <DoctorIcon icon={icon} size="button" />
+        </div>
         <h3>{title}</h3>
         <div className="rx-hr" />
       </div>
@@ -116,21 +146,21 @@ function RxDocument({ data }: { data: PrescriptionPreviewData }) {
     statusLower === "approved" ? (
       <div className="rx-stampbox">
         <div className="rx-stamp">
-          ✓ Approved
+          Approved
           <small>Reviewed by DrInsight Admin</small>
         </div>
       </div>
     ) : statusLower === "dismissed" ? (
       <div className="rx-stampbox">
         <div className="rx-stamp dismissed">
-          ✕ Dismissed
+          Dismissed
           <small>Not dispensed — see notes</small>
         </div>
       </div>
     ) : statusLower === "pending review" ? (
       <div className="rx-stampbox">
         <div className="rx-stamp pending">
-          ⏳ Pending Review
+          Pending Review
           <small>Awaiting admin approval</small>
         </div>
       </div>
@@ -138,36 +168,19 @@ function RxDocument({ data }: { data: PrescriptionPreviewData }) {
 
   const summaryHas =
     s.reason || s.chiefComplaint || s.notes || s.symptomDuration || s.prevTreatment || s.reports.length > 0;
-  const symptomsHas =
-    sy.reported.length > 0 || sy.severity || sy.progression || sy.associated || sy.aggravating || sy.relieving;
-  const examHas = [
-    ex.appearance,
-    ex.alertness,
-    ex.speech,
-    ex.respiratory,
-    ex.swelling,
-    ex.skin,
-    ex.temp,
-    ex.bp,
-    ex.sugar,
-    ex.spo2,
-    ex.hr,
-    ex.other,
-    ex.observations,
-  ].some(Boolean);
   const assessHas = [as.provisional, as.differential, as.icd10, as.impression, as.risk].some(Boolean);
-  const followHas = [fu.required, fu.date, fu.after, fu.type, fu.referral].some(Boolean);
+  const symptomDuration = sy.duration || s.symptomDuration;
 
   const adviceItems = [
-    ["🥗 Diet", ad.diet, ""],
-    ["🌿 Lifestyle", ad.lifestyle, ""],
-    ["🏃 Exercise", ad.exercise, ""],
-    ["💧 Hydration", ad.hydration, ""],
-    ["😴 Sleep", ad.sleep, ""],
-    ["🏠 Home Care", ad.homeCare, ""],
-    ["🦠 Isolation", ad.isolation, ""],
-    ["⚠️ Warning Signs", ad.warning, "warn"],
-    ["🚨 Emergency Instructions", ad.emergency, "warn"],
+    ["Diet", ad.diet, ""],
+    ["Lifestyle", ad.lifestyle, ""],
+    ["Exercise", ad.exercise, ""],
+    ["Hydration", ad.hydration, ""],
+    ["Sleep", ad.sleep, ""],
+    ["Home Care", ad.homeCare, ""],
+    ["Isolation", ad.isolation, ""],
+    ["Warning Signs", ad.warning, "warn"],
+    ["Emergency Instructions", ad.emergency, "warn"],
   ].filter((item) => item[1]);
 
   return (
@@ -180,18 +193,34 @@ function RxDocument({ data }: { data: PrescriptionPreviewData }) {
         <div className="rx-hd-top">
           <div className="rx-brand">
             <div className="rx-logo-img">
-              <img src={HEADER_LOGO_SRC} alt="DrInsight" />
+              <img src={HEADER_LOGO_WHITE_SRC} alt="DrInsight" />
             </div>
             <div className="rx-tag">{BRAND.tagline}</div>
             <div className="rx-contact">
-              <span>🌐 {BRAND.website}</span>
-              <span>☎ {BRAND.phone}</span>
-              <span>💬 WhatsApp {BRAND.whatsapp}</span>
-              <span>✉ {BRAND.email}</span>
+              <span>
+                <DoctorIconInline icon={Globe} size="sm">
+                  {BRAND.website}
+                </DoctorIconInline>
+              </span>
+              <span>{BRAND.phone}</span>
+              <span>
+                <DoctorIconInline icon={MessageSquare} size="sm">
+                  WhatsApp {BRAND.whatsapp}
+                </DoctorIconInline>
+              </span>
+              <span>
+                <DoctorIconInline icon={Mail} size="sm">
+                  {BRAND.email}
+                </DoctorIconInline>
+              </span>
             </div>
           </div>
           <div className="rx-hd-right">
-            <span className="rx-ebadge">🔒 Electronic Prescription</span>
+            <span className="rx-ebadge">
+              <DoctorIconInline icon={Lock} size="sm">
+                Electronic Prescription
+              </DoctorIconInline>
+            </span>
             <div className="rx-qr">
               <div dangerouslySetInnerHTML={{ __html: pseudoQrSvg(`${data.rxNo}|${data.verifyId}`) }} />
               <div className="rx-qr-cap">SCAN TO VERIFY</div>
@@ -225,7 +254,11 @@ function RxDocument({ data }: { data: PrescriptionPreviewData }) {
       <div className="rx-body">
         <div className="rx-idband">
           <div className="rx-idcol doc">
-            <div className="rx-idlabel">🩺 Prescribing Physician</div>
+            <div className="rx-idlabel">
+              <DoctorIconInline icon={Stethoscope} size="sm">
+                Prescribing Physician
+              </DoctorIconInline>
+            </div>
             <div className="rx-idname">{d.name}</div>
             <div className="rx-idsub">{d.specialization}</div>
             <div className="rx-idrows">
@@ -241,7 +274,11 @@ function RxDocument({ data }: { data: PrescriptionPreviewData }) {
             </div>
           </div>
           <div className="rx-idcol">
-            <div className="rx-idlabel">👤 Patient</div>
+            <div className="rx-idlabel">
+              <DoctorIconInline icon={UserRound} size="sm">
+                Patient
+              </DoctorIconInline>
+            </div>
             <div className="rx-idname">{p.name}</div>
             <div className="rx-idsub">
               {p.age} yrs · {p.gender} · {p.blood}
@@ -260,7 +297,7 @@ function RxDocument({ data }: { data: PrescriptionPreviewData }) {
           </div>
         </div>
 
-        <Section icon="🔗" title="Consultation Record">
+        <Section icon={Link} title="Consultation Record">
           <div className="rx-grid">
             <InfoCell label="Consultation ID" value={c.consultId} />
             <InfoCell label="Appointment ID" value={c.apptId} />
@@ -273,7 +310,7 @@ function RxDocument({ data }: { data: PrescriptionPreviewData }) {
           </div>
         </Section>
 
-        <Section icon="👤" title="Patient Information">
+        <Section icon={UserRound} title="Patient Information">
           <div className="rx-grid">
             <InfoCell label="Full Name" value={p.name} />
             <InfoCell label="Date of Birth" value={p.dob} />
@@ -296,7 +333,7 @@ function RxDocument({ data }: { data: PrescriptionPreviewData }) {
           </div>
         </Section>
 
-        <Section icon="📋" title="Consultation Summary">
+        <Section icon={ClipboardList} title="Consultation Summary">
           {summaryHas ? (
             <>
               <div className="rx-grid g2">
@@ -331,76 +368,72 @@ function RxDocument({ data }: { data: PrescriptionPreviewData }) {
           ) : null}
         </Section>
 
-        <Section icon="🩹" title="Symptoms">
-          {symptomsHas ? (
-            <>
-              {sy.reported.length > 0 ? (
-                <div className="rx-tags">
-                  {sy.reported.map((tag) => (
-                    <span key={tag} className="rx-tag">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
-              <div className="rx-grid" style={{ marginTop: sy.reported.length ? 8 : 0 }}>
-                <InfoCell label="Duration" value={sy.duration} />
-                <InfoCell label="Severity" value={sy.severity} />
-                <InfoCell label="Frequency" value={sy.frequency} />
-                <InfoCell label="Progression" value={sy.progression} />
+        <Section icon={AlertTriangle} title="Symptoms">
+          <>
+            {sy.reported.length > 0 ? (
+              <div className="rx-tags">
+                {sy.reported.map((tag) => (
+                  <span key={tag} className="rx-tag">
+                    {tag}
+                  </span>
+                ))}
               </div>
-              {(sy.associated || sy.aggravating || sy.relieving) && (
-                <div className="rx-block">
-                  {sy.associated ? (
-                    <p>
-                      <b>Associated —</b> {sy.associated}
-                    </p>
-                  ) : null}
-                  {sy.aggravating ? (
-                    <p>
-                      <b>Aggravating factors —</b> {sy.aggravating}
-                    </p>
-                  ) : null}
-                  {sy.relieving ? (
-                    <p>
-                      <b>Relieving factors —</b> {sy.relieving}
-                    </p>
-                  ) : null}
-                </div>
-              )}
-            </>
-          ) : null}
-        </Section>
-
-        <Section icon="🎥" title="Virtual Assessment">
-          {examHas ? (
-            <>
-              <div className="rx-grid">
-                <InfoCell label="General Appearance" value={ex.appearance} />
-                <InfoCell label="Alertness" value={ex.alertness} />
-                <InfoCell label="Speech" value={ex.speech} />
-                <InfoCell label="Respiratory Distress" value={ex.respiratory} />
-                <InfoCell label="Visible Swelling" value={ex.swelling} />
-                <InfoCell label="Skin Findings" value={ex.skin} />
-                <InfoCell label="Temperature (home)" value={ex.temp} />
-                <InfoCell label="Blood Pressure (home)" value={ex.bp} />
-                <InfoCell label="Blood Sugar (home)" value={ex.sugar} />
-                <InfoCell label="SpO₂ (oximeter)" value={ex.spo2} />
-                <InfoCell label="Heart Rate (home)" value={ex.hr} />
-                <InfoCell label="Other Home Data" value={ex.other} />
-              </div>
-              {ex.observations ? (
-                <div className="rx-block">
+            ) : null}
+            <div className="rx-grid" style={{ marginTop: sy.reported.length ? 8 : 0 }}>
+              <InfoCell label="Duration" value={symptomDuration} />
+              <InfoCell label="Severity" value={sy.severity} />
+              <InfoCell label="Frequency" value={sy.frequency} />
+              <InfoCell label="Progression" value={sy.progression} />
+            </div>
+            {(sy.associated || sy.aggravating || sy.relieving) ? (
+              <div className="rx-block">
+                {sy.associated ? (
                   <p>
-                    <b>Physician observations —</b> {ex.observations}
+                    <b>Associated —</b> {sy.associated}
                   </p>
-                </div>
-              ) : null}
-            </>
-          ) : null}
+                ) : null}
+                {sy.aggravating ? (
+                  <p>
+                    <b>Aggravating factors —</b> {sy.aggravating}
+                  </p>
+                ) : null}
+                {sy.relieving ? (
+                  <p>
+                    <b>Relieving factors —</b> {sy.relieving}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
+          </>
         </Section>
 
-        <Section icon="🧠" title="Clinical Assessment">
+        <Section icon={Video} title="Virtual Assessment">
+          <>
+            <div className="rx-grid">
+              <InfoCell label="General Appearance" value={ex.appearance} />
+              <InfoCell label="Alertness" value={ex.alertness} />
+              <InfoCell label="Speech" value={ex.speech} />
+              <InfoCell label="Respiratory Distress" value={ex.respiratory} />
+              <InfoCell label="Visible Swelling" value={ex.swelling} />
+              <InfoCell label="Skin Findings" value={ex.skin} />
+              <InfoCell label="Temperature (home)" value={ex.temp} />
+              <InfoCell label="Blood Pressure (home)" value={ex.bp} />
+              <InfoCell label="Blood Sugar (home)" value={ex.sugar} />
+              <InfoCell label="SpO₂ (oximeter)" value={ex.spo2} />
+              <InfoCell label="Heart Rate (home)" value={ex.hr} />
+              <InfoCell label="Other Home Data" value={ex.other} />
+            </div>
+            {ex.observations ? (
+              <div className="rx-block">
+                <p>
+                  <b>Physician observations —</b> {ex.observations}
+                </p>
+              </div>
+            ) : null}
+          </>
+        </Section>
+
+        <Section icon={Stethoscope} title="Clinical Assessment">
           {assessHas ? (
             <div className="rx-block">
               {as.provisional ? (
@@ -430,7 +463,7 @@ function RxDocument({ data }: { data: PrescriptionPreviewData }) {
           ) : null}
         </Section>
 
-        <Section icon="🔬" title="Recommended Investigations">
+        <Section icon={FlaskConical} title="Recommended Investigations">
           {data.investigations.length > 0 ? (
             <div className="rx-tags">
               {data.investigations.map((inv) => (
@@ -439,10 +472,14 @@ function RxDocument({ data }: { data: PrescriptionPreviewData }) {
                 </span>
               ))}
             </div>
-          ) : null}
+          ) : (
+            <div className="rx-block" style={{ color: "#8296ac", fontStyle: "italic" }}>
+              No investigations recommended for this consultation.
+            </div>
+          )}
         </Section>
 
-        <Section icon="💊" title="Prescription">
+        <Section icon={Pill} title="Prescription">
           <div className="rx-scriptwrap">
             <div className="rx-symbol">
               <span className="sym">℞</span>
@@ -457,8 +494,6 @@ function RxDocument({ data }: { data: PrescriptionPreviewData }) {
                   <th>Dosage</th>
                   <th>Frequency</th>
                   <th>Duration</th>
-                  <th>Route</th>
-                  <th>Quantity</th>
                   <th>Food</th>
                   <th>Instructions</th>
                 </tr>
@@ -472,13 +507,12 @@ function RxDocument({ data }: { data: PrescriptionPreviewData }) {
                       </td>
                       <td>
                         <div className="rx-mname">{m.name}</div>
+                        {m.route ? <div className="rx-mstr">{m.route}</div> : null}
                       </td>
                       <td>{m.strength || "—"}</td>
                       <td>{m.dosage || "—"}</td>
                       <td>{m.frequency || "—"}</td>
                       <td>{m.duration || "—"}</td>
-                      <td>{m.route || "—"}</td>
-                      <td>{m.quantity || "—"}</td>
                       <td>{m.food ? <span className="rx-pill-food">{m.food}</span> : "—"}</td>
                       <td>
                         <span className="rx-mins">{m.instructions || "—"}</span>
@@ -487,7 +521,7 @@ function RxDocument({ data }: { data: PrescriptionPreviewData }) {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={10} style={{ textAlign: "center", color: "#8296ac", padding: 16 }}>
+                    <td colSpan={8} style={{ textAlign: "center", color: "#8296ac", padding: 16 }}>
                       No medications prescribed for this consultation.
                     </td>
                   </tr>
@@ -497,7 +531,7 @@ function RxDocument({ data }: { data: PrescriptionPreviewData }) {
           </div>
         </Section>
 
-        <Section icon="📝" title="Advice & Care Plan">
+        <Section icon={FileText} title="Advice & Care Plan">
           {adviceItems.length > 0 ? (
             <div className="rx-advice">
               {adviceItems.map(([title, text, cls]) => (
@@ -507,27 +541,31 @@ function RxDocument({ data }: { data: PrescriptionPreviewData }) {
                 </div>
               ))}
             </div>
-          ) : null}
+          ) : (
+            <div className="rx-block" style={{ color: "#8296ac", fontStyle: "italic" }}>
+              No advice or care plan recorded for this consultation.
+            </div>
+          )}
         </Section>
 
-        <Section icon="🔄" title="Follow-up Plan">
-          {followHas ? (
-            <div className="rx-follow">
-              <InfoCell label="Follow-up Required" value={fu.required} />
-              <InfoCell label="Follow-up After" value={fu.after} />
-              <InfoCell label="Follow-up Date" value={fu.date} />
-              <InfoCell label="Recommended Mode" value={fu.type} />
-              <InfoCell label="Referral" value={fu.referral} />
-              <InfoCell label="Referral Notes" value={fu.referralNotes} />
-            </div>
-          ) : null}
+        <Section icon={RotateCw} title="Follow-up Plan">
+          <div className="rx-follow">
+            <InfoCell label="Follow-up Required" value={fu.required} />
+            <InfoCell label="Follow-up After" value={fu.after} />
+            <InfoCell label="Follow-up Date" value={fu.date} />
+            <InfoCell label="Recommended Mode" value={fu.type} />
+            <InfoCell label="Referral" value={fu.referral} />
+            <InfoCell label="Referral Notes" value={fu.referralNotes} />
+          </div>
         </Section>
 
         {data.doctorNotes.text ? (
-          <Section icon="🔏" title="Doctor Notes">
+          <Section icon={Lock} title="Doctor Notes">
             <div className="rx-privnote">
               <div className="rx-privlabel">
-                🔒 {data.doctorNotes.includeInPatient ? "Shared with patient" : "Private — care team only"}
+                <DoctorIconInline icon={Lock} size="sm">
+                  {data.doctorNotes.includeInPatient ? "Shared with patient" : "Private — care team only"}
+                </DoctorIconInline>
               </div>
               {data.doctorNotes.text}
             </div>
@@ -543,7 +581,7 @@ function RxDocument({ data }: { data: PrescriptionPreviewData }) {
                 {d.specialization} · Reg. {d.reg}
               </div>
             </div>
-            <div className="rx-esign">✔ Electronically signed · {data.issuedAt}</div>
+            <div className="rx-esign">Electronically signed · {data.issuedAt}</div>
           </div>
           {stamp}
         </div>
@@ -551,19 +589,27 @@ function RxDocument({ data }: { data: PrescriptionPreviewData }) {
         <div className="rx-ft">
           <div className="rx-ft-grid">
             <span>
-              🌐 <b>{BRAND.website}</b>
+              <DoctorIconInline icon={Globe} size="sm">
+                <b>{BRAND.website}</b>
+              </DoctorIconInline>
             </span>
             <span>
-              ☎ <b>{BRAND.phone}</b>
+              <b>{BRAND.phone}</b>
             </span>
             <span>
-              💬 WhatsApp <b>{BRAND.whatsapp}</b>
+              <DoctorIconInline icon={MessageSquare} size="sm">
+                WhatsApp <b>{BRAND.whatsapp}</b>
+              </DoctorIconInline>
             </span>
             <span>
-              ✉ <b>{BRAND.email}</b>
+              <DoctorIconInline icon={Mail} size="sm">
+                <b>{BRAND.email}</b>
+              </DoctorIconInline>
             </span>
             <span>
-              🛟 <b>{BRAND.support}</b>
+              <DoctorIconInline icon={Shield} size="sm">
+                <b>{BRAND.support}</b>
+              </DoctorIconInline>
             </span>
           </div>
           <div className="rx-disc">
@@ -616,17 +662,42 @@ export function EPrescriptionViewer({
   useEffect(() => {
     if (!data) return;
     document.body.style.overflow = "hidden";
+
+    const onBeforePrint = () => {
+      document.body.classList.add("rx-print-mode");
+      document.body.style.overflow = "visible";
+    };
+    const onAfterPrint = () => {
+      document.body.classList.remove("rx-print-mode");
+      document.body.style.overflow = "hidden";
+    };
+
+    window.addEventListener("beforeprint", onBeforePrint);
+    window.addEventListener("afterprint", onAfterPrint);
+
     return () => {
+      window.removeEventListener("beforeprint", onBeforePrint);
+      window.removeEventListener("afterprint", onAfterPrint);
+      document.body.classList.remove("rx-print-mode");
       document.body.style.overflow = "";
     };
   }, [data]);
 
   const statusClass = useMemo(() => (data ? statusChipClass(data.status) : "final"), [data]);
 
-  const handlePrint = () => window.print();
+  const beginPrint = () => {
+    document.body.classList.add("rx-print-mode");
+    document.body.style.overflow = "visible";
+  };
+
+  const handlePrint = () => {
+    beginPrint();
+    window.print();
+  };
 
   const handleDownload = () => {
     showToast('Opening print dialog — choose "Save as PDF" to download');
+    beginPrint();
     window.setTimeout(() => window.print(), 350);
   };
 
@@ -640,51 +711,68 @@ export function EPrescriptionViewer({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="rx-vw-bar">
+      <div className="rx-vw-bar rx-no-print">
         <div className="rx-vw-title">
-          💊 e-Prescription{" "}
+          <DoctorIconInline icon={Pill} size="button">
+            e-Prescription
+          </DoctorIconInline>{" "}
           <span className={`rx-schip ${statusClass}`}>{data.status}</span>{" "}
           <span className="rx-vw-no">{data.rxNo}</span>
         </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           {actions?.onEdit ? (
             <button type="button" className="rx-vw-btn" onClick={actions.onEdit}>
-              ✏️ Edit
+              <DoctorIconInline icon={Pencil} size="sm">
+                Edit
+              </DoctorIconInline>
             </button>
           ) : null}
           {actions?.onDuplicate ? (
             <button type="button" className="rx-vw-btn" onClick={actions.onDuplicate}>
-              📋 Duplicate
+              <DoctorIconInline icon={Copy} size="sm">
+                Duplicate
+              </DoctorIconInline>
             </button>
           ) : null}
           {actions?.onMarkCompleted ? (
             <button type="button" className="rx-vw-btn green" onClick={actions.onMarkCompleted}>
-              ✓ Mark Completed
+              <DoctorIconInline icon={BadgeCheck} size="sm">
+                Mark Completed
+              </DoctorIconInline>
             </button>
           ) : null}
           {actions?.onShare ? (
             <button type="button" className="rx-vw-btn" onClick={actions.onShare}>
-              🔗 Share
+              <DoctorIconInline icon={Link} size="sm">
+                Share
+              </DoctorIconInline>
             </button>
           ) : null}
           <button type="button" className="rx-vw-btn blue" onClick={handlePrint}>
-            🖨️ Print
+            <DoctorIconInline icon={Printer} size="sm">
+              Print
+            </DoctorIconInline>
           </button>
           <button type="button" className="rx-vw-btn green" onClick={handleDownload}>
-            ⬇️ Download PDF
+            <DoctorIconInline icon={Download} size="sm">
+              Download PDF
+            </DoctorIconInline>
           </button>
           {actions?.onDelete ? (
             <button type="button" className="rx-vw-btn" style={{ color: "#dc2626", borderColor: "#fecaca" }} onClick={actions.onDelete}>
-              🗑️ Delete
+              <DoctorIconInline icon={Trash2} size="sm">
+                Delete
+              </DoctorIconInline>
             </button>
           ) : null}
           <button type="button" className="rx-vw-btn x" onClick={onClose}>
-            ✕ Close
+            <DoctorIcon icon={X} size="sm" label="Close" />
           </button>
         </div>
       </div>
       {meta?.createdAt || meta?.updatedAt ? (
         <div
+          className="rx-vw-meta rx-no-print"
           style={{
             display: "flex",
             gap: 16,

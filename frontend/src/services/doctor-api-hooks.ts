@@ -2,12 +2,13 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { useAuthStore } from "@/store/auth.store";
 import type { Appointment, BlogPost, DoctorProfile, Paginated } from "@/services/api-hooks";
 
 export interface DoctorPatient {
   patientId: string;
   patientNumber?: string | null;
-  user: { id: string; firstName: string; lastName: string; avatarUrl: string | null };
+  user: { id: string; firstName: string; lastName: string; avatarUrl: string | null; phone?: string | null };
   lastVisit: string;
   nextAppt: string | null;
   appointmentCount: number;
@@ -293,6 +294,42 @@ export function useDoctorAppointments(params?: DoctorAppointmentParams) {
   });
 }
 
+export interface DoctorAppointmentDetail extends Omit<Appointment, "patient"> {
+  updatedAt?: string;
+  patient?: {
+    id?: string;
+    patientNumber?: string | null;
+    gender?: string | null;
+    dateOfBirth?: string | null;
+    address?: string | null;
+    user?: {
+      id?: string;
+      firstName: string;
+      lastName: string;
+      avatarUrl?: string | null;
+      phone?: string | null;
+      email?: string;
+    };
+  };
+  auditLogs?: Array<{
+    id: string;
+    action: string;
+    actorName: string;
+    createdAt: string;
+  }>;
+}
+
+export function useDoctorAppointmentDetail(id: string | null) {
+  return useQuery({
+    queryKey: ["doctor-appointment", id],
+    queryFn: async () => {
+      const { data } = await api.get<DoctorAppointmentDetail>(`/appointments/${id}`);
+      return data;
+    },
+    enabled: !!id,
+  });
+}
+
 export function useDoctorDashboardCounts() {
   return useQuery({
     queryKey: ["doctor-dashboard-counts"],
@@ -326,8 +363,9 @@ export function useCreateManualAppointment() {
       newPatient?: { name: string; phone: string; gender?: string; age?: number };
       scheduledAt: string;
       durationMinutes?: number;
-      bookingSource: "WALK_IN" | "PHONE";
+      bookingSource: "WALK_IN" | "PHONE" | "CLINIC_VISIT" | "EMERGENCY";
       reason?: string;
+      notes?: string;
     }) => {
       const { data } = await api.post<Appointment>("/appointments/manual", body);
       return data;
@@ -405,6 +443,40 @@ export function useUpdateDoctorProfile() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["doctor-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["auth-profile"] });
+    },
+  });
+}
+
+export function useUpdateDoctorUser() {
+  const queryClient = useQueryClient();
+  const setUser = useAuthStore((s) => s.setUser);
+  return useMutation({
+    mutationFn: async (body: {
+      firstName?: string;
+      lastName?: string;
+      phone?: string;
+      avatarUrl?: string | null;
+    }) => {
+      const { data } = await api.patch("/users/me", body);
+      return data;
+    },
+    onSuccess: (data) => {
+      const current = useAuthStore.getState().user;
+      if (data?.id) {
+        setUser({
+          id: data.id,
+          email: data.email,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          role: data.role,
+          status: data.status ?? current?.status ?? "ACTIVE",
+          avatarUrl: data.avatarUrl ?? current?.avatarUrl ?? null,
+          phone: data.phone ?? current?.phone ?? null,
+        });
+      }
+      queryClient.invalidateQueries({ queryKey: ["doctor-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["auth-profile"] });
     },
   });
 }
@@ -463,6 +535,8 @@ export function useDoctorPrescription(id?: string) {
       return data;
     },
     enabled: !!id,
+    staleTime: 0,
+    refetchOnMount: true,
   });
 }
 
@@ -575,6 +649,8 @@ export interface CreateBlogPostPayload {
   authorId?: string;
   featured?: boolean;
   pinned?: boolean;
+  readTimeMinutes?: number;
+  publishedAt?: string;
 }
 
 export function useCreateBlogPost() {

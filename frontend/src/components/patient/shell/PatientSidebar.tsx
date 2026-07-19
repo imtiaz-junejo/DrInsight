@@ -12,6 +12,7 @@ import {
 } from "@/services/patient-api-hooks";
 import { useAuthStore } from "@/store/auth.store";
 import { usePatientUiStore } from "@/store/patient-ui.store";
+import { DoctorIconInline, LogOut, PatientNavIcon } from "@/components/doctor/icons/DoctorIcons";
 
 export function PatientSidebar() {
   const pathname = usePathname();
@@ -99,7 +100,9 @@ export function PatientSidebar() {
               const badge = badgeValue(item.badgeKey);
               return (
                 <Link key={item.id} href={item.href} className={`snav-item${active ? " active" : ""}`}>
-                  <span className="snav-ico">{item.ico}</span>
+                  <span className="snav-ico">
+                    <PatientNavIcon id={item.id} />
+                  </span>
                   {item.name}
                   {item.badgeKey && badge > 0 ? (
                     <span className={`snav-badge ${item.badgeClass ?? ""}`}>{badge}</span>
@@ -113,7 +116,9 @@ export function PatientSidebar() {
 
       <div className="sidebar-footer">
         <button type="button" className="sidebar-signout" onClick={handleSignOut}>
-          🚪 Sign Out
+          <DoctorIconInline icon={LogOut} size="sidebar" tone="error">
+            Sign Out
+          </DoctorIconInline>
         </button>
       </div>
     </aside>

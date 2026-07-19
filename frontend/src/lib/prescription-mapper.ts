@@ -55,7 +55,7 @@ function mapItems(items: Prescription["items"]): PrescriptionMed[] {
     strength: item.strength ?? "",
     dosage: item.dosage ?? "",
     frequency: item.frequency ?? "",
-    route: item.route ?? "Oral",
+    route: item.route ?? "",
     duration: item.duration ?? "",
     food: item.food ?? "",
     instructions: item.instructions ?? "",
@@ -175,8 +175,30 @@ function emptyPreview(): PrescriptionPreviewData {
   };
 }
 
-export function prescriptionToPreviewData(rx: Prescription): PrescriptionPreviewData {
-  const ext = rx.extendedData as Partial<PrescriptionPreviewData> | null | undefined;
+function mergePreviewSections(
+  base: PrescriptionPreviewData,
+  ext: Partial<PrescriptionPreviewData>,
+): PrescriptionPreviewData {
+  return {
+    ...base,
+    ...ext,
+    consult: { ...base.consult, ...(ext.consult ?? {}) },
+    doctor: { ...base.doctor, ...(ext.doctor ?? {}) },
+    patient: { ...base.patient, ...(ext.patient ?? {}) },
+    summary: { ...base.summary, ...(ext.summary ?? {}) },
+    symptoms: { ...base.symptoms, ...(ext.symptoms ?? {}) },
+    exam: { ...base.exam, ...(ext.exam ?? {}) },
+    assessment: { ...base.assessment, ...(ext.assessment ?? {}) },
+    advice: { ...base.advice, ...(ext.advice ?? {}) },
+    followup: { ...base.followup, ...(ext.followup ?? {}) },
+    doctorNotes: { ...base.doctorNotes, ...(ext.doctorNotes ?? {}) },
+    investigations: ext.investigations?.length ? ext.investigations : base.investigations,
+    meds: ext.meds?.length ? ext.meds : base.meds,
+  };
+}
+
+function buildBaseFromApi(rx: Prescription): PrescriptionPreviewData {
+  const built = emptyPreview();
   const patientUser = rx.patient?.user;
   const doctorUser = rx.doctor?.user;
   const patientProfile = rx.patient;
@@ -185,120 +207,125 @@ export function prescriptionToPreviewData(rx: Prescription): PrescriptionPreview
 
   const patientName = patientUser
     ? `${patientUser.firstName ?? ""} ${patientUser.lastName ?? ""}`.trim()
-    : ext?.patient?.name ?? "Patient";
-  const patientId = rx.patientId ?? patientProfile?.id ?? ext?.patient?.id ?? "—";
-  const patientCode = formatPatientPrescriptionId(patientProfile?.patientNumber, patientId !== "—" ? patientId : undefined);
+    : "Patient";
+  const doctorName = doctorUser
+    ? doctorDisplayName(doctorUser.firstName, doctorUser.lastName)
+    : "Doctor";
+  const doctorCode = formatDoctorPrescriptionId(doctorProfile?.doctorNumber, rx.doctorId ?? doctorProfile?.id);
+  const patientId = rx.patientId ?? patientProfile?.id ?? "—";
+  const patientDisplayId = formatPatientDisplayId(patientProfile?.patientNumber, patientId !== "—" ? patientId : undefined);
+
+  return {
+    ...built,
+    consult: {
+      consultId: appointment?.id ? `CONS-${appointment.id.slice(0, 8).toUpperCase()}` : "—",
+      apptId: appointment?.id ?? "—",
+      doctorId: doctorCode,
+      patientId: formatPatientPrescriptionId(patientProfile?.patientNumber, patientId !== "—" ? patientId : undefined),
+      dateTime: appointment?.scheduledAt ? formatDateTime(appointment.scheduledAt) : formatDateTime(rx.createdAt),
+      status: appointment?.status ?? "Completed",
+      type: appointment?.consultationType ? consultationTypeLabel(appointment.consultationType) : "Video",
+      followupRef: rx.followUpDate ? formatDateTime(rx.followUpDate).split("·")[0]?.trim() ?? "—" : "—",
+    },
+    doctor: {
+      name: doctorName,
+      qualification:
+        doctorProfile?.credentials ??
+        [doctorProfile?.professionalTitle, doctorProfile?.education].filter(Boolean).join(", ") ??
+        "—",
+      specialization: doctorProfile?.specialty ?? "—",
+      reg: doctorProfile?.licenseNumber ?? "—",
+      signature: doctorName.replace(/^Dr\.?\s*/i, ""),
+    },
+    patient: {
+      name: patientName,
+      id: patientDisplayId,
+      age: patientAge(patientProfile?.dateOfBirth),
+      gender: genderLabel(patientProfile?.gender),
+      dob: patientProfile?.dateOfBirth
+        ? new Date(patientProfile.dateOfBirth).toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          })
+        : "—",
+      height: "—",
+      weight: "—",
+      bmi: "—",
+      blood: patientProfile?.bloodGroup ?? "—",
+      phone: patientUser?.phone ?? patientUser?.email ?? "—",
+      email: patientUser?.email ?? "—",
+      city: patientProfile?.city ?? "—",
+      country: patientProfile?.country ?? "Pakistan",
+      allergies: patientProfile?.allergies?.length ? patientProfile.allergies.join(", ") : "None reported",
+      chronic: patientProfile?.medicalHistory ?? "None reported",
+      currentMeds: "None",
+      emergency: patientProfile?.emergencyContact ?? "—",
+    },
+    summary: {
+      reason: appointment?.reason ?? "",
+      chiefComplaint: appointment?.reason ?? "",
+      notes: rx.notes ?? appointment?.notes ?? "",
+      symptomDuration: "",
+      prevTreatment: "",
+      prevConsultRef: "",
+      reports: [],
+    },
+    assessment: {
+      provisional: rx.diagnosis ?? "",
+      differential: "",
+      icd10: "",
+      impression: "",
+      risk: "",
+    },
+    meds: mapItems(rx.items),
+    followup: {
+      required: rx.followUpDate ? "Yes" : "",
+      date: rx.followUpDate
+        ? new Date(rx.followUpDate).toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          })
+        : "",
+      after: "",
+      type: "",
+      referral: "",
+      referralNotes: "",
+    },
+    doctorNotes: {
+      text: rx.notes ?? "",
+      includeInPatient: false,
+    },
+  };
+}
+
+function parseExtendedData(
+  raw: Prescription["extendedData"],
+): Partial<PrescriptionPreviewData> | null | undefined {
+  if (raw == null) return null;
+  if (typeof raw === "string") {
+    try {
+      return JSON.parse(raw) as Partial<PrescriptionPreviewData>;
+    } catch {
+      return null;
+    }
+  }
+  if (typeof raw === "object") return raw as Partial<PrescriptionPreviewData>;
+  return null;
+}
+
+export function prescriptionToPreviewData(rx: Prescription): PrescriptionPreviewData {
+  const ext = parseExtendedData(rx.extendedData);
+  const patientProfile = rx.patient;
+  const doctorProfile = rx.doctor;
+  const patientId = rx.patientId ?? patientProfile?.id ?? "—";
   const patientDisplayId = formatPatientDisplayId(patientProfile?.patientNumber, patientId !== "—" ? patientId : undefined);
   const doctorCode = formatDoctorPrescriptionId(doctorProfile?.doctorNumber, rx.doctorId ?? doctorProfile?.id);
 
-  const doctorName = doctorUser
-    ? doctorDisplayName(doctorUser.firstName, doctorUser.lastName)
-    : ext?.doctor?.name ?? "Doctor";
-
-  const built = emptyPreview();
-
-  const merged: PrescriptionPreviewData = ext?.patient
-    ? {
-        ...built,
-        ...ext,
-        consult: { ...built.consult, ...(ext.consult ?? {}) },
-        doctor: { ...built.doctor, ...(ext.doctor ?? {}) },
-        patient: { ...built.patient, ...(ext.patient ?? {}) },
-        summary: { ...built.summary, ...(ext.summary ?? {}) },
-        symptoms: { ...built.symptoms, ...(ext.symptoms ?? {}) },
-        exam: { ...built.exam, ...(ext.exam ?? {}) },
-        assessment: { ...built.assessment, ...(ext.assessment ?? {}) },
-        advice: { ...built.advice, ...(ext.advice ?? {}) },
-        followup: { ...built.followup, ...(ext.followup ?? {}) },
-        doctorNotes: { ...built.doctorNotes, ...(ext.doctorNotes ?? {}) },
-        investigations: ext.investigations ?? built.investigations,
-        meds: ext.meds?.length ? ext.meds : mapItems(rx.items),
-      }
-    : {
-        ...built,
-        consult: {
-          consultId: appointment?.id ? `CONS-${appointment.id.slice(0, 8).toUpperCase()}` : "—",
-          apptId: appointment?.id ?? "—",
-          doctorId: doctorCode,
-          patientId: patientCode,
-          dateTime: appointment?.scheduledAt ? formatDateTime(appointment.scheduledAt) : formatDateTime(rx.createdAt),
-          status: appointment?.status ?? "Completed",
-          type: appointment?.consultationType
-            ? consultationTypeLabel(appointment.consultationType)
-            : "Video",
-          followupRef: rx.followUpDate ? formatDateTime(rx.followUpDate).split("·")[0]?.trim() ?? "—" : "—",
-        },
-        doctor: {
-          name: doctorName,
-          qualification:
-            doctorProfile?.credentials ??
-            [doctorProfile?.professionalTitle, doctorProfile?.education].filter(Boolean).join(", ") ??
-            "—",
-          specialization: doctorProfile?.specialty ?? "—",
-          reg: doctorProfile?.licenseNumber ?? "—",
-          signature: doctorName.replace(/^Dr\.?\s*/i, ""),
-        },
-        patient: {
-          name: patientName,
-          id: patientDisplayId,
-          age: patientAge(patientProfile?.dateOfBirth),
-          gender: genderLabel(patientProfile?.gender),
-          dob: patientProfile?.dateOfBirth
-            ? new Date(patientProfile.dateOfBirth).toLocaleDateString("en-GB", {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-              })
-            : "—",
-          height: "—",
-          weight: "—",
-          bmi: "—",
-          blood: patientProfile?.bloodGroup ?? "—",
-          phone: patientUser?.phone ?? patientUser?.email ?? "—",
-          email: patientUser?.email ?? "—",
-          city: patientProfile?.city ?? "—",
-          country: patientProfile?.country ?? "Pakistan",
-          allergies: patientProfile?.allergies?.length ? patientProfile.allergies.join(", ") : "None reported",
-          chronic: patientProfile?.medicalHistory ?? "None reported",
-          currentMeds: "None",
-          emergency: patientProfile?.emergencyContact ?? "—",
-        },
-        summary: {
-          reason: appointment?.reason ?? "",
-          chiefComplaint: appointment?.reason ?? "",
-          notes: rx.notes ?? appointment?.notes ?? "",
-          symptomDuration: "",
-          prevTreatment: "",
-          prevConsultRef: "",
-          reports: [],
-        },
-        assessment: {
-          provisional: rx.diagnosis ?? "",
-          differential: "",
-          icd10: "",
-          impression: "",
-          risk: "",
-        },
-        meds: mapItems(rx.items),
-        followup: {
-          required: rx.followUpDate ? "Yes" : "",
-          date: rx.followUpDate
-            ? new Date(rx.followUpDate).toLocaleDateString("en-GB", {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-              })
-            : "",
-          after: "",
-          type: "",
-          referral: "",
-          referralNotes: "",
-        },
-        doctorNotes: {
-          text: rx.notes ?? "",
-          includeInPatient: false,
-        },
-      };
+  const base = buildBaseFromApi(rx);
+  const hasExtended = ext && typeof ext === "object" && Object.keys(ext).length > 0;
+  const merged = hasExtended ? mergePreviewSections(base, ext) : base;
 
   return {
     ...merged,
@@ -310,10 +337,7 @@ export function prescriptionToPreviewData(rx: Prescription): PrescriptionPreview
     consult: {
       ...merged.consult,
       doctorId: doctorCode,
-      patientId: patientCode,
-    },
-    doctor: {
-      ...merged.doctor,
+      patientId: formatPatientPrescriptionId(patientProfile?.patientNumber, patientId !== "—" ? patientId : undefined),
     },
     patient: {
       ...merged.patient,

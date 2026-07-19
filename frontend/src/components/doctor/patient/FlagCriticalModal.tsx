@@ -9,13 +9,22 @@ import {
   type PatientCriticalAlert,
 } from "@/services/doctor-api-hooks";
 import { useDoctorUiStore } from "@/store/doctor-ui.store";
+import {
+  AlertTriangle,
+  ClipboardList,
+  DoctorIcon,
+  DoctorIconInline,
+  FileText,
+  History,
+  X,
+} from "@/components/doctor/icons/DoctorIcons";
 import { formatDate, formatDateTime } from "@/lib/data-mappers";
 import { uploadFile, validateLicenseCertificateFile } from "@/lib/upload";
 
 const SEVERITIES = [
-  { key: "CRITICAL" as const, label: "🔴 Critical", className: "crit" },
-  { key: "URGENT" as const, label: "🟡 Urgent", className: "" },
-  { key: "STABLE" as const, label: "🟢 Stable", className: "" },
+  { key: "CRITICAL" as const, label: "Critical", className: "crit" },
+  { key: "URGENT" as const, label: "Urgent", className: "" },
+  { key: "STABLE" as const, label: "Stable", className: "" },
 ];
 
 const CATEGORIES = [
@@ -136,7 +145,7 @@ export function FlagCriticalModal({
       <div className="modal patient-action-modal" style={{ maxWidth: 620 }}>
         <div className="modal-hd" style={{ background: "linear-gradient(135deg,#fef2f2,#fff)" }}>
           <div className="m-av" style={{ background: "linear-gradient(135deg,#e11d48,#f43f5e)" }}>
-            🚨
+            <DoctorIcon icon={AlertTriangle} size="stat" />
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontFamily: "var(--font-display)", fontSize: "1.05rem", fontWeight: 700, color: "var(--gray-900)" }}>
@@ -148,20 +157,24 @@ export function FlagCriticalModal({
           </div>
           {activeAlert ? (
             <span className="st-chip st-critical" style={{ marginRight: 8 }}>
-              🔴 Active Alert
+              Active Alert
             </span>
           ) : null}
-          <button type="button" className="modal-close" onClick={closePatientPanel}>
-            ✕
+          <button type="button" className="modal-close" onClick={closePatientPanel} aria-label="Close">
+            <DoctorIcon icon={X} size="sm" />
           </button>
         </div>
         <div className="modal-bd">
           <div className="pa-tabs">
             <button type="button" className={`pa-tab${tab === "flag" ? " on" : ""}`} onClick={() => setTab("flag")}>
-              🚨 New Alert
+              <DoctorIconInline icon={AlertTriangle} size="sm">
+                New Alert
+              </DoctorIconInline>
             </button>
             <button type="button" className={`pa-tab${tab === "history" ? " on" : ""}`} onClick={() => setTab("history")}>
-              📋 Alert History
+              <DoctorIconInline icon={ClipboardList} size="sm">
+                Alert History
+              </DoctorIconInline>
             </button>
           </div>
 
@@ -226,7 +239,9 @@ export function FlagCriticalModal({
                   />
                   {attachmentFile ? (
                     <span className="file-chip" style={{ marginTop: 8 }}>
-                      📎 {attachmentFile.name}
+                      <DoctorIconInline icon={FileText} size="sm">
+                        {attachmentFile.name}
+                      </DoctorIconInline>
                     </span>
                   ) : null}
                 </div>
@@ -250,7 +265,9 @@ export function FlagCriticalModal({
                   onClick={handleSubmit}
                   disabled={createAlert.isPending || uploading}
                 >
-                  🚨 Confirm Flag
+                  <DoctorIconInline icon={AlertTriangle} size="sm">
+                    Confirm Flag
+                  </DoctorIconInline>
                 </button>
                 <button type="button" className="btn-om" onClick={closePatientPanel}>
                   Cancel
@@ -268,7 +285,7 @@ export function FlagCriticalModal({
                   <div key={alert.id} className={`alert-history-item${alert.status === "ACTIVE" ? " active" : ""}`}>
                     <div className="alert-history-top">
                       <strong>
-                        {alert.severity === "CRITICAL" ? "🔴" : alert.severity === "URGENT" ? "🟡" : "🟢"} {alert.category}
+                        {alert.severity} {alert.category}
                       </strong>
                       <span className={`st-chip ${alert.status === "ACTIVE" ? "st-critical" : "st-active"}`}>{alert.status}</span>
                     </div>

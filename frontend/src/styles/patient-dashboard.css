@@ -131,7 +131,7 @@
 .patient-root .snav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:.85rem;font-weight:500;color:var(--gray-600);cursor:pointer;transition:var(--transition);margin-bottom:1px}
 .patient-root .snav-item:hover{background:var(--gray-100);color:var(--gray-900)}
 .patient-root .snav-item.active{background:var(--blue-light);color:var(--blue);font-weight:600}
-.patient-root .snav-ico{font-size:.93rem;width:20px;text-align:center;flex-shrink:0}
+.patient-root .snav-ico{width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .patient-root .snav-badge{margin-left:auto;font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:50px;min-width:20px;text-align:center}
 .patient-root .sb-r{background:var(--red);color:#fff}.sb-g{background:var(--green);color:#fff}.sb-a{background:var(--amber);color:#fff}
 .patient-root .avail-row{padding:12px 14px;border-top:1px solid var(--gray-200)}
@@ -475,3 +475,30 @@
 /* Featured Image Upload */
 .patient-root .feat-img-box{border:2px dashed var(--gray-200);border-radius:var(--radius);padding:28px 20px;text-align:center;cursor:pointer;transition:var(--transition);background:var(--gray-50)}
 .patient-root .feat-img-box:hover,.feat-img-box.drag-over{border-color:var(--blue);background:var(--blue-light)}
+
+/* Form fields & white action buttons — gray-300 borders (matches doctor dashboard) */
+.patient-root .form-group input,
+.patient-root .form-group select,
+.patient-root .form-group textarea,
+.patient-root .search-inp,
+.patient-root .review-ta,
+.patient-root .rte-wrap,
+.patient-root .rte-btn,
+.patient-root .rte-select,
+.patient-root .rte-color {
+  border-color: var(--gray-300);
+}
+
+.patient-root .btn-w {
+  border: 1.5px solid var(--gray-300);
+}
+
+.patient-root .ca-btn:not(.primary):not(.danger),
+.patient-root .tbl-btn,
+.patient-root .sch-btn,
+.patient-root .qa-btn,
+.patient-root .flt,
+.patient-root .modal-close,
+.patient-root .avail-btn:not(.ag):not(.aa) {
+  border-color: var(--gray-300);
+}

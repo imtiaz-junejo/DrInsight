@@ -3,8 +3,7 @@ import type { PatientDashboardCounts } from "@/services/patient-api-hooks";
 export type PatientBadgeKey = keyof PatientDashboardCounts;
 
 export interface PatientNavItem {
-  id: string;
-  ico: string;
+  id: string;
   name: string;
   badgeKey?: PatientBadgeKey;
   badgeClass?: string;
@@ -20,46 +19,46 @@ export const patientNav: PatientNavGroup[] = [
   {
     lbl: "My Health",
     items: [
-      { id: "dashboard", ico: "📊", name: "Overview", href: "/patient" },
-      { id: "health", ico: "❤️", name: "Health Metrics", href: "/patient/health" },
+      { id: "dashboard", name: "Overview", href: "/patient" },
+      { id: "health", name: "Health Metrics", href: "/patient/health" },
     ],
   },
   {
     lbl: "My Consultations",
     items: [
-      { id: "oc-pending", ico: "🕒", name: "Pending Requests", badgeKey: "ocPending", badgeClass: "sb-a", href: "/patient/consultations/pending" },
-      { id: "oc-upcoming", ico: "📅", name: "Upcoming", badgeKey: "ocUpcoming", badgeClass: "sb-r", href: "/patient/consultations/upcoming" },
-      { id: "oc-ongoing", ico: "🟢", name: "Ongoing", badgeKey: "ocOngoing", badgeClass: "sb-g", href: "/patient/consultations/ongoing" },
-      { id: "oc-completed", ico: "✅", name: "Completed", href: "/patient/consultations/completed" },
-      { id: "oc-cancelled", ico: "❌", name: "Cancelled", href: "/patient/consultations/cancelled" },
-      { id: "oc-history", ico: "📜", name: "Consultation History", href: "/patient/consultations/history" },
+      { id: "oc-pending", name: "Pending Requests", badgeKey: "ocPending", badgeClass: "sb-a", href: "/patient/consultations/pending" },
+      { id: "oc-upcoming", name: "Upcoming", badgeKey: "ocUpcoming", badgeClass: "sb-r", href: "/patient/consultations/upcoming" },
+      { id: "oc-ongoing", name: "Ongoing", badgeKey: "ocOngoing", badgeClass: "sb-g", href: "/patient/consultations/ongoing" },
+      { id: "oc-completed", name: "Completed", href: "/patient/consultations/completed" },
+      { id: "oc-cancelled", name: "Cancelled", href: "/patient/consultations/cancelled" },
+      { id: "oc-history", name: "Consultation History", href: "/patient/consultations/history" },
     ],
   },
   {
     lbl: "Physical Appointments",
     items: [
-      { id: "phys-upcoming", ico: "🏥", name: "Upcoming", badgeKey: "physUpcoming", badgeClass: "sb-r", href: "/patient/physical/upcoming" },
-      { id: "phys-pending", ico: "🕒", name: "Pending Requests", badgeKey: "physPending", badgeClass: "sb-a", href: "/patient/physical/pending" },
-      { id: "phys-confirmed", ico: "✅", name: "Confirmed", badgeKey: "physConfirmed", badgeClass: "sb-g", href: "/patient/physical/confirmed" },
-      { id: "phys-completed", ico: "🏁", name: "Completed", href: "/patient/physical/completed" },
-      { id: "phys-cancelled", ico: "❌", name: "Cancelled", href: "/patient/physical/cancelled" },
+      { id: "phys-upcoming", name: "Upcoming", badgeKey: "physUpcoming", badgeClass: "sb-r", href: "/patient/physical/upcoming" },
+      { id: "phys-pending", name: "Pending Requests", badgeKey: "physPending", badgeClass: "sb-a", href: "/patient/physical/pending" },
+      { id: "phys-confirmed", name: "Confirmed", badgeKey: "physConfirmed", badgeClass: "sb-g", href: "/patient/physical/confirmed" },
+      { id: "phys-completed", name: "Completed", href: "/patient/physical/completed" },
+      { id: "phys-cancelled", name: "Cancelled", href: "/patient/physical/cancelled" },
     ],
   },
   {
     lbl: "Ask & Book",
     items: [
-      { id: "qa-ask", ico: "✍️", name: "Ask Question", href: "/patient/questions/ask" },
-      { id: "qa-pending", ico: "🕒", name: "Pending Approval", badgeKey: "qaPending", badgeClass: "sb-a", href: "/patient/questions/pending" },
-      { id: "qa-answered", ico: "💬", name: "Answered", badgeKey: "qaAnswered", badgeClass: "sb-g", href: "/patient/questions/answered" },
-      { id: "qa-rejected", ico: "⛔", name: "Rejected", href: "/patient/questions/rejected" },
-      { id: "articles", ico: "🔖", name: "Saved Articles", badgeKey: "savedArticles", href: "/patient/articles" },
+      { id: "qa-ask", name: "Ask Question", href: "/patient/questions/ask" },
+      { id: "qa-pending", name: "Pending Approval", badgeKey: "qaPending", badgeClass: "sb-a", href: "/patient/questions/pending" },
+      { id: "qa-answered", name: "Answered", badgeKey: "qaAnswered", badgeClass: "sb-g", href: "/patient/questions/answered" },
+      { id: "qa-rejected", name: "Rejected", href: "/patient/questions/rejected" },
+      { id: "articles", name: "Saved Articles", badgeKey: "savedArticles", href: "/patient/articles" },
     ],
   },
   {
     lbl: "Account",
     items: [
-      { id: "profile", ico: "👤", name: "My Profile", href: "/patient/profile" },
-      { id: "settings", ico: "⚙️", name: "Settings", href: "/patient/settings" },
+      { id: "profile", name: "My Profile", href: "/patient/profile" },
+      { id: "settings", name: "Settings", href: "/patient/settings" },
     ],
   },
 ];

@@ -1,6 +1,12 @@
 "use client";
 
 import { useMemo } from "react";
+import {
+  ClipboardList,
+  DoctorIconInline,
+  PhysicianDashboardLabel,
+  Star,
+} from "@/components/doctor/icons/DoctorIcons";
 import { DashCard, DashPageHeader, GridTwo, PersonAvatar } from "@/components/doctor/ui/DoctorPrimitives";
 import { formatDate, getInitials, gradientForId, starsDisplay } from "@/lib/data-mappers";
 import { todayFormatted } from "@/lib/doctor-utils";
@@ -39,10 +45,10 @@ export function ReviewsPageContent() {
 
   return (
     <>
-      <DashPageHeader subtitle="👨‍⚕️ Physician Dashboard" title="Reviews & Ratings" dateStr={todayFormatted()} />
+      <DashPageHeader subtitle={<PhysicianDashboardLabel />} title="Reviews & Ratings" dateStr={todayFormatted()} />
 
       <GridTwo>
-        <DashCard title="⭐ Patient Reviews">
+        <DashCard title={<DoctorIconInline icon={Star} size="button">Patient Reviews</DoctorIconInline>}>
           {loading ? (
             <EmptyState loading message="" />
           ) : (
@@ -79,7 +85,7 @@ export function ReviewsPageContent() {
           )}
         </DashCard>
 
-        <DashCard title="📊 Rating Breakdown">
+        <DashCard title={<DoctorIconInline icon={ClipboardList} size="button">Rating Breakdown</DoctorIconInline>}>
           {loading ? (
             <EmptyState loading message="" />
           ) : reviews.length === 0 ? (

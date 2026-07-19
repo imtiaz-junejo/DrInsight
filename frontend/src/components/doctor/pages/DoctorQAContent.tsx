@@ -1,6 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
+import {
+  BadgeCheck,
+  Bell,
+  BookOpenText,
+  Calendar,
+  DoctorIcon,
+  DoctorIconInline,
+  Eye,
+  FileText,
+  Mail,
+  MessageCircleX,
+  MessageSquare,
+  MessageSquareMore,
+  Pencil,
+  PhysicianDashboardLabel,
+  Save,
+  UserRound,
+} from "@/components/doctor/icons/DoctorIcons";
 import { ConsModal, ConsModalButton } from "@/components/doctor/ui/ConsModal";
 import { DashCard, DashPageHeader, PersonAvatar } from "@/components/doctor/ui/DoctorPrimitives";
 import { formatDate, getInitials, gradientForId, specialtyEmoji } from "@/lib/data-mappers";
@@ -15,11 +33,35 @@ import {
 } from "@/services/doctor-api-hooks";
 import { useDoctorUiStore } from "@/store/doctor-ui.store";
 
-const VIEW_META: Record<DoctorQuestionView, [string, string, string]> = {
-  new: ["📥 New Questions", "Questions awaiting your first response", "No new questions — you're all caught up."],
-  drafts: ["📝 Pending Answers", "Questions with saved drafts, not yet submitted", "No pending drafts."],
-  answered: ["💬 Answered Questions", "Answers are instantly visible to patients", "No answered questions yet."],
-  rejected: ["⛔ Rejected Questions", "Questions declined with a reason", "Nothing here."],
+const VIEW_META: Record<DoctorQuestionView, [ReactNode, string, string]> = {
+  new: [
+    <DoctorIconInline key="new" icon={MessageSquareMore} size="button">
+      New Questions
+    </DoctorIconInline>,
+    "Questions awaiting your first response",
+    "No new questions — you're all caught up.",
+  ],
+  drafts: [
+    <DoctorIconInline key="drafts" icon={FileText} size="button">
+      Pending Answers
+    </DoctorIconInline>,
+    "Questions with saved drafts, not yet submitted",
+    "No pending drafts.",
+  ],
+  answered: [
+    <DoctorIconInline key="answered" icon={MessageSquare} size="button">
+      Answered Questions
+    </DoctorIconInline>,
+    "Answers are instantly visible to patients",
+    "No answered questions yet.",
+  ],
+  rejected: [
+    <DoctorIconInline key="rejected" icon={MessageCircleX} size="button">
+      Rejected Questions
+    </DoctorIconInline>,
+    "Questions declined with a reason",
+    "Nothing here.",
+  ],
 };
 
 function questionTitle(q: DoctorQuestion): string {
@@ -32,9 +74,31 @@ function submitterName(q: DoctorQuestion): string {
 }
 
 function qaChip(q: DoctorQuestion) {
-  if (q.status === "ANSWERED") return <span className="cons-chip cc-done">💬 Answered</span>;
-  if (q.status === "REJECTED") return <span className="cons-chip cc-cancel">⛔ Rejected</span>;
-  return <span className="cons-chip cc-up">✅ Awaiting answer</span>;
+  if (q.status === "ANSWERED") {
+    return (
+      <span className="cons-chip cc-done">
+        <DoctorIconInline icon={MessageSquare} size="sm">
+          Answered
+        </DoctorIconInline>
+      </span>
+    );
+  }
+  if (q.status === "REJECTED") {
+    return (
+      <span className="cons-chip cc-cancel">
+        <DoctorIconInline icon={MessageCircleX} size="sm">
+          Rejected
+        </DoctorIconInline>
+      </span>
+    );
+  }
+  return (
+    <span className="cons-chip cc-up">
+      <DoctorIconInline icon={BadgeCheck} size="sm">
+        Awaiting answer
+      </DoctorIconInline>
+    </span>
+  );
 }
 
 type ModalState =
@@ -134,32 +198,44 @@ export function DoctorQAContent({ view }: { view: DoctorQuestionView }) {
           <div>
             <div className="cons-dr-name">{questionTitle(q)}</div>
             <div className="cons-dr-spec">
-              🧑 {name} · {specialtyEmoji(q.category)} {q.category}
+              <DoctorIconInline icon={UserRound} size="sm">
+                {name} · {specialtyEmoji(q.category)} {q.category}
+              </DoctorIconInline>
             </div>
           </div>
           {qaChip(q)}
         </div>
         <div className="cons-details">
-          <span>🆔 Q-{q.id.slice(-4).toUpperCase()}</span>
-          <span>📅 Submitted {formatDate(q.createdAt)}</span>
+          <span>Q-{q.id.slice(-4).toUpperCase()}</span>
+          <span>
+            <DoctorIconInline icon={Calendar} size="sm">
+              Submitted {formatDate(q.createdAt)}
+            </DoctorIconInline>
+          </span>
         </div>
         {q.status === "REJECTED" ? (
           <div className="cons-note">
-            ⛔ <strong>Rejected</strong>
+            <DoctorIconInline icon={MessageCircleX} size="sm">
+              <strong>Rejected</strong>
+            </DoctorIconInline>
             {q.rejectReason ? <> — {q.rejectReason}</> : null}
           </div>
         ) : (
-          <div className="cons-note">❓ {q.question}</div>
+          <div className="cons-note">{q.question}</div>
         )}
         {q.answerDraft && q.status === "PENDING" ? (
           <div className="cons-note green">
-            📝 <strong>Draft saved:</strong> {q.answerDraft.slice(0, 140)}
+            <DoctorIconInline icon={FileText} size="sm">
+              <strong>Draft saved:</strong> {q.answerDraft.slice(0, 140)}
+            </DoctorIconInline>
             {q.answerDraft.length > 140 ? "…" : ""}
           </div>
         ) : null}
         {q.answer ? (
           <div className="cons-note green">
-            💬 <strong>Your answer:</strong> {q.answer.slice(0, 160)}
+            <DoctorIconInline icon={MessageSquare} size="sm">
+              <strong>Your answer:</strong> {q.answer.slice(0, 160)}
+            </DoctorIconInline>
             {q.answer.length > 160 ? "…" : ""}
           </div>
         ) : null}
@@ -167,23 +243,39 @@ export function DoctorQAContent({ view }: { view: DoctorQuestionView }) {
           {q.status === "PENDING" ? (
             <>
               <button type="button" className="ca-btn primary" onClick={() => openAnswer(q)}>
-                {q.answerDraft ? "✏️ Edit Answer (draft)" : "💬 Answer"}
+                {q.answerDraft ? (
+                  <DoctorIconInline icon={Pencil} size="sm">
+                    Edit Answer (draft)
+                  </DoctorIconInline>
+                ) : (
+                  <DoctorIconInline icon={MessageSquare} size="sm">
+                    Answer
+                  </DoctorIconInline>
+                )}
               </button>
               <button type="button" className="ca-btn" onClick={() => setModal({ kind: "view", q })}>
-                👁 View
+                <DoctorIconInline icon={Eye} size="sm">
+                  View
+                </DoctorIconInline>
               </button>
               <button type="button" className="ca-btn danger" onClick={() => setModal({ kind: "reject", q })}>
-                ⛔ Reject
+                <DoctorIconInline icon={MessageCircleX} size="sm">
+                  Reject
+                </DoctorIconInline>
               </button>
             </>
           ) : (
             <>
               <button type="button" className="ca-btn" onClick={() => setModal({ kind: "view", q })}>
-                👁 View
+                <DoctorIconInline icon={Eye} size="sm">
+                  View
+                </DoctorIconInline>
               </button>
               {q.status === "ANSWERED" ? (
                 <button type="button" className="ca-btn" onClick={() => setModal({ kind: "view", q })}>
-                  📖 View Answer
+                  <DoctorIconInline icon={BookOpenText} size="sm">
+                    View Answer
+                  </DoctorIconInline>
                 </button>
               ) : null}
             </>
@@ -195,11 +287,13 @@ export function DoctorQAContent({ view }: { view: DoctorQuestionView }) {
 
   return (
     <>
-      <DashPageHeader subtitle="👨‍⚕️ Physician Dashboard" title="Patient Q&A" dateStr={todayFormatted()} />
+      <DashPageHeader subtitle={<PhysicianDashboardLabel />} title="Patient Q&A" dateStr={todayFormatted()} />
 
       {view === "new" && list.length > 0 ? (
         <div className="alert-banner">
-          <div className="ab-ico">🔔</div>
+          <div className="ab-ico">
+            <DoctorIcon icon={Bell} size="stat" />
+          </div>
           <div className="ab-text">
             <strong>
               {list.length} question{list.length !== 1 ? "s" : ""} awaiting your answer
@@ -217,7 +311,9 @@ export function DoctorQAContent({ view }: { view: DoctorQuestionView }) {
           </div>
         ) : list.length === 0 ? (
           <div className="oc-empty">
-            <span className="big">💬</span>
+            <span className="big">
+              <DoctorIcon icon={MessageSquare} size="stat" />
+            </span>
             {meta[2]}
           </div>
         ) : (
@@ -242,7 +338,7 @@ export function DoctorQAContent({ view }: { view: DoctorQuestionView }) {
 
       <ConsModal
         open={modal?.kind === "answer"}
-        icon="💬"
+        icon={<DoctorIcon icon={MessageSquare} size="button" />}
         title={`Answer — Q-${modal ? modal.q.id.slice(-4).toUpperCase() : ""}`}
         onClose={closeModal}
         footer={
@@ -251,10 +347,14 @@ export function DoctorQAContent({ view }: { view: DoctorQuestionView }) {
               Cancel
             </ConsModalButton>
             <ConsModalButton variant="ghost" onClick={doSaveDraft} disabled={saveDraft.isPending}>
-              💾 Save Draft
+              <DoctorIconInline icon={Save} size="sm">
+                Save Draft
+              </DoctorIconInline>
             </ConsModalButton>
             <ConsModalButton variant="blue" onClick={doSubmit} disabled={answerQuestion.isPending}>
-              📨 Submit Answer
+              <DoctorIconInline icon={Mail} size="sm">
+                Submit Answer
+              </DoctorIconInline>
             </ConsModalButton>
           </>
         }
@@ -274,7 +374,7 @@ export function DoctorQAContent({ view }: { view: DoctorQuestionView }) {
               />
             </div>
             <p className="cons-sub" style={{ marginTop: 6 }}>
-              💾 Save Draft keeps it editable · 📨 Submit makes it instantly visible to the patient.
+              Save Draft keeps it editable · Submit makes it instantly visible to the patient.
             </p>
           </>
         ) : null}
@@ -282,7 +382,12 @@ export function DoctorQAContent({ view }: { view: DoctorQuestionView }) {
 
       <ConsModal
         open={modal?.kind === "view"}
-        icon={modal?.kind === "view" && modal.q.status === "ANSWERED" ? "📖" : "💬"}
+        icon={
+          <DoctorIcon
+            icon={modal?.kind === "view" && modal.q.status === "ANSWERED" ? BookOpenText : MessageSquare}
+            size="button"
+          />
+        }
         title={`Q-${modal ? modal.q.id.slice(-4).toUpperCase() : ""} — ${modal ? questionTitle(modal.q) : ""}`}
         onClose={closeModal}
         footer={
@@ -299,7 +404,9 @@ export function DoctorQAContent({ view }: { view: DoctorQuestionView }) {
                   openAnswer(q);
                 }}
               >
-                💬 Answer
+                <DoctorIconInline icon={MessageSquare} size="sm">
+                  Answer
+                </DoctorIconInline>
               </ConsModalButton>
             ) : null}
           </>
@@ -308,12 +415,19 @@ export function DoctorQAContent({ view }: { view: DoctorQuestionView }) {
         {modal?.kind === "view" ? (
           <>
             <p className="cons-sub">
-              🧑 {submitterName(modal.q)} · {specialtyEmoji(modal.q.category)} {modal.q.category} · 📅{" "}
-              {formatDate(modal.q.createdAt)}
+              <DoctorIconInline icon={UserRound} size="sm">
+                {submitterName(modal.q)} · {specialtyEmoji(modal.q.category)} {modal.q.category}
+              </DoctorIconInline>
+              {" · "}
+              <DoctorIconInline icon={Calendar} size="sm">
+                {formatDate(modal.q.createdAt)}
+              </DoctorIconInline>
             </p>
             {modal.q.status === "REJECTED" ? (
               <div className="cons-note">
-                ⛔ Rejected{modal.q.rejectReason ? ` — ${modal.q.rejectReason}` : ""}
+                <DoctorIconInline icon={MessageCircleX} size="sm">
+                  Rejected{modal.q.rejectReason ? ` — ${modal.q.rejectReason}` : ""}
+                </DoctorIconInline>
               </div>
             ) : (
               <p>
@@ -322,7 +436,9 @@ export function DoctorQAContent({ view }: { view: DoctorQuestionView }) {
             )}
             {modal.q.answer ? (
               <div className="cons-note green" style={{ marginTop: 12 }}>
-                💬 <strong>Your answer{modal.q.answeredAt ? ` (${formatDate(modal.q.answeredAt)})` : ""}:</strong>
+                <DoctorIconInline icon={MessageSquare} size="sm">
+                  <strong>Your answer{modal.q.answeredAt ? ` (${formatDate(modal.q.answeredAt)})` : ""}:</strong>
+                </DoctorIconInline>
                 <br />
                 {modal.q.answer}
               </div>
@@ -338,7 +454,7 @@ export function DoctorQAContent({ view }: { view: DoctorQuestionView }) {
 
       <ConsModal
         open={modal?.kind === "reject"}
-        icon="⛔"
+        icon={<DoctorIcon icon={MessageCircleX} size="button" />}
         title="Reject Question"
         warn
         onClose={closeModal}
@@ -348,7 +464,9 @@ export function DoctorQAContent({ view }: { view: DoctorQuestionView }) {
               Back
             </ConsModalButton>
             <ConsModalButton variant="red" onClick={doReject} disabled={rejectQuestion.isPending}>
-              ⛔ Reject Question
+              <DoctorIconInline icon={MessageCircleX} size="sm">
+                Reject Question
+              </DoctorIconInline>
             </ConsModalButton>
           </>
         }

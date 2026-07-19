@@ -2,6 +2,13 @@
 
 import { useMemo } from "react";
 import {
+  BadgeCheck,
+  Calendar,
+  CalendarCheck2,
+  DoctorIconInline,
+  PhysicianDashboardLabel,
+} from "@/components/doctor/icons/DoctorIcons";
+import {
   CardLink,
   DashCard,
   DashPageHeader,
@@ -55,9 +62,9 @@ export function AppointmentsPageContent() {
 
   return (
     <>
-      <DashPageHeader subtitle="👨‍⚕️ Physician Dashboard" title="Consultations" dateStr={todayFormatted()} />
+      <DashPageHeader subtitle={<PhysicianDashboardLabel />} title="Consultations" dateStr={todayFormatted()} />
 
-      <DashCard title="📅 Today's Appointments" actions={<CardLink onClick={() => showToast("Opening calendar...")}>Full Calendar →</CardLink>}>
+      <DashCard title={<DoctorIconInline icon={Calendar} size="button">Today&apos;s Appointments</DoctorIconInline>} actions={<CardLink onClick={() => showToast("Opening calendar...")}>Full Calendar →</CardLink>}>
         {appointmentsQuery.isLoading ? (
           <EmptyState loading message="" />
         ) : todayAppointments.length === 0 ? (
@@ -106,13 +113,13 @@ export function AppointmentsPageContent() {
         )}
       </DashCard>
 
-      <DashCard title="✅ Past Consultations">
+      <DashCard title={<DoctorIconInline icon={CalendarCheck2} size="button">Past Consultations</DoctorIconInline>}>
         <div style={{ overflowX: "auto" }}>
-          <table className="pt-table">
+          <table className="pt-table pt-table-consultations">
             <thead>
               <tr>
-                <th>Patient</th>
-                <th>Type</th>
+                <th className="pt-col-patient">Patient</th>
+                <th className="pt-col-type">Type</th>
                 <th>Date</th>
                 <th>Duration</th>
                 <th>Payment</th>
@@ -138,10 +145,10 @@ export function AppointmentsPageContent() {
                   const name = `${appt.patient?.user?.firstName ?? ""} ${appt.patient?.user?.lastName ?? ""}`.trim() || "Patient";
                   return (
                     <tr key={appt.id}>
-                      <td>
+                      <td className="pt-cell-patient">
                         <strong>{name}</strong>
                       </td>
-                      <td>
+                      <td className="pt-cell-type">
                         <span className="cons-chip cc-up">{consultationTypeLabel(appt.consultationType)}</span>
                       </td>
                       <td>{formatDate(appt.scheduledAt)}</td>

@@ -2,6 +2,27 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import type { DoctorIconComponent } from "@/components/doctor/icons/DoctorIcons";
+import {
+  AlertTriangle,
+  BadgeCheck,
+  ClipboardList,
+  Copy,
+  DoctorIcon,
+  DoctorIconInline,
+  Eye,
+  FileText,
+  FlaskConical,
+  Link,
+  Lock,
+  Pill,
+  RotateCw,
+  Save,
+  Stethoscope,
+  UserRound,
+  Video,
+  X,
+} from "@/components/doctor/icons/DoctorIcons";
 import {
   useDoctorProfile,
   useIssuePrescription,
@@ -92,6 +113,14 @@ const MED_ROUTES = [
 ];
 
 const FOOD_OPTIONS = ["", "Before food", "After food", "With food", "Empty stomach", "Either"];
+
+function RxCardIcon({ icon }: { icon: DoctorIconComponent }) {
+  return (
+    <div className="ic">
+      <DoctorIcon icon={icon} size="button" />
+    </div>
+  );
+}
 
 export interface PrescriptionMed {
   name: string;
@@ -1033,21 +1062,24 @@ export function EPrescriptionBuilder({
     <div id="rxBuild" className="open">
       <div className="rxb-bar">
         <div className="rxb-ttl">
-          💊 New e-Prescription <small>{pName} · {resolvedPatientDisplayId}</small>
+          <DoctorIconInline icon={Pill} size="button">
+            New e-Prescription
+          </DoctorIconInline>{" "}
+          <small>{pName} · {resolvedPatientDisplayId}</small>
         </div>
         <div className="rxb-save">
           <span className="rxb-dot" />
           <span>{saveState}</span>
         </div>
         <button type="button" className="rx-vw-btn x" onClick={handleClose}>
-          ✕ Close
+          <DoctorIcon icon={X} size="sm" label="Close" />
         </button>
       </div>
 
       <div className="rxb-wrap">
         <div className="rxb-card">
           <div className="rxb-h">
-            <div className="ic">🔗</div>
+            <RxCardIcon icon={Link} />
             <h4>Consultation Link</h4>
             <span className="rxb-auto">Auto-filled</span>
           </div>
@@ -1089,7 +1121,7 @@ export function EPrescriptionBuilder({
 
         <div className="rxb-card">
           <div className="rxb-h">
-            <div className="ic">🩺</div>
+            <RxCardIcon icon={Stethoscope} />
             <h4>Prescribing Physician</h4>
             <span className="rxb-auto">Auto-filled</span>
           </div>
@@ -1115,7 +1147,7 @@ export function EPrescriptionBuilder({
 
         <div className="rxb-card">
           <div className="rxb-h">
-            <div className="ic">👤</div>
+            <RxCardIcon icon={UserRound} />
             <h4>Patient Information</h4>
             <span className="rxb-auto">Auto-filled · editable for this consult</span>
           </div>
@@ -1158,7 +1190,7 @@ export function EPrescriptionBuilder({
 
         <div className="rxb-card">
           <div className="rxb-h">
-            <div className="ic">📋</div>
+            <RxCardIcon icon={ClipboardList} />
             <h4>Consultation Summary</h4>
           </div>
           <div className="rxb-fg">
@@ -1189,7 +1221,7 @@ export function EPrescriptionBuilder({
 
         <div className="rxb-card">
           <div className="rxb-h">
-            <div className="ic">🩹</div>
+            <RxCardIcon icon={AlertTriangle} />
             <h4>Symptoms</h4>
           </div>
           <label className="rxb-f" style={{ marginBottom: 8 }}>
@@ -1250,7 +1282,7 @@ export function EPrescriptionBuilder({
 
         <div className="rxb-card">
           <div className="rxb-h">
-            <div className="ic">🎥</div>
+            <RxCardIcon icon={Video} />
             <h4>Virtual Assessment</h4>
             <span className="rxb-auto">Home-monitored / observed</span>
           </div>
@@ -1302,7 +1334,7 @@ export function EPrescriptionBuilder({
 
         <div className="rxb-card">
           <div className="rxb-h">
-            <div className="ic">🧠</div>
+            <RxCardIcon icon={Stethoscope} />
             <h4>Clinical Assessment</h4>
           </div>
           <div className="rxb-fg">
@@ -1331,7 +1363,7 @@ export function EPrescriptionBuilder({
 
         <div className="rxb-card">
           <div className="rxb-h">
-            <div className="ic">🔬</div>
+            <RxCardIcon icon={FlaskConical} />
             <h4>Investigations</h4>
           </div>
           <div className="rxb-chips">
@@ -1369,7 +1401,8 @@ export function EPrescriptionBuilder({
                   className="rxb-chip on inv"
                   onClick={() => setCustomInvestigations((prev) => prev.filter((i) => i !== inv))}
                 >
-                  {inv} ✕
+                  {inv}
+                  <DoctorIcon icon={X} size="sm" />
                 </button>
               ))}
             </div>
@@ -1378,12 +1411,14 @@ export function EPrescriptionBuilder({
 
         <div className="rxb-card">
           <div className="rxb-h">
-            <div className="ic">💊</div>
+            <RxCardIcon icon={Pill} />
             <h4>℞ Medications</h4>
           </div>
           <div className="rxb-tools">
             <button type="button" className="rxb-tool" onClick={duplicatePrevious}>
-              📑 Duplicate previous
+              <DoctorIconInline icon={Copy} size="sm">
+                Duplicate previous
+              </DoctorIconInline>
             </button>
           </div>
           <datalist id="rxbDrugList">
@@ -1395,7 +1430,7 @@ export function EPrescriptionBuilder({
             <div key={med.id} className="rxb-med">
               <div className="rxb-mno">{index + 1}</div>
               <button type="button" className="rxb-mdel" title="Remove" onClick={() => removeMed(med.id)}>
-                ✕
+                <DoctorIcon icon={X} size="sm" />
               </button>
               <div className="rxb-fg">
                 <div className="rxb-f full">
@@ -1465,7 +1500,7 @@ export function EPrescriptionBuilder({
 
         <div className="rxb-card">
           <div className="rxb-h">
-            <div className="ic">📝</div>
+            <RxCardIcon icon={FileText} />
             <h4>Advice &amp; Care Plan</h4>
           </div>
           <div className="rxb-fg">
@@ -1493,7 +1528,7 @@ export function EPrescriptionBuilder({
 
         <div className="rxb-card">
           <div className="rxb-h">
-            <div className="ic">🔄</div>
+            <RxCardIcon icon={RotateCw} />
             <h4>Follow-up Plan</h4>
           </div>
           <div className="rxb-fg g3">
@@ -1541,7 +1576,7 @@ export function EPrescriptionBuilder({
 
         <div className="rxb-card">
           <div className="rxb-h">
-            <div className="ic">🔏</div>
+            <RxCardIcon icon={Lock} />
             <h4>Doctor Notes (Private)</h4>
           </div>
           <div className="rxb-f full">
@@ -1569,10 +1604,14 @@ export function EPrescriptionBuilder({
           {footStatus}
         </span>
         <button type="button" className="rxb-btn out" onClick={handleSaveDraft} disabled={saveDraft.isPending}>
-          💾 Save Draft
+          <DoctorIconInline icon={Save} size="sm">
+            Save Draft
+          </DoctorIconInline>
         </button>
         <button type="button" className="rxb-btn out" onClick={handlePreview}>
-          👁 Preview
+          <DoctorIconInline icon={Eye} size="sm">
+            Preview
+          </DoctorIconInline>
         </button>
         <button
           type="button"
@@ -1580,7 +1619,9 @@ export function EPrescriptionBuilder({
           onClick={handleFinalize}
           disabled={issuePrescription.isPending}
         >
-          ✓ Finalize &amp; Send to Patient
+          <DoctorIconInline icon={BadgeCheck} size="sm">
+            Finalize &amp; Send to Patient
+          </DoctorIconInline>
         </button>
       </div>
     </div>,
