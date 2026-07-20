@@ -5,6 +5,7 @@ import { User } from '@prisma/client';
 import { AuthService } from './auth.service';
 import { OAuthService } from './oauth.service';
 import { LoginDto, RegisterDto, RefreshTokenDto, ForgotPasswordDto, ResetPasswordDto } from './dto/auth.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { CompleteProfileDto } from './dto/complete-profile.dto';
 import { OAuthExchangeDto, CompleteOAuthRegistrationDto } from './dto/oauth.dto';
 import { Public } from '../common/decorators/auth.decorators';
@@ -71,6 +72,13 @@ export class AuthController {
   @ApiBearerAuth()
   logout(@Body() dto: RefreshTokenDto) {
     return this.authService.logout(dto.refreshToken);
+  }
+
+  @Post('change-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  changePassword(@CurrentUser('id') userId: string, @Body() dto: ChangePasswordDto) {
+    return this.authService.changePassword(userId, dto);
   }
 
   @Get('me')

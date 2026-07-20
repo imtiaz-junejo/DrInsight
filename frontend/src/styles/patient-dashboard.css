@@ -222,6 +222,10 @@
 .patient-root .cons-card.completed{border-left:4px solid var(--green)}
 .patient-root .cons-card.cancelled{border-left:4px solid var(--gray-400)}
 .patient-root .cons-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.patient-root .cons-top-main{flex:1;min-width:0}
+.patient-root .cons-top .cons-chip{margin-left:auto;flex-shrink:0}
+.patient-root .cons-details span{display:inline-flex;align-items:center;gap:4px}
+.patient-root .cons-actions .ca-btn{display:inline-flex;align-items:center;gap:5px;text-decoration:none}
 .patient-root .dr-av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.9rem;font-weight:700;flex-shrink:0}
 .patient-root .cons-dr-name{font-size:.9rem;font-weight:700;color:var(--gray-900)}
 .patient-root .cons-dr-spec{font-size:.74rem;color:var(--blue);font-weight:600}

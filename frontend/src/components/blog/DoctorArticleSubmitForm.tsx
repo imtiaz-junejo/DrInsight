@@ -12,28 +12,14 @@ import { uploadFile } from "@/lib/upload";
 import { useBlogCategories } from "@/services/api-hooks";
 import { useCreateBlogPost, useDoctorProfile } from "@/services/doctor-api-hooks";
 import { useDoctorUiStore } from "@/store/doctor-ui.store";
+import { MEDICAL_SPECIALTIES } from "@/lib/medical-specialties";
+import { getDefaultHeroIconForSpecialty, getHeroIconOptionIdForSpecialty, DEFAULT_HERO_ICON_OPTION_ID } from "@/lib/article-hero-icons";
+import { ArticleHeroIconPicker } from "@/components/blog/ArticleHeroIconPicker";
 
 const ArticleRichTextEditor = dynamic(
   () => import("@/components/blog/ArticleRichTextEditor").then((m) => m.ArticleRichTextEditor),
   { ssr: false },
 );
-
-const SPECIALTIES = [
-  "Cardiology",
-  "Neurology",
-  "Endocrinology",
-  "Gastroenterology",
-  "Nephrology",
-  "Pulmonology",
-  "Psychiatry",
-  "Pediatrics",
-  "Oncology",
-  "Dermatology",
-  "Internal Medicine",
-  "Family Medicine",
-  "Emergency Medicine",
-  "Other",
-];
 
 const ARTICLE_TYPES = [
   "Clinical Overview",
@@ -67,7 +53,11 @@ function todayInput(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-function readFormPreview(form: HTMLFormElement, editor: ArticleRichTextEditorHandle | null): ArticlePreviewData {
+function readFormPreview(
+  form: HTMLFormElement,
+  editor: ArticleRichTextEditorHandle | null,
+  heroIconValue = "🩺",
+): ArticlePreviewData {
   const val = (name: string) => (form.elements.namedItem(name) as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement)?.value ?? "";
   return {
     title: val("artTitle"),
@@ -78,7 +68,7 @@ function readFormPreview(form: HTMLFormElement, editor: ArticleRichTextEditorHan
     read: val("artReadTime"),
     tags: val("artTags"),
     published: val("artPublished"),
-    heroIcon: val("artHeroIcon") || "🩺",
+    heroIcon: heroIconValue,
     authorName: val("artAuthorName"),
     authorCreds: val("artAuthorCreds"),
     authorRole: val("artAuthorRole"),
@@ -100,6 +90,10 @@ export function DoctorArticleSubmitForm() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [previewHtml, setPreviewHtml] = useState("");
   const [isDraft, setIsDraft] = useState(false);
+  const [heroIconOptionId, setHeroIconOptionId] = useState(DEFAULT_HERO_ICON_OPTION_ID);
+  const [heroIcon, setHeroIcon] = useState("🩺");
+  const heroIconRef = useRef("🩺");
+  const heroIconOptionIdRef = useRef(DEFAULT_HERO_ICON_OPTION_ID);
 
   const formRef = useRef<HTMLFormElement>(null);
   const editorRef = useRef<ArticleRichTextEditorHandle>(null);
@@ -121,12 +115,29 @@ export function DoctorArticleSubmitForm() {
         .join(" · ");
       if (role) roleField.value = role;
     }
+    const specField = form.elements.namedItem("artSpec") as HTMLSelectElement;
+    if (!specField.value && profile.specialty) {
+      const match = MEDICAL_SPECIALTIES.find((s) => s.toLowerCase() === profile.specialty?.toLowerCase());
+      if (match) {
+        specField.value = match;
+        const nextOptionId = getHeroIconOptionIdForSpecialty(match);
+        const nextIcon = getDefaultHeroIconForSpecialty(match);
+        heroIconRef.current = nextIcon;
+        heroIconOptionIdRef.current = nextOptionId;
+        setHeroIconOptionId(nextOptionId);
+        setHeroIcon(nextIcon);
+        const preview = readFormPreview(form, editorRef.current, nextIcon);
+        setPreviewHtml(buildArticlePreviewHtml(preview));
+        return;
+      }
+    }
     refreshPreview();
   }, [profile]);
 
-  const refreshPreview = () => {
+  const refreshPreview = (heroIconOverride?: string) => {
     if (!formRef.current) return;
-    setPreviewHtml(buildArticlePreviewHtml(readFormPreview(formRef.current, editorRef.current)));
+    const icon = heroIconOverride ?? heroIconRef.current;
+    setPreviewHtml(buildArticlePreviewHtml(readFormPreview(formRef.current, editorRef.current, icon)));
   };
 
   const resolveCategoryId = (specialty: string): string => {
@@ -174,9 +185,9 @@ export function DoctorArticleSubmitForm() {
       return;
     }
 
-    const preview = readFormPreview(form, editorRef.current);
+    const preview = readFormPreview(form, editorRef.current, heroIconRef.current);
     const pointsRaw = (form.elements.namedItem("artPoints") as HTMLTextAreaElement).value.trim();
-    const summaryPoints = pointsRaw
+    const keyTakeaways = pointsRaw
       .split("\n")
       .map((line) => line.replace(/^[-•*]\s*/, "").trim())
       .filter(Boolean);
@@ -203,8 +214,7 @@ export function DoctorArticleSubmitForm() {
         specialty,
         coverImageUrl: previewUrl || undefined,
         tags,
-        summaryPoints,
-        keyTakeaways: summaryPoints,
+        keyTakeaways,
         references: [{ text: referenceUrl, url: referenceUrl }],
         medicalDisclaimer: coi ? `${DEFAULT_ARTICLE_DISCLAIMER}\n\nConflict of interest: ${coi}` : DEFAULT_ARTICLE_DISCLAIMER,
         seoTitle: title,
@@ -279,7 +289,11 @@ export function DoctorArticleSubmitForm() {
             e.preventDefault();
             void handleSubmit(false);
           }}
-          onInput={refreshPreview}
+          onInput={(e) => {
+            const target = e.target as HTMLElement;
+            if (target.id === "artHeroIconSelect") return;
+            refreshPreview();
+          }}
         >
           <div className="pub-sec-lbl">📄 Article Details</div>
           <div className="form-group">
@@ -295,9 +309,23 @@ export function DoctorArticleSubmitForm() {
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="artSpec">Medical Specialty *</label>
-              <select id="artSpec" name="artSpec" defaultValue="">
+              <select
+                id="artSpec"
+                name="artSpec"
+                defaultValue=""
+                onChange={(e) => {
+                  const specialty = e.target.value;
+                  const nextOptionId = getHeroIconOptionIdForSpecialty(specialty);
+                  const nextIcon = getDefaultHeroIconForSpecialty(specialty);
+                  heroIconRef.current = nextIcon;
+                  heroIconOptionIdRef.current = nextOptionId;
+                  setHeroIconOptionId(nextOptionId);
+                  setHeroIcon(nextIcon);
+                  refreshPreview(nextIcon);
+                }}
+              >
                 <option value="">Select specialty...</option>
-                {SPECIALTIES.map((s) => (
+                {MEDICAL_SPECIALTIES.map((s) => (
                   <option key={s} value={s}>
                     {s}
                   </option>
@@ -345,10 +373,20 @@ export function DoctorArticleSubmitForm() {
               <input type="date" id="artPublished" name="artPublished" defaultValue={todayInput()} />
             </div>
             <div className="form-group">
-              <label htmlFor="artHeroIcon">
+              <label htmlFor="artHeroIconSelect">
                 Hero Illustration (emoji) <span style={{ fontWeight: 400, color: "var(--gray-400)" }}>(cover banner)</span>
               </label>
-              <input type="text" id="artHeroIcon" name="artHeroIcon" maxLength={4} defaultValue="🩺" style={{ maxWidth: 120 }} />
+              <ArticleHeroIconPicker
+                optionId={heroIconOptionId}
+                value={heroIcon}
+                onChange={(nextOptionId, icon) => {
+                  heroIconRef.current = icon;
+                  heroIconOptionIdRef.current = nextOptionId;
+                  setHeroIconOptionId(nextOptionId);
+                  setHeroIcon(icon);
+                  refreshPreview(icon);
+                }}
+              />
             </div>
           </div>
 
@@ -456,7 +494,7 @@ export function DoctorArticleSubmitForm() {
             />
           </div>
 
-          <div className="form-group">
+          <div className="form-group art-content-card">
             <label>
               📝 Article Content <span style={{ fontWeight: 400, color: "var(--gray-400)" }}>(Full article body — required)</span>
             </label>

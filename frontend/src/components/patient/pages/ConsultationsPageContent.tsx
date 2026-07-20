@@ -2,10 +2,11 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ConsultationCard, EmptyState } from "@/components/patient/ui/PatientShared";
+import { EmptyState } from "@/components/patient/ui/PatientShared";
+import { PatientAppointmentCard } from "@/components/patient/ui/PatientAppointmentCard";
 import { DashButton, DashCard, DashPageHeader, FilterPills } from "@/components/patient/ui/PatientPrimitives";
 import { PatientAddNoteModal } from "@/components/patient/notes/PatientAddNoteModal";
-import { formatDateTime, mapAppointmentToConsultation } from "@/lib/data-mappers";
+import { formatDateTime } from "@/lib/data-mappers";
 import { todayFormatted } from "@/lib/patient-utils";
 import { usePatientAppointments, usePatientClinicalNotes } from "@/services/patient-api-hooks";
 import { usePatientUiStore } from "@/store/patient-ui.store";
@@ -37,12 +38,10 @@ export function ConsultationsPageContent() {
     const appointments = appointmentsQuery.data?.data ?? [];
     const up = appointments
       .filter((a) => UPCOMING_STATUSES.has(a.status))
-      .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime())
-      .map((a) => mapAppointmentToConsultation(a));
+      .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime());
     const pa = appointments
       .filter((a) => !UPCOMING_STATUSES.has(a.status))
-      .sort((a, b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime())
-      .map((a) => mapAppointmentToConsultation(a));
+      .sort((a, b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime());
     return { upcoming: up, past: pa };
   }, [appointmentsQuery.data?.data]);
 
@@ -70,7 +69,7 @@ export function ConsultationsPageContent() {
           {appointmentsQuery.isLoading ? (
             <EmptyState message="Loading upcoming consultations..." />
           ) : upcoming.length > 0 ? (
-            upcoming.map((item) => <ConsultationCard key={item.id} item={item} variant="full" />)
+            upcoming.map((appt) => <PatientAppointmentCard key={appt.id} appt={appt} />)
           ) : (
             <EmptyState message="No upcoming consultations scheduled." />
           )}
@@ -82,7 +81,7 @@ export function ConsultationsPageContent() {
           {appointmentsQuery.isLoading ? (
             <EmptyState message="Loading past consultations..." />
           ) : past.length > 0 ? (
-            past.map((item) => <ConsultationCard key={item.id} item={item} variant="full" />)
+            past.map((appt) => <PatientAppointmentCard key={appt.id} appt={appt} />)
           ) : (
             <EmptyState message="No past consultations yet." />
           )}

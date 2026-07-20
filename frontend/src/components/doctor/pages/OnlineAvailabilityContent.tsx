@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import type { DoctorIconComponent } from "@/components/doctor/icons/DoctorIcons";
 import {
   Calendar,
@@ -236,45 +236,34 @@ export function OnlineAvailabilityContent() {
       </DashCard>
 
       <DashCard title={<DoctorIconInline icon={CircleX} size="button">Holidays / Unavailable Dates</DoctorIconInline>}>
-        <div>
+        <div className="cs-holiday-grid">
           {config.holidays.length === 0 ? (
-            <div style={{ fontSize: ".8rem", color: "var(--gray-400)", padding: "6px 0" }}>
-              No unavailable dates added yet.
-            </div>
+            <div className="cs-holiday-empty">No unavailable dates added yet.</div>
           ) : (
             config.holidays.map((h, i) => (
-              <div
-                key={`${h.date}-${i}`}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "9px 0",
-                  borderBottom: "1px solid var(--gray-100)",
-                  fontSize: ".84rem",
-                }}
-              >
-                <span>
+              <Fragment key={`${h.date}-${i}`}>
+                <div className="cs-holiday-date-cell">
                   <DoctorIconInline icon={Calendar} size="sm">
                     {holidayDisplay(h)}
                   </DoctorIconInline>
-                </span>
-                <button type="button" className="tbl-btn" onClick={() => removeHoliday(i)}>
-                  Remove
-                </button>
-              </div>
+                </div>
+                <div className="cs-holiday-action-cell">
+                  <button type="button" className="tbl-btn" onClick={() => removeHoliday(i)}>
+                    Remove
+                  </button>
+                </div>
+              </Fragment>
             ))
           )}
-        </div>
-        <div className="cs-compact-row" style={{ marginTop: 14 }}>
-          <div className="form-group cs-field-w">
+          <div className="form-group cs-field-w cs-holiday-form-date">
             <label>Add Unavailable Date</label>
             <input type="date" value={newHolidayDate} onChange={(e) => setNewHolidayDate(e.target.value)} />
           </div>
-          <div className="form-group">
+          <div className="form-group cs-holiday-form-label">
             <label>Label</label>
             <input
               type="text"
+              size={34}
               value={newHolidayLabel}
               onChange={(e) => setNewHolidayLabel(e.target.value)}
               placeholder="e.g. Conference — offline"

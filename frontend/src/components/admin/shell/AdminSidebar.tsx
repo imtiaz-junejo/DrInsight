@@ -7,6 +7,8 @@ import { useAuthStore } from "@/store/auth.store";
 import { useAdminUiStore } from "@/store/admin-ui.store";
 import { getInitials } from "@/lib/admin-utils";
 import { useAdminNavBadges } from "@/services/cms-api-hooks";
+import { usePublicSiteConfig } from "@/services/configuration-api-hooks";
+import { BRAND_LOGO_ALT, FOOTER_LOGO_SRC } from "@/config/brand-logos";
 import { AdminNavIcon, DoctorIconInline, LogOut } from "@/components/doctor/icons/DoctorIcons";
 
 export function AdminSidebar() {
@@ -18,8 +20,10 @@ export function AdminSidebar() {
   const setSidebarOpen = useAdminUiStore((s) => s.setSidebarOpen);
   const showToast = useAdminUiStore((s) => s.showToast);
   const badgesQuery = useAdminNavBadges();
+  const siteConfig = usePublicSiteConfig();
   const badges = badgesQuery.data ?? {};
   const routeId = adminRouteId(pathname);
+  const footerLogo = siteConfig.data?.footerLogoUrl?.trim() || FOOTER_LOGO_SRC;
 
   const handleSignOut = () => {
     showToast("Signing out...");
@@ -30,11 +34,7 @@ export function AdminSidebar() {
   return (
     <aside className={`sidebar${sidebarOpen ? " open" : ""}`}>
       <div className="sb-logo">
-        <div className="sb-logo-ic">✚</div>
-        <div>
-          <div className="sb-logo-txt">DrInsight</div>
-          <div className="sb-logo-sub">Admin Panel</div>
-        </div>
+        <img src={footerLogo} alt={BRAND_LOGO_ALT} className="sb-logo-img" />
       </div>
       <nav className="sb-nav">
         {adminNav.map((group) => (
@@ -55,7 +55,9 @@ export function AdminSidebar() {
                   <span className="sb-ico">
                     <AdminNavIcon id={item.id} />
                   </span>
-                  {item.name}
+                  <span className="sb-item-label" title={item.name}>
+                    {item.name}
+                  </span>
                   {badge ? <span className="sb-badge">{badge}</span> : null}
                 </Link>
               );

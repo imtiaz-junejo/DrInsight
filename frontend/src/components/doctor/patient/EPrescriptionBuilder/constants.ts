@@ -1,0 +1,72 @@
+export const COMMON_MEDS = [
+  "Amlodipine",
+  "Atorvastatin",
+  "Metformin",
+  "Losartan",
+  "Lisinopril",
+  "Bisoprolol",
+  "Carvedilol",
+  "Furosemide",
+  "Aspirin",
+  "Clopidogrel",
+  "Ramipril",
+  "Telmisartan",
+  "Hydrochlorothiazide",
+  "Amoxicillin",
+  "Azithromycin",
+  "Omeprazole",
+  "Paracetamol",
+  "Ibuprofen",
+  "Sumatriptan",
+  "Naproxen",
+  "Cetirizine",
+  "Salbutamol",
+  "Levothyroxine",
+  "Warfarin",
+  "Ticagrelor",
+];
+
+export const SYMPTOMS = [
+  "Fever",
+  "Cough",
+  "Headache",
+  "Chest pain",
+  "Breathlessness",
+  "Fatigue",
+  "Palpitations",
+  "Dizziness",
+  "Nausea",
+  "Swelling (oedema)",
+  "Abdominal pain",
+  "Sore throat",
+];
+
+export const INVESTIGATIONS = [
+  "CBC",
+  "LFT",
+  "RFT",
+  "HbA1c",
+  "Lipid Profile",
+  "ECG",
+  "Chest X-Ray",
+  "CT Scan",
+  "MRI",
+  "Ultrasound",
+  "Urine Analysis",
+  "NT-proBNP",
+  "TSH",
+  "Serum Electrolytes",
+];
+
+export const MED_ROUTES = [
+  "Oral",
+  "Sublingual",
+  "Topical",
+  "Inhaled",
+  "Injection (IM)",
+  "Injection (IV)",
+  "Nasal",
+  "Ophthalmic",
+];
+
+export const FOOD_OPTIONS = ["", "Before food", "After food", "With food", "Empty stomach", "Either"];

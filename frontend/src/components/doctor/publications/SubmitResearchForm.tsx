@@ -30,19 +30,9 @@ import {
   type PublicationReference,
   type PublicationType,
 } from "@/services/publications-api-hooks";
+import { MEDICAL_SPECIALTIES } from "@/lib/medical-specialties";
 
-export const MEDICAL_SPECIALTIES = [
-  "Cardiovascular",
-  "Neurology",
-  "Endocrine & Metabolic",
-  "Oncology",
-  "Pediatrics",
-  "Mental Health",
-  "Preventive Health",
-  "Infectious Disease",
-  "Dental & Oral Health",
-  "Other",
-] as const;
+export { MEDICAL_SPECIALTIES } from "@/lib/medical-specialties";
 
 export interface AuthorRow {
   name: string;

@@ -64,17 +64,10 @@ export function buildArticlePreviewHtml(d: ArticlePreviewData): string {
     meta("📄", "Type", d.type) +
     meta("👥", "Audience", d.audience);
   const points = pubLines(d.points);
-  const summaryInner = points.length
-    ? `<ul>${points.map((p) => `<li>${escHtml(p)}</li>`).join("")}</ul>`
-    : d.abstract?.trim()
-      ? `<p>${escHtml(d.abstract)}</p>`
-      : "";
-  const summaryBox =
-    points.length || d.abstract?.trim()
-      ? `<div class="summary-box"><h4>📋 Quick Summary</h4>${summaryInner}</div>`
-      : "";
-  const abstractPara =
-    d.abstract?.trim() && points.length ? `<div class="prose"><p>${escHtml(d.abstract)}</p></div>` : "";
+  const summaryInner = d.abstract?.trim() ? `<p>${escHtml(d.abstract)}</p>` : "";
+  const summaryBox = d.abstract?.trim()
+    ? `<div class="summary-box"><h4>📋 Quick Summary</h4>${summaryInner}</div>`
+    : "";
   const authorCard = `<div class="author-row" style="grid-template-columns:1fr"><div class="author-card">` +
     `<div class="author-av" style="background:linear-gradient(135deg,#7c3aed,#4a90d9)">${artInitials(d.authorName)}</div><div>` +
     `<div class="author-label">Written by</div><div class="author-name">${escHtml(d.authorName || "Author")}</div>` +
@@ -104,7 +97,6 @@ export function buildArticlePreviewHtml(d: ArticlePreviewData): string {
     `<div class="author-block">${authorCard}</div>` +
     `<div class="hero-img"><div class="hero-img-inner">${d.heroIcon || "🩺"}</div></div>` +
     summaryBox +
-    abstractPara +
     bodyInner +
     keyTakeaways +
     refBox +

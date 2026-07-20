@@ -4,13 +4,13 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
-  ConsultationCard,
   EmptyState,
   MedicationsList,
   VitalsGrid,
 } from "@/components/patient/ui/PatientShared";
+import { PatientAppointmentCard } from "@/components/patient/ui/PatientAppointmentCard";
 import { CardLink, DashButton, DashCard, DashPageHeader, GridThree, PersonAvatar, StatCardRow } from "@/components/patient/ui/PatientPrimitives";
-import { doctorFullName, formatDate, formatDateTime, getInitials, mapAppointmentToConsultation, mapBlogPostToCard } from "@/lib/data-mappers";
+import { doctorFullName, formatDate, formatDateTime, getInitials, mapBlogPostToCard } from "@/lib/data-mappers";
 import { todayFormatted } from "@/lib/patient-utils";
 import { useNotifications } from "@/services/api-hooks";
 import { ClinicalNotificationItem } from "@/components/clinical-notes/ClinicalNotificationItem";
@@ -84,7 +84,7 @@ export function DashboardPageContent() {
         .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime()),
     [appointments],
   );
-  const upcomingMapped = upcoming.slice(0, 2).map((a) => mapAppointmentToConsultation(a));
+  const upcomingPreview = upcoming.slice(0, 2);
   const tomorrowAppt = upcoming.find((a) => isTomorrow(a.scheduledAt));
 
   const notifications = notificationsQuery.data?.data ?? [];
@@ -209,8 +209,8 @@ export function DashboardPageContent() {
           <div className="cons-list">
             {appointmentsQuery.isLoading ? (
               <EmptyState message="Loading consultations..." />
-            ) : upcomingMapped.length > 0 ? (
-              upcomingMapped.map((item) => <ConsultationCard key={item.id} item={item} />)
+            ) : upcomingPreview.length > 0 ? (
+              upcomingPreview.map((appt) => <PatientAppointmentCard key={appt.id} appt={appt} />)
             ) : (
               <EmptyState message="No upcoming consultations. Book one to get started." />
             )}

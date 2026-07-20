@@ -942,6 +942,27 @@ main:has(.article-detail-page.high-contrast) {
   margin-bottom: 0;
 }
 
+.article-detail-page .ad-prose .callout-body {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--gray-800);
+}
+
+.article-detail-page .ad-prose blockquote {
+  border-left: 3px solid var(--blue);
+  padding: 10px 16px;
+  background: var(--blue-light);
+  border-radius: 0 8px 8px 0;
+  margin: 12px 0;
+  font-style: italic;
+  color: var(--gray-700);
+}
+
+.article-detail-page .ad-prose blockquote p {
+  margin-bottom: 0;
+}
+
 .article-detail-page .ad-prose .pull-quote {
   background: linear-gradient(135deg, var(--blue-dark), var(--blue));
   color: #fff;
@@ -983,7 +1004,7 @@ main:has(.article-detail-page.high-contrast) {
   overflow-x: auto;
   margin: 20px 0;
   border-radius: var(--radius);
-  border: 1px solid var(--gray-200);
+  border: 1px solid var(--gray-300);
 }
 
 .article-detail-page .ad-prose .data-table {
@@ -999,15 +1020,16 @@ main:has(.article-detail-page.high-contrast) {
   text-align: left;
   font-weight: 600;
   font-size: 0.76rem;
+  border: 1px solid var(--gray-300);
 }
 
 .article-detail-page .ad-prose .data-table td {
   padding: 9px 14px;
-  border-bottom: 1px solid var(--gray-100);
+  border: 1px solid var(--gray-300);
 }
 
 .article-detail-page .ad-prose .data-table tr:last-child td {
-  border-bottom: none;
+  border-bottom: 1px solid var(--gray-300);
 }
 
 .article-detail-page .ad-prose .data-table tr:nth-child(even) {

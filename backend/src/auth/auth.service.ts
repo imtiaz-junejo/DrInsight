@@ -16,6 +16,7 @@ import { EmailService } from '../email/email.service';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { ProfileNumberService } from '../prisma/profile-number.service';
 import { ForgotPasswordDto, LoginDto, RegisterDto, ResetPasswordDto } from './dto/auth.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { CompleteProfileDto } from './dto/complete-profile.dto';
 import { JwtPayload } from './strategies/jwt.strategy';
 import {
@@ -812,5 +813,58 @@ export class AuthService {
       refreshToken,
       user,
     };
+  }
+
+  async changePassword(userId: string, dto: ChangePasswordDto) {
+    if (dto.newPassword !== dto.confirmPassword) {
+      throw new BadRequestException('Passwords do not match');
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, firstName: true, lastName: true, passwordHash: true },
+    });
+    if (!user) throw new UnauthorizedException();
+
+    if (!user.passwordHash) {
+      throw new BadRequestException(
+        'No password is set for this account. Use Forgot Password to create one first.',
+      );
+    }
+
+    const valid = await bcrypt.compare(dto.currentPassword, user.passwordHash);
+    if (!valid) {
+      throw new BadRequestException('Current password is incorrect');
+    }
+
+    const samePassword = await bcrypt.compare(dto.newPassword, user.passwordHash);
+    if (samePassword) {
+      throw new BadRequestException('New password cannot match your current password');
+    }
+
+    const passwordHash = await bcrypt.hash(dto.newPassword, 12);
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: userId },
+        data: { passwordHash },
+      }),
+      this.prisma.refreshToken.updateMany({
+        where: { userId, revoked: false },
+        data: { revoked: true },
+      }),
+    ]);
+
+    await this.auditLogService.log({
+      actorUserId: userId,
+      actorName: `${user.firstName} ${user.lastName}`,
+      actorRole: 'USER',
+      action: 'Changed password',
+      target: user.email,
+      severity: AuditSeverity.SENSITIVE,
+      category: AuditCategory.AUTH,
+    });
+
+    return { message: 'Password updated successfully.' };
   }
 }

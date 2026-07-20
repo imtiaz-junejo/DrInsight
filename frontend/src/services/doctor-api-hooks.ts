@@ -441,9 +441,17 @@ export function useUpdateDoctorProfile() {
       const { data } = await api.patch("/doctors/profile", body);
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data: { id?: string; profileSlug?: string | null }) => {
       queryClient.invalidateQueries({ queryKey: ["doctor-profile"] });
       queryClient.invalidateQueries({ queryKey: ["auth-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["doctors"] });
+      if (data?.id) {
+        queryClient.invalidateQueries({ queryKey: ["doctor", data.id] });
+        queryClient.invalidateQueries({ queryKey: ["author", data.id] });
+      }
+      if (data?.profileSlug) {
+        queryClient.invalidateQueries({ queryKey: ["author", data.profileSlug] });
+      }
     },
   });
 }

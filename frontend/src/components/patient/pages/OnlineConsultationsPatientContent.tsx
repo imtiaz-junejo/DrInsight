@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
-import { ConsultationCard, EmptyState } from "@/components/patient/ui/PatientShared";
+import { EmptyState } from "@/components/patient/ui/PatientShared";
+import { PatientAppointmentCard } from "@/components/patient/ui/PatientAppointmentCard";
 import { DashButton, DashCard, DashPageHeader } from "@/components/patient/ui/PatientPrimitives";
-import { mapAppointmentToConsultation } from "@/lib/data-mappers";
 import { todayFormatted } from "@/lib/patient-utils";
 import { usePatientAppointments } from "@/services/patient-api-hooks";
 import { usePatientUiStore } from "@/store/patient-ui.store";
@@ -51,11 +51,9 @@ export function OnlineConsultationsPatientContent({ view }: { view: PatientOnlin
   const list = useMemo(() => {
     const data = appointmentsQuery.data?.data ?? [];
     if (view === "history") {
-      return [...data]
-        .sort((a, b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime())
-        .map((a) => mapAppointmentToConsultation(a));
+      return [...data].sort((a, b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime());
     }
-    return data.map((a) => mapAppointmentToConsultation(a));
+    return data;
   }, [appointmentsQuery.data?.data, view]);
 
   return (
@@ -79,7 +77,7 @@ export function OnlineConsultationsPatientContent({ view }: { view: PatientOnlin
           {appointmentsQuery.isLoading ? (
             <EmptyState message="Loading consultations..." />
           ) : list.length > 0 ? (
-            list.map((item) => <ConsultationCard key={item.id} item={item} variant="full" />)
+            list.map((appt) => <PatientAppointmentCard key={appt.id} appt={appt} />)
           ) : (
             <div className="oc-empty" style={{ padding: "34px 10px", textAlign: "center", color: "var(--gray-400)", fontSize: "0.86rem" }}>
               <span style={{ fontSize: "2rem", display: "block", marginBottom: 8 }}>🗂️</span>

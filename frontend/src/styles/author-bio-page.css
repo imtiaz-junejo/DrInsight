@@ -166,7 +166,7 @@
 .author-bio-page .award-ico {width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--amber),#f59e0b);display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0}
 .author-bio-page .award-item h4 {font-size:.82rem;font-weight:700;color:var(--gray-900);margin-bottom:2px}
 .author-bio-page .award-item p {font-size:.76rem;color:var(--gray-500)}
-.author-bio-page .award-year {font-size:.7rem;font-weight:700;background:#fffbeb;color:var(--amber);padding:2px 8px;border-radius:50px}
+.author-bio-page .award-year {font-size:.7rem;font-weight:700;background:var(--blue-light);color:var(--blue);padding:2px 8px;border-radius:50px;display:inline-block;margin-top:3px}
 .author-bio-page .speaking-list {display:flex;flex-direction:column;gap:9px}
 .author-bio-page .speak-item {display:flex;gap:10px;padding:10px 12px;background:var(--gray-50);border-radius:var(--radius);border-left:3px solid var(--blue)}
 .author-bio-page .speak-item h4 {font-size:.82rem;font-weight:600;color:var(--gray-900);margin-bottom:2px;line-height:1.35}

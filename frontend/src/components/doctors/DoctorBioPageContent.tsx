@@ -22,6 +22,7 @@ import {
   specialtyEmoji,
   starsDisplay,
 } from "@/lib/data-mappers";
+import { resolveDoctorEducationHistory } from "@/lib/doctor-profile-form";
 import type {
   DoctorArticleSummary,
   DoctorProfile,
@@ -314,8 +315,8 @@ export function AuthorBioPageContent({
   };
 
   const educationHistory = useMemo(
-    () => asArray<NonNullable<DoctorProfile["educationHistory"]>[number]>(doctor?.educationHistory),
-    [doctor?.educationHistory],
+    () => resolveDoctorEducationHistory(doctor),
+    [doctor?.education, doctor?.educationHistory],
   );
   const certifications = useMemo(
     () => asArray<NonNullable<DoctorProfile["certifications"]>[number]>(doctor?.certifications),
@@ -918,7 +919,7 @@ export function AuthorBioPageContent({
                       </div>
                     </div>
                   )}
-                  {doctor.education && (
+                  {educationHistory.length === 0 && doctor.education && (
                     <div className="cred-item">
                       <div className="cred-label">Education Summary</div>
                       <div className="cred-val">{doctor.education}</div>

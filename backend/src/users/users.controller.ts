@@ -1,9 +1,10 @@
-import { Controller, Get, Patch, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Patch, Body, Param, Query, Delete, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { UserRole, UserStatus } from '@prisma/client';
 import { UsersService } from './users.service';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/auth.decorators';
+import { DeleteAccountDto, UpdateAccountSettingsDto } from './dto/account-settings.dto';
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -38,6 +39,22 @@ export class UsersController {
     },
   ) {
     return this.usersService.updatePatientProfile(userId, body);
+  }
+
+  @Get('me/account-settings')
+  getAccountSettings(@CurrentUser('id') userId: string) {
+    return this.usersService.getAccountSettings(userId);
+  }
+
+  @Patch('me/account-settings')
+  updateAccountSettings(@CurrentUser('id') userId: string, @Body() body: UpdateAccountSettingsDto) {
+    return this.usersService.updateAccountSettings(userId, body);
+  }
+
+  @Delete('me/account')
+  @HttpCode(HttpStatus.OK)
+  deleteAccount(@CurrentUser('id') userId: string, @Body() body: DeleteAccountDto) {
+    return this.usersService.deleteAccount(userId, body.password, body.confirmation);
   }
 
   @Get()

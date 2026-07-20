@@ -2,12 +2,48 @@
 
 .patient-root .snav-ico,
 .admin-root .sb-ico {
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+.admin-root .admin-sb-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--admin-icon-bg, rgba(148, 163, 184, 0.12));
+  flex-shrink: 0;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-root .admin-sb-icon-badge .dr-icon-shell .dr-icon svg :is(path, circle, ellipse, rect) {
+  stroke: color-mix(in srgb, var(--dr-icon-color, currentColor) 42%, #fff 58%);
+  stroke-width: 0.5px;
+}
+
+.admin-root .sb-item:hover .admin-sb-icon-badge {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--dr-icon-color, #cbd5e1) 28%, transparent);
+}
+
+.admin-root .sb-item.active .admin-sb-icon-badge {
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: none;
+}
+
+.admin-root .sb-item.active .admin-sb-icon-badge,
+.admin-root .sb-item.active .admin-sb-icon-badge .dr-icon {
+  --dr-icon-color: #fff;
+  color: #fff !important;
+}
+
+.admin-root .sb-item.active .admin-sb-icon-badge .dr-icon-shell .dr-icon svg :is(path, circle, ellipse, rect) {
+  stroke: color-mix(in srgb, #fff 72%, transparent);
 }
 
 .patient-root .dr-icon-shell,

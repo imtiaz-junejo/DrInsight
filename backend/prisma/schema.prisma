@@ -20,6 +20,7 @@ model User {
   profileCompletedAt            DateTime?
   lastSeenAt                    DateTime?
   isOnline                      Boolean                @default(false)
+  accountSettings               Json?
   createdAt                     DateTime               @default(now())
   updatedAt                     DateTime               @updatedAt
   answeredQuestions             AskDoctorQuestion[]    @relation("AnsweredBy")

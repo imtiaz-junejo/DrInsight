@@ -1,7 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { AuditCategory, AuditSeverity, UserRole, UserStatus } from '@prisma/client';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { AuditCategory, AuditSeverity, Prisma, UserRole, UserStatus } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditLogService } from '../audit-log/audit-log.service';
+import {
+  DEFAULT_ACCOUNT_SETTINGS,
+  mergeAccountSettings,
+  normalizeAccountSettings,
+  type UserAccountSettings,
+} from './account-settings.util';
+import type { UpdateAccountSettingsDto } from './dto/account-settings.dto';
 
 @Injectable()
 export class UsersService {
@@ -329,5 +337,89 @@ export class UsersService {
       where: { id: userId },
       data: { isOnline, lastSeenAt: new Date() },
     });
+  }
+
+  async getAccountSettings(userId: string): Promise<UserAccountSettings> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { accountSettings: true },
+    });
+    if (!user) throw new NotFoundException('User not found');
+    return normalizeAccountSettings(user.accountSettings ?? DEFAULT_ACCOUNT_SETTINGS);
+  }
+
+  async updateAccountSettings(userId: string, patch: UpdateAccountSettingsDto): Promise<UserAccountSettings> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { accountSettings: true },
+    });
+    if (!user) throw new NotFoundException('User not found');
+
+    const next = mergeAccountSettings(user.accountSettings, patch as Partial<UserAccountSettings>);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { accountSettings: next },
+    });
+    return next;
+  }
+
+  async deleteAccount(userId: string, password: string, confirmation: string) {
+    if (confirmation.trim().toUpperCase() !== 'DELETE') {
+      throw new BadRequestException('Type DELETE to confirm account deletion');
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, firstName: true, lastName: true, passwordHash: true, status: true },
+    });
+    if (!user) throw new NotFoundException('User not found');
+    if (user.status === UserStatus.INACTIVE) {
+      throw new BadRequestException('This account has already been deleted');
+    }
+
+    if (!user.passwordHash) {
+      throw new BadRequestException(
+        'Password confirmation is required. Set a password using Forgot Password, then try again.',
+      );
+    }
+
+    const valid = await bcrypt.compare(password, user.passwordHash);
+    if (!valid) {
+      throw new BadRequestException('Incorrect password');
+    }
+
+    const anonymizedEmail = `deleted+${user.id}@deleted.drinsight.local`;
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          status: UserStatus.INACTIVE,
+          email: anonymizedEmail,
+          passwordHash: null,
+          isOnline: false,
+          avatarUrl: null,
+          phone: null,
+          accountSettings: Prisma.DbNull,
+        },
+      }),
+      this.prisma.refreshToken.updateMany({
+        where: { userId, revoked: false },
+        data: { revoked: true },
+      }),
+    ]);
+
+    await this.auditLogService.log({
+      actorUserId: userId,
+      actorName: `${user.firstName} ${user.lastName}`,
+      actorRole: 'USER',
+      action: 'Deleted account',
+      target: `${user.firstName} ${user.lastName} (${user.email})`,
+      severity: AuditSeverity.SENSITIVE,
+      category: AuditCategory.AUTH,
+      details: { previousEmail: user.email },
+    });
+
+    return { message: 'Your account has been permanently deleted.' };
   }
 }

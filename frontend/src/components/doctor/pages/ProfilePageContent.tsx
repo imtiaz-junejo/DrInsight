@@ -2,15 +2,20 @@
 
 import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from "react";
 import {
+  AdFacebookIcon,
+  AdInstagramIcon,
+  AdLinkedInIcon,
+  AdXIcon,
+  AdYouTubeIcon,
+} from "@/components/blog/ArticleDetailIcons";
+import {
   BadgeCheck,
-  BookOpenText,
+  Mic,
   CircleUserRound,
   DoctorIcon,
   DoctorIconInline,
   FileText,
   Globe,
-  Link,
-  MessageSquare,
   Pencil,
   PhysicianDashboardLabel,
   Save,
@@ -27,10 +32,13 @@ import {
 import {
   displayDob,
   emptyDoctorProfileForm,
+  educationHistoryToText,
   formToDoctorPayload,
   formToUserPayload,
   memberSinceLabel,
+  normalizeEducationText,
   profileToForm,
+  resolveDoctorEducationHistory,
   type DoctorProfileFormState,
 } from "@/lib/doctor-profile-form";
 import { todayFormatted } from "@/lib/doctor-utils";
@@ -48,6 +56,14 @@ import {
 import { useAuthProfile } from "@/services/patient-api-hooks";
 import { useAuthStore } from "@/store/auth.store";
 import { useDoctorUiStore } from "@/store/doctor-ui.store";
+import {
+  AWARD_ICONS,
+  BOARD_CERT_ICONS,
+  LECTURE_TYPES,
+  ProfileIconPicker,
+  ProfilePipeTextArea,
+  ProfileTypePicker,
+} from "@/components/doctor/pages/ProfileTextPickers";
 
 function FormField({
   label,
@@ -55,7 +71,7 @@ function FormField({
   full,
   children,
 }: {
-  label: string;
+  label: React.ReactNode;
   hint?: string;
   full?: boolean;
   children: React.ReactNode;
@@ -107,6 +123,36 @@ function TextArea({
   return <textarea rows={rows} value={value} onChange={(e) => onChange(e.target.value)} />;
 }
 
+function EducationTextArea({
+  value,
+  onChange,
+  rows = 4,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  rows?: number;
+}) {
+  const lineCount = value ? value.split("\n").length : 1;
+
+  return (
+    <div className="dp-education-textarea-wrap">
+      <div className="dp-education-textarea-glyphs" aria-hidden>
+        {Array.from({ length: lineCount }, (_, index) => (
+          <div key={index} className="dp-education-textarea-glyph">
+            🎓
+          </div>
+        ))}
+      </div>
+      <textarea
+        className="dp-education-textarea"
+        rows={rows}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      />
+    </div>
+  );
+}
+
 function ChipList({ items }: { items: string[] }) {
   if (!items.length) {
     return <span style={{ color: "var(--gray-400)", fontSize: "0.82rem" }}>None added</span>;
@@ -122,15 +168,16 @@ function ChipList({ items }: { items: string[] }) {
   );
 }
 
-function LineList({ items }: { items: string[] }) {
+function EducationLineList({ items }: { items: string[] }) {
   if (!items.length) {
     return <span style={{ color: "var(--gray-400)", fontSize: "0.82rem" }}>None added</span>;
   }
   return (
     <>
       {items.map((item) => (
-        <div key={item} className="dp-line-item">
-          {item}
+        <div key={item} className="dp-education-item">
+          <span className="ico">🎓</span>
+          <span>{item}</span>
         </div>
       ))}
     </>
@@ -145,9 +192,7 @@ function CertGrid({ items }: { items: DoctorCertificationItem[] }) {
     <div className="dp-cert-grid">
       {items.map((item, index) => (
         <div key={`${item.title}-${index}`} className="dp-cert-item">
-          <div className="ico">
-            <DoctorIcon icon={BadgeCheck} size="button" />
-          </div>
+          <div className="ico">{item.icon ?? "🏥"}</div>
           <div className="title">{item.title}</div>
           {item.subtitle ? <div className="sub">{item.subtitle}</div> : null}
         </div>
@@ -164,14 +209,11 @@ function AwardList({ items }: { items: DoctorAwardItem[] }) {
     <>
       {items.map((item, index) => (
         <div key={`${item.title}-${index}`} className="dp-list-item">
-          <span className="ico">
-            <DoctorIcon icon={Star} size="sm" />
-          </span>
+          <span className="ico">{item.icon ?? "🏆"}</span>
           <div>
             <div className="title">{item.title}</div>
-            <div className="sub">
-              {[item.organization, item.year].filter(Boolean).join(" · ")}
-            </div>
+            {item.organization ? <div className="sub">{item.organization}</div> : null}
+            {item.year ? <span className="dp-award-year">{item.year}</span> : null}
           </div>
         </div>
       ))}
@@ -179,28 +221,64 @@ function AwardList({ items }: { items: DoctorAwardItem[] }) {
   );
 }
 
+function speakingTypeMeta(type: string): { badgeClass: string; label: string } {
+  const normalized = type.trim().toLowerCase();
+
+  if (normalized.includes("webinar")) {
+    return { badgeClass: "dp-speak-webinar", label: "Webinar" };
+  }
+  if (normalized.includes("conference") || normalized.includes("keynote")) {
+    return { badgeClass: "dp-speak-conference", label: "Conference" };
+  }
+  if (normalized.includes("grand rounds")) {
+    return { badgeClass: "dp-speak-lecture", label: "Grand Rounds" };
+  }
+  if (normalized.includes("teaching")) {
+    return { badgeClass: "dp-speak-lecture", label: "Teaching" };
+  }
+  if (normalized.includes("lecture")) {
+    return { badgeClass: "dp-speak-lecture", label: "Lecture" };
+  }
+
+  const label = type
+    ? type.charAt(0).toUpperCase() + type.slice(1)
+    : "Lecture";
+  return { badgeClass: "dp-speak-lecture", label };
+}
+
 function SpeakingList({ items }: { items: DoctorSpeakingItem[] }) {
   if (!items.length) {
     return <span style={{ color: "var(--gray-400)", fontSize: "0.82rem" }}>None added</span>;
   }
   return (
-    <>
-      {items.map((item, index) => (
-        <div key={`${item.title}-${index}`} className="dp-list-item">
-          <span className="ico">
-            <DoctorIcon icon={MessageSquare} size="sm" />
-          </span>
-          <div>
-            <div className="title">{item.title}</div>
-            <div className="sub">
-              {[item.venue, item.type, item.year].filter(Boolean).join(" · ")}
+    <div className="dp-speak-list">
+      {items.map((item, index) => {
+        const meta = speakingTypeMeta(item.type);
+        return (
+          <div key={`${item.title}-${index}`} className="dp-speak-item">
+            <div>
+              <div className="title">{item.title}</div>
+              {item.venue ? <div className="sub">{item.venue}</div> : null}
+              {(item.type || item.year) && (
+                <span className={`dp-speak-type ${meta.badgeClass}`}>
+                  {[meta.label, item.year].filter(Boolean).join(" · ")}
+                </span>
+              )}
             </div>
           </div>
-        </div>
-      ))}
-    </>
+        );
+      })}
+    </div>
   );
 }
+
+const SOCIAL_PLATFORMS = [
+  { key: "facebook", label: "Facebook", color: "#1877f2", Icon: AdFacebookIcon },
+  { key: "twitter", label: "Twitter / X", color: "#0f1419", Icon: AdXIcon },
+  { key: "youtube", label: "YouTube", color: "#ff0000", Icon: AdYouTubeIcon },
+  { key: "instagram", label: "Instagram", color: "#e1306c", Icon: AdInstagramIcon },
+  { key: "linkedin", label: "LinkedIn", color: "#0a66c2", Icon: AdLinkedInIcon },
+] as const;
 
 function SocialLinks({
   facebook,
@@ -215,28 +293,29 @@ function SocialLinks({
   instagram?: string | null;
   linkedin?: string | null;
 }) {
-  const links = [
-    ["Facebook", facebook],
-    ["Twitter / X", twitter],
-    ["YouTube", youtube],
-    ["Instagram", instagram],
-    ["LinkedIn", linkedin],
-  ].filter(([, url]) => Boolean(url)) as Array<[string, string]>;
+  const urls = { facebook, twitter, youtube, instagram, linkedin };
+  const links = SOCIAL_PLATFORMS.filter((platform) => Boolean(urls[platform.key]?.trim()));
 
   if (!links.length) {
     return <span style={{ color: "var(--gray-400)", fontSize: "0.82rem" }}>No social links added</span>;
   }
 
   return (
-    <>
-      {links.map(([label, url]) => (
-        <a key={label} href={url} target="_blank" rel="noopener noreferrer" className="dp-social-link">
-          <DoctorIconInline icon={Link} size="sm">
-            {label}
-          </DoctorIconInline>
+    <div className="dp-social-list">
+      {links.map(({ key, label, color, Icon }) => (
+        <a
+          key={key}
+          href={urls[key]!}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="dp-social-link"
+          style={{ color, borderColor: `${color}33`, background: `${color}10` }}
+        >
+          <Icon size={16} />
+          <span>{label}</span>
         </a>
       ))}
-    </>
+    </div>
   );
 }
 
@@ -368,7 +447,7 @@ export function ProfilePageContent() {
   const readView = useMemo(() => {
     if (!doctorProfile) return null;
     const expertise = doctorProfile.expertise ?? [];
-    const educationLines = (doctorProfile.education ?? "")
+    const educationLines = educationHistoryToText(resolveDoctorEducationHistory(doctorProfile))
       .split("\n")
       .map((line) => line.trim())
       .filter(Boolean);
@@ -450,8 +529,8 @@ export function ProfilePageContent() {
           <DashCard title={<DoctorIconInline icon={Stethoscope} size="button">Areas of Expertise</DoctorIconInline>}>
             <ChipList items={expertise} />
           </DashCard>
-          <DashCard title={<DoctorIconInline icon={BookOpenText} size="button">Education & Training</DoctorIconInline>}>
-            <LineList items={educationLines} />
+          <DashCard title="🎓 Education & Training">
+            <EducationLineList items={educationLines} />
           </DashCard>
         </GridTwo>
 
@@ -463,7 +542,7 @@ export function ProfilePageContent() {
           <AwardList items={doctorProfile.awards ?? []} />
         </DashCard>
 
-        <DashCard title={<DoctorIconInline icon={MessageSquare} size="button">Lectures, Conferences & Teaching</DoctorIconInline>}>
+        <DashCard title={<DoctorIconInline icon={Mic} size="button">Lectures, Conferences & Teaching</DoctorIconInline>}>
           <SpeakingList items={doctorProfile.speakingEngagements ?? []} />
         </DashCard>
 
@@ -593,8 +672,8 @@ export function ProfilePageContent() {
           <FormField label="Areas of Expertise" hint="(comma-separated)" full>
             <TextArea value={form.expertise} onChange={(v) => patchForm("expertise", v)} rows={2} />
           </FormField>
-          <FormField label="Education & Training" hint="(one per line)" full>
-            <TextArea value={form.education} onChange={(v) => patchForm("education", v)} rows={4} />
+          <FormField label={<>🎓 Education & Training</>} hint="(one per line)" full>
+            <EducationTextArea value={form.education} onChange={(v) => patchForm("education", v)} rows={4} />
           </FormField>
         </div>
       </DashCard>
@@ -603,10 +682,22 @@ export function ProfilePageContent() {
         <div className="dp-form-grid">
           <FormField
             label="Board Certifications & Memberships"
-            hint="(one per line — icon|Title|Detail, e.g. hospital|American Board of Internal Medicine|Board Certified · 2009)"
+            hint="(one per line — icon|Title|Detail, e.g. 🏥|American Board of Internal Medicine|Board Certified · 2009)"
             full
           >
-            <TextArea value={form.boardCerts} onChange={(v) => patchForm("boardCerts", v)} rows={4} />
+            <ProfilePipeTextArea
+              value={form.boardCerts}
+              onChange={(v) => patchForm("boardCerts", v)}
+              rows={4}
+              picker={(insertAtCursor) => (
+                <ProfileIconPicker
+                  icons={BOARD_CERT_ICONS}
+                  hint="Title|Detail"
+                  mutedIconBorder
+                  onInsert={(icon) => insertAtCursor(`${icon}|`)}
+                />
+              )}
+            />
           </FormField>
         </div>
       </DashCard>
@@ -615,22 +706,41 @@ export function ProfilePageContent() {
         <div className="dp-form-grid">
           <FormField
             label="Awards & Honors"
-            hint="(one per line — icon|Title|Organization|Year, e.g. gold|Best Research Award|AAN Annual Meeting|2024)"
+            hint="(one per line — icon|Title|Organization|Year, e.g. 🥇|Best Research Award|AAN Annual Meeting|2024)"
             full
           >
-            <TextArea value={form.awards} onChange={(v) => patchForm("awards", v)} rows={4} />
+            <ProfilePipeTextArea
+              value={form.awards}
+              onChange={(v) => patchForm("awards", v)}
+              rows={4}
+              picker={(insertAtCursor) => (
+                <ProfileIconPicker
+                  icons={AWARD_ICONS}
+                  hint="Title|Organization|Year"
+                  mutedIconBorder
+                  onInsert={(icon) => insertAtCursor(`${icon}|`)}
+                />
+              )}
+            />
           </FormField>
         </div>
       </DashCard>
 
-      <DashCard title={<DoctorIconInline icon={MessageSquare} size="button">Lectures, Conferences & Teaching</DoctorIconInline>}>
+      <DashCard title={<DoctorIconInline icon={Mic} size="button">Lectures, Conferences & Teaching</DoctorIconInline>}>
         <div className="dp-form-grid">
           <FormField
             label="Lectures, Conferences & Teaching"
             hint="(one per line — Title|Venue|Type|Year, e.g. Keynote: Topic|AAN Meeting, Boston|Conference|2024)"
             full
           >
-            <TextArea value={form.lectures} onChange={(v) => patchForm("lectures", v)} rows={4} />
+            <ProfilePipeTextArea
+              value={form.lectures}
+              onChange={(v) => patchForm("lectures", v)}
+              rows={4}
+              picker={(insertAtCursor) => (
+                <ProfileTypePicker types={LECTURE_TYPES} onInsert={insertAtCursor} />
+              )}
+            />
           </FormField>
         </div>
       </DashCard>

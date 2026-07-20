@@ -67,6 +67,7 @@ import {
   Palette,
   HamburgerMenu,
   Mailbox,
+  Microphone,
   Dollar,
   Hospital,
   Chart,
@@ -115,6 +116,43 @@ export const DOCTOR_COLORS: Record<DoctorColorTone, string> = {
   success: "#047857",
 };
 
+/** High-contrast icon colors for the admin dark sidebar */
+export const ADMIN_SIDEBAR_COLORS: Record<DoctorColorTone, string> = {
+  blue: "#60A5FA",
+  purple: "#A78BFA",
+  profile: "#C4B5FD",
+  cyan: "#67E8F9",
+  red: "#F87171",
+  indigo: "#A5B4FC",
+  teal: "#5EEAD4",
+  orange: "#FB923C",
+  gold: "#FCD34D",
+  amber: "#FBBF24",
+  gray: "#CBD5E1",
+  green: "#4ADE80",
+  warning: "#FB923C",
+  error: "#F87171",
+  success: "#4ADE80",
+};
+
+export const ADMIN_SIDEBAR_BG: Record<DoctorColorTone, string> = {
+  blue: "rgba(96, 165, 250, 0.16)",
+  purple: "rgba(167, 139, 250, 0.16)",
+  profile: "rgba(196, 181, 253, 0.16)",
+  cyan: "rgba(103, 232, 249, 0.14)",
+  red: "rgba(248, 113, 113, 0.16)",
+  indigo: "rgba(165, 180, 252, 0.16)",
+  teal: "rgba(94, 234, 212, 0.14)",
+  orange: "rgba(251, 146, 60, 0.16)",
+  gold: "rgba(252, 211, 77, 0.16)",
+  amber: "rgba(251, 191, 36, 0.16)",
+  gray: "rgba(203, 213, 225, 0.12)",
+  green: "rgba(74, 222, 128, 0.14)",
+  warning: "rgba(251, 146, 60, 0.16)",
+  error: "rgba(248, 113, 113, 0.16)",
+  success: "rgba(74, 222, 128, 0.14)",
+};
+
 const SIZE_MAP: Record<DoctorIconSize, number> = {
   sidebar: 20,
   header: 20,
@@ -153,6 +191,7 @@ export const Trash2 = TrashBinTrash;
 export const Globe = Global;
 export const MessageSquare = ChatRound;
 export const MessageCircle = ChatRound;
+export const Mic = Microphone;
 export const Pencil = Pen;
 export const FileText = DocumentText;
 export const RotateCw = RefreshCircle;
@@ -203,6 +242,7 @@ const ICON_TONE_MAP = new Map<Icon, DoctorColorTone>([
   [Global, "gray"],
   [Phone, "cyan"],
   [ChatRound, "cyan"],
+  [Microphone, "orange"],
   [Pen, "orange"],
   [ClipboardList, "indigo"],
   [DocumentText, "orange"],
@@ -415,7 +455,22 @@ export function PatientNavIcon({ id }: { id: string }) {
 
 export function AdminNavIcon({ id }: { id: string }) {
   const meta = ADMIN_NAV_META[id] ?? ADMIN_NAV_META.dashboard;
-  return <DoctorIcon icon={meta.icon} size="sidebar" tone={meta.tone} />;
+  const color = ADMIN_SIDEBAR_COLORS[meta.tone];
+  const bg = ADMIN_SIDEBAR_BG[meta.tone];
+
+  return (
+    <span
+      className="admin-sb-icon-badge"
+      style={
+        {
+          "--admin-icon-bg": bg,
+          "--dr-icon-color": color,
+        } as CSSProperties
+      }
+    >
+      <DoctorIcon icon={meta.icon} size="sidebar" color={color} />
+    </span>
+  );
 }
 
 type DoctorIconInlineProps = {
@@ -502,6 +557,7 @@ export {
   Logout,
   Magnifier,
   Mailbox,
+  Microphone,
   Palette,
   Pen,
   PenNewSquare,

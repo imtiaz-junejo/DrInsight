@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { DashCard, DashPageHeader } from "@/components/doctor/ui/DoctorPrimitives";
 import { slugifyTitle } from "@/lib/blog-toc";
 import { todayFormatted } from "@/lib/doctor-utils";
+import { MEDICAL_SPECIALTIES } from "@/lib/medical-specialties";
 import { uploadFile } from "@/lib/upload";
 import { useBlogCategories } from "@/services/api-hooks";
 import {
@@ -371,9 +372,9 @@ export function SubmitArticleForm({ mode, editSlug }: SubmitArticleFormProps) {
               <label htmlFor="artSpec">Medical Specialty *</label>
               <select id="artSpec" name="artSpec" defaultValue="">
                 <option value="">Select specialty...</option>
-                {categories?.map((cat) => (
-                  <option key={cat.slug} value={cat.name}>
-                    {cat.name}
+                {MEDICAL_SPECIALTIES.map((specialty) => (
+                  <option key={specialty} value={specialty}>
+                    {specialty}
                   </option>
                 ))}
               </select>

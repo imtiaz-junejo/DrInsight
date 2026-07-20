@@ -1,6 +1,7 @@
 import type {
   DoctorAwardItem,
   DoctorCertificationItem,
+  DoctorEducationItem,
   DoctorProfile,
   DoctorSpeakingItem,
 } from "@/services/api-hooks";
@@ -36,6 +37,83 @@ export type DoctorProfileFormState = {
   instagram: string;
   linkedin: string;
 };
+
+export function normalizeEducationText(text: string): string {
+  return text
+    .split("\n")
+    .map((line) => line.replace(/^\s*🎓\s*/, ""))
+    .join("\n");
+}
+
+export function parseEducationLine(line: string): DoctorEducationItem {
+  const trimmed = line.trim();
+  if (!trimmed) {
+    return { icon: "🎓", title: "", institution: "", year: "" };
+  }
+
+  const yearMatch = trimmed.match(/\s·\s*(\d{4}(?:\s*[–-]\s*present)?)\s*$/i);
+  const year = yearMatch?.[1] ?? "";
+  const rest = yearMatch ? trimmed.slice(0, yearMatch.index).trim() : trimmed;
+  const parts = rest.split(/\s[—–-]\s/).map((part) => part.trim()).filter(Boolean);
+
+  if (parts.length >= 2) {
+    return {
+      icon: "🎓",
+      title: parts[0],
+      institution: parts.slice(1).join(" — "),
+      year,
+    };
+  }
+
+  return {
+    icon: "🎓",
+    title: rest,
+    institution: "",
+    year,
+  };
+}
+
+export function textToEducationHistory(text: string): DoctorEducationItem[] {
+  return normalizeEducationText(text)
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map(parseEducationLine);
+}
+
+export function educationHistoryToText(items?: DoctorEducationItem[] | null): string {
+  return (items ?? [])
+    .map((item) => {
+      const segments = [item.title, item.institution].filter(Boolean);
+      let line = segments.join(" — ");
+      if (item.year) {
+        line = line ? `${line} · ${item.year}` : item.year;
+      }
+      return line;
+    })
+    .filter(Boolean)
+    .join("\n");
+}
+
+function resolveEducationText(doctor: DoctorProfile): string {
+  const fromEducation = normalizeEducationText(doctor.education ?? "");
+  if (fromEducation.trim()) return fromEducation;
+  return educationHistoryToText(doctor.educationHistory);
+}
+
+export function resolveDoctorEducationHistory(doctor?: Pick<DoctorProfile, "education" | "educationHistory"> | null) {
+  const educationText = normalizeEducationText(doctor?.education ?? "").trim();
+  if (educationText) {
+    return textToEducationHistory(educationText);
+  }
+
+  const structured = doctor?.educationHistory;
+  if (Array.isArray(structured) && structured.length > 0) {
+    return structured;
+  }
+
+  return [];
+}
 
 export function emptyDoctorProfileForm(): DoctorProfileFormState {
   return {
@@ -183,7 +261,7 @@ export function profileToForm(
     bioShort: doctor.bio ?? "",
     bioFull: doctor.bioFull ?? "",
     expertise: (doctor.expertise ?? []).join(", "),
-    education: doctor.education ?? "",
+    education: resolveEducationText(doctor),
     boardCerts: certsToText(doctor.certifications),
     awards: awardsToText(doctor.awards),
     lectures: lecturesToText(doctor.speakingEngagements),
@@ -197,6 +275,9 @@ export function profileToForm(
 
 export function formToDoctorPayload(form: DoctorProfileFormState): Record<string, unknown> {
   const experienceYears = Number.parseInt(form.experience, 10);
+  const educationText = normalizeEducationText(form.education).trim();
+  const educationHistory = textToEducationHistory(educationText);
+
   return {
     specialty: form.specialty.trim() || undefined,
     credentials: form.credentials.trim() || undefined,
@@ -216,7 +297,8 @@ export function formToDoctorPayload(form: DoctorProfileFormState): Record<string
       .split(",")
       .map((value) => value.trim())
       .filter(Boolean),
-    education: form.education.trim() || undefined,
+    education: educationText,
+    educationHistory,
     city: form.city.trim() || undefined,
     country: form.country.trim() || undefined,
     dateOfBirth: form.dob || undefined,

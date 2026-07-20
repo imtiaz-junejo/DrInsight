@@ -101,7 +101,7 @@ export function appointmentStatusChip(status: string): { chip: string; chipLabel
     PENDING: { chip: "cc-pend", chipLabel: "⏳ Pending", cardClass: "upcoming" },
     IN_PROGRESS: { chip: "cc-live", chipLabel: "🔴 Live", cardClass: "upcoming" },
     COMPLETED: { chip: "cc-done", chipLabel: "✓ Completed", cardClass: "completed" },
-    CANCELLED: { chip: "cc-cancel", chipLabel: "✕ Cancelled", cardClass: "completed" },
+    CANCELLED: { chip: "cc-cancel", chipLabel: "✕ Cancelled", cardClass: "cancelled" },
   };
   return map[status] ?? { chip: "cc-up", chipLabel: status, cardClass: "upcoming" };
 }
