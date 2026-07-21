@@ -16,7 +16,7 @@ export function BlogArticleCard({ post }: BlogArticleCardProps) {
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="blog-card blog-card--accent bg-gray-200 border-[1.5px] border-gray-300"
+      className="blog-card blog-card--accent bg-gray-100 border-[1.5px] border-gray-300"
       data-cat={post.category?.slug ?? "all"}
       style={categoryAccentStyle(visuals)}
     >
@@ -51,7 +51,7 @@ export function BlogArticleGridSkeleton({ count = 6 }: { count?: number }) {
   return (
     <>
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="blog-card blog-card--skeleton bg-gray-200 border-[1.5px] border-gray-300" aria-hidden>
+        <div key={i} className="blog-card blog-card--skeleton bg-gray-100 border-[1.5px] border-gray-300" aria-hidden>
           <div className="blog-thumb blog-skeleton-thumb" />
           <div className="blog-body">
             <div className="blog-skeleton-line blog-skeleton-line--sm" />

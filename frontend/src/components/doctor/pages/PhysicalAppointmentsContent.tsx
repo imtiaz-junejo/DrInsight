@@ -7,6 +7,7 @@ import {
   BadgeCheck,
   Calendar,
   CalendarClock,
+  Circle,
   CircleX,
   ClipboardList,
   Clock3,
@@ -16,13 +17,16 @@ import {
   MessageCircleX,
   MessageSquareMore,
   PhysicianDashboardLabel,
+  Pill,
   Stethoscope,
   Bell,
+  UserRound,
+  Wallet,
   X,
 } from "@/components/doctor/icons/DoctorIcons";
 import { ConsModal, ConsModalButton } from "@/components/doctor/ui/ConsModal";
-import { DashCard, DashPageHeader } from "@/components/doctor/ui/DoctorPrimitives";
-import { formatDate, isSameDay } from "@/lib/data-mappers";
+import { DashCard, DashPageHeader, PersonAvatar } from "@/components/doctor/ui/DoctorPrimitives";
+import { formatDate, getInitials, gradientForId, isSameDay } from "@/lib/data-mappers";
 import { todayFormatted } from "@/lib/doctor-utils";
 import {
   useDoctorAppointments,
@@ -59,7 +63,7 @@ const VIEW_META: Record<PhysicalView, [ReactNode, string]> = {
     <DoctorIconInline key="done" icon={BadgeCheck} size="button">
       Completed Appointments
     </DoctorIconInline>,
-    "In-person visits you have completed",
+    "No completed appointments yet.",
   ],
   cancelled: [
     <DoctorIconInline key="cancel" icon={CircleX} size="button">
@@ -148,6 +152,65 @@ function apptTime(appt: Appointment): string {
 
 function apptDateLabel(appt: Appointment): string {
   return isSameDay(new Date(appt.scheduledAt), new Date()) ? "Today" : formatDate(appt.scheduledAt);
+}
+
+function cardClass(appt: Appointment): string {
+  if (appt.status === "COMPLETED") return "completed";
+  if (appt.status === "CANCELLED") return "cancelled";
+  return "upcoming";
+}
+
+function feeLabel(appt: Appointment): string | null {
+  if (!appt.payment?.amountCents) return null;
+  const amount = (appt.payment.amountCents / 100).toLocaleString();
+  return appt.payment.currency?.toUpperCase() === "USD" ? `$${amount}` : `Rs. ${amount}`;
+}
+
+function physApptChip(appt: Appointment) {
+  switch (appt.status) {
+    case "PENDING":
+      return (
+        <span className="cons-chip cc-pending">
+          <DoctorIconInline icon={Clock3} size="sm">
+            Pending Approval
+          </DoctorIconInline>
+        </span>
+      );
+    case "CONFIRMED":
+      return (
+        <span className="cons-chip cc-up">
+          <DoctorIconInline icon={Calendar} size="sm">
+            Upcoming
+          </DoctorIconInline>
+        </span>
+      );
+    case "IN_PROGRESS":
+      return (
+        <span className="cons-chip cc-live">
+          <DoctorIconInline icon={Circle} size="sm">
+            Ongoing
+          </DoctorIconInline>
+        </span>
+      );
+    case "COMPLETED":
+      return (
+        <span className="cons-chip cc-done">
+          <DoctorIconInline icon={BadgeCheck} size="sm">
+            Completed
+          </DoctorIconInline>
+        </span>
+      );
+    case "CANCELLED":
+      return (
+        <span className="cons-chip cc-cancel">
+          <DoctorIconInline icon={CircleX} size="sm">
+            Cancelled
+          </DoctorIconInline>
+        </span>
+      );
+    default:
+      return <span className="cons-chip cc-up">{appt.status}</span>;
+  }
 }
 
 function toLocalInputDate(d: Date): string {
@@ -306,17 +369,97 @@ export function PhysicalAppointmentsContent({ view }: { view: PhysicalView }) {
         </>
       );
     }
-    if (view === "completed") {
-      return (
-        <button type="button" className="tbl-btn" onClick={() => setModal({ kind: "details", appt })}>
-          View Summary
-        </button>
-      );
-    }
     return (
       <button type="button" className="tbl-btn" onClick={() => setModal({ kind: "details", appt })}>
         Details
       </button>
+    );
+  };
+
+  const completedCardActions = (appt: Appointment) => (
+    <>
+      <button type="button" className="ca-btn" onClick={() => setModal({ kind: "details", appt })}>
+        <DoctorIconInline icon={ClipboardList} size="sm">
+          Full Summary
+        </DoctorIconInline>
+      </button>
+      {appt.prescription?.id ? (
+        <Link href={`/doctor/prescriptions/${appt.prescription.id}`} className="ca-btn primary" style={{ textDecoration: "none" }}>
+          <DoctorIconInline icon={Pill} size="sm">
+            View e-Prescription
+          </DoctorIconInline>
+        </Link>
+      ) : (
+        <Link href="/doctor/prescriptions/new" className="ca-btn primary" style={{ textDecoration: "none" }}>
+          <DoctorIconInline icon={Pill} size="sm">
+            Fill e-Prescription
+          </DoctorIconInline>
+        </Link>
+      )}
+    </>
+  );
+
+  const appointmentCard = (appt: Appointment) => {
+    const fee = feeLabel(appt);
+    return (
+      <div key={appt.id} className={`cons-card ${cardClass(appt)}`}>
+        <div className="cons-top">
+          <PersonAvatar
+            initials={getInitials(appt.patient?.user?.firstName, appt.patient?.user?.lastName)}
+            seed={appt.id}
+            style={{ background: gradientForId(appt.id) }}
+          />
+          <div>
+            <div className="cons-dr-name">{patientName(appt)}</div>
+            <div className="cons-dr-spec">
+              <DoctorIconInline icon={UserRound} size="sm">
+                Patient{appt.patient?.patientNumber ? ` · ID ${appt.patient.patientNumber}` : ""}
+              </DoctorIconInline>
+            </div>
+          </div>
+          {physApptChip(appt)}
+        </div>
+        <div className="cons-details">
+          <span>
+            <DoctorIconInline icon={Stethoscope} size="sm">
+              In-Person Visit
+            </DoctorIconInline>
+          </span>
+          <span>
+            <DoctorIconInline icon={Calendar} size="sm">
+              {formatDate(appt.scheduledAt)}
+            </DoctorIconInline>
+          </span>
+          <span>
+            <DoctorIconInline icon={Clock3} size="sm">
+              {apptTime(appt)}
+            </DoctorIconInline>
+          </span>
+          <span>
+            <DoctorIconInline icon={Clock3} size="sm">
+              {appt.durationMinutes} min
+            </DoctorIconInline>
+          </span>
+          <span>
+            <DoctorIconInline icon={Stethoscope} size="sm">
+              {clinicName}
+            </DoctorIconInline>
+          </span>
+          {fee ? (
+            <span>
+              <DoctorIconInline icon={Wallet} size="sm">
+                {fee}
+              </DoctorIconInline>
+            </span>
+          ) : null}
+        </div>
+        <div className="cons-note">
+          <DoctorIconInline icon={ClipboardList} size="sm">
+            <strong>Reason:</strong> {appt.reason ?? "In-person visit"}
+          </DoctorIconInline>
+        </div>
+        <div className="cons-actions">{completedCardActions(appt)}</div>
+      </div>
     );
   };
 
@@ -341,75 +484,94 @@ export function PhysicalAppointmentsContent({ view }: { view: PhysicalView }) {
       ) : null}
 
       <DashCard title={meta[0]}>
-        <div style={{ fontSize: ".78rem", color: "var(--gray-500)", marginBottom: 10 }}>{meta[1]}</div>
-        <div style={{ overflowX: "auto" }}>
-          <table className="pt-table">
-            <thead>
-              <tr>
-                <th>Patient</th>
-                <th>Clinic</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Reason</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {query.isLoading ? (
-                <tr>
-                  <td colSpan={7} style={{ textAlign: "center", color: "var(--gray-400)", padding: 24 }}>
-                    Loading...
-                  </td>
-                </tr>
-              ) : list.length === 0 ? (
-                <tr>
-                  <td colSpan={7} style={{ textAlign: "center", color: "var(--gray-400)", padding: 24 }}>
-                    No appointments in this category.
-                  </td>
-                </tr>
-              ) : (
-                list.map((appt) => (
-                  <tr key={appt.id}>
-                    <td>
-                      <strong>{patientName(appt)}</strong>
-                      {appt.bookingSource && appt.bookingSource !== "ONLINE" ? (
-                        <div style={{ fontSize: ".7rem", color: "var(--gray-400)" }}>
-                          Manual (
-                          {appt.bookingSource === "PHONE"
-                            ? "Phone"
-                            : appt.bookingSource === "CLINIC_VISIT"
-                              ? "Clinic visit"
-                              : appt.bookingSource === "EMERGENCY"
-                                ? "Emergency"
-                                : "Walk-in"}
-                          )
-                        </div>
-                      ) : null}
-                    </td>
-                    <td>{clinicName}</td>
-                    <td>{apptDateLabel(appt)}</td>
-                    <td>{apptTime(appt)}</td>
-                    <td style={{ fontSize: ".78rem", color: "var(--gray-500)" }}>
-                      {appt.reason ?? "—"}
-                      {view === "cancelled" && appt.cancelReason ? (
-                        <div style={{ fontSize: ".7rem", color: "var(--gray-400)" }}>
-                          <DoctorIconInline icon={CircleX} size="sm">
-                            {appt.cancelReason}
-                          </DoctorIconInline>
-                        </div>
-                      ) : null}
-                    </td>
-                    <td>{physChip(view, appt)}</td>
-                    <td>
-                      <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>{actionsFor(appt)}</div>
-                    </td>
+        {view === "completed" ? (
+          query.isLoading ? (
+            <div style={{ padding: "24px 0", textAlign: "center", color: "var(--gray-400)", fontSize: "0.84rem" }}>
+              Loading...
+            </div>
+          ) : list.length === 0 ? (
+            <div className="oc-empty">
+              <span className="big">
+                <DoctorIcon icon={ClipboardList} size="stat" />
+              </span>
+              {meta[1]}
+            </div>
+          ) : (
+            <div className="cons-list">{list.map(appointmentCard)}</div>
+          )
+        ) : (
+          <>
+            <div style={{ fontSize: ".78rem", color: "var(--gray-500)", marginBottom: 10 }}>{meta[1]}</div>
+            <div style={{ overflowX: "auto" }}>
+              <table className="pt-table">
+                <thead>
+                  <tr>
+                    <th>Patient</th>
+                    <th>Clinic</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                    <th>Actions</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                </thead>
+                <tbody>
+                  {query.isLoading ? (
+                    <tr>
+                      <td colSpan={7} style={{ textAlign: "center", color: "var(--gray-400)", padding: 24 }}>
+                        Loading...
+                      </td>
+                    </tr>
+                  ) : list.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} style={{ textAlign: "center", color: "var(--gray-400)", padding: 24 }}>
+                        No appointments in this category.
+                      </td>
+                    </tr>
+                  ) : (
+                    list.map((appt) => (
+                      <tr key={appt.id}>
+                        <td>
+                          <strong>{patientName(appt)}</strong>
+                          {appt.bookingSource && appt.bookingSource !== "ONLINE" ? (
+                            <div style={{ fontSize: ".7rem", color: "var(--gray-400)" }}>
+                              Manual (
+                              {appt.bookingSource === "PHONE"
+                                ? "Phone"
+                                : appt.bookingSource === "CLINIC_VISIT"
+                                  ? "Clinic visit"
+                                  : appt.bookingSource === "EMERGENCY"
+                                    ? "Emergency"
+                                    : "Walk-in"}
+                              )
+                            </div>
+                          ) : null}
+                        </td>
+                        <td>{clinicName}</td>
+                        <td>{apptDateLabel(appt)}</td>
+                        <td>{apptTime(appt)}</td>
+                        <td style={{ fontSize: ".78rem", color: "var(--gray-500)" }}>
+                          {appt.reason ?? "—"}
+                          {view === "cancelled" && appt.cancelReason ? (
+                            <div style={{ fontSize: ".7rem", color: "var(--gray-400)" }}>
+                              <DoctorIconInline icon={CircleX} size="sm">
+                                {appt.cancelReason}
+                              </DoctorIconInline>
+                            </div>
+                          ) : null}
+                        </td>
+                        <td>{physChip(view, appt)}</td>
+                        <td>
+                          <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>{actionsFor(appt)}</div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
         {totalPages > 1 ? (
           <div className="table-pager">
             <span>

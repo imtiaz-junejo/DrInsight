@@ -140,7 +140,7 @@ export default function AskDoctorPage() {
           </div>
 
           <aside className="sidebar-col" aria-label="Submit your question">
-            <div className="ask-form-card bg-gray-200">
+            <div className="ask-form-card bg-gray-100">
               <div className="ask-form-card-header">
                 <h3>💬 Submit Your Question</h3>
                 <p>

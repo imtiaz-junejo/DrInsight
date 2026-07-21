@@ -146,7 +146,7 @@ export function HomePageContent() {
       </section>
 
       <div className="px-6 pb-2">
-        <div className="relative z-10 mx-auto mt-8 flex max-w-[1240px] flex-wrap items-center gap-3.5 rounded-xl border-[1.5px] border-[#fecaca] bg-gray-200 p-4 min-[901px]:p-5">
+        <div className="relative z-10 mx-auto mt-8 flex max-w-[1240px] flex-wrap items-center gap-3.5 rounded-xl border-[1.5px] border-[#fecaca] bg-gray-100 p-4 min-[901px]:p-5">
           <span className="text-2xl">🚨</span>
           <div className="flex-1">
             <strong className="text-red">Medical Emergency? Call 911 immediately.</strong>
@@ -350,7 +350,7 @@ export function HomePageContent() {
                 return (
                   <div
                     key={r.id}
-                    className="rounded-[20px] border-[1.5px] border-gray-400 bg-gray-200 p-7 shadow-lg"
+                    className="rounded-[20px] border-[1.5px] border-gray-400 bg-gray-100 p-7 shadow-lg"
                   >
                     <div className="mb-3.5 text-base text-amber">{"★".repeat(r.rating)}</div>
                     <p className="mb-4 text-[.88rem] italic leading-relaxed text-gray-600">

@@ -141,9 +141,9 @@ export function LoginForm() {
       />
 
       <div className="mb-4 flex items-center gap-3 text-[.8rem] text-gray-400">
-        <div className="h-px flex-1 bg-gray-200" />
+        <div className="h-px flex-1 bg-gray-100" />
         or sign in with email
-        <div className="h-px flex-1 bg-gray-200" />
+        <div className="h-px flex-1 bg-gray-100" />
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-3.5">

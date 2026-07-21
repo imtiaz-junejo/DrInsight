@@ -25,7 +25,7 @@ export function CalculatorCard({
   tall,
 }: CalculatorCardProps) {
   return (
-    <article className={cn("calc-card bg-gray-200", tall && "calc-card--tall", className)} id={id}>
+    <article className={cn("calc-card bg-gray-100", tall && "calc-card--tall", className)} id={id}>
       <div className={cn("calc-card-icon", `calc-card-icon--${iconClass}`)} aria-hidden>
         {icon}
       </div>

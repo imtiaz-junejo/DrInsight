@@ -68,7 +68,7 @@ export function QuestionSearchBar({ value, onChange, onSearch, isSearching }: Qu
         <input
           ref={inputRef}
           type="search"
-          className="search-input bg-gray-200"
+          className="search-input bg-gray-100"
           placeholder="Search questions by symptom, condition, or keyword..."
           value={value}
           onChange={(e) => onChange(e.target.value)}

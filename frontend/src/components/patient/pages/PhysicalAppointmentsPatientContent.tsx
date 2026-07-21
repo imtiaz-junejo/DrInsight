@@ -15,7 +15,7 @@ const VIEW_META: Record<PatientPhysicalView, [string, string, string]> = {
   upcoming: ["📅 Upcoming Physical Appointments", "Your confirmed in-person clinic visits coming up", "No appointments in this category yet."],
   pending: ["🕒 Pending Requests", "Physical appointment requests awaiting doctor approval", "No appointments in this category yet."],
   confirmed: ["✅ Confirmed Appointments", "In-person appointments confirmed by the doctor", "No appointments in this category yet."],
-  completed: ["🏁 Completed Visits", "Clinic visits you have completed", "No appointments in this category yet."],
+  completed: ["✅ Completed Visits", "Finished clinic visits with notes & prescriptions", "No completed visits yet."],
   cancelled: ["❌ Cancelled Appointments", "Appointments that were cancelled", "No appointments in this category yet."],
 };
 
@@ -38,7 +38,7 @@ export function PhysicalAppointmentsPatientContent({ view }: { view: PatientPhys
     <>
       <DashPageHeader
         subtitle="🏥 Patient Dashboard"
-        title="Physical Appointments"
+        title={view === "completed" ? meta[0].replace(/^[^\s]+\s/, "") : "Physical Appointments"}
         dateStr={todayFormatted()}
         actions={
           <Link href="/book-consultation">
@@ -57,7 +57,8 @@ export function PhysicalAppointmentsPatientContent({ view }: { view: PatientPhys
           ) : list.length > 0 ? (
             list.map((appt) => <PatientAppointmentCard key={appt.id} appt={appt} />)
           ) : (
-            <div style={{ padding: "34px 10px", textAlign: "center", color: "var(--gray-400)", fontSize: "0.86rem" }}>
+            <div className="oc-empty" style={{ padding: "34px 10px", textAlign: "center", color: "var(--gray-400)", fontSize: "0.86rem" }}>
+              <span style={{ fontSize: "2rem", display: "block", marginBottom: 8 }}>🗂️</span>
               {meta[2]}
             </div>
           )}

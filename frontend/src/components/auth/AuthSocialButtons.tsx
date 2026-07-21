@@ -64,7 +64,7 @@ export function AuthSocialButtons({ onOAuth, oauthLoading, disabled, className }
             type="button"
             onClick={() => onOAuth(provider)}
             disabled={Boolean(oauthLoading) || disabled}
-            className="flex h-11 items-center justify-center gap-2 rounded-xl border border-gray-400 bg-white text-sm font-semibold text-gray-700 transition hover:border-blue hover:bg-gray-200 hover:text-blue disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex h-11 items-center justify-center gap-2 rounded-xl border border-gray-400 bg-white text-sm font-semibold text-gray-700 transition hover:border-blue hover:bg-gray-100 hover:text-blue disabled:cursor-not-allowed disabled:opacity-60"
           >
             <Icon />
             {isLoading ? "Connecting..." : oauthProviderLabel(provider)}

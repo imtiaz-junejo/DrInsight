@@ -39,7 +39,7 @@ export function HomeHealthToolsSection() {
               aria-label={`Open ${tool.name}`}
               className={cn(
                 "group flex h-full min-h-[220px] flex-col items-center rounded-[18px]",
-                "border-[1.5px] border-gray-300 bg-gray-200 px-5 py-6 text-center",
+                "border-[1.5px] border-gray-300 bg-gray-100 px-5 py-6 text-center",
                 toolCardShadow,
                 "transition-all duration-300 ease-out",
                 "hover:-translate-y-1.5 hover:border-blue",

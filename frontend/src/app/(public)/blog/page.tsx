@@ -290,7 +290,7 @@ function BlogPageContent() {
           </div>
 
           <aside className="sticky-sidebar-col" aria-label="Blog sidebar">
-            <div className="sticky-sidebar-panel bg-gray-200">
+            <div className="sticky-sidebar-panel bg-gray-100">
               <div className="sticky-sidebar-scroll">
                 <form className="subscribe-card" onSubmit={handleNewsletter}>
                   <h4>📬 Weekly Health Digest</h4>

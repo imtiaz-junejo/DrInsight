@@ -5,7 +5,6 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: [
       "@solar-icons/react",
-      "lucide-react",
       "@radix-ui/react-avatar",
       "@radix-ui/react-dialog",
       "@radix-ui/react-dropdown-menu",

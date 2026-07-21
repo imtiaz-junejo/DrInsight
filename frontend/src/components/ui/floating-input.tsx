@@ -131,7 +131,7 @@ const FloatingInput = React.forwardRef<HTMLInputElement, FloatingInputProps>(
             onBlur?.(e);
           }}
           className={cn(
-            "floating-input peer block h-11 w-full rounded-xl border border-gray-400 bg-gray-200 px-3.5 pb-2 pt-5 text-sm text-gray-900 outline-none transition placeholder:text-transparent",
+            "floating-input peer block h-11 w-full rounded-xl border border-gray-400 bg-gray-100 px-3.5 pb-2 pt-5 text-sm text-gray-900 outline-none transition placeholder:text-transparent",
             "focus:border-blue focus:bg-white focus:ring-[3px] focus:ring-blue/10",
             error && "border-red focus:border-red focus:ring-red/10",
             inputPadding,

@@ -703,7 +703,7 @@ export function BlogArticleDetail({ slug }: Props) {
             </div>
           </div>
 
-          <div className="ad-engagement ad-detail-card ad-surface-card border border-gray-400 bg-gray-200 shadow-sm">
+          <div className="ad-engagement ad-detail-card ad-surface-card border border-gray-400 bg-gray-100 shadow-sm">
             <h3>Was this article helpful to you?</h3>
             <div className="ad-helpful-row">
               <button
@@ -810,25 +810,25 @@ export function BlogArticleDetail({ slug }: Props) {
               </div>
             ))}
 
-            <form className="ad-comment-form ad-detail-card ad-surface-card border border-gray-400 bg-gray-200 shadow-sm" onSubmit={handleCommentSubmit}>
+            <form className="ad-comment-form ad-detail-card ad-surface-card border border-gray-400 bg-gray-100 shadow-sm" onSubmit={handleCommentSubmit}>
               <h4>Leave a Comment</h4>
               <div className="ad-cf-row">
                 <input
-                  className="ad-cf-input border border-gray-300 bg-gray-200"
+                  className="ad-cf-input border border-gray-300 bg-gray-100"
                   name="commentName"
                   type="text"
                   placeholder="Your Name"
                   required
                 />
                 <input
-                  className="ad-cf-input border border-gray-300 bg-gray-200"
+                  className="ad-cf-input border border-gray-300 bg-gray-100"
                   name="commentEmail"
                   type="email"
                   placeholder="Email Address (not published)"
                 />
               </div>
               <textarea
-                className="ad-cf-ta border border-gray-300 bg-gray-200"
+                className="ad-cf-ta border border-gray-300 bg-gray-100"
                 name="commentBody"
                 placeholder="Share your thoughts, experience, or feedback about this article..."
                 required

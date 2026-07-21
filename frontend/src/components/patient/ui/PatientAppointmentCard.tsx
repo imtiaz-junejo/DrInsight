@@ -279,17 +279,16 @@ export function PatientAppointmentCard({ appt }: { appt: Appointment }) {
       </div>
 
       <div className="cons-details">
+        <span>
+          <DoctorIcon icon={t.icon} size="sm" /> {t.label}
+        </span>
         {physical ? (
           <span>
             <DoctorIconInline icon={Hospital} size="sm">
               {clinicLabel(appt)}
             </DoctorIconInline>
           </span>
-        ) : (
-          <span>
-            <DoctorIcon icon={t.icon} size="sm" /> {t.label}
-          </span>
-        )}
+        ) : null}
         <span>
           <DoctorIconInline icon={Calendar} size="sm">
             {formatDate(appt.scheduledAt)}
@@ -300,13 +299,11 @@ export function PatientAppointmentCard({ appt }: { appt: Appointment }) {
             {apptTime(appt)}
           </DoctorIconInline>
         </span>
-        {!physical ? (
-          <span>
-            <DoctorIconInline icon={Clock3} size="sm">
-              {appt.durationMinutes} min
-            </DoctorIconInline>
-          </span>
-        ) : null}
+        <span>
+          <DoctorIconInline icon={Clock3} size="sm">
+            {appt.durationMinutes} min
+          </DoctorIconInline>
+        </span>
       </div>
 
       {appt.status === "CANCELLED" ? (
@@ -315,13 +312,13 @@ export function PatientAppointmentCard({ appt }: { appt: Appointment }) {
             <strong>Cancelled:</strong> {appt.cancelReason ?? "Not specified"}
           </DoctorIconInline>
         </div>
-      ) : appt.reason ? (
+      ) : (
         <div className="cons-note">
           <DoctorIconInline icon={ClipboardList} size="sm">
-            <strong>Reason:</strong> {appt.reason}
+            <strong>Reason:</strong> {appt.reason ?? (physical ? "In-person visit" : "Consultation")}
           </DoctorIconInline>
         </div>
-      ) : null}
+      )}
 
       <div className="cons-actions">{renderActions()}</div>
     </div>
