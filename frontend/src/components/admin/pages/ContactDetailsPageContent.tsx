@@ -81,7 +81,7 @@ export function ContactDetailsPageContent() {
           <input
             value={draft.email}
             onChange={(e) => setDraft((d) => ({ ...d, email: e.target.value }))}
-            placeholder="drinsightofficial@gmail.com"
+            placeholder="contact@drinsight.org"
           />
         </FormItem>
         <FormItem label="Office Hours">

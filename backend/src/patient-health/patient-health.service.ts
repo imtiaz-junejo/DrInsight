@@ -37,8 +37,14 @@ export class PatientHealthService {
   constructor(private prisma: PrismaService) {}
 
   private async requirePatient(userId: string) {
-    const patient = await this.prisma.patientProfile.findUnique({ where: { userId } });
-    if (!patient) throw new NotFoundException('Patient profile not found');
+    let patient = await this.prisma.patientProfile.findUnique({ where: { userId } });
+    if (!patient) {
+      const user = await this.prisma.user.findUnique({ where: { id: userId } });
+      if (!user) throw new NotFoundException('User not found');
+      patient = await this.prisma.patientProfile.create({
+        data: { userId },
+      });
+    }
     return patient;
   }
 

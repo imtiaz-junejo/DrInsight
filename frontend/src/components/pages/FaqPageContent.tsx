@@ -252,7 +252,7 @@ export function FaqPageContent() {
               <h4>Live Chat</h4>
               <p>Mon–Fri, 8AM–8PM</p>
             </Link>
-            <a href="mailto:drinsightofficial@gmail.com" className="contact-option">
+            <a href="mailto:contact@drinsight.org" className="contact-option">
               <div className="opt-icon">✉️</div>
               <h4>Email Support</h4>
               <p>Reply within 24 hours</p>

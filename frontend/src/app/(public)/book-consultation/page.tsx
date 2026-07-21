@@ -1196,7 +1196,7 @@ export default function BookConsultationPage() {
             <span>
               Need help? Call us at{" "}
               <a href={`tel:${CONTACT_PHONE_TEL}`}>{CONTACT_PHONE}</a> or email{" "}
-              <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
+              <a href="mailto:contact@drinsight.org">contact@drinsight.org</a>
             </span>
           </div>
         </div>

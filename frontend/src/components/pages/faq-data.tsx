@@ -338,7 +338,7 @@ export const FAQ_SECTIONS: FaqSection[] = [
             <p>
               Yes. You have the right to request deletion of your account and all associated personal data at any time.
               To submit a deletion request, go to <em>Account Settings → Privacy → Delete My Account</em>, or contact us
-              at <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>.
+              at <a href="mailto:contact@drinsight.org">contact@drinsight.org</a>.
             </p>
             <p>
               Please note that certain data may be retained for legally required periods (e.g. medical records for 7
@@ -469,7 +469,7 @@ export const FAQ_SECTIONS: FaqSection[] = [
             </ul>
             <p>
               Refunds are processed within 3–5 business days to your original payment method. For disputes or special
-              circumstances, contact <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>. See our
+              circumstances, contact <a href="mailto:contact@drinsight.org">contact@drinsight.org</a>. See our
               full <Link href="/terms-conditions">Terms &amp; Conditions</Link> for the complete refund policy.
             </p>
           </>
@@ -645,7 +645,7 @@ export const FAQ_SECTIONS: FaqSection[] = [
             </p>
             <p>
               If you don&apos;t receive the email, check your spam folder or contact{" "}
-              <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>.
+              <a href="mailto:contact@drinsight.org">contact@drinsight.org</a>.
             </p>
           </>
         ),

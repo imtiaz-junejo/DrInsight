@@ -887,8 +887,8 @@ export function ResearchPublicationsPageContent() {
             </div>
             <div className="contact-grid">
               {[
-                ["📧 Research Enquiries", "mailto:drinsightofficial@gmail.com", "Collaborations & submissions"],
-                ["✏️ Corrections", "mailto:drinsightofficial@gmail.com", "Report an error in an article"],
+                ["📧 Research Enquiries", "mailto:contact@drinsight.org", "Collaborations & submissions"],
+                ["✏️ Corrections", "mailto:contact@drinsight.org", "Report an error in an article"],
                 ["📞 Editorial Desk", "tel:+923353545545", "Mon–Fri, 8AM–8PM"],
                 ["💬 General Contact", "/contact", "Everything else"],
               ].map(([title, href, note]) => (
@@ -902,6 +902,14 @@ export function ResearchPublicationsPageContent() {
                   <p>{note}</p>
                 </div>
               ))}
+              <div className="contact-card">
+                <h4>📍 Mailing Address</h4>
+                <p>
+                  DrInsight
+                  <br />
+                  Badin, Sindh Pakistan
+                </p>
+              </div>
             </div>
           </section>
         </div>
@@ -921,9 +929,6 @@ export function ResearchPublicationsPageContent() {
             </Link>
           </div>
           <div className="pf-btns">
-            <button type="button" className="pf-btn" onClick={() => window.print()}>
-              🖨️ Print This Page
-            </button>
             <button type="button" className="pf-btn g" onClick={() => scrollTo("s11")}>
               🤝 Collaborate
             </button>

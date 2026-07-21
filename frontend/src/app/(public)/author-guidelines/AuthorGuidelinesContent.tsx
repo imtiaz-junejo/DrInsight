@@ -44,7 +44,7 @@ const CONTENT_TYPES = [
 ];
 
 const CHECKLIST = [
-  { strong: "Topic approval:", text: <>Confirm your topic with our Editorial team before writing — many topics are already covered or assigned. Email: <span style={{ color: "var(--blue)", fontWeight: 600 }}>drinsightofficial@gmail.com</span></> },
+  { strong: "Topic approval:", text: <>Confirm your topic with our Editorial team before writing — many topics are already covered or assigned. Email: <span style={{ color: "var(--blue)", fontWeight: 600 }}>contact@drinsight.org</span></> },
   { strong: "Scope check:", text: "Confirm the article falls within your recognised specialty or professional scope" },
   { strong: "Source gathering:", text: "Identify minimum 5 peer-reviewed sources from the last 10 years (preferably last 5 years) before writing" },
   { strong: "COI self-check:", text: "Identify any financial, professional, or personal conflicts of interest related to the topic" },
@@ -55,7 +55,7 @@ const CHECKLIST = [
 ];
 
 const SUBMISSION_STEPS = [
-  { num: "1", title: "✉️ Topic Proposal", badge: "First step", badgeClass: "sb-blue", text: <>Email your proposed topic to <strong style={{ color: "var(--blue)" }}>drinsightofficial@gmail.com</strong> with a 2–3 sentence outline. Receive approval or feedback within 3–5 business days before writing.</> },
+  { num: "1", title: "✉️ Topic Proposal", badge: "First step", badgeClass: "sb-blue", text: <>Email your proposed topic to <strong style={{ color: "var(--blue)" }}>contact@drinsight.org</strong> with a 2–3 sentence outline. Receive approval or feedback within 3–5 business days before writing.</> },
   { num: "2", title: "📋 Author Brief Received", text: "Receive your detailed author brief — including target audience, required word count, source requirements, safe messaging guidance if applicable, COI disclosure form, and submission deadline." },
   { num: "3", title: "✍️ Write Your Article", badge: "You are here", badgeClass: "sb-blue", text: "Write using the required structure for your article type. Submit as a Google Doc or Word document (.docx). Include all inline citations. Complete and attach the COI disclosure form." },
   { num: "4", title: "🖊️ Editorial Pre-Screen", text: "Our editorial team reviews your submission within 3–5 business days for structure, completeness, source quality, and style guide compliance. Returned with feedback if pre-screen fails." },
@@ -75,11 +75,11 @@ const COI_ITEMS = [
 ];
 
 const CONTACTS = [
-  { title: "✍️ New Author Applications", email: "drinsightofficial@gmail.com", note: "Apply to join our author network. Response within 3–5 business days." },
-  { title: "📋 Topic Proposals & Briefs", email: "drinsightofficial@gmail.com", note: "Submit topic ideas or request a writing brief. Response within 3–5 business days." },
-  { title: "📤 Article Submissions", email: "drinsightofficial@gmail.com", note: "Submit completed articles for editorial pre-screen and peer review." },
-  { title: "💰 Payments & Contracts", email: "drinsightofficial@gmail.com", note: "Queries about honoraria, author agreements, and CPD/CME letters." },
-  { title: "📝 Corrections & Updates", email: "drinsightofficial@gmail.com", note: "Request corrections or updates to your published articles." },
+  { title: "✍️ New Author Applications", email: "authors@drinsight.org", note: "Apply to join our author network. Response within 3–5 business days." },
+  { title: "📋 Topic Proposals & Briefs", email: "editorial@drinsight.org", note: "Submit topic ideas or request a writing brief. Response within 3–5 business days." },
+  { title: "📤 Article Submissions", email: "submissions@drinsight.org", note: "Submit completed articles for editorial pre-screen and peer review." },
+  { title: "💰 Payments & Contracts", email: "payments@drinsight.org", note: "Queries about honoraria, author agreements, and CPD/CME letters." },
+  { title: "📝 Corrections & Updates", email: "corrections@drinsight.org", note: "Request corrections or updates to your published articles." },
 ];
 
 function Accordion({ id, title, open, onToggle, children }: { id: string; title: string; open: boolean; onToggle: (id: string) => void; children: React.ReactNode }) {
@@ -173,9 +173,6 @@ export function AuthorGuidelinesContent() {
           <div className="hero-actions">
             <button type="button" className="btn-white" onClick={() => scrollTo("s10")}>
               ✍️ Apply to Write
-            </button>
-            <button type="button" className="btn-ghost" onClick={() => window.print()}>
-              🖨️ Download PDF
             </button>
           </div>
           <div className="trust-strip">
@@ -592,8 +589,8 @@ export function AuthorGuidelinesContent() {
                 <button type="button" className="btn-apply" onClick={() => showToast("Opening application form...")}>
                   ✍️ Apply to Become an Author →
                 </button>
-                <a href="mailto:drinsightofficial@gmail.com" className="btn-apply-ghost">
-                  📧 drinsightofficial@gmail.com
+                <a href="mailto:contact@drinsight.org" className="btn-apply-ghost">
+                  📧 contact@drinsight.org
                 </a>
               </div>
             </div>
@@ -718,7 +715,7 @@ export function AuthorGuidelinesContent() {
             </div>
             <div className="contact-grid">
               {CONTACTS.map((c) => (
-                <div key={c.email} className="contact-card">
+                <div key={c.title} className="contact-card">
                   <h4>{c.title}</h4>
                   <a href={`mailto:${c.email}`}>{c.email}</a>
                   <p>{c.note}</p>
@@ -727,7 +724,11 @@ export function AuthorGuidelinesContent() {
               <div className="contact-card">
                 <h4>📍 Mailing Address</h4>
                 <p style={{ color: "var(--gray-700)", fontSize: ".84rem", lineHeight: 1.6, marginTop: 0 }}>
-                  DrInsight<br />123 Medical Plaza, Suite 400<br />New York, NY 10001, USA
+                  DrInsight Inc.
+                  <br />
+                  Badin
+                  <br />
+                  Pakistan
                 </p>
               </div>
             </div>
@@ -756,14 +757,8 @@ export function AuthorGuidelinesContent() {
           </div>
           <div className="pf-actions">
             <span style={{ fontSize: ".76rem", color: "var(--gray-400)" }}>Last updated: June 1, 2026 · v2.1</span>
-            <button type="button" className="pf-btn gray" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-              ↑ Back to Top
-            </button>
             <button type="button" className="pf-btn green" onClick={() => scrollTo("s10")}>
               ✍️ Apply to Write
-            </button>
-            <button type="button" className="pf-btn" onClick={() => window.print()}>
-              ⬇️ Download PDF
             </button>
           </div>
         </div>

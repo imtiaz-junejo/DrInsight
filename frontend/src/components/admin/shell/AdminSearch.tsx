@@ -48,7 +48,7 @@ export function AdminSearch() {
     } else if (event.key === "Enter") {
       event.preventDefault();
       const target = results[activeIndex];
-      if (target) navigate(target.href);
+      if (target?.href) navigate(target.href);
     } else if (event.key === "Escape") {
       setOpen(false);
     }
@@ -89,7 +89,7 @@ export function AdminSearch() {
                 onMouseEnter={() => setActiveIndex(index)}
                 onMouseDown={(event) => {
                   event.preventDefault();
-                  navigate(item.href);
+                  if (item.href) navigate(item.href);
                 }}
               >
                 <span className="sb-ico">

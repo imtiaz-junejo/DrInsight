@@ -51,10 +51,8 @@ const TOC_ITEMS = [
 const FOOTER_LINKS = DEFAULT_LINKS.filter((link) => link.href !== "/terms-conditions");
 
 export function TermsConditionsPageClient() {
-  const { activeSection, scrollToSection, scrollToTop } = usePolicyPageScroll(SECTION_IDS);
+  const { activeSection, scrollToSection } = usePolicyPageScroll(SECTION_IDS);
   const [versionOpen, setVersionOpen] = useState(true);
-
-  const handlePrint = () => window.print();
 
   return (
     <div className="terms-conditions-page">
@@ -73,14 +71,6 @@ export function TermsConditionsPageClient() {
           </div>
           <div className="hero-badge-wrap">
             <div className="hero-badge">⚖️ Governed by the Laws of New York, USA</div>
-          </div>
-          <div className="hero-actions">
-            <button type="button" className="hero-btn primary" onClick={handlePrint}>
-              🖨️ Print Terms
-            </button>
-            <button type="button" className="hero-btn">
-              ⬇️ Download PDF
-            </button>
           </div>
         </div>
       </div>
@@ -182,7 +172,7 @@ export function TermsConditionsPageClient() {
                 <strong>Account Registration:</strong> You agree to provide accurate, current, and complete information
                 during registration. You are responsible for maintaining the confidentiality of your password. Notify us
                 immediately of any unauthorized access at{" "}
-                <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>. One person may not maintain
+                <a href="mailto:contact@drinsight.org">contact@drinsight.org</a>. One person may not maintain
                 multiple accounts. Accounts are non-transferable.
               </p>
             </div>
@@ -269,10 +259,10 @@ export function TermsConditionsPageClient() {
               <ul>
                 <li>
                   Reprint or syndication requests:{" "}
-                  <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
+                  <a href="mailto:contact@drinsight.org">contact@drinsight.org</a>
                 </li>
                 <li>
-                  To report copyright infringement: <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
+                  To report copyright infringement: <a href="mailto:contact@drinsight.org">contact@drinsight.org</a>
                 </li>
                 <li>
                   Include: your contact info, description of the work, URL of infringing content, and statement of good
@@ -472,7 +462,7 @@ export function TermsConditionsPageClient() {
                 <li>We do not endorse advertised products or services</li>
                 <li>
                   For advertising inquiries:{" "}
-                  <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
+                  <a href="mailto:contact@drinsight.org">contact@drinsight.org</a>
                 </li>
               </ul>
             </div>
@@ -570,14 +560,14 @@ export function TermsConditionsPageClient() {
                 <li>Content you authored may remain published per the Author Agreement</li>
                 <li>
                   You may appeal termination by emailing:{" "}
-                  <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
+                  <a href="mailto:contact@drinsight.org">contact@drinsight.org</a>
                 </li>
               </ul>
             </div>
             <div className="prose">
               <p>
                 You may terminate your account at any time by using the account deletion option in Settings or emailing{" "}
-                <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>.
+                <a href="mailto:contact@drinsight.org">contact@drinsight.org</a>.
               </p>
             </div>
           </div>
@@ -623,7 +613,7 @@ export function TermsConditionsPageClient() {
                 <li>Alt text on all images and medical illustrations</li>
                 <li>
                   To report an accessibility issue:{" "}
-                  <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
+                  <a href="mailto:contact@drinsight.org">contact@drinsight.org</a>
                 </li>
               </ul>
             </div>
@@ -707,37 +697,37 @@ export function TermsConditionsPageClient() {
             <div className="contact-grid">
               <div className="contact-card">
                 <h4>⚖️ Legal & Terms Inquiries</h4>
-                <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
+                <a href="mailto:legal@drinsight.org">legal@drinsight.org</a>
                 <p>All legal and terms-related enquiries</p>
               </div>
               <div className="contact-card">
                 <h4>©️ Copyright / DMCA</h4>
-                <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
+                <a href="mailto:dmca@drinsight.org">dmca@drinsight.org</a>
                 <p>Copyright infringement reports</p>
               </div>
               <div className="contact-card">
                 <h4>👤 Account Issues</h4>
-                <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
+                <a href="mailto:accounts@drinsight.org">accounts@drinsight.org</a>
                 <p>Account deletion, suspension appeals</p>
               </div>
               <div className="contact-card">
                 <h4>📣 Advertising</h4>
-                <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
+                <a href="mailto:advertise@drinsight.org">advertise@drinsight.org</a>
                 <p>Partnership and advertising inquiries</p>
               </div>
               <div className="contact-card">
                 <h4>✉️ General Contact</h4>
-                <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
+                <a href="mailto:contact@drinsight.org">contact@drinsight.org</a>
                 <p>All other enquiries</p>
               </div>
               <div className="contact-card">
                 <h4>📍 Mailing Address</h4>
                 <p>
-                  DrInsight
+                  DrInsight Inc.
                   <br />
-                  123 Medical Plaza, Suite 400
+                  Badin
                   <br />
-                  New York, NY 10001, USA
+                  Pakistan
                 </p>
               </div>
             </div>
@@ -760,15 +750,6 @@ export function TermsConditionsPageClient() {
           </div>
           <div className="pf-btns">
             <span className="pf-meta">Last updated: June 1, 2026 · v2.1</span>
-            <button type="button" className="pf-btn gray" onClick={scrollToTop}>
-              ↑ Back to Top
-            </button>
-            <button type="button" className="pf-btn" onClick={handlePrint}>
-              🖨️ Print
-            </button>
-            <button type="button" className="pf-btn green">
-              ⬇️ Download PDF
-            </button>
           </div>
         </div>
       </div>

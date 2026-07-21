@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { adminNav, adminRouteId } from "@/config/admin-nav";
 import { useAuthStore } from "@/store/auth.store";
 import { useAdminUiStore } from "@/store/admin-ui.store";
@@ -24,11 +25,27 @@ export function AdminSidebar() {
   const badges = badgesQuery.data ?? {};
   const routeId = adminRouteId(pathname);
   const footerLogo = siteConfig.data?.footerLogoUrl?.trim() || FOOTER_LOGO_SRC;
+  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
 
-  const handleSignOut = () => {
-    showToast("Signing out...");
-    clearAuth();
-    router.replace("/login");
+  useEffect(() => {
+    adminNav.forEach((group) => {
+      group.items.forEach((item) => {
+        if (item.children?.some((child) => child.id === routeId)) {
+          setOpenMenus((prev) => ({ ...prev, [item.id]: true }));
+        }
+      });
+    });
+  }, [routeId]);
+
+  const toggleMenu = (id: string) => {
+    setOpenMenus((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const renderBadge = (item: { badgeKey?: string; id: string }) => {
+    const badgeCount = badges[item.badgeKey ?? item.id] ?? 0;
+    return badgeCount > 0 ? (
+      <span className="sb-badge">{badgeCount > 99 ? "99+" : badgeCount}</span>
+    ) : null;
   };
 
   return (
@@ -41,13 +58,56 @@ export function AdminSidebar() {
           <div key={group.lbl}>
             <div className="sb-section-lbl">{group.lbl}</div>
             {group.items.map((item) => {
+              if (item.children?.length) {
+                const childActive = item.children.some((child) => routeId === child.id);
+                const open = openMenus[item.id] ?? childActive;
+                return (
+                  <div key={item.id}>
+                    <button
+                      type="button"
+                      className={`sb-item sb-parent${childActive ? " active" : ""}`}
+                      onClick={() => toggleMenu(item.id)}
+                    >
+                      <span className="sb-ico">
+                        <AdminNavIcon id={item.id} />
+                      </span>
+                      <span className="sb-item-label" title={item.name}>
+                        {item.name}
+                      </span>
+                      {renderBadge(item)}
+                      <span className={`sb-caret${open ? " open" : ""}`}>▾</span>
+                    </button>
+                    <div className={`sb-subwrap${open ? " open" : ""}`}>
+                      {item.children.map((child) => {
+                        const active = routeId === child.id || pathname === child.href;
+                        return (
+                          <Link
+                            key={child.id}
+                            href={child.href!}
+                            className={`sb-item sb-sub${active ? " active" : ""}`}
+                            data-id={child.id}
+                            onClick={() => setSidebarOpen(false)}
+                          >
+                            <span className="sb-ico">
+                              <AdminNavIcon id={child.id} />
+                            </span>
+                            <span className="sb-item-label" title={child.name}>
+                              {child.name}
+                            </span>
+                            {renderBadge(child)}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              }
+
               const active = routeId === item.id || pathname === item.href;
-              const badgeCount = badges[item.badgeKey ?? item.id] ?? 0;
-              const badge = badgeCount > 0 ? String(badgeCount > 99 ? "99+" : badgeCount) : undefined;
               return (
                 <Link
                   key={item.id}
-                  href={item.href}
+                  href={item.href!}
                   className={`sb-item${active ? " active" : ""}`}
                   data-id={item.id}
                   onClick={() => setSidebarOpen(false)}
@@ -58,7 +118,7 @@ export function AdminSidebar() {
                   <span className="sb-item-label" title={item.name}>
                     {item.name}
                   </span>
-                  {badge ? <span className="sb-badge">{badge}</span> : null}
+                  {renderBadge(item)}
                 </Link>
               );
             })}
@@ -75,7 +135,15 @@ export function AdminSidebar() {
             <div className="sb-admin-role">Super Admin</div>
           </div>
         </div>
-        <button type="button" className="sb-signout" onClick={handleSignOut}>
+        <button
+          type="button"
+          className="sb-signout"
+          onClick={() => {
+            showToast("Signing out...");
+            clearAuth();
+            router.replace("/login");
+          }}
+        >
           <DoctorIconInline icon={LogOut} size="sidebar" tone="error">
             Sign Out
           </DoctorIconInline>

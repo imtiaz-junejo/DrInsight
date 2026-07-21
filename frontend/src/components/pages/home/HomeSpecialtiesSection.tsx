@@ -3,9 +3,44 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { HOME_MAJOR_SPECIALTIES } from "./specialty-icons";
 
+function SpecialtyCard({ name, icon }: { name: string; icon: string }) {
+  return (
+    <Link
+      href="/our-doctors"
+      aria-label={`Browse ${name} specialists`}
+      className={cn(
+        "group flex min-h-[132px] flex-col items-center justify-center rounded-xl",
+        "border border-gray-200 bg-white px-4 py-6 text-center",
+        "transition-all duration-[.22s]",
+        "hover:-translate-y-[3px] hover:border-blue hover:shadow-[var(--shadow-lg)]",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue focus-visible:ring-offset-2",
+      )}
+    >
+      <div
+        className={cn(
+          "mb-3 flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-[14px]",
+          "bg-blue-light text-[1.65rem] leading-none transition-all duration-[.22s]",
+          "group-hover:bg-blue",
+        )}
+        aria-hidden
+      >
+        <span className="transition-transform duration-[.22s] group-hover:scale-105">{icon}</span>
+      </div>
+      <h3
+        className={cn(
+          "text-[.88rem] font-semibold leading-snug text-gray-800",
+          "transition-colors duration-[.22s] group-hover:text-blue",
+        )}
+      >
+        {name}
+      </h3>
+    </Link>
+  );
+}
+
 export function HomeSpecialtiesSection() {
   return (
-    <section className="home-section px-6 py-16 min-[901px]:py-20">
+    <section className="home-section home-specialties-section bg-white px-6 pb-16 min-[901px]:pb-20">
       <div className="mx-auto max-w-[1240px]">
         <div className="mb-13 text-center">
           <div className="mb-2.5 text-[.78rem] font-bold uppercase tracking-widest text-blue">Our Specialties</div>
@@ -18,44 +53,9 @@ export function HomeSpecialtiesSection() {
           </p>
         </div>
 
-        <div
-          className={cn(
-            "grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-4",
-            "md:grid-cols-3 lg:grid-cols-6",
-          )}
-        >
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-6">
           {HOME_MAJOR_SPECIALTIES.map(({ name, icon }) => (
-            <Link
-              key={name}
-              href="/our-doctors"
-              aria-label={`Browse ${name} specialists`}
-              className={cn(
-                "group flex min-h-[132px] flex-col items-center justify-center rounded-xl",
-                "border-[1.5px] border-gray-300 bg-gray-100 px-4 py-6 text-center",
-                "shadow-[var(--shadow-sm)] transition-all duration-[.22s]",
-                "hover:-translate-y-[3px] hover:border-blue hover:shadow-[var(--shadow-lg)]",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue focus-visible:ring-offset-2",
-              )}
-            >
-              <div
-                className={cn(
-                  "mb-3 flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-[14px]",
-                  "bg-blue-light text-[1.65rem] leading-none transition-all duration-[.22s]",
-                  "group-hover:bg-blue",
-                )}
-                aria-hidden
-              >
-                <span className="transition-transform duration-[.22s] group-hover:scale-105">{icon}</span>
-              </div>
-              <h3
-                className={cn(
-                  "text-[.88rem] font-semibold leading-snug text-gray-800",
-                  "transition-colors duration-[.22s] group-hover:text-blue",
-                )}
-              >
-                {name}
-              </h3>
-            </Link>
+            <SpecialtyCard key={name} name={name} icon={icon} />
           ))}
         </div>
 

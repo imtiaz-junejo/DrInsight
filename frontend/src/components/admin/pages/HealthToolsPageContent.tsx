@@ -30,7 +30,7 @@ export function HealthToolsPageContent() {
   return (
     <>
       <AdminPanel
-        title="🧮 Health Tools & Calculators"
+        title="🛠️ Manage Health Tools & Calculators"
         actions={
           <AdminButton
             variant="primary"

@@ -1003,6 +1003,76 @@
 .health-tools-page .ht-trimester--t2 { background: #fffbeb; color: #92400e; }
 .health-tools-page .ht-trimester--t3 { background: #fef2f2; color: #991b1b; }
 
+.health-tools-page .ht-milestone-list {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.health-tools-page .ht-milestone-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #dbeafe;
+}
+
+.health-tools-page .ht-milestone-icon {
+  flex: none;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.health-tools-page .ht-milestone-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.76rem;
+  color: var(--gray-700);
+  line-height: 1.55;
+  word-break: break-word;
+}
+
+.health-tools-page .ht-milestone-week {
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.health-tools-page .ht-milestone-date {
+  color: var(--blue);
+  font-weight: 600;
+}
+
+.health-tools-page .ht-upcoming-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--gray-600);
+  margin: 0 0 6px;
+}
+
+.health-tools-page .form-check-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 2px;
+}
+
+.health-tools-page .form-check-row input[type="checkbox"] {
+  width: auto;
+  accent-color: var(--blue);
+}
+
+.health-tools-page .form-check-row label {
+  margin: 0;
+  text-transform: none;
+  font-weight: 500;
+  font-size: 0.78rem;
+  letter-spacing: 0;
+}
+
 .health-tools-page .ht-modal-actions {
   display: flex;
   gap: 8px;
@@ -1082,4 +1152,117 @@
     white-space: normal;
     text-align: center;
   }
+}
+
+.health-tools-page .whr-box {
+  margin-top: 12px;
+  border: 1.5px dashed var(--gray-200);
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: #fafcff;
+}
+
+.health-tools-page .whr-box--compact {
+  padding: 10px 14px;
+}
+
+.health-tools-page .whr-box--compact .whr-hd {
+  margin-bottom: 8px;
+}
+
+.health-tools-page .whr-box--compact .whr-check {
+  margin-top: 0;
+}
+
+.health-tools-page .whr-hd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+
+.health-tools-page .whr-chip {
+  font-size: 0.64rem;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: 50px;
+  margin-left: auto;
+}
+
+.health-tools-page .whr-chip.on {
+  background: #f0fdf4;
+  color: var(--green, #059669);
+}
+
+.health-tools-page .whr-chip.off {
+  background: var(--gray-100);
+  color: var(--gray-600);
+}
+
+.health-tools-page .whr-check {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 2px;
+}
+
+.health-tools-page .whr-check label {
+  margin: 0;
+  text-transform: none;
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0;
+  color: var(--gray-800);
+  cursor: pointer;
+}
+
+.health-tools-page .whr-registered {
+  font-size: 0.76rem;
+  color: var(--gray-600);
+  background: var(--blue-light);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+}
+
+.health-tools-page .whr-err {
+  display: none;
+  font-size: 0.74rem;
+  color: #dc2626;
+  margin: 6px 0 0;
+}
+
+.health-tools-page .whr-info {
+  display: none;
+  margin-top: 10px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 9px 11px;
+  font-size: 0.76rem;
+  color: #166534;
+  line-height: 1.55;
+}
+
+.health-tools-page .whr-info.warn {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+.health-tools-page .whr-sched {
+  margin-top: 8px;
+  display: grid;
+  gap: 4px;
+}
+
+.health-tools-page .whr-sched-row {
+  display: flex;
+  gap: 7px;
+  font-size: 0.74rem;
+  color: #166534;
+  align-items: flex-start;
 }

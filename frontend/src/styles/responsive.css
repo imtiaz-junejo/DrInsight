@@ -488,8 +488,16 @@ figcaption,
     padding-right: 20px !important;
   }
 
-  .home-newsletter-form {
+  .home-stay-informed-form {
     flex-direction: column !important;
+    max-width: 100% !important;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .home-stay-informed-form input,
+  .home-stay-informed-form button {
+    width: 100% !important;
   }
 
   .doctor-root .dash-body,

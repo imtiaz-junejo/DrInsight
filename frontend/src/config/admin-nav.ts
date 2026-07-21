@@ -2,7 +2,8 @@ export interface AdminNavItem {
   id: string;
   name: string;
   badgeKey?: string;
-  href: string;
+  href?: string;
+  children?: AdminNavItem[];
 }
 
 export interface AdminNavGroup {
@@ -95,7 +96,14 @@ export const adminNav: AdminNavGroup[] = [
     lbl: "Site Management",
     items: [
       { id: "homepage-sections", name: "Homepage Sections", href: "/admin/homepage-sections" },
-      { id: "health-tools", name: "Health Tools", href: "/admin/health-tools" },
+      {
+        id: "health-tools-menu",
+        name: "Health Tools",
+        children: [
+          { id: "health-tools", name: "Manage Tools", href: "/admin/health-tools" },
+          { id: "whr", name: "Women's Health Email Reminders", badgeKey: "whr", href: "/admin/womens-health-reminders" },
+        ],
+      },
       { id: "faqs", name: "FAQs", href: "/admin/faqs" },
       { id: "contact-inquiries", name: "Contact Inquiries", badgeKey: "contact-inquiries", href: "/admin/contact-inquiries" },
       { id: "seo-settings", name: "SEO Settings", href: "/admin/seo-settings" },
@@ -172,7 +180,8 @@ export const adminPageMeta: Record<string, [string, string]> = {
   "newsletter-mgmt": ["Newsletter", "Subscribers, compose & send campaigns, and CSV export"],
   notifications: ["Notifications", "System-wide notification logs and settings"],
   "homepage-sections": ["Homepage Sections", "Manage homepage content blocks and ordering"],
-  "health-tools": ["Health Tools", "Manage health calculators and assessment tools"],
+  "health-tools": ["Manage Tools", "Manage health calculators and assessment tools"],
+  whr: ["Women's Health Email Reminders", "Automated reminder emails for the Pregnancy, Ovulation and Period tools — dashboard, settings, schedules, templates and logs"],
   faqs: ["FAQs", "Manage frequently asked questions"],
   "contact-inquiries": ["Contact Inquiries", "Messages submitted through the contact form"],
   "seo-settings": ["SEO Management", "Global meta, social cards, schema, robots.txt, and per-page SEO"],
@@ -201,6 +210,7 @@ export function adminRouteId(pathname: string): string {
   if (segments[0] === "questions" && segments[1]) return `qa-${segments[1]}`;
   if (segments[0] === "consultations" && segments[1]) return `oc-${segments[1]}`;
   if (segments[0] === "physical" && segments[1]) return `phys-${segments[1]}`;
+  if (segments[0] === "womens-health-reminders") return "whr";
   if (segments[0] === "doctor-profiles") return "doctor-seo";
   if (segments[0] === "trusted-partners") return "about-partners";
   if (segments[0] === "founders-message") return "about-founder";
@@ -226,6 +236,9 @@ export function getAdminPageMeta(pathname: string): [string, string] {
   if (segments[0] === "physical" && segments[1]) {
     return adminPageMeta[`phys-${segments[1]}`] ?? adminPageMeta["phys-pending"];
   }
+  if (segments[0] === "womens-health-reminders") {
+    return adminPageMeta.whr;
+  }
   if (segments[0] === "doctor-profiles") {
     return adminPageMeta["doctor-seo"];
   }
@@ -249,4 +262,6 @@ export function getAdminPageMeta(pathname: string): [string, string] {
   return adminPageMeta[id] ?? adminPageMeta.dashboard;
 }
 
-export const allAdminNavItems = adminNav.flatMap((group) => group.items);
+export const allAdminNavItems = adminNav.flatMap((group) =>
+  group.items.flatMap((item) => (item.children?.length ? item.children : [item])),
+);

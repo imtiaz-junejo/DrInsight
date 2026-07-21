@@ -27,6 +27,7 @@ export class SiteCmsService {
       pendingPublications,
       unreadContacts,
       openAuditAlerts,
+      failedWhrEmails,
     ] = await Promise.all([
       this.prisma.user.count({ where: { status: UserStatus.PENDING } }),
       this.prisma.appointment.count({
@@ -63,6 +64,7 @@ export class SiteCmsService {
           result: { in: ['FAILED', 'BLOCKED'] },
         },
       }),
+      this.prisma.womensHealthReminderLog.count({ where: { status: 'Failed' } }),
     ]);
 
     return {
@@ -77,6 +79,7 @@ export class SiteCmsService {
       'publication-review': pendingPublications,
       'contact-inquiries': unreadContacts,
       users: pendingUsers,
+      whr: failedWhrEmails,
     };
   }
 

@@ -216,12 +216,8 @@ const VERSION_ROWS = [
 const FOOTER_LINKS = DEFAULT_LINKS.filter((link) => link.href !== "/privacy-policy");
 
 export default function PrivacyPolicyPageClient() {
-  const { activeSection, scrollToSection, scrollToTop } = usePolicyPageScroll([...SECTION_IDS]);
+  const { activeSection, scrollToSection } = usePolicyPageScroll([...SECTION_IDS]);
   const [versionOpen, setVersionOpen] = useState(true);
-
-  const handlePrint = useCallback(() => {
-    window.print();
-  }, []);
 
   const toggleVersionAccord = useCallback(() => {
     setVersionOpen((prev) => !prev);
@@ -234,8 +230,7 @@ export default function PrivacyPolicyPageClient() {
         <div className="hero-inner">
           <h1>🛡️ Privacy Policy</h1>
           <p>
-            &quot;Your privacy matters to us. Here&apos;s exactly how we collect, use, and protect your
-            information.&quot;
+            &quot;Your privacy matters to us. Here&apos;s exactly how we collect, use, and protect your information.&quot;
           </p>
           <div className="hero-meta">
             <span>📅 Effective: January 1, 2025</span>
@@ -244,14 +239,6 @@ export default function PrivacyPolicyPageClient() {
           </div>
           <div className="hero-badge-wrap">
             <div className="hero-badge">📖 Plain English Summary Available Below</div>
-          </div>
-          <div className="hero-actions">
-            <button type="button" className="hero-btn primary" onClick={handlePrint}>
-              🖨️ Print Policy
-            </button>
-            <button type="button" className="hero-btn">
-              ⬇️ Download PDF
-            </button>
           </div>
         </div>
       </div>
@@ -314,14 +301,14 @@ export default function PrivacyPolicyPageClient() {
                 #NY-2018-MED-4471
               </p>
               <p>
-                <strong>Registered Office:</strong> 123 Medical Plaza, Suite 400, New York, NY 10001, USA
+                <strong>Registered Office:</strong> DrInsight, Badin, Sindh Pakistan
               </p>
               <p>
                 <strong>Data Controller:</strong> DrInsight
               </p>
               <p>
                 <strong>Data Protection Officer (DPO):</strong> Dr. Javed Kumbhar —{" "}
-                <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
+                <a href="mailto:contact@drinsight.org">contact@drinsight.org</a>
               </p>
             </div>
           </div>
@@ -595,7 +582,7 @@ export default function PrivacyPolicyPageClient() {
               <div className="ch">📬 How to Exercise Your Rights</div>
               <ul>
                 <li>
-                  Email: <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
+                  Email: <a href="mailto:contact@drinsight.org">contact@drinsight.org</a>
                 </li>
                 <li>
                   Response time: Within <strong>30 days</strong>
@@ -627,7 +614,7 @@ export default function PrivacyPolicyPageClient() {
                 </li>
                 <li>
                   Parents or guardians may contact us at{" "}
-                  <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
+                  <a href="mailto:contact@drinsight.org">contact@drinsight.org</a>
                 </li>
                 <li>
                   Medical content is written for adult healthcare professionals and informed adult readers
@@ -746,27 +733,27 @@ export default function PrivacyPolicyPageClient() {
             <div className="contact-grid">
               <div className="contact-card">
                 <h4>🛡️ Data Protection Officer</h4>
-                <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
+                <a href="mailto:privacy@drinsight.org">privacy@drinsight.org</a>
                 <p>All privacy & data requests</p>
               </div>
               <div className="contact-card">
                 <h4>✉️ General Inquiries</h4>
-                <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
+                <a href="mailto:contact@drinsight.org">contact@drinsight.org</a>
                 <p>All general enquiries</p>
               </div>
               <div className="contact-card">
                 <h4>⚖️ Legal Department</h4>
-                <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
+                <a href="mailto:legal@drinsight.org">legal@drinsight.org</a>
                 <p>Legal and compliance matters</p>
               </div>
               <div className="contact-card">
                 <h4>📍 Mailing Address</h4>
                 <p>
-                  DrInsight
+                  DrInsight Inc.
                   <br />
-                  123 Medical Plaza, Suite 400
+                  Badin
                   <br />
-                  New York, NY 10001, USA
+                  Pakistan
                 </p>
               </div>
             </div>
@@ -793,15 +780,6 @@ export default function PrivacyPolicyPageClient() {
             <span style={{ fontSize: ".72rem", color: "var(--gray-400)" }}>
               Last updated: June 1, 2026 · v2.1
             </span>
-            <button type="button" className="pf-btn gray" onClick={scrollToTop}>
-              ↑ Back to Top
-            </button>
-            <button type="button" className="pf-btn" onClick={handlePrint}>
-              🖨️ Print
-            </button>
-            <button type="button" className="pf-btn green">
-              ⬇️ Download PDF
-            </button>
           </div>
         </div>
       </div>

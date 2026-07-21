@@ -113,7 +113,7 @@ const PLAIN_LIST_ITEMS = [
 const FOOTER_LINKS = DEFAULT_LINKS.filter((link) => link.href !== "/disclaimer");
 
 export default function DisclaimerPageClient() {
-  const { activeSection, scrollToSection, scrollToTop } = usePolicyPageScroll([...SECTION_IDS]);
+  const { activeSection, scrollToSection } = usePolicyPageScroll([...SECTION_IDS]);
   const [fontSize, setFontSize] = useState(14);
   const [openAccords, setOpenAccords] = useState<Set<number>>(() => new Set([0]));
 
@@ -134,10 +134,6 @@ export default function DisclaimerPageClient() {
     });
   }, []);
 
-  const handlePrint = useCallback(() => {
-    window.print();
-  }, []);
-
   return (
     <div className="disclaimer-page">
 
@@ -150,26 +146,6 @@ export default function DisclaimerPageClient() {
             seek the advice of a qualified healthcare provider regarding any medical condition. Never disregard
             professional medical advice or delay seeking it because of something you have read on this platform.
           </p>
-          <div className="emg-numbers">
-            <div className="emg-num">
-              🇵🇰 Pakistan: <strong>115</strong>
-            </div>
-            <div className="emg-num">
-              🇺🇸 USA: <strong>911</strong>
-            </div>
-            <div className="emg-num">
-              🇬🇧 UK: <strong>999</strong>
-            </div>
-            <div className="emg-num">
-              🇪🇺 EU: <strong>112</strong>
-            </div>
-            <div className="emg-num">
-              🇦🇺 Australia: <strong>000</strong>
-            </div>
-            <div className="emg-num">
-              🌍 International: <strong>112</strong>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -183,14 +159,6 @@ export default function DisclaimerPageClient() {
           <div className="hero-meta">
             <span>📅 Effective: January 1, 2025</span>
             <span>🔄 Last Updated: June 1, 2026</span>
-          </div>
-          <div className="hero-actions">
-            <button type="button" className="hero-btn primary" onClick={handlePrint}>
-              🖨️ Print Disclaimer
-            </button>
-            <button type="button" className="hero-btn">
-              ⬇️ Download PDF
-            </button>
           </div>
         </div>
       </div>
@@ -421,7 +389,7 @@ export default function DisclaimerPageClient() {
               </p>
               <p>
                 To report potentially outdated content: 📧{" "}
-                <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
+                <a href="mailto:contact@drinsight.org">contact@drinsight.org</a>
               </p>
             </div>
           </div>
@@ -650,7 +618,7 @@ export default function DisclaimerPageClient() {
             <div className="prose">
               <p>
                 To report a broken or inappropriate external link: 📧{" "}
-                <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
+                <a href="mailto:contact@drinsight.org">contact@drinsight.org</a>
               </p>
             </div>
           </div>
@@ -809,27 +777,27 @@ export default function DisclaimerPageClient() {
             <div className="contact-grid">
               <div className="contact-card">
                 <h4>📝 Corrections & Inaccuracies</h4>
-                <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
+                <a href="mailto:corrections@drinsight.org">corrections@drinsight.org</a>
                 <p>Reviewed within 5 business days</p>
               </div>
               <div className="contact-card">
                 <h4>✍️ General Editorial</h4>
-                <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
+                <a href="mailto:editorial@drinsight.org">editorial@drinsight.org</a>
                 <p>All editorial enquiries</p>
               </div>
               <div className="contact-card">
                 <h4>🧠 Safe Messaging Concerns</h4>
-                <a href="mailto:drinsightofficial@gmail.com">drinsightofficial@gmail.com</a>
+                <a href="mailto:safemessaging@drinsight.org">safemessaging@drinsight.org</a>
                 <p>Mental health content issues</p>
               </div>
               <div className="contact-card">
                 <h4>📍 Mailing Address</h4>
                 <p>
-                  DrInsight
+                  DrInsight Inc.
                   <br />
-                  123 Medical Plaza, Suite 400
+                  Badin
                   <br />
-                  New York, NY 10001, USA
+                  Pakistan
                 </p>
               </div>
             </div>
@@ -852,15 +820,6 @@ export default function DisclaimerPageClient() {
           </div>
           <div className="pf-btns">
             <span style={{ fontSize: ".72rem", color: "var(--gray-400)" }}>Last updated: June 1, 2026</span>
-            <button type="button" className="pf-btn gray" onClick={scrollToTop}>
-              ↑ Back to Top
-            </button>
-            <button type="button" className="pf-btn" onClick={handlePrint}>
-              🖨️ Print
-            </button>
-            <button type="button" className="pf-btn green">
-              ⬇️ Download PDF
-            </button>
           </div>
         </div>
       </div>

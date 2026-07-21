@@ -161,7 +161,7 @@
 }
 
 .contact-page .contact-card {
-  background: #fff;
+  background: var(--gray-50);
   border: 1.5px solid var(--gray-300);
   border-radius: var(--radius-lg);
   padding: 22px 18px;
@@ -246,7 +246,7 @@
 }
 
 .contact-page .form-card {
-  background: #f1f5f9;
+  background: var(--gray-50);
   border: 1.5px solid var(--gray-200);
   border-radius: var(--radius-lg);
   padding: 28px;
@@ -488,7 +488,7 @@
 }
 
 .contact-page .sidebar-card {
-  background: #fff;
+  background: var(--gray-50);
   border: 1.5px solid var(--gray-200);
   border-radius: var(--radius-lg);
   padding: 22px;
@@ -496,7 +496,7 @@
 }
 
 .contact-page .sidebar-card-tone {
-  background: #f1f5f9;
+  background: var(--gray-50);
   border-color: #d1d5db;
 }
 
@@ -567,7 +567,8 @@
   font-size: 0.78rem;
   padding: 7px 10px;
   border-radius: 8px;
-  background: var(--gray-50);
+  background: transparent;
+  border: 1px solid var(--gray-200);
 }
 
 .contact-page .hours-row.today {
@@ -640,7 +641,7 @@
   border: 1.5px solid var(--gray-200);
   position: relative;
   height: 220px;
-  background: linear-gradient(135deg, #e8f0fb, #dbeafe);
+  background: var(--gray-50);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -712,6 +713,7 @@
   height: 38px;
   border-radius: 9px;
   border: 1.5px solid var(--gray-200);
+  background: var(--gray-50);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -773,7 +775,7 @@
   max-width: none;
   margin: 0;
   padding: 28px;
-  background: #e2e8f0;
+  background: var(--gray-50);
   border: 1.5px solid var(--gray-300);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
@@ -785,7 +787,7 @@
 }
 
 .contact-page .main-column .faq-item {
-  background: #fff;
+  background: var(--gray-50);
   border-color: var(--gray-300);
 }
 
@@ -806,6 +808,7 @@
 }
 
 .contact-page .faq-item {
+  background: var(--gray-50);
   border: 1.5px solid var(--gray-200);
   border-radius: var(--radius);
   overflow: hidden;

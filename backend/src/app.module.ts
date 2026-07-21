@@ -30,6 +30,7 @@ import { NewsletterModule } from './newsletter/newsletter.module';
 import { ClinicalRecordsModule } from './clinical-records/clinical-records.module';
 import { MeetingModule } from './meeting/meeting.module';
 import { PatientHealthModule } from './patient-health/patient-health.module';
+import { WomensHealthRemindersModule } from './womens-health-reminders/womens-health-reminders.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
@@ -64,6 +65,7 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
     ClinicalRecordsModule,
     MeetingModule,
     PatientHealthModule,
+    WomensHealthRemindersModule,
     AiModule,
     GatewayModule,
   ],

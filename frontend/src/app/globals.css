@@ -136,7 +136,7 @@ body {
   min-height: calc(100svh - var(--site-header-height));
   min-height: calc(100dvh - var(--site-header-height));
   padding-top: clamp(1rem, 2vh, 1.5rem);
-  padding-bottom: clamp(1rem, 2vh, 1.5rem);
+  padding-bottom: clamp(3rem, 6vh, 4.5rem);
 }
 
 @media (min-width: 901px) {
@@ -150,8 +150,28 @@ body {
   min-height: var(--site-topbar-height);
 }
 
+.home-hero-block {
+  position: relative;
+  z-index: 1;
+}
+
 .home-hero-section .home-hero-inner {
   width: 100%;
+}
+
+.home-emergency-anchor {
+  position: absolute;
+}
+
+.home-emergency-banner {
+  position: relative;
+}
+
+.home-specialties-section {
+  position: relative;
+  z-index: 0;
+  /* Clear the overlapping emergency banner + add comfortable section breathing room */
+  padding-top: clamp(5.5rem, 11vh, 7.5rem);
 }
 
 .home-hero-section .home-hero-badges {

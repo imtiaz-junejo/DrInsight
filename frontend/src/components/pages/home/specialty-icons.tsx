@@ -4,13 +4,18 @@ export const HOME_MAJOR_SPECIALTIES = [
   { name: "Pulmonology", icon: "🫁" },
   { name: "Orthopedics", icon: "🦴" },
   { name: "Ophthalmology", icon: "👁️" },
-  { name: "Family Medicine", icon: "👨‍⚕️" },
+  { name: "Dermatology", icon: "🧴" },
   { name: "OB/GYN", icon: "🤰" },
   { name: "Pediatrics", icon: "👶" },
   { name: "Oncology", icon: "🧬" },
   { name: "Endocrinology", icon: "🫀" },
   { name: "Infectious Disease", icon: "🦠" },
   { name: "Psychiatry", icon: "🧘" },
+  { name: "Oral & Maxillofacial Surgery", icon: "🦷" },
+  { name: "Endodontics", icon: "🪥" },
+  { name: "Periodontology", icon: "🫧" },
+  { name: "Prosthodontics", icon: "😁" },
+  { name: "Orthodontics", icon: "😬" },
 ] as const;
 
 export type HomeMajorSpecialty = (typeof HOME_MAJOR_SPECIALTIES)[number]["name"];

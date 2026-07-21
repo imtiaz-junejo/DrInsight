@@ -1101,3 +1101,60 @@ export function usePatientPrescriptions(patientId?: string) {
     enabled: !!patientId,
   });
 }
+
+export interface DoctorVitalItem {
+  id: string;
+  val: string;
+  unit: string;
+  label: string;
+  badge: string;
+  badgeLabel: string;
+  recordedAt: string;
+}
+
+export interface DoctorHealthToolHistoryItem {
+  id: string;
+  resultSummary?: string | null;
+  notes?: string | null;
+  createdAt: string;
+  tool: { name: string; iconEmoji?: string | null; slug: string };
+}
+
+export function useDoctorHealthVitals() {
+  return useQuery({
+    queryKey: ["doctor-health-vitals"],
+    queryFn: async () => {
+      const { data } = await api.get<{ data: DoctorVitalItem[]; lastRecordedAt: string | null }>("/doctors/me/health/vitals");
+      return data;
+    },
+  });
+}
+
+export function useDoctorHealthToolHistory(limit = 20) {
+  return useQuery({
+    queryKey: ["doctor-health-tool-history", limit],
+    queryFn: async () => {
+      const { data } = await api.get<DoctorHealthToolHistoryItem[]>("/doctors/me/health/tools/history", { params: { limit } });
+      return data;
+    },
+  });
+}
+
+export function useCreateDoctorVital() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (body: {
+      type: string;
+      value: string;
+      unit?: string;
+      status?: string;
+      notes?: string;
+    }) => {
+      const { data } = await api.post("/doctors/me/health/vitals", body);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["doctor-health-vitals"] });
+    },
+  });
+}

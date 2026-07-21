@@ -28,7 +28,6 @@ import {
   MessageSquare,
   Newspaper,
   Pin,
-  Printer,
   RefreshCw,
   Shield,
   Smile,
@@ -564,11 +563,6 @@ export function BlogArticleDetail({ slug }: Props) {
         >
           <AdIconLabel icon={isListening ? VolumeX : Volume2} size={14}>
             {isListening ? "Stop Listening" : "Listen to Article"}
-          </AdIconLabel>
-        </button>
-        <button type="button" className="ad-print-btn" onClick={() => window.print()}>
-          <AdIconLabel icon={Printer} size={14}>
-            Print
           </AdIconLabel>
         </button>
       </div>

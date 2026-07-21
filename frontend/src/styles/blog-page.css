@@ -1,5 +1,3 @@
-@import "./sticky-sidebar.css";
-
 .blog-page {
   --blue: #1a56a0;
   --blue-dark: #0f3d7a;
@@ -24,9 +22,6 @@
   --radius: 12px;
   --radius-lg: 18px;
   --transition: all 0.2s ease;
-  --sticky-nav-height: 70px;
-  --sticky-gap: 22px;
-  --sticky-top: calc(var(--sticky-nav-height) + var(--sticky-gap));
   font-family: var(--font-body);
   font-size: 14px;
   line-height: 1.6;
@@ -259,7 +254,7 @@
   display: grid;
   grid-template-columns: 1fr 300px;
   gap: 32px;
-  align-items: stretch;
+  align-items: start;
 }
 
 .blog-page .articles-col {
@@ -940,10 +935,6 @@
   .blog-page .hero-inner,
   .blog-page .blog-layout {
     grid-template-columns: 1fr;
-  }
-
-  .blog-page .sticky-sidebar-col {
-    order: -1;
   }
 }
 

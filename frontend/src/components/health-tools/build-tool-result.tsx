@@ -8,6 +8,7 @@ import type {
   IdealWeightResult,
   KidneyResult,
   OvulationResult,
+  PeriodTrackerResult,
   PregnancyResult,
   RiskResult,
   SmokingResult,
@@ -458,8 +459,8 @@ export function buildPregnancyModal(result: PregnancyResult): HealthToolModalDat
     toolId: "pregnancy",
     icon: "🤰",
     iconClass: "pink",
-    title: "Pregnancy Due Date",
-    primaryLabel: "Due Date (EDD)",
+    title: "Pregnancy Due Date Calculator",
+    primaryLabel: "Estimated Due Date (EDD)",
     primaryValue: result.edd,
     status: { text: result.weeksText, variant: "info" },
     sections: [
@@ -467,12 +468,29 @@ export function buildPregnancyModal(result: PregnancyResult): HealthToolModalDat
         title: "Interpretation",
         content: (
           <>
-            <p>Your estimated due date is <strong>{result.edd}</strong>. {result.weeksText}.</p>
+            <p>
+              Your estimated due date is <strong>{result.edd}</strong>. {result.weeksText}.
+            </p>
+            <p>{result.trimester}</p>
+            <p>{result.babySize}</p>
             <ul className="ht-trimester-list">
               <li className="ht-trimester--t1">1st Trimester: Weeks 1–13 (ends {result.t1End})</li>
               <li className="ht-trimester--t2">2nd Trimester: Weeks 14–27 (ends {result.t2End})</li>
               <li className="ht-trimester--t3">3rd Trimester: Weeks 28–40 (due {result.eddShort})</li>
             </ul>
+            <div className="ht-milestone-list">
+              {result.milestones.map((m) => (
+                <div key={m.week} className="ht-milestone-row">
+                  <span className="ht-milestone-icon" aria-hidden>
+                    🗓️
+                  </span>
+                  <span className="ht-milestone-text">
+                    <span className="ht-milestone-week">Week {m.week}</span>{" "}
+                    <span className="ht-milestone-date">({m.date})</span> — {m.label}
+                  </span>
+                </div>
+              ))}
+            </div>
           </>
         ),
       },
@@ -481,8 +499,8 @@ export function buildPregnancyModal(result: PregnancyResult): HealthToolModalDat
         variant: "warning",
         content: (
           <p>
-            EDD is an estimate — only about 5% of babies are born on their due date. Ultrasound dating in the first
-            trimester is the most accurate method.
+            EDD is an estimate — only about 5% of babies are born on their due date. Ultrasound dating is the most
+            accurate method.
           </p>
         ),
       },
@@ -513,8 +531,8 @@ export function buildOvulationModal(result: OvulationResult): HealthToolModalDat
     toolId: "ovulation",
     icon: "🌸",
     iconClass: "purple",
-    title: "Ovulation Calculator",
-    primaryLabel: "Ovulation Date",
+    title: "Pregnancy Planner (Ovulation Calculator)",
+    primaryLabel: "Your Fertility Insights",
     primaryValue: result.ovDate,
     status: { text: "Fertile Window", variant: "info" },
     sections: [
@@ -523,7 +541,17 @@ export function buildOvulationModal(result: OvulationResult): HealthToolModalDat
         content: (
           <>
             <p>{result.window}</p>
-            <p>Next period expected: <strong>{result.nextPeriod}</strong></p>
+            <p>{result.nextPeriod}</p>
+            {result.irregular && (
+              <div className="ht-milestone-row">
+                <span className="ht-milestone-icon" aria-hidden>
+                  ⚠️
+                </span>
+                <span className="ht-milestone-text">
+                  Irregular cycles make prediction less reliable — track a few cycles or confirm with an ovulation test.
+                </span>
+              </div>
+            )}
           </>
         ),
       },
@@ -532,8 +560,8 @@ export function buildOvulationModal(result: OvulationResult): HealthToolModalDat
         variant: "warning",
         content: (
           <p>
-            Ovulation calculators provide estimates only. Cycle irregularities, stress, and health conditions affect
-            accuracy. Consult a fertility specialist for conception planning.
+            Fertile window usually spans 5 days before ovulation and 1 day after. Irregular cycles or medical conditions
+            may affect accuracy.
           </p>
         ),
       },
@@ -553,6 +581,72 @@ export function buildOvulationModal(result: OvulationResult): HealthToolModalDat
         { icon: "💧", label: "Hydration", text: "Stay well-hydrated throughout your cycle." },
         { icon: "😴", label: "Sleep", text: "Aim for consistent sleep to regulate hormones." },
         { icon: "📊", label: "Monitoring", text: "Use a cycle tracking app for pattern recognition." },
+      ]),
+      DISCLAIMER,
+    ],
+  };
+}
+
+export function buildPeriodTrackerModal(result: PeriodTrackerResult): HealthToolModalData {
+  return {
+    toolId: "period-tracker",
+    icon: "🩸",
+    iconClass: "pink",
+    title: "Menstrual Period Tracker",
+    primaryLabel: "Cycle Overview",
+    primaryValue: result.nextPeriod,
+    status: { text: "Next Period", variant: "info" },
+    sections: [
+      {
+        title: "Interpretation",
+        content: (
+          <>
+            <p>{result.periodEnd}</p>
+            <p>{result.ovulationDay}</p>
+            <p>{result.fertileWindow}</p>
+            <div className="ht-milestone-list">
+              <p className="ht-upcoming-label">Upcoming Cycles</p>
+              {result.upcomingCycles.map((cycle) => (
+                <div key={cycle.label} className="ht-milestone-row">
+                  <span className="ht-milestone-icon" aria-hidden>
+                    🩸
+                  </span>
+                  <span className="ht-milestone-text">
+                    <span className="ht-milestone-week">{cycle.label}</span> —{" "}
+                    <span className="ht-milestone-date">{cycle.date}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </>
+        ),
+      },
+      {
+        title: "Warnings",
+        variant: "warning",
+        content: (
+          <p>
+            Results are estimates based on a regular cycle. Actual dates may vary due to stress, hormones or health
+            conditions.
+          </p>
+        ),
+      },
+      {
+        title: "Recommendations",
+        content: (
+          <ul className="ht-bullet-list">
+            <li>Track your cycle for at least 3 months to identify patterns.</li>
+            <li>Note symptoms like cramps, mood changes, and flow intensity.</li>
+            <li>Consult your gynaecologist if cycles are consistently irregular.</li>
+          </ul>
+        ),
+      },
+      lifestyleTips([
+        { icon: "🥗", label: "Diet", text: "Iron-rich foods can help during menstruation." },
+        { icon: "🏃", label: "Exercise", text: "Light activity may ease PMS symptoms." },
+        { icon: "💧", label: "Hydration", text: "Stay hydrated to reduce bloating." },
+        { icon: "😴", label: "Sleep", text: "Prioritise rest during your period." },
+        { icon: "📊", label: "Monitoring", text: "Use a period tracking app for long-term insights." },
       ]),
       DISCLAIMER,
     ],

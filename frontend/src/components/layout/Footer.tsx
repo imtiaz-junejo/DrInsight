@@ -6,19 +6,24 @@ import "@/styles/site-footer.css";
 import { phoneHref, whatsappHref } from "@/lib/contact-utils";
 import { CONTACT_ADDRESS, CONTACT_EMAIL, CONTACT_HOURS, CONTACT_PHONE_DISPLAY } from "@/lib/site-contact";
 import { BRAND_LOGO_ALT, FOOTER_LOGO_SRC } from "@/config/brand-logos";
+import {
+  AdFacebookIcon,
+  AdLinkedInIcon,
+  AdXIcon,
+  AdYouTubeIcon,
+} from "@/components/blog/ArticleDetailIcons";
 import { useNewsletterSubscribe } from "@/services/api-hooks";
 import { usePublicSiteConfig } from "@/services/configuration-api-hooks";
 
 const QUICK_LINKS = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About Us" },
-  { href: "/health-tools", label: "Health Tools" },
   { href: "/our-doctors", label: "Our Doctors" },
-  { href: "/ask-doctor", label: "Ask the Doctor" },
   { href: "/blog", label: "Blog" },
-  { href: "/book-consultation", label: "Book Consultation" },
-  { href: "/contact", label: "Contact Us" },
   { href: "/research-publications", label: "Research & Publications" },
+  { href: "/author-guidelines", label: "Author Guidelines" },
+  { href: "/editorial-policy#s6", label: "Medical Review Process" },
+  { href: "/editorial-policy", label: "Editorial Policy" },
 ] as const;
 
 const MEDICAL_CATEGORIES = [
@@ -43,6 +48,37 @@ const BOTTOM_LINKS = [
 ] as const;
 
 const SOCIAL_LINKS = ["𝕏", "f", "in", "▶", "📸"] as const;
+
+const FOOTER_SOCIAL_ORDER = [
+  { key: "facebook", label: "Facebook", icon: "facebook" as const },
+  { key: "twitter", label: "X", icon: "x" as const },
+  { key: "instagram", label: "Instagram", icon: "instagram" as const },
+  { key: "linkedin", label: "LinkedIn", icon: "linkedin" as const },
+  { key: "youtube", label: "YouTube", icon: "youtube" as const },
+] as const;
+
+function FooterInstagramIcon({ size = 14 }: { size?: number }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" aria-hidden>
+      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+    </svg>
+  );
+}
+
+function FooterSocialIcon({ type, size = 14 }: { type: (typeof FOOTER_SOCIAL_ORDER)[number]["icon"]; size?: number }) {
+  switch (type) {
+    case "facebook":
+      return <AdFacebookIcon size={size} />;
+    case "x":
+      return <AdXIcon size={size} />;
+    case "instagram":
+      return <FooterInstagramIcon size={size} />;
+    case "linkedin":
+      return <AdLinkedInIcon size={size} />;
+    case "youtube":
+      return <AdYouTubeIcon size={size} />;
+  }
+}
 
 function PhoneIcon() {
   return (
@@ -109,7 +145,13 @@ export function Footer() {
     { key: "instagram", label: "📸", href: social?.instagram },
   ].filter((s) => s.href);
 
-  const handleSubscribe = async () => {
+  const footerSocialItems = FOOTER_SOCIAL_ORDER.map((item) => ({
+    ...item,
+    href: social?.[item.key as keyof NonNullable<typeof social>] ?? "#",
+  }));
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!email.trim()) return;
     try {
       await newsletter.mutateAsync(email.trim());
@@ -211,28 +253,46 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="footer-col">
+        <div className="footer-col footer-col-insights">
           <h4>Expert Health Insights</h4>
-          <p style={{ fontSize: "0.82rem", marginBottom: 14 }}>
-            Get weekly medical tips and health news from our specialists.
+          <p className="footer-insights-desc">
+            Get our latest physician-written medical tips and health updates
           </p>
-          <div className="footer-subscribe">
+          <form className="footer-subscribe" onSubmit={handleSubscribe}>
             <input
               type="email"
               placeholder="Your email address"
               aria-label="Email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
             />
-            <button type="button" onClick={handleSubscribe} disabled={newsletter.isPending}>
+            <button type="submit" disabled={newsletter.isPending}>
               {newsletter.isPending ? "Subscribing..." : "Subscribe Free →"}
             </button>
-            {message && (
-              <p style={{ fontSize: "0.72rem", color: "#475569", marginTop: 8 }}>{message}</p>
-            )}
-            <p style={{ fontSize: "0.72rem", color: "#475569", marginTop: 8 }}>
-              🔒 GDPR compliant. Unsubscribe anytime.
+            {message && <p className="footer-subscribe-msg">{message}</p>}
+            <p className="footer-insights-legal">
+              By continuing, you agree to DrInsight{" "}
+              <Link href="/terms-conditions">Terms of Use</Link> and{" "}
+              <Link href="/privacy-policy">Privacy Policy</Link>. You may unsubscribe at any time.
             </p>
+          </form>
+          <div className="footer-follow-us">
+            <div className="footer-follow-label">Follow Us</div>
+            <div className="footer-follow-social">
+              {footerSocialItems.map((item) => (
+                <a
+                  key={item.key}
+                  href={item.href}
+                  className="footer-social-circle"
+                  aria-label={item.label}
+                  target={item.href !== "#" ? "_blank" : undefined}
+                  rel={item.href !== "#" ? "noopener noreferrer" : undefined}
+                >
+                  <FooterSocialIcon type={item.icon} />
+                </a>
+              ))}
+            </div>
           </div>
         </div>
       </div>

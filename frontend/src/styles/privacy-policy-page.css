@@ -54,7 +54,7 @@
 }
 
 .privacy-policy-page .hero-inner {
-  max-width: 680px;
+  max-width: 980px;
   margin: auto;
   position: relative;
 }
@@ -70,8 +70,9 @@
   font-size: 0.9rem;
   opacity: 0.88;
   line-height: 1.75;
-  max-width: 560px;
+  max-width: none;
   margin: auto auto 14px;
+  white-space: nowrap;
 }
 
 .privacy-policy-page .hero-meta {
@@ -1038,6 +1039,11 @@
     position: static;
     margin-bottom: 18px;
     max-height: none;
+  }
+
+  .privacy-policy-page .page-hero p {
+    white-space: normal;
+    max-width: 560px;
   }
 }
 

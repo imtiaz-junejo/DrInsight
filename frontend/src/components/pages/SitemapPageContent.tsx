@@ -407,25 +407,6 @@ export function SitemapPageContent() {
               Sitemap last updated: <strong>{new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</strong> · All {totalStaticPages} static routes live
             </span>
           </div>
-          <div className="lu-right">
-            <button
-              type="button"
-              className="lu-btn"
-              onClick={() => showToast("XML sitemap: drinsight.org/sitemap.xml")}
-            >
-              📄 XML Sitemap
-            </button>
-            <button
-              type="button"
-              className="lu-btn"
-              onClick={() => showToast("Robots.txt: drinsight.org/robots.txt")}
-            >
-              🤖 robots.txt
-            </button>
-            <button type="button" className="lu-btn primary" onClick={() => window.print()}>
-              🖨️ Print Sitemap
-            </button>
-          </div>
         </div>
 
         <div className="sitemap-grid" id="smGrid">
@@ -645,22 +626,6 @@ export function SitemapPageContent() {
               Our machine-readable XML sitemap is available for search engines and SEO tools. It includes all public
               pages with last-modified dates and priority scores.
             </p>
-          </div>
-          <div className="xml-cta-btns">
-            <button
-              type="button"
-              className="xml-btn primary"
-              onClick={() => showToast("Opening XML sitemap: drinsight.org/sitemap.xml")}
-            >
-              📄 View XML Sitemap
-            </button>
-            <button
-              type="button"
-              className="xml-btn outline"
-              onClick={() => showToast("robots.txt: drinsight.org/robots.txt")}
-            >
-              🤖 robots.txt
-            </button>
           </div>
         </div>
 

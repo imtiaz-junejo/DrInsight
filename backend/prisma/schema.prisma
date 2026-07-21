@@ -51,6 +51,7 @@ model User {
   blogPostBookmarks             BlogPostBookmark[]
   submittedQuestions            AskDoctorQuestion[]    @relation("QuestionSubmitter")
   healthToolUsages              HealthToolUsage[]
+  womensHealthReminderSubscriptions WomensHealthReminderSubscription[]
   publicationReviews            PublicationReview[]
   reviewedPublications          Publication[]          @relation("PublicationReviewer")
   refreshTokens                 RefreshToken[]
@@ -2440,4 +2441,100 @@ enum OtpDeliveryStatus {
   SENT
   FAILED
   VERIFIED
+}
+
+enum WomensHealthToolType {
+  PREGNANCY
+  OVULATION
+  PERIOD
+}
+
+enum WomensHealthReminderStatus {
+  SCHEDULED
+  SENT
+  FAILED
+  PENDING
+  DISABLED_BY_ADMIN
+  CANCELLED
+}
+
+model WomensHealthReminderSubscription {
+  id             String                     @id @default(cuid())
+  userId         String?
+  email          String
+  tool           WomensHealthToolType
+  cycleKey       String?
+  reminderDate   DateTime?
+  enabled        Boolean                    @default(true)
+  status         WomensHealthReminderStatus @default(SCHEDULED)
+  predictionJson Json?
+  source         String                     @default("tools_page")
+  createdAt      DateTime                   @default(now())
+  updatedAt      DateTime                   @updatedAt
+  user           User?                      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  logs           WomensHealthReminderLog[]
+
+  @@unique([email, tool, cycleKey])
+  @@index([tool, enabled])
+  @@index([userId])
+  @@map("womens_health_reminder_subscriptions")
+}
+
+model WomensHealthReminderLog {
+  id             String                            @id @default(cuid())
+  subscriptionId String?
+  patientName    String?
+  email          String
+  tool           WomensHealthToolType
+  emailType      String
+  scheduledAt    DateTime
+  sentAt         DateTime?
+  status         String
+  errorMessage   String?
+  createdAt      DateTime                          @default(now())
+  subscription   WomensHealthReminderSubscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  @@index([tool, status])
+  @@index([scheduledAt])
+  @@map("womens_health_reminder_logs")
+}
+
+model PregnancyCareSchedule {
+  id               String   @id @default(cuid())
+  weekRange        String
+  title            String
+  subject          String
+  bodyHtml         String   @db.Text
+  tests            String?
+  visitReminder    String?
+  careInstructions String?
+  enabled          Boolean  @default(true)
+  displayOrder     Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([enabled, displayOrder])
+  @@map("pregnancy_care_schedules")
+}
+
+model WomensHealthReminderSettings {
+  id                  String    @id @default("default")
+  globalEnabled       Boolean   @default(true)
+  pregnancyEnabled    Boolean   @default(true)
+  ovulationEnabled    Boolean   @default(true)
+  periodEnabled       Boolean   @default(true)
+  queueEnabled        Boolean   @default(true)
+  retryEnabled        Boolean   @default(true)
+  senderEmail         String    @default("reminders@drinsight.com")
+  senderName          String    @default("DrInsight Care Team")
+  ovulationDaysBefore Int       @default(1)
+  periodDaysBefore    Int       @default(1)
+  retryAttempts       Int       @default(3)
+  lastRunAt           DateTime?
+  nextRunAt           DateTime?
+  ovulationTemplate   Json?
+  periodTemplate      Json?
+  updatedAt           DateTime  @updatedAt
+
+  @@map("womens_health_reminder_settings")
 }

@@ -23,6 +23,7 @@ export const doctorNav: DoctorNavGroup[] = [
       { id: "patients", name: "My Patients", href: "/doctor/patients" },
       { id: "appointments", name: "Consultations", badgeKey: "consultationsToday", badgeClass: "sb-a", href: "/doctor/appointments" },
       { id: "prescriptions", name: "Prescriptions", href: "/doctor/prescriptions" },
+      { id: "health", name: "Health Metrics", href: "/doctor/health" },
     ],
   },
   {
@@ -120,6 +121,7 @@ export const doctorPageMeta: Record<string, [string, string]> = {
   "qa-rejected": ["Rejected Questions", "Questions that were declined with a reason"],
   questions: ["New Questions", "Patient questions awaiting your medical reply"],
   prescriptions: ["Prescriptions", "Prescriptions issued to your patients"],
+  health: ["Health Metrics", "Track your vitals, health tool history, and women's health email reminders"],
   "patient-notes": ["Patient Notes", "View and manage consultation notes for your patients"],
   "submit-article": ["Submit an Article", "Share evidence-based medical content with our editorial team"],
   articles: ["My Articles", "Published, draft, and in-review articles"],

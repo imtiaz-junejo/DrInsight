@@ -9,6 +9,7 @@ export const HEALTH_TOOL_PANEL_IDS = [
   "bloodpressure",
   "pregnancy",
   "ovulation",
+  "period-tracker",
   "diabetes",
   "smoking",
   "kidney",

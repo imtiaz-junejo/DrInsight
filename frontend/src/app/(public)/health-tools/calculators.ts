@@ -7,14 +7,43 @@ export type WaterResult = { litres: number; cups: number };
 export type HrZone = { name: string; pct: string; lo: number; hi: number; col: string };
 export type HrResult = { max: number; zones: HrZone[] };
 export type BpResult = { sys: number; dia: number; category: string; cls: string; advice: string };
+export type PregnancyMethod = "lmp" | "conception" | "ivf";
+
+export type PregnancyInput = {
+  method: PregnancyMethod;
+  lmp?: string;
+  cycle?: number;
+  conception?: string;
+  ivfDate?: string;
+  ivfDay?: 3 | 5;
+};
+
+export type PregnancyMilestone = { week: number; date: string; label: string };
+
 export type PregnancyResult = {
   edd: string;
   weeksText: string;
+  trimester: string;
+  babySize: string;
   t1End: string;
   t2End: string;
   eddShort: string;
+  milestones: PregnancyMilestone[];
 };
-export type OvulationResult = { ovDate: string; window: string; nextPeriod: string };
+export type OvulationResult = {
+  ovDate: string;
+  window: string;
+  nextPeriod: string;
+  irregular?: boolean;
+};
+export type PeriodTrackerCycle = { label: string; date: string };
+export type PeriodTrackerResult = {
+  nextPeriod: string;
+  periodEnd: string;
+  ovulationDay: string;
+  fertileWindow: string;
+  upcomingCycles: PeriodTrackerCycle[];
+};
 export type RiskResult = { badge: string; cls: string; advice: string };
 export type SmokingResult = { packYears: number; risk: string };
 export type KidneyResult = { egfr: number; stage: string };
@@ -175,25 +204,211 @@ export function calcBP(sys: number, dia: number): BpResult | null {
   return { sys, dia, category, cls, advice };
 }
 
-export function calcPregnancy(lmpVal: string): PregnancyResult | null {
-  if (!lmpVal) return null;
-  const lmp = new Date(lmpVal);
-  const edd = new Date(lmp);
-  edd.setDate(edd.getDate() + 280);
+const PREG_BABY_SIZE: [number, string][] = [
+  [4, "poppy seed"],
+  [6, "lentil"],
+  [8, "raspberry"],
+  [10, "strawberry"],
+  [12, "lime"],
+  [14, "lemon"],
+  [16, "avocado"],
+  [18, "bell pepper"],
+  [20, "banana"],
+  [22, "papaya"],
+  [24, "corn on the cob"],
+  [26, "lettuce head"],
+  [28, "eggplant"],
+  [30, "cabbage"],
+  [32, "jicama"],
+  [34, "cantaloupe"],
+  [36, "romaine lettuce"],
+  [38, "pumpkin"],
+  [40, "small watermelon"],
+];
+
+function babySizeForWeek(week: number): string {
+  let label = PREG_BABY_SIZE[0][1];
+  for (const [wk, name] of PREG_BABY_SIZE) {
+    if (week >= wk) label = name;
+  }
+  return label;
+}
+
+function pregMilestoneSchedule(lmp: Date): PregnancyMilestone[] {
+  const mk = (w: number) => {
+    const d = new Date(lmp);
+    d.setDate(d.getDate() + w * 7);
+    return d;
+  };
+  const fmt = (d: Date) => d.toLocaleDateString("en-US", shortOpts);
+  return [
+    [8, "First prenatal visit & dating check"],
+    [11, "First-trimester screening / NT scan (11–13 wks)"],
+    [16, "Genetic screening / quad screen (15–20 wks)"],
+    [20, "Anatomy ultrasound (18–22 wks)"],
+    [26, "Glucose screening for gestational diabetes (24–28 wks)"],
+    [28, "Tdap vaccine; Rh factor follow-up if Rh-negative"],
+    [32, "Growth check-up; visits become more frequent"],
+    [36, "Group B strep test (35–37 wks)"],
+    [39, "Weekly checkups; full term begins at 39 weeks"],
+  ].map(([week, label]) => ({
+    week: week as number,
+    date: fmt(mk(week as number)),
+    label: label as string,
+  }));
+}
+
+function toIsoDate(d: Date) {
+  return d.toISOString().slice(0, 10);
+}
+
+function resolvePregnancyDates(input: PregnancyInput): { lmp: Date; edd: Date } | null {
+  let lmp: Date;
+  let edd: Date;
+
+  if (input.method === "lmp") {
+    if (!input.lmp) return null;
+    lmp = new Date(input.lmp);
+    const cycle = Math.min(45, Math.max(21, input.cycle ?? 28));
+    const cycleAdjustDays = cycle - 28;
+    edd = new Date(lmp);
+    edd.setDate(edd.getDate() + 280 + cycleAdjustDays);
+  } else if (input.method === "conception") {
+    if (!input.conception) return null;
+    const conception = new Date(input.conception);
+    edd = new Date(conception);
+    edd.setDate(edd.getDate() + 266);
+    lmp = new Date(conception);
+    lmp.setDate(lmp.getDate() - 14);
+  } else {
+    if (!input.ivfDate) return null;
+    const transferDay = input.ivfDay ?? 5;
+    const transfer = new Date(input.ivfDate);
+    const daysToAdd = transferDay === 3 ? 263 : 261;
+    edd = new Date(transfer);
+    edd.setDate(edd.getDate() + daysToAdd);
+    lmp = new Date(transfer);
+    lmp.setDate(lmp.getDate() - (14 + transferDay));
+  }
+
+  return { lmp, edd };
+}
+
+export type PregnancyWhrPrediction = {
+  cycleKey: string;
+  edd: string;
+  reminderDate?: string;
+  schedule: Array<{ week: number; date: string; title: string }>;
+};
+
+export function pregnancyWhrPrediction(input: PregnancyInput): PregnancyWhrPrediction | null {
+  const dates = resolvePregnancyDates(input);
+  if (!dates) return null;
+
+  const { lmp, edd } = dates;
   const today = new Date();
+  const week = Math.floor(Math.floor((today.getTime() - lmp.getTime()) / 86400000) / 7);
+  const schedule = pregMilestoneSchedule(lmp)
+    .filter((m) => m.week >= Math.max(week, 4))
+    .map((m) => {
+      const d = new Date(lmp);
+      d.setDate(d.getDate() + m.week * 7);
+      return { week: m.week, date: toIsoDate(d), title: m.label };
+    });
+
+  return {
+    cycleKey: toIsoDate(edd),
+    edd: toIsoDate(edd),
+    reminderDate: schedule[0]?.date,
+    schedule,
+  };
+}
+
+export function ovulationWhrPrediction(lmpVal: string, cycle: number) {
+  if (!lmpVal) return null;
+  const c = Math.min(35, Math.max(21, cycle || 28));
+  const lmp = new Date(lmpVal);
+  const ov = new Date(lmp);
+  ov.setDate(ov.getDate() + c - 14);
+  const rem = new Date(ov);
+  rem.setDate(rem.getDate() - 1);
+  return {
+    cycleKey: toIsoDate(ov),
+    ovDate: toIsoDate(ov),
+    reminderDate: toIsoDate(rem),
+  };
+}
+
+export function periodWhrPrediction(lmpVal: string, cycle: number) {
+  if (!lmpVal) return null;
+  const c = Math.min(35, Math.max(21, cycle || 28));
+  const next = new Date(lmpVal);
+  next.setDate(next.getDate() + c);
+  const rem = new Date(next);
+  rem.setDate(rem.getDate() - 1);
+  return {
+    cycleKey: toIsoDate(next),
+    nextPeriod: toIsoDate(next),
+    reminderDate: toIsoDate(rem),
+  };
+}
+
+export function calcPregnancy(input: PregnancyInput): PregnancyResult | null {
+  const today = new Date();
+  const dates = resolvePregnancyDates(input);
+  if (!dates) return null;
+  const { lmp, edd } = dates;
   const diffDays = Math.floor((today.getTime() - lmp.getTime()) / 86400000);
   const weeks = Math.floor(diffDays / 7);
   const days = diffDays % 7;
+  const inRange = weeks >= 0 && weeks <= 42;
+
   const t1End = new Date(lmp);
   t1End.setDate(t1End.getDate() + 91);
   const t2End = new Date(lmp);
   t2End.setDate(t2End.getDate() + 189);
+
+  let trimester = "--";
+  if (inRange) {
+    trimester = weeks < 13 ? "1st Trimester" : weeks < 27 ? "2nd Trimester" : "3rd Trimester";
+  }
+
   return {
     edd: edd.toLocaleDateString("en-US", dateOpts),
-    weeksText: weeks >= 0 && weeks <= 42 ? `Gestational age: ${weeks} weeks ${days} days` : "Before LMP date",
+    weeksText: inRange
+      ? `Gestational age: ${weeks} weeks ${days} days`
+      : "Outside typical 0–42 week range for the date entered",
+    trimester: `Trimester: ${trimester}`,
+    babySize: inRange ? `Baby's size this week: about a ${babySizeForWeek(weeks)}` : "Baby's size: --",
     t1End: t1End.toLocaleDateString("en-US", shortOpts),
     t2End: t2End.toLocaleDateString("en-US", shortOpts),
     eddShort: edd.toLocaleDateString("en-US", shortOpts),
+    milestones: pregMilestoneSchedule(lmp),
+  };
+}
+
+export function calcPlanner(
+  lmpVal: string,
+  cycle: number,
+  _periodLen: number,
+  irregular: boolean,
+): OvulationResult | null {
+  if (!lmpVal) return null;
+  const c = Math.min(35, Math.max(21, cycle || 28));
+  const lmp = new Date(lmpVal);
+  const ovDay = new Date(lmp);
+  ovDay.setDate(ovDay.getDate() + c - 14);
+  const winStart = new Date(ovDay);
+  winStart.setDate(winStart.getDate() - 5);
+  const winEnd = new Date(ovDay);
+  winEnd.setDate(winEnd.getDate() + 1);
+  const nextPeriod = new Date(lmp);
+  nextPeriod.setDate(nextPeriod.getDate() + c);
+  return {
+    ovDate: ovDay.toLocaleDateString("en-US", shortYearOpts),
+    window: `Fertile window: ${winStart.toLocaleDateString("en-US", shortOpts)} to ${winEnd.toLocaleDateString("en-US", shortOpts)}`,
+    nextPeriod: `Next period expected: ${nextPeriod.toLocaleDateString("en-US", shortYearOpts)}`,
+    irregular,
   };
 }
 
@@ -212,6 +427,39 @@ export function calcOvulation(lmpVal: string, cycle: number, luteal: number): Ov
     ovDate: ovDay.toLocaleDateString("en-US", shortYearOpts),
     window: `Fertile window: ${winStart.toLocaleDateString("en-US", shortOpts)} to ${winEnd.toLocaleDateString("en-US", shortOpts)}`,
     nextPeriod: nextPeriod.toLocaleDateString("en-US", shortYearOpts),
+  };
+}
+
+export function calcPeriodTracker(lmpVal: string, cycle: number, periodLen: number): PeriodTrackerResult | null {
+  if (!lmpVal) return null;
+  const c = Math.min(35, Math.max(21, cycle || 28));
+  const p = Math.min(7, Math.max(1, periodLen || 5));
+  const lmp = new Date(lmpVal);
+  const nextPeriod = new Date(lmp);
+  nextPeriod.setDate(nextPeriod.getDate() + c);
+  const periodEnd = new Date(nextPeriod);
+  periodEnd.setDate(periodEnd.getDate() + p - 1);
+  const ovDay = new Date(lmp);
+  ovDay.setDate(ovDay.getDate() + c - 14);
+  const winStart = new Date(ovDay);
+  winStart.setDate(winStart.getDate() - 5);
+  const winEnd = new Date(ovDay);
+  winEnd.setDate(winEnd.getDate() + 1);
+
+  const cyc2 = new Date(nextPeriod);
+  cyc2.setDate(cyc2.getDate() + c);
+  const cyc3 = new Date(cyc2);
+  cyc3.setDate(cyc3.getDate() + c);
+
+  return {
+    nextPeriod: nextPeriod.toLocaleDateString("en-US", shortYearOpts),
+    periodEnd: `Expected to last through: ${periodEnd.toLocaleDateString("en-US", shortOpts)}`,
+    ovulationDay: `Ovulation day: ${ovDay.toLocaleDateString("en-US", shortOpts)}`,
+    fertileWindow: `Fertile window: ${winStart.toLocaleDateString("en-US", shortOpts)} to ${winEnd.toLocaleDateString("en-US", shortOpts)}`,
+    upcomingCycles: [
+      { label: "Cycle 2", date: cyc2.toLocaleDateString("en-US", shortOpts) },
+      { label: "Cycle 3", date: cyc3.toLocaleDateString("en-US", shortOpts) },
+    ],
   };
 }
 

@@ -202,9 +202,13 @@ export const ArticleRichTextEditor = forwardRef<ArticleRichTextEditorHandle, Art
 
       e.preventDefault();
 
-      let next = callout.nextElementSibling;
-      if (!(next instanceof HTMLElement) || next.tagName !== "P") {
-        next = createTrailingParagraph();
+      const sibling = callout.nextElementSibling;
+      const next =
+        sibling instanceof HTMLElement && sibling.tagName === "P"
+          ? sibling
+          : createTrailingParagraph();
+
+      if (next !== sibling) {
         callout.insertAdjacentElement("afterend", next);
       }
 

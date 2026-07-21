@@ -17,13 +17,13 @@ import {
   buildHrModal,
   buildIdealWeightModal,
   buildKidneyModal,
-  buildOvulationModal,
   buildPhqModal,
-  buildPregnancyModal,
   buildSmokingModal,
   buildSymptomModal,
   buildWaterModal,
 } from "@/components/health-tools/build-tool-result";
+import { WomensHealthTools } from "@/components/health-tools/WomensHealthTools";
+import { formNum, formStr } from "@/components/health-tools/form-fields";
 import type { HealthToolModalData } from "@/components/health-tools/types";
 import { SectionHeading } from "@/components/public/section-heading";
 import { HEALTH_TOOL_COUNT } from "@/config/health-tools";
@@ -39,9 +39,7 @@ import {
   calcHR,
   calcIdealWeight,
   calcKidney,
-  calcOvulation,
   calcPHQ9,
-  calcPregnancy,
   calcSmoking,
   calcWater,
   checkSymptom,
@@ -101,14 +99,6 @@ export default function HealthToolsPage() {
       input?.focus();
     });
   }, []);
-
-  function num(id: string, form: HTMLFormElement) {
-    return Number((form.elements.namedItem(id) as HTMLInputElement).value);
-  }
-
-  function str(id: string, form: HTMLFormElement) {
-    return (form.elements.namedItem(id) as HTMLInputElement | HTMLSelectElement).value;
-  }
 
   return (
     <div className="health-tools-page">
@@ -174,7 +164,7 @@ export default function HealthToolsPage() {
                 e.preventDefault();
                 const f = e.currentTarget;
                 void openResult("bmi", () => {
-                  const result = calcBMI(num("bmi-weight", f), num("bmi-height", f));
+                  const result = calcBMI(formNum("bmi-weight", f), formNum("bmi-height", f));
                   return result ? buildBmiModal(result) : null;
                 });
               }}
@@ -219,7 +209,7 @@ export default function HealthToolsPage() {
                 e.preventDefault();
                 const f = e.currentTarget;
                 void openResult("bmr", () => {
-                  const result = calcBMR(num("bmr-weight", f), num("bmr-height", f), num("bmr-age", f), str("bmr-sex", f), num("bmr-act", f));
+                  const result = calcBMR(formNum("bmr-weight", f), formNum("bmr-height", f), formNum("bmr-age", f), formStr("bmr-sex", f), formNum("bmr-act", f));
                   return result ? buildBmrModal(result) : null;
                 });
               }}
@@ -276,7 +266,7 @@ export default function HealthToolsPage() {
                 e.preventDefault();
                 const f = e.currentTarget;
                 void openResult("bodyfat", () => {
-                  const result = calcBodyFat(str("bf-sex", f), num("bf-height", f), num("bf-waist", f), num("bf-neck", f), num("bf-hip", f));
+                  const result = calcBodyFat(formStr("bf-sex", f), formNum("bf-height", f), formNum("bf-waist", f), formNum("bf-neck", f), formNum("bf-hip", f));
                   return result ? buildBodyFatModal(result) : null;
                 });
               }}
@@ -334,7 +324,7 @@ export default function HealthToolsPage() {
                 e.preventDefault();
                 const f = e.currentTarget;
                 void openResult("idealweight", () => {
-                  const result = calcIdealWeight(num("iw-height", f), str("iw-sex", f));
+                  const result = calcIdealWeight(formNum("iw-height", f), formStr("iw-sex", f));
                   return result ? buildIdealWeightModal(result) : null;
                 });
               }}
@@ -388,7 +378,7 @@ export default function HealthToolsPage() {
                 e.preventDefault();
                 const f = e.currentTarget;
                 void openResult("calories", () => {
-                  const result = calcCalories(num("cal-weight", f), num("cal-height", f), num("cal-age", f), str("cal-sex", f), num("cal-goal", f));
+                  const result = calcCalories(formNum("cal-weight", f), formNum("cal-height", f), formNum("cal-age", f), formStr("cal-sex", f), formNum("cal-goal", f));
                   return result ? buildCalorieModal(result) : null;
                 });
               }}
@@ -443,7 +433,7 @@ export default function HealthToolsPage() {
                 e.preventDefault();
                 const f = e.currentTarget;
                 void openResult("water", () => {
-                  const result = calcWater(num("wa-weight", f), num("wa-age", f), num("wa-act", f), num("wa-climate", f));
+                  const result = calcWater(formNum("wa-weight", f), formNum("wa-age", f), formNum("wa-act", f), formNum("wa-climate", f));
                   return result ? buildWaterModal(result) : null;
                 });
               }}
@@ -501,7 +491,7 @@ export default function HealthToolsPage() {
                 e.preventDefault();
                 const f = e.currentTarget;
                 void openResult("heartrate", () => {
-                  const result = calcHR(num("hr-age", f), num("hr-rest", f));
+                  const result = calcHR(formNum("hr-age", f), formNum("hr-rest", f));
                   return result ? buildHrModal(result) : null;
                 });
               }}
@@ -542,7 +532,7 @@ export default function HealthToolsPage() {
                 e.preventDefault();
                 const f = e.currentTarget;
                 void openResult("bloodpressure", () => {
-                  const result = calcBP(num("bp-sys", f), num("bp-dia", f));
+                  const result = calcBP(formNum("bp-sys", f), formNum("bp-dia", f));
                   return result ? buildBpModal(result) : null;
                 });
               }}
@@ -584,81 +574,7 @@ export default function HealthToolsPage() {
           title="Women's Health"
           subtitle="Reproductive health calculators designed with obstetricians and gynaecologists"
         >
-          <CalculatorCard
-            id="pregnancy"
-            icon="🤰"
-            iconClass="pink"
-            title="Pregnancy Due Date Calculator"
-            description="Calculate your estimated due date (EDD) and key pregnancy milestones from your last menstrual period."
-          >
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                void openResult("pregnancy", () => {
-                  const result = calcPregnancy(str("preg-lmp", e.currentTarget));
-                  return result ? buildPregnancyModal(result) : null;
-                });
-              }}
-            >
-                <div className="form-row single">
-                  <div className="form-group">
-                    <label htmlFor="preg-lmp">First Day of Last Menstrual Period (LMP)</label>
-                    <input type="date" id="preg-lmp" name="preg-lmp" />
-                  </div>
-                </div>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="preg-cycle">Cycle Length (days)</label>
-                    <input type="number" id="preg-cycle" name="preg-cycle" placeholder="28" min={21} max={45} />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="preg-method">Method</label>
-                    <select id="preg-method" name="preg-method" defaultValue="lmp">
-                      <option value="lmp">Last Period (LMP)</option>
-                      <option value="ivf">IVF Transfer Date</option>
-                    </select>
-                  </div>
-                </div>
-              <CalcButton loading={loadingId === "pregnancy"}>Calculate Due Date</CalcButton>
-            </form>
-          </CalculatorCard>
-
-          <CalculatorCard
-            id="ovulation"
-            icon="🌸"
-            iconClass="purple"
-            title="Ovulation Calculator"
-            description="Predict your fertile window and ovulation date to help with family planning or conception."
-          >
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const f = e.currentTarget;
-                void openResult("ovulation", () => {
-                  const result = calcOvulation(str("ov-lmp", f), num("ov-cycle", f) || 28, num("ov-luteal", f) || 14);
-                  return result ? buildOvulationModal(result) : null;
-                });
-              }}
-            >
-                <div className="form-row single">
-                  <div className="form-group">
-                    <label htmlFor="ov-lmp">First Day of Last Period</label>
-                    <input type="date" id="ov-lmp" name="ov-lmp" />
-                  </div>
-                </div>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="ov-cycle">Cycle Length (days)</label>
-                    <input type="number" id="ov-cycle" name="ov-cycle" placeholder="28" min={21} max={45} />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="ov-luteal">Luteal Phase (days)</label>
-                    <input type="number" id="ov-luteal" name="ov-luteal" placeholder="14" min={10} max={16} />
-                  </div>
-                </div>
-              <CalcButton loading={loadingId === "ovulation"}>Calculate Fertile Window</CalcButton>
-            </form>
-          </CalculatorCard>
+          <WomensHealthTools openResult={openResult} loadingId={loadingId} />
         </CategorySection>
 
         <CategorySection
@@ -681,7 +597,7 @@ export default function HealthToolsPage() {
                 e.preventDefault();
                 const f = e.currentTarget;
                 void openResult("diabetes", () => {
-                  const scores = [num("db-age", f), num("db-bmi", f), num("db-fam", f), num("db-act", f), num("db-bp", f), num("db-gest", f)];
+                  const scores = [formNum("db-age", f), formNum("db-bmi", f), formNum("db-fam", f), formNum("db-act", f), formNum("db-bp", f), formNum("db-gest", f)];
                   const score = scores.reduce((a, b) => a + b, 0);
                   return buildDiabetesModal(calcDiabetes(scores), score);
                 });
@@ -756,7 +672,7 @@ export default function HealthToolsPage() {
                 e.preventDefault();
                 const f = e.currentTarget;
                 void openResult("smoking", () => {
-                  const result = calcSmoking(num("sm-cpd", f), num("sm-yrs", f));
+                  const result = calcSmoking(formNum("sm-cpd", f), formNum("sm-yrs", f));
                   return result ? buildSmokingModal(result) : null;
                 });
               }}
@@ -796,7 +712,7 @@ export default function HealthToolsPage() {
                 e.preventDefault();
                 const f = e.currentTarget;
                 void openResult("kidney", () => {
-                  const result = calcKidney(num("kd-creat", f), num("kd-age", f), str("kd-sex", f), str("kd-race", f));
+                  const result = calcKidney(formNum("kd-creat", f), formNum("kd-age", f), formStr("kd-sex", f), formStr("kd-race", f));
                   return result ? buildKidneyModal(result) : null;
                 });
               }}
@@ -901,7 +817,7 @@ export default function HealthToolsPage() {
                 e.preventDefault();
                 const f = e.currentTarget;
                 void openResult("symptom", () => {
-                  const result = checkSymptom(str("sy-symp", f), str("sy-dur", f));
+                  const result = checkSymptom(formStr("sy-symp", f), formStr("sy-dur", f));
                   return result ? buildSymptomModal(result) : null;
                 });
               }}

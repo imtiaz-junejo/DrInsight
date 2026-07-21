@@ -108,7 +108,7 @@ export default function ContactPage() {
   const businessHours = useMemo(() => parseBusinessHours(contact?.businessHours), [contact?.businessHours]);
   const today = weekdayName();
   const openNow = isOpenNow(businessHours);
-  const contactEmail = contact?.contactEmail ?? "drinsightofficial@gmail.com";
+  const contactEmail = contact?.contactEmail ?? "contact@drinsight.org";
   const faqItems = useMemo(() => buildFaqItems(contactEmail), [contactEmail]);
 
   const contactCards = useMemo<ContactCard[]>(() => {
@@ -264,7 +264,7 @@ export default function ContactPage() {
       <div className="contact-cards-section">
         <div className="contact-cards">
           {contactCards.map((card) => (
-            <div key={card.title} className="contact-card border border-gray-300">
+            <div key={card.title} className="contact-card border border-gray-300 bg-gray-50">
               <div className="cc-icon" style={{ background: card.iconBg }}>
                 {card.icon}
               </div>
@@ -297,7 +297,7 @@ export default function ContactPage() {
 
       <div className="main-section">
         <div className="main-column">
-          <div className="form-card bg-gray-100">
+          <div className="form-card bg-gray-50">
             <SectionTitle>Send Us a Message</SectionTitle>
             <p>Fill in the form below and our team will respond within 2–4 hours during business hours.</p>
 
@@ -460,7 +460,7 @@ export default function ContactPage() {
           )}
           </div>
 
-          <div className="faq-mini">
+          <div className="faq-mini bg-gray-50">
             <SectionEyebrow className="eyebrow">Common Queries</SectionEyebrow>
             <SectionTitle>Frequently Asked Contact Questions</SectionTitle>
             <p>Quick answers to the most common questions about reaching our team</p>
@@ -468,7 +468,7 @@ export default function ContactPage() {
               {faqItems.map((item, i) => (
                 <div
                   key={item.q}
-                  className={`faq-item${openFaq === i ? " open" : ""}`}
+                  className={`faq-item bg-gray-50${openFaq === i ? " open" : ""}`}
                   onClick={() => toggleFAQ(i)}
                   onKeyDown={(e) => e.key === "Enter" && toggleFAQ(i)}
                   role="button"
@@ -486,7 +486,7 @@ export default function ContactPage() {
         </div>
 
         <div className="sidebar">
-          <div className="sidebar-card sidebar-card-tone border border-gray-300 bg-gray-100">
+          <div className="sidebar-card sidebar-card-tone border border-gray-300 bg-gray-50">
             <h3>Office & Contact Info</h3>
             <div className="info-item">
               <div className="info-ico" style={{ background: "#e8f0fb" }}>
@@ -549,7 +549,7 @@ export default function ContactPage() {
             )}
           </div>
 
-          <div className="sidebar-card sidebar-card-tone border border-gray-300 bg-gray-100">
+          <div className="sidebar-card sidebar-card-tone border border-gray-300 bg-gray-50">
             <h3>🕐 Business Hours</h3>
             <div className="open-now">
               <div className="open-dot" />
@@ -579,13 +579,13 @@ export default function ContactPage() {
             </p>
           </div>
 
-          <div className="sidebar-card map-card">
+          <div className="sidebar-card map-card border border-gray-300 bg-gray-50">
             <h3>🗺️ Find Us</h3>
             <a
               href={contact ? mapsHref(contact) : "#"}
               target="_blank"
               rel="noopener noreferrer"
-              className="map-placeholder"
+              className="map-placeholder bg-gray-50"
             >
               <div className="map-pin">📍</div>
               <h4>DrInsight HQ</h4>
@@ -597,7 +597,7 @@ export default function ContactPage() {
             </p>
           </div>
 
-          <div className="sidebar-card sidebar-card-tone border border-gray-300 bg-gray-100">
+          <div className="sidebar-card sidebar-card-tone border border-gray-300 bg-gray-50">
             <h3>🌐 Follow Us</h3>
             <p className="social-desc">
               Stay updated with the latest health news, doctor tips, and platform updates.

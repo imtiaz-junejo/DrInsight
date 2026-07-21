@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   formatStatCount,
@@ -12,10 +11,10 @@ import {
 import { HomeHealthToolsSection } from "@/components/pages/home/HomeHealthToolsSection";
 import { HomeResearchPublicationsSection } from "@/components/pages/home/HomeResearchPublicationsSection";
 import { HomeSpecialtiesSection } from "@/components/pages/home/HomeSpecialtiesSection";
+import { HomeStayInformedSection } from "@/components/pages/home/HomeStayInformedSection";
 import {
   useDoctorSpecialties,
   useFeaturedBlogPosts,
-  useNewsletterSubscribe,
   usePlatformStats,
   useRecentReviews,
 } from "@/services/api-hooks";
@@ -38,10 +37,6 @@ export function HomePageContent() {
   const { data: blogData, isLoading: blogLoading } = useFeaturedBlogPosts(3);
   const { data: reviews, isLoading: reviewsLoading } = useRecentReviews(4);
   const { data: specialties } = useDoctorSpecialties();
-  const newsletter = useNewsletterSubscribe();
-  const [newsletterEmail, setNewsletterEmail] = useState("");
-  const [newsletterMsg, setNewsletterMsg] = useState("");
-
   const blogPosts = blogData?.data.map(mapBlogPostToCard) ?? [];
 
   const heroStats = [
@@ -50,22 +45,11 @@ export function HomePageContent() {
     [stats ? `${stats.averageRating.toFixed(1)}★` : "—", "Avg. Rating"],
   ];
 
-  const handleNewsletter = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newsletterEmail.trim()) return;
-    try {
-      await newsletter.mutateAsync(newsletterEmail.trim());
-      setNewsletterMsg("Subscribed successfully!");
-      setNewsletterEmail("");
-    } catch {
-      setNewsletterMsg("Subscription failed. Please try again.");
-    }
-  };
-
   return (
     <>
-      <section className="home-section home-hero-section hero-pattern relative overflow-hidden bg-gradient-to-br from-blue-dark via-blue to-teal px-6 text-white">
-        <div className="home-hero-inner relative mx-auto grid max-w-[1240px] items-center gap-6 min-[901px]:grid-cols-2 min-[901px]:gap-10">
+      <div className="home-hero-block relative">
+        <section className="home-section home-hero-section hero-pattern relative overflow-hidden bg-gradient-to-br from-blue-dark via-blue to-teal px-6 text-white">
+          <div className="home-hero-inner relative mx-auto grid max-w-[1240px] items-center gap-6 min-[901px]:grid-cols-2 min-[901px]:gap-10">
           <div>
             <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-3.5 py-1 text-[.75rem] font-semibold tracking-wide backdrop-blur-sm">
               <span>{heroConfig.icon ?? "🏥"}</span>{" "}
@@ -142,21 +126,26 @@ export function HomePageContent() {
               ))}
             </div>
           </div>
-        </div>
-      </section>
-
-      <div className="px-6 pb-2">
-        <div className="relative z-10 mx-auto mt-8 flex max-w-[1240px] flex-wrap items-center gap-3.5 rounded-xl border-[1.5px] border-[#fecaca] bg-gray-200 p-4 min-[901px]:p-5">
-          <span className="text-2xl">🚨</span>
-          <div className="flex-1">
-            <strong className="text-red">Medical Emergency? Call 911 immediately.</strong>
-            <p className="text-[.85rem] text-gray-600">
-              For non-emergency medical queries, use our Ask the Doctor feature. Available 24/7.
-            </p>
           </div>
-          <Button asChild className="w-auto whitespace-nowrap">
-            <Link href="/ask-doctor">Get Help Now →</Link>
-          </Button>
+        </section>
+
+        <div className="home-emergency-anchor pointer-events-none absolute inset-x-0 bottom-0 z-20 translate-y-1/2 px-6">
+          <div className="home-emergency-banner pointer-events-auto mx-auto flex max-w-[1240px] flex-wrap items-center gap-4 rounded-2xl border border-[#fecaca] bg-[#fff5f5] p-5 text-gray-900 shadow-[0_8px_24px_rgba(15,23,42,0.08)] min-[901px]:flex-nowrap min-[901px]:gap-6 min-[901px]:px-6 min-[901px]:py-5">
+            <span className="text-3xl leading-none" aria-hidden="true">
+              🚨
+            </span>
+            <div className="min-w-0 flex-1">
+              <strong className="block text-base font-bold leading-snug text-[#c53030] min-[901px]:text-lg">
+                Medical Emergency? Call 911 immediately.
+              </strong>
+              <p className="mt-1 text-sm leading-relaxed text-gray-600">
+                For non-emergency medical queries, use our Ask the Doctor feature. Available 24/7.
+              </p>
+            </div>
+            <Button asChild className="w-full shrink-0 min-[901px]:w-auto">
+              <Link href="/ask-doctor">Get Help Now →</Link>
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -381,29 +370,7 @@ export function HomePageContent() {
         </div>
       </section>
 
-      <section className="home-section border-t border-gray-200 bg-gray-50 px-6 py-16 min-[901px]:py-20">
-        <div className="mx-auto max-w-[600px] text-center">
-          <h2 className="font-display text-[clamp(1.6rem,3vw,2.2rem)] font-bold">Stay Informed, Stay Healthy</h2>
-          <p className="my-3 text-gray-600">
-            Subscribe to our newsletter for weekly health tips from board-certified physicians.
-          </p>
-          <form className="home-newsletter-form mx-auto flex max-w-[440px] flex-row gap-2.5 max-[640px]:flex-col" onSubmit={handleNewsletter}>
-            <input
-              type="email"
-              placeholder="Your email address"
-              value={newsletterEmail}
-              onChange={(e) => setNewsletterEmail(e.target.value)}
-              className="flex-1 rounded-[10px] border-[1.5px] border-gray-400 px-4 py-3 text-[.9rem] focus:border-blue focus:outline-none"
-              required
-            />
-            <Button type="submit" className="whitespace-nowrap" disabled={newsletter.isPending}>
-              {newsletter.isPending ? "..." : "Subscribe"}
-            </Button>
-          </form>
-          {newsletterMsg && <p className="mt-2 text-[.8rem] text-gray-600">{newsletterMsg}</p>}
-          <p className="mt-3 text-[.76rem] text-gray-400">No spam. Unsubscribe anytime.</p>
-        </div>
-      </section>
+      <HomeStayInformedSection />
 
       <div className="bg-blue-dark px-6 py-10 text-white">
         <div className="mx-auto grid max-w-[1240px] grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-3">

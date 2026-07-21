@@ -81,12 +81,12 @@ const TEAM = [
 ];
 
 const CONTACTS = [
-  { title: "✉️ General Editorial", email: "drinsightofficial@gmail.com", note: "General editorial enquiries" },
-  { title: "🔍 Corrections & Inaccuracies", email: "drinsightofficial@gmail.com", note: "Report inaccurate content" },
-  { title: "✍️ Author Applications", email: "drinsightofficial@gmail.com", note: "Join as a medical author" },
-  { title: "🔬 Reviewer Applications", email: "drinsightofficial@gmail.com", note: "Join as a medical reviewer" },
-  { title: "📣 Sponsored Content", email: "drinsightofficial@gmail.com", note: "Partnership & advertising enquiries" },
-  { title: "🧠 Safe Messaging", email: "drinsightofficial@gmail.com", note: "Safe messaging concerns" },
+  { title: "✉️ General Editorial", email: "editorial@drinsight.org", note: "General editorial enquiries" },
+  { title: "🔍 Corrections & Inaccuracies", email: "corrections@drinsight.org", note: "Report inaccurate content" },
+  { title: "✍️ Author Applications", email: "authors@drinsight.org", note: "Join as a medical author" },
+  { title: "🔬 Reviewer Applications", email: "reviewers@drinsight.org", note: "Join as a medical reviewer" },
+  { title: "📣 Sponsored Content", email: "partnerships@drinsight.org", note: "Partnership & advertising enquiries" },
+  { title: "🧠 Safe Messaging", email: "safemessaging@drinsight.org", note: "Safe messaging concerns" },
 ];
 
 function Accordion({ id, title, open, onToggle, children }: { id: string; title: string; open: boolean; onToggle: (id: string) => void; children: React.ReactNode }) {
@@ -147,14 +147,6 @@ export function EditorialPolicyContent() {
             <span>📅 Effective: January 1, 2025</span>
             <span>🔄 Last Updated: June 1, 2026</span>
             <span>📋 Version 2.1</span>
-          </div>
-          <div className="hero-actions">
-            <button type="button" className="hero-btn primary" onClick={() => window.print()}>
-              🖨️ Print Policy
-            </button>
-            <button type="button" className="hero-btn" onClick={() => window.print()}>
-              ⬇️ Download PDF
-            </button>
           </div>
           <div className="trust-strip">
             {["✅ Written by Verified Medical Professionals", "🔬 Evidence-Based Content Only", "🔄 Regularly Reviewed & Updated", "🚫 No Advertiser Editorial Influence", "📋 Full COI Disclosure"].map((pill) => (
@@ -585,7 +577,7 @@ export function EditorialPolicyContent() {
               <p>Full article removal when content is fundamentally flawed or clinically unsafe. A retraction notice is published at the original URL. If author misconduct is identified, the matter is reported to relevant professional regulatory bodies. All retractions are permanently logged in editorial records.</p>
             </div>
             <div className="prose">
-              <p>📧 To report a correction: <strong>drinsightofficial@gmail.com</strong> · Response commitment: within 5 business days</p>
+              <p>📧 To report a correction: <strong>contact@drinsight.org</strong> · Response commitment: within 5 business days</p>
             </div>
           </div>
 
@@ -728,7 +720,7 @@ export function EditorialPolicyContent() {
             <div className="sec-title"><div className="sn">18</div>Contact the Editorial Team</div>
             <div className="contact-grid">
               {CONTACTS.map((c) => (
-                <div key={c.email} className="contact-card">
+                <div key={c.title} className="contact-card">
                   <h4>{c.title}</h4>
                   <a href={`mailto:${c.email}`}>{c.email}</a>
                   <p>{c.note}</p>
@@ -775,15 +767,6 @@ export function EditorialPolicyContent() {
           </div>
           <div className="pf-btns">
             <span style={{ fontSize: ".72rem", color: "var(--gray-400)" }}>Last updated: June 1, 2026 · v2.1</span>
-            <button type="button" className="pf-btn gray" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-              ↑ Back to Top
-            </button>
-            <button type="button" className="pf-btn" onClick={() => window.print()}>
-              🖨️ Print
-            </button>
-            <button type="button" className="pf-btn g" onClick={() => window.print()}>
-              ⬇️ Download PDF
-            </button>
           </div>
         </div>
       </div>

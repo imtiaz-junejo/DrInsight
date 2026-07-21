@@ -106,7 +106,7 @@ type CookiePrefs = {
 };
 
 export function CookiePolicyPageClient() {
-  const { activeSection, scrollToSection, scrollToTop } = usePolicyPageScroll(SECTION_IDS, 120);
+  const { activeSection, scrollToSection } = usePolicyPageScroll(SECTION_IDS, 120);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [prefs, setPrefs] = useState<CookiePrefs>({
@@ -283,12 +283,6 @@ export function CookiePolicyPageClient() {
           <div className="hero-actions">
             <button type="button" className="hero-btn primary" onClick={openModal}>
               🍪 Manage My Cookie Preferences
-            </button>
-            <button type="button" className="hero-btn">
-              🖨️ Print Policy
-            </button>
-            <button type="button" className="hero-btn">
-              ⬇️ Download PDF
             </button>
           </div>
         </div>
@@ -1311,22 +1305,22 @@ export function CookiePolicyPageClient() {
             <div className="contact-grid">
               <div className="contact-card">
                 <h4>🍪 Cookie Enquiries</h4>
-                <a href="#">drinsightofficial@gmail.com</a>
+                <a href="mailto:privacy@drinsight.org">privacy@drinsight.org</a>
                 <p>For cookie questions or to request active cookie list</p>
               </div>
               <div className="contact-card">
                 <h4>🛡️ Data Protection Officer</h4>
-                <a href="#">drinsightofficial@gmail.com</a>
+                <a href="mailto:dpo@drinsight.org">dpo@drinsight.org</a>
                 <p>For GDPR-related data concerns</p>
               </div>
               <div className="contact-card">
                 <h4>📍 Mailing Address</h4>
                 <p>
-                  DrInsight
+                  DrInsight Inc.
                   <br />
-                  123 Medical Plaza, Suite 400
+                  Badin
                   <br />
-                  New York, NY 10001, USA
+                  Pakistan
                 </p>
               </div>
               <div className="contact-card">
@@ -1356,12 +1350,6 @@ export function CookiePolicyPageClient() {
             <span className="pf-meta">Last updated: June 1, 2026 · v2.1</span>
             <button type="button" className="pf-btn" onClick={openModal}>
               🍪 Manage Preferences
-            </button>
-            <button type="button" className="pf-btn" onClick={scrollToTop}>
-              ↑ Back to Top
-            </button>
-            <button type="button" className="pf-btn pf-btn-green">
-              ⬇️ Download PDF
             </button>
           </div>
         </div>

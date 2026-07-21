@@ -240,8 +240,8 @@ function BlogPageContent() {
       </div>
 
       <div className="main-wrap" ref={mainWrapRef}>
-        <div className="blog-layout sticky-sidebar-layout">
-          <div className="articles-col sticky-sidebar-main">
+        <div className="blog-layout">
+          <div className="articles-col">
             <SectionEyebrow className="section-eyebrow">Latest Articles</SectionEyebrow>
             <SectionTitle as="div" className="section-title !text-2xl">
               {sectionTitle}
@@ -289,101 +289,97 @@ function BlogPageContent() {
             <TrendingArticlesSection posts={popularPosts} isLoading={popularLoading} />
           </div>
 
-          <aside className="sticky-sidebar-col" aria-label="Blog sidebar">
-            <div className="sticky-sidebar-panel bg-gray-200">
-              <div className="sticky-sidebar-scroll">
-                <form className="subscribe-card" onSubmit={handleNewsletter}>
-                  <h4>📬 Weekly Health Digest</h4>
-                  <p>Get the week&apos;s best medical articles delivered every Monday.</p>
-                  <input
-                    type="email"
-                    className="border-gray-300"
-                    placeholder="Your email address"
-                    value={newsletterEmail}
-                    onChange={(e) => setNewsletterEmail(e.target.value)}
-                    required
-                  />
-                  <button type="submit" disabled={newsletter.isPending}>
-                    {newsletter.isPending ? "Subscribing..." : "Subscribe Free →"}
-                  </button>
-                  {newsletterMsg && <p className="subscribe-note">{newsletterMsg}</p>}
-                  <p className="subscribe-note">🔒 No spam. Unsubscribe anytime.</p>
-                </form>
+          <aside aria-label="Blog sidebar">
+            <form className="subscribe-card" onSubmit={handleNewsletter}>
+              <h4>📬 Weekly Health Digest</h4>
+              <p>Get the week&apos;s best medical articles delivered every Monday.</p>
+              <input
+                type="email"
+                className="border-gray-300"
+                placeholder="Your email address"
+                value={newsletterEmail}
+                onChange={(e) => setNewsletterEmail(e.target.value)}
+                required
+              />
+              <button type="submit" disabled={newsletter.isPending}>
+                {newsletter.isPending ? "Subscribing..." : "Subscribe Free →"}
+              </button>
+              {newsletterMsg && <p className="subscribe-note">{newsletterMsg}</p>}
+              <p className="subscribe-note">🔒 No spam. Unsubscribe anytime.</p>
+            </form>
 
-                <div className="sidebar-card">
-                  <h4>Top Author Doctors</h4>
-                  {(topAuthors ?? []).map((doc) => (
-                    <div key={doc.id} className="sidebar-doc">
-                      <div className="doc-av" style={{ background: gradientForId(doc.id) }}>
-                        {getInitials(doc.firstName, doc.lastName)}
-                      </div>
-                      <div>
-                        <div className="doc-name">{doctorFullName(doc)}</div>
-                        <div className="doc-spec">{doc.platformRole ?? doc.specialty ?? "Author"}</div>
-                        <div className="doc-count">{doc.articleCount} articles published</div>
-                      </div>
-                    </div>
-                  ))}
-                  {!topAuthors?.length && <p style={{ color: "var(--gray-500)" }}>No authors yet.</p>}
-                </div>
-
-                <div className="sidebar-card">
-                  <h4>Browse by Specialty</h4>
-                  <div className="spec-tag-cloud">
-                    {(sortCategoriesWithCardiologyFirst(categories ?? [], cardiologySlug)).map((cat) => {
-                      const visuals = getBlogCategoryVisuals(cat.name);
-                      const isActive = !isSearchMode && activeFilter === cat.slug;
-                      return (
-                        <button
-                          key={cat.id}
-                          type="button"
-                          className={`spec-tag spec-tag--accent ${visuals.specTagClass}${isActive ? " active" : ""}`}
-                          style={
-                            isActive
-                              ? {
-                                  borderColor: visuals.catColor,
-                                  color: visuals.catColor,
-                                  background: `${visuals.iconBg}`,
-                                }
-                              : undefined
-                          }
-                          onClick={() => filterPosts(cat.slug)}
-                        >
-                          {cat.name} ({cat.postCount ?? 0})
-                        </button>
-                      );
-                    })}
+            <div className="sidebar-card">
+              <h4>Top Author Doctors</h4>
+              {(topAuthors ?? []).map((doc) => (
+                <div key={doc.id} className="sidebar-doc">
+                  <div className="doc-av" style={{ background: gradientForId(doc.id) }}>
+                    {getInitials(doc.firstName, doc.lastName)}
                   </div>
-                  <div className="spec-legend">
-                    <span className="spec-legend-item" style={{ color: "var(--blue)" }}>
-                      <span className="spec-legend-dot" style={{ background: "var(--blue)" }} />
-                      Clinical
-                    </span>
-                    <span className="spec-legend-item" style={{ color: "var(--teal)" }}>
-                      <span className="spec-legend-dot" style={{ background: "var(--teal)" }} />
-                      Surgical
-                    </span>
-                    <span className="spec-legend-item" style={{ color: "var(--purple)" }}>
-                      <span className="spec-legend-dot" style={{ background: "var(--purple)" }} />
-                      Other
-                    </span>
+                  <div>
+                    <div className="doc-name">{doctorFullName(doc)}</div>
+                    <div className="doc-spec">{doc.platformRole ?? doc.specialty ?? "Author"}</div>
+                    <div className="doc-count">{doc.articleCount} articles published</div>
                   </div>
                 </div>
+              ))}
+              {!topAuthors?.length && <p style={{ color: "var(--gray-500)" }}>No authors yet.</p>}
+            </div>
 
-                <div className="sidebar-card advice-card">
-                  <h4>🩺 Need Medical Advice?</h4>
-                  <p>
-                    Reading articles is a great start — but a doctor consultation gives you personalised
-                    guidance.
-                  </p>
-                  <Link href="/book-consultation" className="advice-btn-primary">
-                    📅 Book Consultation
-                  </Link>
-                  <Link href="/ask-doctor" className="advice-btn-secondary">
-                    💬 Ask a Doctor Free
-                  </Link>
-                </div>
+            <div className="sidebar-card">
+              <h4>Browse by Specialty</h4>
+              <div className="spec-tag-cloud">
+                {(sortCategoriesWithCardiologyFirst(categories ?? [], cardiologySlug)).map((cat) => {
+                  const visuals = getBlogCategoryVisuals(cat.name);
+                  const isActive = !isSearchMode && activeFilter === cat.slug;
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      className={`spec-tag spec-tag--accent ${visuals.specTagClass}${isActive ? " active" : ""}`}
+                      style={
+                        isActive
+                          ? {
+                              borderColor: visuals.catColor,
+                              color: visuals.catColor,
+                              background: `${visuals.iconBg}`,
+                            }
+                          : undefined
+                      }
+                      onClick={() => filterPosts(cat.slug)}
+                    >
+                      {cat.name} ({cat.postCount ?? 0})
+                    </button>
+                  );
+                })}
               </div>
+              <div className="spec-legend">
+                <span className="spec-legend-item" style={{ color: "var(--blue)" }}>
+                  <span className="spec-legend-dot" style={{ background: "var(--blue)" }} />
+                  Clinical
+                </span>
+                <span className="spec-legend-item" style={{ color: "var(--teal)" }}>
+                  <span className="spec-legend-dot" style={{ background: "var(--teal)" }} />
+                  Surgical
+                </span>
+                <span className="spec-legend-item" style={{ color: "var(--purple)" }}>
+                  <span className="spec-legend-dot" style={{ background: "var(--purple)" }} />
+                  Other
+                </span>
+              </div>
+            </div>
+
+            <div className="sidebar-card advice-card">
+              <h4>🩺 Need Medical Advice?</h4>
+              <p>
+                Reading articles is a great start — but a doctor consultation gives you personalised
+                guidance.
+              </p>
+              <Link href="/book-consultation" className="advice-btn-primary">
+                📅 Book Consultation
+              </Link>
+              <Link href="/ask-doctor" className="advice-btn-secondary">
+                💬 Ask a Doctor Free
+              </Link>
             </div>
           </aside>
         </div>
