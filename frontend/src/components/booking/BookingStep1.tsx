@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { formatCurrency, mapDoctorProfile, specialtyEmoji } from "@/lib/data-mappers";
 import type { MappedDoctorCard } from "@/lib/data-mappers";
+import { DoctorProfileAvatar } from "@/components/booking/DoctorProfileAvatar";
 import {
   CATEGORY_LABELS,
   CONSULT_TYPE_LABELS,
@@ -282,13 +283,12 @@ export function BookingStep1({
 
               return (
                 <div key={card.id} className={`doc-card${isSelected ? " sel" : ""}`} id={`doc-${card.id}`}>
-                  <div className="doc-av" style={{ background: card.bg }}>
-                    {card.avatarUrl ? (
-                      <img src={card.avatarUrl} alt="" style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} />
-                    ) : (
-                      card.init
-                    )}
-                  </div>
+                  <DoctorProfileAvatar
+                    avatarUrl={card.avatarUrl}
+                    initials={card.init}
+                    alt={card.name}
+                    background={card.bg}
+                  />
                   <h4>{card.name}</h4>
                   <div className="dspec">{card.specialtyName}</div>
                   <div className="dqual">{card.cred}</div>
@@ -353,9 +353,13 @@ export function BookingStep1({
               <i className="ti ti-x" aria-hidden="true" />
             </button>
             <div className="profile-head">
-              <div className="profile-av" style={{ background: profileEntry.card.bg }}>
-                {profileEntry.card.init}
-              </div>
+              <DoctorProfileAvatar
+                className="profile-av"
+                avatarUrl={profileEntry.card.avatarUrl}
+                initials={profileEntry.card.init}
+                alt={profileEntry.card.name}
+                background={profileEntry.card.bg}
+              />
               <div>
                 <h3>{profileEntry.card.name}</h3>
                 <div className="pspec">{profileEntry.card.specialtyName}</div>

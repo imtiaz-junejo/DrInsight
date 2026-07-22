@@ -394,6 +394,7 @@ export function AuthorBioPageContent({
   const commentCount = doctor.commentCount ?? doctor.reviewCount ?? 0;
   const publicationCount = doctor.publicationCount ?? approvedPublications.length;
   const bookingEnabled = doctor.bookingEnabled !== false;
+  const contactEnabled = doctor.contactEnabled !== false;
   const onlineAvailEnabled = doctor.onlineAvailEnabled !== false;
   const physicalAvailEnabled = doctor.physicalAvailEnabled !== false;
   const licenseBoard = doctor.licenseBoard ?? "PMDC";
@@ -552,29 +553,31 @@ export function AuthorBioPageContent({
                   📅 Book Consultation
                 </Link>
               )}
-              {doctor.user?.email && (
+              {contactEnabled && doctor.user?.email && (
                 <a href={`mailto:${doctor.user.email}`} className="action-btn outline">
                   📧 Contact Author
                 </a>
               )}
-              {doctor.twitterUrl && (
+              {contactEnabled && doctor.twitterUrl && (
                 <a href={doctor.twitterUrl} target="_blank" rel="noreferrer" className="action-btn outline">
                   𝕏 Twitter
                 </a>
               )}
-              {doctor.youtubeUrl && (
+              {contactEnabled && doctor.youtubeUrl && (
                 <a href={doctor.youtubeUrl} target="_blank" rel="noreferrer" className="action-btn outline">
                   ▶️ YouTube
                 </a>
               )}
-              {doctor.linkedinUrl && (
+              {contactEnabled && doctor.linkedinUrl && (
                 <a href={doctor.linkedinUrl} target="_blank" rel="noreferrer" className="action-btn outline">
                   🔗 LinkedIn
                 </a>
               )}
-              <button type="button" className="action-btn outline" onClick={shareProfile}>
-                🔗 Share Profile
-              </button>
+              {contactEnabled && (
+                <button type="button" className="action-btn outline" onClick={shareProfile}>
+                  🔗 Share Profile
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -763,7 +766,7 @@ export function AuthorBioPageContent({
                   <Link href="/editorial-policy" className="role-link">
                     📋 Editorial Guidelines →
                   </Link>
-                  <Link href="/editorial-policy" className="role-link">
+                  <Link href="/medical-review-process" className="role-link">
                     🔍 Medical Review Process →
                   </Link>
                   <a href="#credentials" className="role-link danger" onClick={() => setTab("credentials")}>
@@ -1013,40 +1016,42 @@ export function AuthorBioPageContent({
             </div>
           )}
 
-          <div className="sidebar-card">
-            <div className="sb-title">📬 Contact {name}</div>
-            {doctor.user?.email && (
-              <div className="contact-item">
-                ✉️ <a href={`mailto:${doctor.user.email}`}>{doctor.user.email}</a>
-              </div>
-            )}
-            {doctor.hospital && (
-              <div className="contact-item">
-                🏥 <span>{doctor.hospital}</span>
-              </div>
-            )}
-            {doctor.linkedinUrl && (
-              <div className="contact-item">
-                🔗{" "}
-                <a href={doctor.linkedinUrl} target="_blank" rel="noreferrer">
-                  LinkedIn Profile
-                </a>
-              </div>
-            )}
-            {doctor.twitterUrl && (
-              <div className="contact-item">
-                𝕏{" "}
-                <a href={doctor.twitterUrl} target="_blank" rel="noreferrer">
-                  Twitter Profile
-                </a>
-              </div>
-            )}
-            {!doctor.user?.email && !doctor.hospital && !doctor.linkedinUrl && !doctor.twitterUrl && (
-              <div className="empty-state" style={{ padding: 8 }}>
-                Contact details not published.
-              </div>
-            )}
-          </div>
+          {contactEnabled && (
+            <div className="sidebar-card">
+              <div className="sb-title">📬 Contact {name}</div>
+              {doctor.user?.email && (
+                <div className="contact-item">
+                  ✉️ <a href={`mailto:${doctor.user.email}`}>{doctor.user.email}</a>
+                </div>
+              )}
+              {doctor.hospital && (
+                <div className="contact-item">
+                  🏥 <span>{doctor.hospital}</span>
+                </div>
+              )}
+              {doctor.linkedinUrl && (
+                <div className="contact-item">
+                  🔗{" "}
+                  <a href={doctor.linkedinUrl} target="_blank" rel="noreferrer">
+                    LinkedIn Profile
+                  </a>
+                </div>
+              )}
+              {doctor.twitterUrl && (
+                <div className="contact-item">
+                  𝕏{" "}
+                  <a href={doctor.twitterUrl} target="_blank" rel="noreferrer">
+                    Twitter Profile
+                  </a>
+                </div>
+              )}
+              {!doctor.user?.email && !doctor.hospital && !doctor.linkedinUrl && !doctor.twitterUrl && (
+                <div className="empty-state" style={{ padding: 8 }}>
+                  Contact details not published.
+                </div>
+              )}
+            </div>
+          )}
 
           {onlineAvailEnabled && onlineAvailability.length > 0 && (
             <div className="sidebar-card" id="card-online-avail">
@@ -1266,7 +1271,7 @@ export function AuthorBioPageContent({
               Every article undergoes a multi-step review by a specialist before and after publication,
               with quarterly content updates.
             </p>
-            <Link href="/editorial-policy">Review Process →</Link>
+            <Link href="/medical-review-process">Review Process →</Link>
           </div>
           <div className="trust-item">
             <i>⚖️</i>

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { avatarGradient, hashString, getInitials } from "@/lib/admin-utils";
-import { adminUserProfileHref } from "@/lib/admin-routes";
+import { adminDoctorProfileHref, adminUserProfileHref } from "@/lib/admin-routes";
 import { resolveDashboardIcon } from "@/components/doctor/icons/resolveEmojiIcon";
 
 export function UserAvatar({
@@ -38,12 +38,14 @@ export function UserCell({
   sub,
   seed,
   userId,
+  doctorProfileId,
 }: {
   firstName?: string | null;
   lastName?: string | null;
   sub?: string;
   seed?: string;
   userId?: string;
+  doctorProfileId?: string;
 }) {
   const content = (
     <div className="cell-user">
@@ -57,9 +59,15 @@ export function UserCell({
     </div>
   );
 
-  if (userId) {
+  const href = doctorProfileId
+    ? adminDoctorProfileHref(doctorProfileId)
+    : userId
+      ? adminUserProfileHref(userId)
+      : null;
+
+  if (href) {
     return (
-      <Link href={adminUserProfileHref(userId)} className="cell-user-link">
+      <Link href={href} className="cell-user-link">
         {content}
       </Link>
     );

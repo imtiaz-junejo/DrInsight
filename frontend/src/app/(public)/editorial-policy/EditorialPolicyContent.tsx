@@ -720,7 +720,7 @@ export function EditorialPolicyContent() {
             <div className="sec-title"><div className="sn">18</div>Contact the Editorial Team</div>
             <div className="contact-grid">
               {CONTACTS.map((c) => (
-                <div key={c.title} className="contact-card">
+                <div key={c.title} className="contact-card bg-gray-50">
                   <h4>{c.title}</h4>
                   <a href={`mailto:${c.email}`}>{c.email}</a>
                   <p>{c.note}</p>
@@ -763,6 +763,7 @@ export function EditorialPolicyContent() {
             <Link href="/terms-conditions" className="pill-link">Terms & Conditions</Link>
             <Link href="/disclaimer" className="pill-link">Disclaimer</Link>
             <Link href="/cookie-policy" className="pill-link">Cookie Policy</Link>
+            <Link href="/medical-review-process" className="pill-link">Medical Review Process</Link>
             <Link href="/author-guidelines" className="pill-link">Author Guidelines</Link>
           </div>
           <div className="pf-btns">

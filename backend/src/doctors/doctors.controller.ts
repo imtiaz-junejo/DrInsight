@@ -6,6 +6,7 @@ import { Public } from '../common/decorators/auth.decorators';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/auth.decorators';
 import { UserRole } from '@prisma/client';
+import { AdminDoctorListQueryDto, AdminUpdateDoctorDto } from './dto/admin-doctor.dto';
 
 @ApiTags('doctors')
 @Controller('doctors')
@@ -62,6 +63,27 @@ export class DoctorsController {
     return this.doctorsService.updateSchedules(userId, body as Parameters<DoctorsService['updateSchedules']>[1]);
   }
 
+  @Get('manage')
+  @ApiBearerAuth()
+  @Roles(UserRole.ADMIN)
+  findAllAdmin(@Query() query: AdminDoctorListQueryDto) {
+    return this.doctorsService.findAllAdmin(query);
+  }
+
+  @Get('manage/:id/content')
+  @ApiBearerAuth()
+  @Roles(UserRole.ADMIN)
+  getAdminContent(@Param('id') id: string) {
+    return this.doctorsService.getAdminContent(id);
+  }
+
+  @Get('manage/:id')
+  @ApiBearerAuth()
+  @Roles(UserRole.ADMIN)
+  findAdminDetail(@Param('id') id: string) {
+    return this.doctorsService.findAdminDetail(id);
+  }
+
   @Public()
   @Get('by-slug/:slug')
   findBySlug(@Param('slug') slug: string) {
@@ -95,5 +117,23 @@ export class DoctorsController {
   @Roles(UserRole.ADMIN)
   updateDoctorSeo(@Param('id') id: string, @Body() body: Record<string, unknown>) {
     return this.doctorsService.updateAdminSeo(id, body as Parameters<DoctorsService['updateAdminSeo']>[1]);
+  }
+
+  @Patch(':id/admin')
+  @ApiBearerAuth()
+  @Roles(UserRole.ADMIN)
+  updateAdminDoctor(
+    @Param('id') id: string,
+    @CurrentUser('id') actorUserId: string,
+    @Body() body: AdminUpdateDoctorDto,
+  ) {
+    return this.doctorsService.updateAdminDoctor(id, body, actorUserId);
+  }
+
+  @Patch(':id/admin/reset-seo')
+  @ApiBearerAuth()
+  @Roles(UserRole.ADMIN)
+  resetAdminSeo(@Param('id') id: string) {
+    return this.doctorsService.resetAdminSeo(id);
   }
 }

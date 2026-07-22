@@ -695,32 +695,32 @@ export function TermsConditionsPageClient() {
               Contact Information
             </div>
             <div className="contact-grid">
-              <div className="contact-card">
+              <div className="contact-card bg-gray-50">
                 <h4>⚖️ Legal & Terms Inquiries</h4>
                 <a href="mailto:legal@drinsight.org">legal@drinsight.org</a>
                 <p>All legal and terms-related enquiries</p>
               </div>
-              <div className="contact-card">
+              <div className="contact-card bg-gray-50">
                 <h4>©️ Copyright / DMCA</h4>
                 <a href="mailto:dmca@drinsight.org">dmca@drinsight.org</a>
                 <p>Copyright infringement reports</p>
               </div>
-              <div className="contact-card">
+              <div className="contact-card bg-gray-50">
                 <h4>👤 Account Issues</h4>
                 <a href="mailto:accounts@drinsight.org">accounts@drinsight.org</a>
                 <p>Account deletion, suspension appeals</p>
               </div>
-              <div className="contact-card">
+              <div className="contact-card bg-gray-50">
                 <h4>📣 Advertising</h4>
                 <a href="mailto:advertise@drinsight.org">advertise@drinsight.org</a>
                 <p>Partnership and advertising inquiries</p>
               </div>
-              <div className="contact-card">
+              <div className="contact-card bg-gray-50">
                 <h4>✉️ General Contact</h4>
                 <a href="mailto:contact@drinsight.org">contact@drinsight.org</a>
                 <p>All other enquiries</p>
               </div>
-              <div className="contact-card">
+              <div className="contact-card bg-gray-50">
                 <h4>📍 Mailing Address</h4>
                 <p>
                   DrInsight Inc.

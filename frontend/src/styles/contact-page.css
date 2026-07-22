@@ -161,7 +161,7 @@
 }
 
 .contact-page .contact-card {
-  background: var(--gray-50);
+  background: #fff;
   border: 1.5px solid var(--gray-300);
   border-radius: var(--radius-lg);
   padding: 22px 18px;
@@ -246,7 +246,7 @@
 }
 
 .contact-page .form-card {
-  background: var(--gray-50);
+  background: var(--gray-200);
   border: 1.5px solid var(--gray-200);
   border-radius: var(--radius-lg);
   padding: 28px;
@@ -488,7 +488,7 @@
 }
 
 .contact-page .sidebar-card {
-  background: var(--gray-50);
+  background: #fff;
   border: 1.5px solid var(--gray-200);
   border-radius: var(--radius-lg);
   padding: 22px;
@@ -496,7 +496,7 @@
 }
 
 .contact-page .sidebar-card-tone {
-  background: var(--gray-50);
+  background: #fff;
   border-color: #d1d5db;
 }
 
@@ -641,7 +641,7 @@
   border: 1.5px solid var(--gray-200);
   position: relative;
   height: 220px;
-  background: var(--gray-50);
+  background: var(--gray-200);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -775,7 +775,7 @@
   max-width: none;
   margin: 0;
   padding: 28px;
-  background: var(--gray-50);
+  background: var(--gray-200);
   border: 1.5px solid var(--gray-300);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
@@ -787,7 +787,7 @@
 }
 
 .contact-page .main-column .faq-item {
-  background: var(--gray-50);
+  background: #fff;
   border-color: var(--gray-300);
 }
 
@@ -808,7 +808,7 @@
 }
 
 .contact-page .faq-item {
-  background: var(--gray-50);
+  background: #fff;
   border: 1.5px solid var(--gray-200);
   border-radius: var(--radius);
   overflow: hidden;

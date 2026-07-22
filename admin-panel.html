@@ -101,12 +101,6 @@ button{font-family:var(--font-b)}
 .sb-item.active{background:var(--blue);color:#fff;font-weight:600}
 .sb-ico{width:18px;text-align:center;flex-shrink:0;font-size:.9rem}
 .sb-badge{margin-left:auto;font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:50px;background:var(--red);color:#fff}
-.sb-caret{margin-left:auto;font-size:.56rem;color:#64748b;transition:transform .2s;flex-shrink:0}
-.sb-item .sb-badge+.sb-caret{margin-left:0}
-.sb-caret.open{transform:rotate(180deg)}
-.sb-subwrap{display:none}
-.sb-subwrap.open{display:block}
-.sb-item.sb-sub{padding:7px 12px 7px 38px;font-size:.78rem}
 .sb-foot{padding:14px;border-top:1px solid #1e293b}
 .sb-admin{display:flex;align-items:center;gap:10px}
 .sb-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--teal));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.8rem;flex-shrink:0}
@@ -497,18 +491,31 @@ var nav = [
    {id:'patients', ico:'🧑‍🤝‍🧑', name:'Patients'},
    {id:'roles', ico:'🔑', name:'Roles & Permissions'}
  ]},
+ {lbl:'Physical Consultation Requests', items:[
+   {id:'phys-pending', ico:'🕒', name:'Pending', badge:'5'},
+   {id:'phys-approved', ico:'✅', name:'Approved'},
+   {id:'phys-rejected', ico:'⛔', name:'Rejected'},
+   {id:'phys-upcoming', ico:'📅', name:'Upcoming'},
+   {id:'phys-completed', ico:'🏁', name:'Completed'},
+   {id:'phys-cancelled', ico:'❌', name:'Cancelled'},
+   {id:'ma-admin', ico:'📝', name:'Manual Appointments'}
+ ]},
  {lbl:'Consultation Management', items:[
-   {id:'appointments', ico:'📅', name:'Appointments'},
-   {id:'consult-requests', ico:'📥', name:'Consultation Requests', badge:'7'},
-   {id:'physical-requests', ico:'🏥', name:'Physical Consultation Requests', badge:'4', children:[
-     {id:'phys-pending', ico:'⏳', name:'Pending', badge:'4'},
-     {id:'phys-approved', ico:'✅', name:'Approved'},
-     {id:'phys-rejected', ico:'⛔', name:'Rejected'},
-     {id:'phys-upcoming', ico:'📅', name:'Upcoming'},
-     {id:'phys-completed', ico:'🏁', name:'Completed'},
-     {id:'phys-cancelled', ico:'❌', name:'Cancelled'}
-   ]},
+   {id:'oc-pending', ico:'🕒', name:'Pending', badge:'2'},
+   {id:'oc-approved', ico:'✅', name:'Approved'},
+   {id:'oc-upcoming', ico:'📅', name:'Upcoming'},
+   {id:'oc-ongoing', ico:'🟢', name:'Ongoing', badge:'1'},
+   {id:'oc-completed', ico:'🏁', name:'Completed'},
+   {id:'oc-cancelled', ico:'❌', name:'Cancelled'},
+   {id:'oc-reports', ico:'📊', name:'Reports'},
    {id:'prescriptions', ico:'💊', name:'Prescriptions'}
+ ]},
+ {lbl:'Patient Q&A', items:[
+   {id:'qa-pending', ico:'🕒', name:'Pending Questions', badge:'2'},
+   {id:'qa-approved', ico:'✅', name:'Approved Questions'},
+   {id:'qa-rejected', ico:'⛔', name:'Rejected Questions'},
+   {id:'qa-answered', ico:'💬', name:'Answered'},
+   {id:'qa-reports', ico:'📊', name:'Reports'}
  ]},
  {lbl:'Content Management', items:[
    {id:'blog-posts', ico:'📰', name:'Blog Posts'},
@@ -531,10 +538,7 @@ var nav = [
  ]},
  {lbl:'Site Management', items:[
    {id:'homepage-sections', ico:'🏠', name:'Homepage Sections'},
-   {id:'health-tools-menu', ico:'🧮', name:'Health Tools', children:[
-     {id:'health-tools', ico:'🛠️', name:'Manage Tools'},
-     {id:'whr', ico:'📧', name:"Women's Health Email Reminders", badge:'3'}
-   ]},
+   {id:'health-tools', ico:'🧮', name:'Health Tools'},
    {id:'faqs', ico:'❓', name:'FAQs'},
    {id:'contact-inquiries', ico:'📩', name:'Contact Inquiries', badge:'12'},
    {id:'seo-settings', ico:'🔍', name:'SEO Settings'}
@@ -550,38 +554,12 @@ var nav = [
  ]}
 ];
 
-var sbOpen={};
-function sbOpenState(it){
-  if(sbOpen[it.id]!==undefined)return sbOpen[it.id];
-  return (it.children||[]).some(function(c){return c.id===window._sbActive;});
-}
-function sbToggle(id){
-  var item=null;
-  nav.some(function(g){return g.items.some(function(x){if(x.id===id){item=x;return true;}return false;});});
-  if(!item)return;
-  sbOpen[id]=!sbOpenState(item);
-  buildNav();
-}
 function buildNav(){
   var html='';
   nav.forEach(function(group){
     html += '<div class="sb-section-lbl">'+group.lbl+'</div>';
     group.items.forEach(function(it){
-      if(it.children){
-        var open=sbOpenState(it);
-        var childActive=it.children.some(function(c){return c.id===window._sbActive;});
-        html += '<div class="sb-item'+(childActive?' active':'')+'" data-id="'+it.id+'" onclick="sbToggle(\''+it.id+'\')">'+
-          '<span class="sb-ico">'+it.ico+'</span>'+it.name+
-          (it.badge?'<span class="sb-badge">'+it.badge+'</span>':'')+
-          '<span class="sb-caret'+(open?' open':'')+'">▾</span></div>';
-        html += '<div class="sb-subwrap'+(open?' open':'')+'">'+it.children.map(function(c){
-          return '<div class="sb-item sb-sub'+(c.id===window._sbActive?' active':'')+'" data-id="'+c.id+'" onclick="goto(\''+c.id+'\')">'+
-            '<span class="sb-ico">'+c.ico+'</span>'+c.name+
-            (c.badge?'<span class="sb-badge">'+c.badge+'</span>':'')+'</div>';
-        }).join('')+'</div>';
-        return;
-      }
-      html += '<div class="sb-item'+(it.id===window._sbActive?' active':'')+'" data-id="'+it.id+'" onclick="goto(\''+it.id+'\')">'+
+      html += '<div class="sb-item" data-id="'+it.id+'" onclick="goto(\''+it.id+'\')">'+
         '<span class="sb-ico">'+it.ico+'</span>'+it.name+
         (it.badge?'<span class="sb-badge">'+it.badge+'</span>':'')+
       '</div>';
@@ -600,13 +578,13 @@ var pageMeta = {
   'roles':['Roles & Permissions','Configure access levels for Admin, Doctor, and Patient roles'],
   'appointments':['Appointments','All scheduled consultations across the platform'],
   'consult-requests':['Consultation Requests','New consultation bookings awaiting confirmation'],
-  'phys-pending':['Physical Consultations — Pending','Clinic visit requests awaiting doctor approval'],
-  'phys-approved':['Physical Consultations — Approved','Requests approved by the doctor\'s clinic'],
-  'phys-rejected':['Physical Consultations — Rejected','Requests declined by the doctor or clinic'],
-  'phys-upcoming':['Physical Consultations — Upcoming','Confirmed clinic visits scheduled ahead'],
-  'phys-completed':['Physical Consultations — Completed','Clinic visits that have taken place'],
-  'phys-cancelled':['Physical Consultations — Cancelled','Clinic visits cancelled by patient, doctor, or admin'],
   'prescriptions':['Prescriptions','Prescriptions issued by physicians'],
+  'phys-pending':['Physical Consultation Requests · Pending','In-person clinic visit requests awaiting approval'],
+  'phys-approved':['Physical Consultation Requests · Approved','In-person visits approved and awaiting the appointment date'],
+  'phys-rejected':['Physical Consultation Requests · Rejected','In-person visit requests that were declined'],
+  'phys-upcoming':['Physical Consultation Requests · Upcoming','Confirmed in-person visits scheduled ahead'],
+  'phys-completed':['Physical Consultation Requests · Completed','In-person clinic visits that have taken place'],
+  'phys-cancelled':['Physical Consultation Requests · Cancelled','In-person visits cancelled by patient, doctor, or admin'],
   'blog-posts':['Blog Posts','Manage all published, draft, and scheduled articles'],
   'categories':['Categories','Manage blog content categories'],
   'tags':['Tags','Manage article tags for search and filtering'],
@@ -622,7 +600,6 @@ var pageMeta = {
   'notifications':['Notifications','System-wide notification logs and settings'],
   'homepage-sections':['Homepage Sections','Manage homepage content blocks and ordering'],
   'health-tools':['Health Tools','Manage health calculators and assessment tools'],
-  'whr':["Women's Health Email Reminders",'Automated reminder emails for the Pregnancy, Ovulation and Period tools — dashboard, settings, schedules, templates and logs'],
   'faqs':['FAQs','Manage frequently asked questions'],
   'contact-inquiries':['Contact Inquiries','Messages submitted through the contact form'],
   'seo-settings':['SEO Settings','Manage meta titles, descriptions, and permalinks for all pages'],
@@ -634,8 +611,7 @@ var pageMeta = {
 };
 
 function goto(id){
-  window._sbActive=id;
-  buildNav(); /* buildNav renders active + submenu open state from window._sbActive */
+  document.querySelectorAll('.sb-item').forEach(function(i){i.classList.toggle('active', i.dataset.id===id);});
   document.getElementById('pageTitle').textContent=pageMeta[id][0];
   document.getElementById('pageSub').textContent=pageMeta[id][1];
   document.getElementById('content').innerHTML = renderPage(id);
@@ -683,13 +659,10 @@ function renderPage(id){
     case 'roles': return pgRoles();
     case 'appointments': return pgAppointments();
     case 'consult-requests': return pgConsultRequests();
-    case 'phys-pending': return pgPhysical('Pending');
-    case 'phys-approved': return pgPhysical('Approved');
-    case 'phys-rejected': return pgPhysical('Rejected');
-    case 'phys-upcoming': return pgPhysical('Upcoming');
-    case 'phys-completed': return pgPhysical('Completed');
-    case 'phys-cancelled': return pgPhysical('Cancelled');
     case 'prescriptions': return pgPrescriptions();
+    case 'phys-pending': case 'phys-approved': case 'phys-rejected':
+    case 'phys-upcoming': case 'phys-completed': case 'phys-cancelled':
+      return pgPhysical(id);
     case 'blog-posts': return pgBlogPosts();
     case 'categories': return pgCategories();
     case 'tags': return pgTags();
@@ -705,7 +678,6 @@ function renderPage(id){
     case 'notifications': return pgNotifications();
     case 'homepage-sections': return pgHomepageSections();
     case 'health-tools': return pgHealthTools();
-    case 'whr': return pgWHR();
     case 'faqs': return pgFaqs();
     case 'contact-inquiries': return pgContactInquiries();
     case 'seo-settings': return pgSeoSettings();
@@ -1175,374 +1147,121 @@ function pgConsultRequests(){
   return table;
 }
 
-/* ===== Physical Consultation Requests (Admin) — separate from Online Consultations ===== */
+/* ===== Physical (in-clinic) Consultation Requests ===== */
 var PHYS_DB=[
-  {id:'PA-1041',patient:'Sarah Johnson',doctor:'Dr. Sarah Mitchell',spec:'Cardiology',clinic:'HeartCare Clinic — Downtown',city:'New York',date:'Jun 15, 2026',time:'10:30 AM',status:'Upcoming'},
-  {id:'PA-1042',patient:'Ahmed Raza',doctor:'Dr. Javed Kumbhar',spec:'Cardiology',clinic:'DrInsight Medical Center',city:'New York',date:'Jun 14, 2026',time:'11:00 AM',status:'Pending'},
-  {id:'PA-1043',patient:'Sara Malik',doctor:'Dr. Javed Kumbhar',spec:'Cardiology',clinic:'HeartCare Clinic — Downtown',city:'New York',date:'Jun 16, 2026',time:'9:30 AM',status:'Pending'},
-  {id:'PA-1044',patient:'Imran Ali',doctor:'Dr. Javed Kumbhar',spec:'Cardiology',clinic:'DrInsight Medical Center',city:'New York',date:'Jun 18, 2026',time:'3:00 PM',status:'Pending'},
-  {id:'PA-1045',patient:'Zara Ahmed',doctor:'Dr. Priya Sharma',spec:'Endocrinology',clinic:'Wellness Clinic — Midtown',city:'Chicago',date:'Jun 25, 2026',time:'9:00 AM',status:'Pending'},
-  {id:'PA-1046',patient:'Sarah Johnson',doctor:'Dr. James Okafor',spec:'Neurology',clinic:'DrInsight Medical Center',city:'New York',date:'Jun 22, 2026',time:'2:00 PM',status:'Approved'},
-  {id:'PA-1047',patient:'Nadia Baig',doctor:'Dr. Sarah Mitchell',spec:'Cardiology',clinic:'HeartCare Clinic — Downtown',city:'New York',date:'Jun 20, 2026',time:'1:00 PM',status:'Approved'},
-  {id:'PA-1048',patient:'Kamran Sheikh',doctor:'Dr. Ayesha Khan',spec:'Orthopedics',clinic:'City Care Clinic — Uptown',city:'Chicago',date:'Jun 11, 2026',time:'4:30 PM',status:'Rejected'},
-  {id:'PA-1049',patient:'Muhammad Hassan',doctor:'Dr. Javed Kumbhar',spec:'Cardiology',clinic:'DrInsight Medical Center',city:'New York',date:'Jun 19, 2026',time:'2:30 PM',status:'Upcoming'},
-  {id:'PA-1050',patient:'Fatima Khan',doctor:'Dr. Javed Kumbhar',spec:'Cardiology',clinic:'DrInsight Medical Center',city:'New York',date:'Jun 1, 2026',time:'11:30 AM',status:'Completed'},
-  {id:'PA-1051',patient:'Sara Malik',doctor:'Dr. Priya Sharma',spec:'Endocrinology',clinic:'Wellness Clinic — Midtown',city:'Chicago',date:'May 2, 2026',time:'9:30 AM',status:'Completed'},
-  {id:'PA-1052',patient:'Linda Patel',doctor:'Dr. Ayesha Khan',spec:'Orthopedics',clinic:'City Care Clinic — Uptown',city:'Chicago',date:'May 22, 2026',time:'10:00 AM',status:'Completed'},
-  {id:'PA-1053',patient:'Zara Ahmed',doctor:'Dr. Sarah Mitchell',spec:'Cardiology',clinic:'HeartCare Clinic — Downtown',city:'New York',date:'Jun 3, 2026',time:'4:00 PM',status:'Cancelled'},
-  {id:'PA-1054',patient:'Nadia Baig',doctor:'Dr. James Okafor',spec:'Neurology',clinic:'DrInsight Medical Center',city:'New York',date:'May 27, 2026',time:'1:30 PM',status:'Cancelled'}
+  {id:'PHY-3001',patient:'Ahmed Raza',doctor:'Dr. Javed Kumbhar',specialty:'Cardiology',city:'Karachi',clinic:'Dr Insight Clinic — Clifton',date:'Jul 14, 2026',time:'10:30 AM',status:'Pending',requested:'20 min ago'},
+  {id:'PHY-3002',patient:'Nadia Baig',doctor:'Dr. Sarah Mitchell',specialty:'Cardiology',city:'Lahore',clinic:'HeartCare Clinic — Gulberg',date:'Jul 15, 2026',time:'11:00 AM',status:'Pending',requested:'1 hour ago'},
+  {id:'PHY-3003',patient:'Imran Ali',doctor:'Dr. Priya Sharma',specialty:'Endocrinology',city:'Karachi',clinic:'Dr Insight Clinic — DHA',date:'Jul 16, 2026',time:'09:15 AM',status:'Pending',requested:'3 hours ago'},
+  {id:'PHY-3004',patient:'Kamran Sheikh',doctor:'Dr. James Okafor',specialty:'Neurology',city:'Islamabad',clinic:'NeuroHealth Clinic — F-8',date:'Jul 17, 2026',time:'02:00 PM',status:'Pending',requested:'Yesterday'},
+  {id:'PHY-3005',patient:'Sara Malik',doctor:'Dr. Javed Kumbhar',specialty:'Cardiology',city:'Karachi',clinic:'Dr Insight Clinic — Clifton',date:'Jul 18, 2026',time:'04:30 PM',status:'Pending',requested:'Yesterday'},
+  {id:'PHY-2991',patient:'Fatima Khan',doctor:'Dr. Javed Kumbhar',specialty:'Cardiology',city:'Karachi',clinic:'Dr Insight Clinic — Clifton',date:'Jul 12, 2026',time:'10:00 AM',status:'Approved',requested:'2 days ago'},
+  {id:'PHY-2988',patient:'Zara Ahmed',doctor:'Dr. Priya Sharma',specialty:'Endocrinology',city:'Karachi',clinic:'Dr Insight Clinic — DHA',date:'Jul 13, 2026',time:'12:30 PM',status:'Approved',requested:'2 days ago'},
+  {id:'PHY-2975',patient:'Bilal Aslam',doctor:'Dr. Sarah Mitchell',specialty:'Cardiology',city:'Lahore',clinic:'HeartCare Clinic — Gulberg',date:'Jun 30, 2026',time:'09:30 AM',status:'Rejected',requested:'5 days ago',reason:'Clinic fully booked that week'},
+  {id:'PHY-2970',patient:'Hina Farooq',doctor:'Dr. James Okafor',specialty:'Neurology',city:'Islamabad',clinic:'NeuroHealth Clinic — F-8',date:'Jun 28, 2026',time:'03:00 PM',status:'Rejected',requested:'6 days ago',reason:'Doctor on leave — patient asked to rebook'},
+  {id:'PHY-2960',patient:'Omar Farooq',doctor:'Dr. Javed Kumbhar',specialty:'Cardiology',city:'Karachi',clinic:'Dr Insight Clinic — Clifton',date:'Jul 20, 2026',time:'11:30 AM',status:'Upcoming',requested:'1 week ago'},
+  {id:'PHY-2958',patient:'Muhammad Hassan',doctor:'Dr. Priya Sharma',specialty:'Endocrinology',city:'Karachi',clinic:'Dr Insight Clinic — DHA',date:'Jul 22, 2026',time:'10:00 AM',status:'Upcoming',requested:'1 week ago'},
+  {id:'PHY-2940',patient:'Ayesha Siddiqui',doctor:'Dr. Sarah Mitchell',specialty:'Cardiology',city:'Lahore',clinic:'HeartCare Clinic — Gulberg',date:'Jun 20, 2026',time:'09:00 AM',status:'Completed',requested:'3 weeks ago'},
+  {id:'PHY-2935',patient:'Tariq Mehmood',doctor:'Dr. Javed Kumbhar',specialty:'Cardiology',city:'Karachi',clinic:'Dr Insight Clinic — Clifton',date:'Jun 18, 2026',time:'02:30 PM',status:'Completed',requested:'3 weeks ago'},
+  {id:'PHY-2920',patient:'Sana Iqbal',doctor:'Dr. James Okafor',specialty:'Neurology',city:'Islamabad',clinic:'NeuroHealth Clinic — F-8',date:'Jun 10, 2026',time:'01:00 PM',status:'Cancelled',requested:'1 month ago',reason:'Patient requested cancellation'}
 ];
-var PHYS_ADMIN={doctor:'All',city:'All',spec:'All',status:'Pending',q:''};
-function pgPhysical(status){
-  PHYS_ADMIN={doctor:'All',city:'All',spec:'All',status:status,q:''};
-  return '<div id="physAdminPage">'+physAdminInner()+'</div>';
-}
-function physUnique(key){
-  var seen={},out=[];
-  PHYS_DB.forEach(function(r){if(!seen[r[key]]){seen[r[key]]=1;out.push(r[key]);}});
-  return out.sort();
-}
-function physFiltered(){
-  var q=(PHYS_ADMIN.q||'').toLowerCase();
-  return PHYS_DB.filter(function(r){
-    return (PHYS_ADMIN.status==='All'||r.status===PHYS_ADMIN.status)
-      && (PHYS_ADMIN.doctor==='All'||r.doctor===PHYS_ADMIN.doctor)
-      && (PHYS_ADMIN.city==='All'||r.city===PHYS_ADMIN.city)
-      && (PHYS_ADMIN.spec==='All'||r.spec===PHYS_ADMIN.spec)
-      && (!q||(r.patient+' '+r.id).toLowerCase().indexOf(q)>=0);
-  });
-}
+var PHYS_STATUS_MAP={'phys-pending':'Pending','phys-approved':'Approved','phys-rejected':'Rejected','phys-upcoming':'Upcoming','phys-completed':'Completed','phys-cancelled':'Cancelled'};
+var PHYS_FLT={status:'Pending',doctor:'All',city:'All',specialty:'All',patient:'',_navId:''};
 function physChip(st){
   var m={'Pending':'ch-a','Approved':'ch-g','Rejected':'ch-r','Upcoming':'ch-b','Completed':'ch-g','Cancelled':'ch-gray'};
-  var ic={'Pending':'⏳ ','Approved':'✅ ','Rejected':'⛔ ','Upcoming':'📅 ','Completed':'🏁 ','Cancelled':'❌ '};
-  return '<span class="chip '+(m[st]||'ch-b')+'">'+(ic[st]||'')+st+'</span>';
+  var ic={'Pending':'🕒','Approved':'✅','Rejected':'⛔','Upcoming':'📅','Completed':'🏁','Cancelled':'❌'};
+  return '<span class="chip '+(m[st]||'ch-b')+'">'+(ic[st]||'')+' '+st+'</span>';
 }
-function physSel(label,key,opts){
-  return '<div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:.68rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.04em">'+label+'</span>'+
-    '<select style="padding:7px 10px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:.78rem;background:#fff;outline:none;min-width:150px" onchange="physSet(\''+key+'\',this.value)">'+
-    ['All'].concat(opts).map(function(o){return '<option'+(PHYS_ADMIN[key]===o?' selected':'')+'>'+o+'</option>';}).join('')+'</select></div>';
+function physUnique(field){var s=[];PHYS_DB.forEach(function(r){if(s.indexOf(r[field])<0)s.push(r[field]);});return s.sort();}
+function physSelect(label,field,options){
+  var cur=PHYS_FLT[field];
+  return '<div class="fg-item" style="min-width:150px"><label>'+label+'</label><select onchange="physSet(\''+field+'\',this.value)">'+
+    '<option'+(cur==='All'?' selected':'')+'>All</option>'+
+    options.map(function(o){return '<option'+(o===cur?' selected':'')+'>'+o+'</option>';}).join('')+
+    '</select></div>';
 }
-function physAdminInner(){
-  var total=PHYS_DB.length,
-      pend=PHYS_DB.filter(function(r){return r.status==='Pending';}).length,
-      up=PHYS_DB.filter(function(r){return r.status==='Upcoming'||r.status==='Approved';}).length,
-      done=PHYS_DB.filter(function(r){return r.status==='Completed';}).length;
+function physSet(field,val){ PHYS_FLT[field]=val; physRefresh(); }
+function physRefresh(){
+  var c=document.getElementById('content');
+  if(c) c.innerHTML=pgPhysical(PHYS_FLT._navId);
+}
+function physFilteredList(){
+  var q=(PHYS_FLT.patient||'').toLowerCase();
+  return PHYS_DB.filter(function(r){
+    if(PHYS_FLT.status!=='All'&&r.status!==PHYS_FLT.status) return false;
+    if(PHYS_FLT.doctor!=='All'&&r.doctor!==PHYS_FLT.doctor) return false;
+    if(PHYS_FLT.city!=='All'&&r.city!==PHYS_FLT.city) return false;
+    if(PHYS_FLT.specialty!=='All'&&r.specialty!==PHYS_FLT.specialty) return false;
+    if(q&&r.patient.toLowerCase().indexOf(q)<0) return false;
+    return true;
+  });
+}
+function pgPhysical(id){
+  if(PHYS_FLT._navId!==id){
+    PHYS_FLT._navId=id; PHYS_FLT.status=PHYS_STATUS_MAP[id]||'All';
+    PHYS_FLT.doctor='All'; PHYS_FLT.city='All'; PHYS_FLT.specialty='All'; PHYS_FLT.patient='';
+  }
+  var counts={};['Pending','Approved','Rejected','Upcoming','Completed','Cancelled'].forEach(function(s){counts[s]=PHYS_DB.filter(function(r){return r.status===s;}).length;});
   var stats=statCards([
-    {ic:'ic1',icon:'🏥',num:String(total),label:'Total Physical Appointments',tag:'All time',tagClass:'tt-b'},
-    {ic:'ic3',icon:'⏳',num:String(pend),label:'Pending Approval',tag:pend?'Action needed':'All clear',tagClass:pend?'tt-a':'tt-g'},
-    {ic:'ic2',icon:'📅',num:String(up),label:'Approved & Upcoming',tag:'Scheduled',tagClass:'tt-g'},
-    {ic:'ic4',icon:'🏁',num:String(done),label:'Completed Visits',tag:'This quarter',tagClass:'tt-g'}
+    {ic:'ic3',icon:'🕒',num:String(counts.Pending),label:'Pending Requests',tag:counts.Pending?'Action needed':'All clear',tagClass:counts.Pending?'tt-a':'tt-g'},
+    {ic:'ic1',icon:'✅',num:String(counts.Approved),label:'Approved',tag:'Awaiting visit',tagClass:'tt-b'},
+    {ic:'ic2',icon:'📅',num:String(counts.Upcoming),label:'Upcoming',tag:'Scheduled',tagClass:'tt-b'},
+    {ic:'ic4',icon:'🏁',num:String(counts.Completed),label:'Completed',tag:'Clinic visits',tagClass:'tt-g'}
   ]);
-  var filters='<div class="panel" style="padding:14px 18px;margin-bottom:16px"><div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end">'+
-    physSel('Doctor','doctor',physUnique('doctor'))+
-    physSel('City','city',physUnique('city'))+
-    physSel('Specialty','spec',physUnique('spec'))+
-    physSel('Status','status',['Pending','Approved','Rejected','Upcoming','Completed','Cancelled'])+
-    '<div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:180px"><span style="font-size:.68rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.04em">Patient</span><div class="panel-search" style="max-width:none"><input placeholder="Search by patient name or ID…" value="'+(PHYS_ADMIN.q||'')+'" oninput="physSearch(this.value)"></div></div>'+
+  var filterBar='<div class="panel"><div class="panel-hd"><h3>🔍 Filter Physical Appointments</h3><div class="btn-row">'+
+    '<button class="btn" onclick="physExport()">⬇ Export Report (CSV)</button></div></div>'+
+    '<div class="panel-bd" style="display:flex;gap:14px;flex-wrap:wrap">'+
+    physSelect('Status','status',['Pending','Approved','Rejected','Upcoming','Completed','Cancelled'])+
+    physSelect('Doctor','doctor',physUnique('doctor'))+
+    physSelect('City','city',physUnique('city'))+
+    physSelect('Specialty','specialty',physUnique('specialty'))+
+    '<div class="fg-item" style="min-width:180px;flex:1"><label>Patient</label><input placeholder="Search patient name..." value="'+escAttr(PHYS_FLT.patient)+'" oninput="physSet(\'patient\',this.value)"></div>'+
     '</div></div>';
-  var rows=physFiltered().map(function(r){
-    var actions='<div class="btn-row"><button class="btn" onclick="showToast(\'Opening appointment details...\')">Details</button>';
+  var list=physFilteredList();
+  var rows=list.map(function(r){
+    var actions='<div class="btn-row"><button class="btn" onclick="showToast(\'Opening appointment '+r.id+'...\')">View</button>';
     if(r.status==='Pending'){
-      actions+='<button class="btn green" onclick="physDecide(\''+r.id+'\',\'Approved\')">✓ Approve</button><button class="btn danger" onclick="physDecide(\''+r.id+'\',\'Rejected\')">✕ Reject</button>';
+      actions+='<button class="btn green" onclick="physDecide(\''+r.id+'\',\'Approved\')">✓ Approve</button>'+
+        '<button class="btn danger" onclick="physDecide(\''+r.id+'\',\'Rejected\')">✕ Reject</button>';
     } else if(r.status==='Approved'||r.status==='Upcoming'){
-      actions+='<button class="btn" onclick="showToast(\'🔄 Reschedule proposal sent — patient & doctor notified\')">Reschedule</button><button class="btn danger" onclick="physDecide(\''+r.id+'\',\'Cancelled\')">Cancel</button>';
-    } else if(r.status==='Completed'){
-      actions+='<button class="btn" onclick="showToast(\'Opening visit report...\')">Report</button>';
-    } else {
-      actions+='<button class="btn" onclick="physDecide(\''+r.id+'\',\'Pending\')">Re-open</button>';
+      actions+='<button class="btn danger" onclick="physDecide(\''+r.id+'\',\'Cancelled\')">Cancel</button>';
     }
     actions+='</div>';
-    return ['<strong>'+r.id+'</strong>',r.patient,r.doctor+'<div style="font-size:.78rem;color:var(--gray-500)">'+r.spec+'</div>','🏥 '+r.clinic+'<div style="font-size:.78rem;color:var(--gray-500)">📍 '+r.city+'</div>',r.date,r.time,physChip(r.status),actions];
+    return [
+      '<strong>'+r.id+'</strong>',
+      r.patient,
+      r.doctor+'<div style="font-size:.78rem;color:var(--gray-500)">'+r.specialty+'</div>',
+      r.clinic+'<div style="font-size:.78rem;color:var(--gray-500)">'+r.city+'</div>',
+      r.date+'<div style="font-size:.78rem;color:var(--gray-500)">'+r.time+'</div>',
+      physChip(r.status),
+      actions
+    ];
   });
-  var table=panelTable('🏥 Physical Consultation Requests',
-    '<button class="btn" onclick="physExport()">⬇ Export Report</button>',
-    ['ID','Patient','Doctor','Clinic','Date','Time','Status','Actions'],
-    rows.length?rows:[['<span style="color:var(--gray-500)">No physical appointments match these filters.</span>','','','','','','','']],
-    'Showing '+rows.length+' of '+PHYS_DB.length+' physical appointments');
-  return stats+filters+table;
+  var table=panelTable('🏥 Physical Consultation Requests ('+rows.length+')','',
+    ['ID','Patient','Doctor / Specialty','Clinic / City','Date & Time','Status','Actions'],
+    rows.length?rows:[['<span style="color:var(--gray-400)">No appointments match these filters</span>','','','','','','']],
+    rows.length?'Showing '+rows.length+' of '+PHYS_DB.length+' physical appointments':'');
+  return stats+filterBar+table;
 }
-function physRefresh(){var p=document.getElementById('physAdminPage');if(p)p.innerHTML=physAdminInner();}
-function physSet(k,v){PHYS_ADMIN[k]=v;physRefresh();}
-function physSearch(v){PHYS_ADMIN.q=v;physRefresh();
-  var p=document.getElementById('physAdminPage');
-  var inp=p&&p.querySelector('.panel-search input');
-  if(inp){inp.focus();inp.setSelectionRange(inp.value.length,inp.value.length);}}
-function physDecide(id,st){
+function physDecide(id,newStatus){
   var r=PHYS_DB.find(function(x){return x.id===id;});
-  if(!r)return;
-  r.status=st;
-  var msg={'Approved':'✅ Request approved — 🔔 patient & doctor notified','Rejected':'⛔ Request rejected — 🔔 patient notified','Cancelled':'❌ Appointment cancelled — 🔔 patient & doctor notified','Pending':'⏳ Request re-opened for review'};
-  showToast(msg[st]||('Status changed to '+st));
+  if(!r) return;
+  r.status=newStatus;
+  var msg={'Approved':'✅ Appointment approved — patient & doctor notified','Rejected':'⛔ Appointment rejected — patient notified','Cancelled':'❌ Appointment cancelled — patient & doctor notified'};
+  showToast(msg[newStatus]||'Status updated');
   physRefresh();
 }
 function physExport(){
-  var rows=physFiltered();
-  var csv='ID,Patient,Doctor,Specialty,Clinic,City,Date,Time,Status\n'+rows.map(function(r){
-    return [r.id,r.patient,r.doctor,r.spec,'"'+r.clinic+'"',r.city,'"'+r.date+'"',r.time,r.status].join(',');
-  }).join('\n');
+  var list=physFilteredList();
+  var head=['ID','Patient','Doctor','Specialty','City','Clinic','Date','Time','Status'];
+  var lines=[head.join(',')].concat(list.map(function(r){
+    return [r.id,r.patient,r.doctor,r.specialty,r.city,r.clinic,r.date,r.time,r.status].map(function(v){return '"'+String(v).replace(/"/g,'""')+'"';}).join(',');
+  }));
   var a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  a.download='physical-appointments-report.csv';
-  document.body.appendChild(a);a.click();a.remove();
-  showToast('⬇ Report exported — '+rows.length+' record'+(rows.length!==1?'s':'')+' (CSV)');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(lines.join('\n'));
+  a.download='physical-appointments-'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+  showToast('⬇ Appointment report exported');
 }
-
-/* ===== Women's Health Email Reminders (Admin) — additive module =====
-   Front-end for the automated reminder system used by the Pregnancy Due Date Calculator,
-   Pregnancy Planner (Ovulation) and Menstrual Period Tracker. No existing tool logic is touched.
-   Suggested backend entities (add-only, indexed on email/status/scheduled_date):
-     womens_health_reminders(id, patient_id, tool, email, cycle_key, reminder_date, status, created_at)
-     pregnancy_weekly_schedule(id, week, title, subject, content, tests, visit_reminder, care, enabled)
-     email_logs(id, reminder_id, patient, tool, email, type, scheduled_at, sent_at, status, error)
-     reminder_settings(key, value)  — queue jobs for sending, unique(cycle_key,email,tool) to prevent duplicates */
-var WHR_STATS={users:1248,pregUsers:312,ovUsers:189,perUsers:421,sentToday:57,scheduled:934,failed:3,pending:12,lastRun:'Today, 06:00 AM',nextRun:'Tomorrow, 06:00 AM'};
-var WHR_SETTINGS={global:true,preg:true,ov:true,per:true,queue:true,retry:true,senderEmail:'reminders@drinsight.com',senderName:'DrInsight Care Team',ovDays:1,perDays:1,retries:3};
-var WHR_SCHED=[
-  {id:1,wk:'6–8',title:'First Antenatal Visit',subject:'Week {{Pregnancy Week}}: Time for Your First Antenatal Visit',tests:'Initial blood tests · Folic acid check',visit:'Book your first antenatal visit',care:'Start folic acid 400mcg daily; avoid alcohol & smoking',on:true},
-  {id:2,wk:'11–13',title:'First Trimester Screening',subject:'Week {{Pregnancy Week}}: First Trimester Screening Due',tests:'NT Scan · Double Marker Test',visit:'Screening appointment this window',care:'Stay hydrated; light exercise as advised',on:true},
-  {id:3,wk:'18–22',title:'Detailed Anatomy Scan',subject:'Week {{Pregnancy Week}}: Your Anatomy Scan Window',tests:'Detailed Anatomy (Level II) Scan',visit:'Schedule your anatomy scan',care:'Note fetal movements; balanced iron-rich diet',on:true},
-  {id:4,wk:'24–28',title:'Glucose Screening & Bloods',subject:'Week {{Pregnancy Week}}: GTT & Blood Work Due',tests:'Glucose Tolerance Test (GTT) · CBC · Urine Examination',visit:'Antenatal review with results',care:'Fasting required for GTT — follow lab instructions',on:true},
-  {id:5,wk:'28',title:'Anti-D Injection',subject:'Week {{Pregnancy Week}}: Anti-D Injection Reminder',tests:'Anti-D Injection (if Rh negative)',visit:'Rh-negative mothers: clinic visit for Anti-D',care:'Bring your blood group report',on:true},
-  {id:6,wk:'32',title:'Growth Ultrasound',subject:'Week {{Pregnancy Week}}: Growth Ultrasound Due',tests:'Growth Ultrasound',visit:'Growth scan & antenatal review',care:'Monitor fetal kick counts daily',on:true},
-  {id:7,wk:'36',title:'GBS Screening & Birth Planning',subject:'Week {{Pregnancy Week}}: GBS Screening & Birth Plan',tests:'Group B Streptococcus (GBS) Screening',visit:'Discuss birth plan with your doctor',care:'Prepare hospital bag; finalise birth preferences',on:true},
-  {id:8,wk:'37–40',title:'Weekly Follow-up & Labour Signs',subject:'Week {{Pregnancy Week}}: Weekly Check-in — You\'re Almost There',tests:'Weekly antenatal follow-up',visit:'Weekly visits until delivery',care:'Labour warning signs · Hospital preparation checklist · Emergency contacts ready',on:true}
-];
-/* Every pregnancy schedule row carries its own email template (subject + body). Default bodies are
-   built from the row's tests / visit / care so each of the weekly reminders has a distinct email. */
-WHR_SCHED.forEach(function(s){
-  if(!s.body)s.body='Hello {{Patient Name}},\n\nYou are now in week {{Pregnancy Week}} of your pregnancy (due date: {{Due Date}}).\n\nThis week — '+s.title+':\nRecommended investigations: '+s.tests+'\nDoctor visit: '+s.visit+'\nCare tips: '+s.care+'\n\nEmergency warning signs: severe abdominal pain, heavy vaginal bleeding, severe headache or vision changes, reduced fetal movement, fever — seek medical care immediately.\n\nRegards,\nWebsite Team';
-});
-var WHR_TPL={
-  ov:{name:'Ovulation Reminder',subject:'Your Fertile Window Starts Tomorrow',body:'Hello {{Patient Name}},\n\nBased on your cycle information, your predicted ovulation day is tomorrow ({{Ovulation Date}}).\nThis is one of your most fertile days if you are planning to conceive.\n\nPlease remember that predictions are estimates.\n\nRegards,\nWebsite Team'},
-  per:{name:'Period Reminder',subject:'Period Reminder',body:'Hello {{Patient Name}},\n\nAccording to your menstrual cycle information, your next period is expected to begin tomorrow ({{Next Period Date}}).\n\nThis prediction is an estimate and actual dates may vary.\n\nRegards,\nWebsite Team'}
-};
-/* The generic pregnancy template was replaced by per-week templates stored on each
-   pregnancy schedule row (WHR_SCHED[n].subject / .body) — see Email Templates tab. */
-var WHR_LOGS=[
-  {p:'Sarah Johnson',tool:'Pregnancy',email:'sarah.johnson@email.com',type:'Week 24 — GTT & Bloods',sched:'Jul 12, 2026',sent:'Jul 12, 2026 06:01',st:'Sent',err:'—'},
-  {p:'Zara Ahmed',tool:'Ovulation',email:'zara.a@email.com',type:'Fertile Window Tomorrow',sched:'Jul 12, 2026',sent:'Jul 12, 2026 06:01',st:'Sent',err:'—'},
-  {p:'Nadia Baig',tool:'Period',email:'nadia.b@email.com',type:'Period Reminder',sched:'Jul 12, 2026',sent:'—',st:'Pending',err:'—'},
-  {p:'Sara Malik',tool:'Period',email:'sara.malik@email.com',type:'Period Reminder',sched:'Jul 11, 2026',sent:'—',st:'Failed',err:'Mailbox full (452)'},
-  {p:'Linda Patel',tool:'Pregnancy',email:'linda.p@email.com',type:'Week 32 — Growth Ultrasound',sched:'Jul 11, 2026',sent:'Jul 11, 2026 06:02',st:'Sent',err:'—'},
-  {p:'Aisha Mirza',tool:'Ovulation',email:'aisha.m@email.com',type:'Fertile Window Tomorrow',sched:'Jul 10, 2026',sent:'—',st:'Failed',err:'Invalid recipient (550)'},
-  {p:'Fatima Khan',tool:'Pregnancy',email:'fatima.k@email.com',type:'Week 36 — GBS & Birth Plan',sched:'Jul 10, 2026',sent:'Jul 10, 2026 06:00',st:'Sent',err:'—'}
-];
-var WHR_ADMIN={tab:'dashboard',logTool:'All',logStatus:'All',logDate:'',logQ:''};
-/* ---- Subscribed reminder emails ----
-   New subscriptions are added automatically (and enabled automatically) the moment a user submits
-   their email on the Women's Health tools page; the admin can disable/re-enable any of them here.
-   Disabling writes back to the shared store, so the tools page immediately reflects it. */
-var WHR_TOOL_LABEL={pregnancy:'🤰 Pregnancy Due Date',ovulation:'🌸 Ovulation Planner',period:'🩸 Period Tracker'};
-var WHR_EMAILS=[
-  {email:'javedkumbhar@yahoo.com',patient:'Javed Kumbhar',tool:'pregnancy',added:'Jul 12, 2026',enabled:true},
-  {email:'sarah.johnson@email.com',patient:'Sarah Johnson',tool:'pregnancy',added:'Jul 10, 2026',enabled:true},
-  {email:'zara.a@email.com',patient:'Zara Ahmed',tool:'ovulation',added:'Jul 9, 2026',enabled:true},
-  {email:'nadia.b@email.com',patient:'Nadia Baig',tool:'period',added:'Jul 8, 2026',enabled:true},
-  {email:'sara.malik@email.com',patient:'Sara Malik',tool:'period',added:'Jul 5, 2026',enabled:false},
-  {email:'aisha.m@email.com',patient:'Aisha Mirza',tool:'ovulation',added:'Jun 30, 2026',enabled:true}
-];
-function whrUserSubs(){
-  /* Entries written by the Health Tools page when a user submits their email (same-origin store) */
-  try{
-    var db=JSON.parse(localStorage.getItem('whr_reminders')||'{}'),out=[];
-    Object.keys(db).forEach(function(k){
-      var e=db[k];
-      if(e&&e.email)out.push({email:e.email,patient:'Website user',tool:k,added:e.createdAt||'—',enabled:e.enabled!==false,ls:k});
-    });
-    return out;
-  }catch(err){return[];}
-}
-function whrAllEmails(){
-  var subs=whrUserSubs();
-  /* user-submitted entries override seeded demo rows with the same email+tool */
-  var seed=WHR_EMAILS.filter(function(s){
-    return !subs.some(function(u){return u.email===s.email&&u.tool===s.tool;});
-  });
-  return subs.concat(seed);
-}
-function whrEmailToggle(email,tool){
-  var subs=whrUserSubs(),hit=subs.find(function(u){return u.email===email&&u.tool===tool;});
-  if(hit){ /* live user subscription — write the admin decision back to the shared store */
-    try{
-      var db=JSON.parse(localStorage.getItem('whr_reminders')||'{}');
-      if(db[hit.ls]){db[hit.ls].enabled=!hit.enabled;db[hit.ls].status=db[hit.ls].enabled?'scheduled':'disabled_by_admin';localStorage.setItem('whr_reminders',JSON.stringify(db));}
-    }catch(err){}
-    showToast((hit.enabled?'🔕 Reminders disabled':'📧 Reminders re-enabled')+' for '+email+' — synced to the tools page');
-  }else{
-    var s=WHR_EMAILS.find(function(x){return x.email===email&&x.tool===tool;});
-    if(s){s.enabled=!s.enabled;showToast((s.enabled?'📧 Reminders re-enabled':'🔕 Reminders disabled')+' for '+email);}
-  }
-  whrRefresh();
-}
-function whrEmailsPanel(){
-  var list=whrAllEmails();
-  var rows=list.map(function(u){
-    return [u.patient,'<strong>'+u.email+'</strong>',WHR_TOOL_LABEL[u.tool]||u.tool,u.added,
-      u.ls?'<span class="chip ch-b">Tools page</span>':'<span class="chip ch-gray">Seed data</span>',
-      '<span class="chip '+(u.enabled?'ch-g':'ch-r')+'">'+(u.enabled?'✓ Enabled':'⛔ Disabled')+'</span>',
-      '<div class="btn-row"><button class="btn '+(u.enabled?'danger':'green')+'" onclick="whrEmailToggle(\''+u.email+'\',\''+u.tool+'\')">'+(u.enabled?'Disable':'Enable')+'</button></div>'];
-  });
-  return panelTable('📮 Reminder Email Subscriptions','<span style="font-size:.74rem;color:var(--gray-500);align-self:center">Auto-added & enabled when a user submits their email — admin can disable any time</span>',
-    ['Patient','Email','Tool','Subscribed','Source','Status','Action'],
-    rows.length?rows:[['<span style="color:var(--gray-500)">No subscriptions yet — they appear here automatically when users submit their email on the tools page.</span>','','','','','','']],
-    list.length+' subscription'+(list.length!==1?'s':''));
-}
-function pgWHR(){WHR_ADMIN.tab='dashboard';return '<div id="whrPage">'+whrInner()+'</div>';}
-function whrRefresh(){var p=document.getElementById('whrPage');if(p)p.innerHTML=whrInner();}
-function whrTab(t){WHR_ADMIN.tab=t;whrRefresh();}
-function whrInner(){
-  var tabs=[['dashboard','📊 Dashboard'],['settings','⚙️ Reminder Settings'],['schedule','🤰 Pregnancy Schedule Manager'],['templates','✉️ Email Templates'],['logs','📋 Reminder Logs']];
-  var pills='<div class="flt-row">'+tabs.map(function(t){return '<div class="flt'+(WHR_ADMIN.tab===t[0]?' on':'')+'" onclick="whrTab(\''+t[0]+'\')">'+t[1]+'</div>';}).join('')+'</div>';
-  var body={dashboard:whrDashboard,settings:whrSettingsPg,schedule:whrSchedulePg,templates:whrTemplatesPg,logs:whrLogsPg}[WHR_ADMIN.tab]();
-  return pills+body;
-}
-var whrInp='padding:8px 10px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:.8rem;background:#fff;outline:none;font-family:inherit;width:100%';
-function whrToggleRow(label,desc,key){
-  return '<div style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid var(--gray-100)"><div><div style="font-weight:600;font-size:.86rem;color:var(--gray-900)">'+label+'</div><div style="font-size:.76rem;color:var(--gray-500)">'+desc+'</div></div><input type="checkbox" '+(WHR_SETTINGS[key]?'checked':'')+' style="width:19px;height:19px;accent-color:var(--blue);cursor:pointer;flex-shrink:0" onchange="WHR_SETTINGS[\''+key+'\']=this.checked;showToast(\''+label+' \'+(this.checked?\'enabled\':\'disabled\'))"></div>';
-}
-function whrDashboard(){
-  var s=WHR_STATS;
-  return statCards([
-    {ic:'ic1',icon:'👥',num:s.users.toLocaleString(),label:'Total Users',tag:'All tools',tagClass:'tt-b'},
-    {ic:'ic2',icon:'🤰',num:String(s.pregUsers),label:'Pregnancy Reminder Users',tag:'Care schedules',tagClass:'tt-g'},
-    {ic:'ic3',icon:'🌸',num:String(s.ovUsers),label:'Ovulation Reminder Users',tag:'1 email / cycle',tagClass:'tt-a'},
-    {ic:'ic4',icon:'🩸',num:String(s.perUsers),label:'Period Reminder Users',tag:'1 email / cycle',tagClass:'tt-b'}
-  ])+statCards([
-    {ic:'ic2',icon:'📤',num:String(s.sentToday),label:'Emails Sent Today',tag:'Since 06:00',tagClass:'tt-g'},
-    {ic:'ic1',icon:'🗓️',num:String(s.scheduled),label:'Emails Scheduled',tag:'In queue',tagClass:'tt-b'},
-    {ic:'ic4',icon:'⚠️',num:String(s.failed),label:'Failed Emails',tag:s.failed?'Retry pending':'All clear',tagClass:s.failed?'tt-r':'tt-g'},
-    {ic:'ic3',icon:'⏳',num:String(s.pending),label:'Pending Emails',tag:'Due today',tagClass:'tt-a'}
-  ])+
-  '<div class="panel"><div class="panel-hd"><h3>🤖 Background Scheduler</h3><div class="btn-row"><button class="btn primary" onclick="whrRunScheduler()">▶ Run Scheduler Now</button></div></div>'+
-  '<div style="padding:16px 18px;font-size:.82rem;color:var(--gray-600);line-height:1.7">The scheduler runs automatically every day at 06:00. On each run it checks ovulation and period reminders due today, checks pregnancy weekly schedules due today, queues the emails, skips anything already sent for the same cycle (duplicate prevention), records a log entry for every email, retries failed emails automatically, and marks reminders completed after successful delivery.<br><span style="color:var(--gray-500)">Last run: <strong>'+s.lastRun+'</strong> &nbsp;·&nbsp; Next run: <strong>'+s.nextRun+'</strong> &nbsp;·&nbsp; Queue processing: <strong>'+(WHR_SETTINGS.queue?'On':'Off')+'</strong> &nbsp;·&nbsp; Auto-retry: <strong>'+(WHR_SETTINGS.retry?'On ('+WHR_SETTINGS.retries+' attempts)':'Off')+'</strong></span></div></div>'+
-  whrEmailsPanel();
-}
-function whrRunScheduler(){
-  var queued=0,retried=0,now='Jul 12, 2026 '+new Date().toTimeString().slice(0,5);
-  WHR_LOGS.forEach(function(l){
-    if(l.st==='Pending'){l.st='Sent';l.sent=now;l.err='—';queued++;}
-    else if(l.st==='Failed'&&WHR_SETTINGS.retry){l.st='Sent';l.sent=now;l.err='Recovered on retry';retried++;}
-  });
-  WHR_STATS.sentToday+=queued+retried;
-  WHR_STATS.pending=Math.max(0,WHR_STATS.pending-queued);
-  WHR_STATS.failed=Math.max(0,WHR_STATS.failed-retried);
-  WHR_STATS.lastRun='Just now';
-  showToast('🤖 Scheduler run complete — '+queued+' queued email'+(queued!==1?'s':'')+' sent, '+retried+' failed retried, 0 duplicates created');
-  whrRefresh();
-}
-function whrSettingsPg(){
-  return '<div class="panel"><div class="panel-hd"><h3>⚙️ Reminder Settings</h3><div class="btn-row"><button class="btn primary" onclick="whrSaveSettings()">💾 Save Settings</button></div></div><div style="padding:6px 18px 16px">'+
-    whrToggleRow('Enable reminders globally','Master switch for the whole Women’s Health reminder system','global')+
-    whrToggleRow('Pregnancy Due Date Calculator','Weekly pregnancy care schedule emails','preg')+
-    whrToggleRow('Pregnancy Planner (Ovulation)','One reminder per ovulation cycle','ov')+
-    whrToggleRow('Menstrual Period Tracker','One reminder per period cycle','per')+
-    whrToggleRow('Queue processing','Send emails through background queue jobs (recommended for thousands of users)','queue')+
-    whrToggleRow('Retry failed emails automatically','Failed sends are retried on the next scheduler run','retry')+
-    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:16px">'+
-    '<div><div style="font-size:.7rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:5px">Sender Email</div><input value="'+WHR_SETTINGS.senderEmail+'" style="'+whrInp+'" oninput="WHR_SETTINGS.senderEmail=this.value"></div>'+
-    '<div><div style="font-size:.7rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:5px">Sender Name</div><input value="'+WHR_SETTINGS.senderName+'" style="'+whrInp+'" oninput="WHR_SETTINGS.senderName=this.value"></div>'+
-    '<div><div style="font-size:.7rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:5px">Ovulation reminder — days before</div><input type="number" min="0" max="7" value="'+WHR_SETTINGS.ovDays+'" style="'+whrInp+'" oninput="WHR_SETTINGS.ovDays=this.value"></div>'+
-    '<div><div style="font-size:.7rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:5px">Period reminder — days before</div><input type="number" min="0" max="7" value="'+WHR_SETTINGS.perDays+'" style="'+whrInp+'" oninput="WHR_SETTINGS.perDays=this.value"></div>'+
-    '<div><div style="font-size:.7rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:5px">Retry attempts</div><input type="number" min="1" max="10" value="'+WHR_SETTINGS.retries+'" style="'+whrInp+'" oninput="WHR_SETTINGS.retries=this.value"></div>'+
-    '</div></div></div>';
-}
-function whrSaveSettings(){
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(WHR_SETTINGS.senderEmail)){showToast('⚠️ Please enter a valid sender email');return;}
-  showToast('✅ Reminder settings saved');
-}
-var whrEditId=null;
-function whrSchedulePg(){
-  var editor='';
-  if(whrEditId!==null){
-    var s=WHR_SCHED.find(function(x){return x.id===whrEditId;})||{wk:'',title:'',subject:'',tests:'',visit:'',care:'',on:true};
-    editor='<div class="panel" style="margin-bottom:16px"><div class="panel-hd"><h3>'+(s.id?'✏️ Edit Schedule — Week '+s.wk:'➕ Add New Schedule')+'</h3></div><div style="padding:14px 18px;display:grid;gap:12px">'+
-      '<div style="display:grid;grid-template-columns:120px 1fr;gap:12px"><div><div style="font-size:.7rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:5px">Pregnancy Week</div><input id="whrE-wk" value="'+(s.wk||'')+'" placeholder="e.g. 24–28" style="'+whrInp+'"></div>'+
-      '<div><div style="font-size:.7rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:5px">Reminder Title</div><input id="whrE-title" value="'+(s.title||'')+'" style="'+whrInp+'"></div></div>'+
-      '<div><div style="font-size:.7rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:5px">Email Subject</div><input id="whrE-subject" value="'+(s.subject||'')+'" style="'+whrInp+'"></div>'+
-      '<div><div style="font-size:.7rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:5px">Recommended Tests</div><input id="whrE-tests" value="'+(s.tests||'')+'" style="'+whrInp+'"></div>'+
-      '<div><div style="font-size:.7rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:5px">Doctor Visit Reminder</div><input id="whrE-visit" value="'+(s.visit||'')+'" style="'+whrInp+'"></div>'+
-      '<div><div style="font-size:.7rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:5px">Care Instructions</div><textarea id="whrE-care" rows="2" style="'+whrInp+';resize:vertical">'+(s.care||'')+'</textarea></div>'+
-      '<div><div style="font-size:.7rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:5px">Email Body <span style="font-weight:400;text-transform:none">(this week\'s template — leave blank to auto-generate from the fields above)</span></div><textarea id="whrE-body" rows="6" style="'+whrInp+';resize:vertical;line-height:1.6">'+(s.body||'')+'</textarea></div>'+
-      '<div class="btn-row"><button class="btn primary" onclick="whrSaveSched()">💾 Save Schedule</button><button class="btn" onclick="whrEditId=null;whrRefresh()">Cancel</button></div>'+
-      '</div></div>';
-  }
-  var rows=WHR_SCHED.map(function(s){
-    return ['<strong>Week '+s.wk+'</strong>',s.title,'<span style="font-size:.78rem;color:var(--gray-500)">'+s.subject+'</span>','<span style="font-size:.78rem;color:var(--gray-500)">'+s.tests+'</span>',
-      '<span class="chip '+(s.on?'ch-g':'ch-gray')+'">'+(s.on?'✓ Enabled':'Disabled')+'</span>',
-      '<div class="btn-row"><button class="btn" onclick="whrEditId='+s.id+';whrRefresh()">Edit</button><button class="btn" onclick="whrToggleSched('+s.id+')">'+(s.on?'Disable':'Enable')+'</button><button class="btn danger" onclick="whrDelSched('+s.id+')">Delete</button></div>'];
-  });
-  return editor+panelTable('🤰 Pregnancy Care Schedules','<button class="btn primary" onclick="whrEditId=0;whrRefresh()">➕ Add Schedule</button>',
-    ['Week','Title','Email Subject','Recommended Tests','Status','Actions'],rows,WHR_SCHED.length+' schedules — emails in the same week are combined into one');
-}
-function whrSaveSched(){
-  var v=function(id){return document.getElementById(id).value.trim();};
-  if(!v('whrE-wk')||!v('whrE-title')||!v('whrE-subject')){showToast('⚠️ Week, Title and Subject are required');return;}
-  var data={wk:v('whrE-wk'),title:v('whrE-title'),subject:v('whrE-subject'),tests:v('whrE-tests'),visit:v('whrE-visit'),care:v('whrE-care'),body:v('whrE-body')};
-  if(!data.body)data.body='Hello {{Patient Name}},\n\nYou are now in week {{Pregnancy Week}} of your pregnancy (due date: {{Due Date}}).\n\nThis week — '+data.title+':\nRecommended investigations: '+data.tests+'\nDoctor visit: '+data.visit+'\nCare tips: '+data.care+'\n\nEmergency warning signs: severe abdominal pain, heavy vaginal bleeding, severe headache or vision changes, reduced fetal movement, fever — seek medical care immediately.\n\nRegards,\nWebsite Team';
-  if(whrEditId){var s=WHR_SCHED.find(function(x){return x.id===whrEditId;});for(var k in data)s[k]=data[k];showToast('✅ Schedule updated — Week '+data.wk);}
-  else{data.id=WHR_SCHED.reduce(function(m,x){return Math.max(m,x.id);},0)+1;data.on=true;WHR_SCHED.push(data);showToast('✅ Schedule added — Week '+data.wk);}
-  whrEditId=null;whrRefresh();
-}
-function whrToggleSched(id){var s=WHR_SCHED.find(function(x){return x.id===id;});if(s){s.on=!s.on;showToast('Week '+s.wk+' schedule '+(s.on?'enabled':'disabled'));whrRefresh();}}
-function whrDelSched(id){var i=WHR_SCHED.findIndex(function(x){return x.id===id;});if(i>=0){showToast('🗑️ Deleted — Week '+WHR_SCHED[i].wk+' schedule');WHR_SCHED.splice(i,1);whrRefresh();}}
-function whrTemplatesPg(){
-  var chips='{{Patient Name}} {{Pregnancy Week}} {{Ovulation Date}} {{Next Period Date}} {{Due Date}} {{Upcoming Test}} {{Doctor Visit Date}}'.split(' {{').map(function(c,i){return '<span class="chip ch-b" style="font-weight:600">'+(i?'{{':'')+c+'</span>';}).join(' ');
-  var cardTop='<div class="panel" style="margin-bottom:16px"><div style="padding:12px 18px;font-size:.78rem;color:var(--gray-600)">Supported placeholders — use them anywhere in a subject or body: <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px">'+chips+'</div></div></div>';
-  var single=['ov','per'].map(function(k){var t=WHR_TPL[k];
-    return '<div class="panel" style="margin-bottom:16px"><div class="panel-hd"><h3>✉️ '+t.name+'</h3><div class="btn-row"><button class="btn primary" onclick="whrSaveTpl(\''+k+'\')">💾 Save Template</button></div></div><div style="padding:14px 18px;display:grid;gap:12px">'+
-    '<div><div style="font-size:.7rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:5px">Subject</div><input id="whrT-'+k+'-s" value="'+t.subject.replace(/"/g,'&quot;')+'" style="'+whrInp+'"></div>'+
-    '<div><div style="font-size:.7rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:5px">Email Body</div><textarea id="whrT-'+k+'-b" rows="7" style="'+whrInp+';resize:vertical;line-height:1.6">'+t.body+'</textarea></div>'+
-    '</div></div>';}).join('');
-  var pregHd='<div class="panel" style="margin-bottom:16px"><div class="panel-hd"><h3>🤰 Pregnancy Weekly Reminder Templates</h3><span style="font-size:.76rem;color:var(--gray-500)">'+WHR_SCHED.length+' templates — one per schedule week, kept in sync with the Pregnancy Schedule Manager</span></div></div>';
-  var preg=WHR_SCHED.map(function(s){
-    return '<div class="panel" style="margin-bottom:16px"><div class="panel-hd"><h3>✉️ Week '+s.wk+' — '+s.title+'</h3><div class="btn-row"><span class="chip '+(s.on?'ch-g':'ch-gray')+'">'+(s.on?'✓ Enabled':'Disabled')+'</span><button class="btn primary" onclick="whrSaveSchedTpl('+s.id+')">💾 Save Template</button></div></div><div style="padding:14px 18px;display:grid;gap:12px">'+
-    '<div><div style="font-size:.7rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:5px">Subject</div><input id="whrTS-'+s.id+'" value="'+s.subject.replace(/"/g,'&quot;')+'" style="'+whrInp+'"></div>'+
-    '<div><div style="font-size:.7rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:5px">Email Body</div><textarea id="whrTB-'+s.id+'" rows="8" style="'+whrInp+';resize:vertical;line-height:1.6">'+s.body+'</textarea></div>'+
-    '</div></div>';}).join('');
-  return cardTop+single+pregHd+preg;
-}
-function whrSaveSchedTpl(id){
-  var s=WHR_SCHED.find(function(x){return x.id===id;});
-  if(!s)return;
-  s.subject=document.getElementById('whrTS-'+id).value;
-  s.body=document.getElementById('whrTB-'+id).value;
-  showToast('✅ Week '+s.wk+' template saved — schedule manager updated too');
-}
-function whrSaveTpl(k){
-  WHR_TPL[k].subject=document.getElementById('whrT-'+k+'-s').value;
-  WHR_TPL[k].body=document.getElementById('whrT-'+k+'-b').value;
-  showToast('✅ '+WHR_TPL[k].name+' template saved');
-}
-function whrLogChip(st){var m={'Sent':'ch-g','Pending':'ch-a','Failed':'ch-r','Cancelled':'ch-gray'};return '<span class="chip '+(m[st]||'ch-b')+'">'+st+'</span>';}
-function whrLogsPg(){
-  var f=WHR_ADMIN;
-  var sel=function(label,key,opts){return '<div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:.68rem;font-weight:700;color:var(--gray-500);text-transform:uppercase">'+label+'</span><select style="padding:7px 10px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:.78rem;background:#fff;outline:none;min-width:140px" onchange="WHR_ADMIN.'+key+'=this.value;whrRefresh()">'+['All'].concat(opts).map(function(o){return '<option'+(f[key]===o?' selected':'')+'>'+o+'</option>';}).join('')+'</select></div>';};
-  var filters='<div class="panel" style="padding:14px 18px;margin-bottom:16px"><div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end">'+
-    sel('Tool','logTool',['Pregnancy','Ovulation','Period'])+
-    sel('Status','logStatus',['Sent','Pending','Failed'])+
-    '<div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:.68rem;font-weight:700;color:var(--gray-500);text-transform:uppercase">Date</span><input type="date" style="padding:7px 10px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:.78rem;outline:none" onchange="WHR_ADMIN.logDate=this.value;whrRefresh()" value="'+f.logDate+'"></div>'+
-    '<div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:180px"><span style="font-size:.68rem;font-weight:700;color:var(--gray-500);text-transform:uppercase">Patient</span><div class="panel-search" style="max-width:none"><input placeholder="Search by patient name or email…" value="'+f.logQ+'" oninput="whrLogSearch(this.value)"></div></div>'+
-    '</div></div>';
-  var q=f.logQ.toLowerCase();
-  var dateStr=f.logDate?new Date(f.logDate+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
-  var list=WHR_LOGS.filter(function(l){
-    return (f.logTool==='All'||l.tool===f.logTool)&&(f.logStatus==='All'||l.st===f.logStatus)&&(!dateStr||l.sched===dateStr)&&(!q||(l.p+' '+l.email).toLowerCase().indexOf(q)>=0);
-  });
-  var rows=list.map(function(l,i){
-    var act='<div class="btn-row"><button class="btn" onclick="showToast(\'Opening email preview...\')">View</button>'+(l.st==='Failed'?'<button class="btn primary" onclick="whrRetry('+WHR_LOGS.indexOf(l)+')">🔁 Retry</button>':'')+'</div>';
-    return ['<strong>'+l.p+'</strong>',l.tool,l.email,'<span style="font-size:.78rem;color:var(--gray-500)">'+l.type+'</span>',l.sched,l.sent,whrLogChip(l.st),'<span style="font-size:.76rem;color:'+(l.err==='—'?'var(--gray-400)':'var(--red)')+'">'+l.err+'</span>',act];
-  });
-  return filters+panelTable('📋 Reminder Logs','<button class="btn" onclick="showToast(\'⬇ Exporting reminder logs (CSV)...\')">⬇ Export</button>',
-    ['Patient','Tool','Email','Reminder Type','Scheduled','Sent','Status','Error','Actions'],
-    rows.length?rows:[['<span style="color:var(--gray-500)">No log entries match these filters.</span>','','','','','','','','']],
-    'Showing '+rows.length+' of '+WHR_LOGS.length+' log entries');
-}
-function whrLogSearch(v){WHR_ADMIN.logQ=v;whrRefresh();
-  var p=document.getElementById('whrPage');var inp=p&&p.querySelector('.panel-search input');
-  if(inp){inp.focus();inp.setSelectionRange(inp.value.length,inp.value.length);}}
-function whrRetry(i){var l=WHR_LOGS[i];if(!l)return;l.st='Sent';l.sent='Jul 12, 2026 '+new Date().toTimeString().slice(0,5);l.err='Recovered on retry';
-  WHR_STATS.failed=Math.max(0,WHR_STATS.failed-1);WHR_STATS.sentToday++;
-  showToast('🔁 Email requeued & delivered — log updated');whrRefresh();}
 
 /* ===== e-Prescription review dashboard ===== */
 var RX_ADMIN={filter:'Pending Review',search:'',order:['FURO','AMLO','METF','SUMA','DISM']};
@@ -3487,18 +3206,18 @@ function docControlsHtml(){
       '<div><strong>Canonical URL:</strong><br>'+escHtmlPub(docSeoUrl(d))+'</div>'+
       '<div style="margin-top:8px"><strong>SEO:</strong> '+(saved?'<span class="chip ch-g">Custom SEO live</span>':'<span class="chip ch-gray">Using defaults</span>')+'</div>'+
       '<div style="margin-top:6px"><strong>Account:</strong> '+(susp?'<span class="chip ch-r">Suspended</span>':'<span class="chip ch-g">Active</span>')+'</div>'+
-      '<div style="margin-top:6px"><strong>Book Consultation:</strong> '+(d.bookingEnabled?'<span class="chip ch-g">Shown on profile</span>':'<span class="chip ch-gray">Hidden</span>')+'</div>'+
+            '<div style="margin-top:6px"><strong>Book Consultation:</strong> '+(d.bookingEnabled?'<span class="chip ch-g">Shown on profile</span>':'<span class="chip ch-gray">Hidden</span>')+'</div>'+
       '<div style="margin-top:6px"><strong>Contact Author:</strong> '+(d.contactEnabled?'<span class="chip ch-g">Shown on profile</span>':'<span class="chip ch-gray">Hidden</span>')+'</div>'+
       '<div style="margin-top:6px"><strong>Online Consultation Availability:</strong> '+(d.onlineAvailEnabled?'<span class="chip ch-g">Shown on profile</span>':'<span class="chip ch-gray">Hidden</span>')+'</div>'+
       '<div style="margin-top:6px"><strong>Physical Appointment:</strong> '+(d.physicalAvailEnabled?'<span class="chip ch-g">Shown on profile</span>':'<span class="chip ch-gray">Hidden</span>')+'</div>'+
-    '</div>'+
+                '</div>'+
     '<div class="btn-row" style="margin-top:14px;flex-wrap:wrap"><button class="btn primary" onclick="docSave()">💾 Save Doctor SEO</button><button class="btn" onclick="docCopySchema()">📋 Copy Schema</button><button class="btn danger" onclick="docReset()">Reset SEO</button></div>'+
     '<div style="border-top:1.5px dashed var(--gray-200);margin:16px 0 12px"></div>'+
-    '<label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.84rem;font-weight:600;color:var(--gray-800)"><input type="checkbox" '+(d.bookingEnabled?'checked':'')+' onchange="docToggleBooking()" style="width:17px;height:17px;cursor:pointer">📅 Allow Book Consultation on public profile</label>'+
+        '<label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.84rem;font-weight:600;color:var(--gray-800)"><input type="checkbox" '+(d.bookingEnabled?'checked':'')+' onchange="docToggleBooking()" style="width:17px;height:17px;cursor:pointer">📅 Allow Book Consultation on public profile</label>'+
     '<label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.84rem;font-weight:600;color:var(--gray-800);margin-top:10px"><input type="checkbox" '+(d.contactEnabled?'checked':'')+' onchange="docToggleContact()" style="width:17px;height:17px;cursor:pointer">📧 Allow Contact Author on public profile</label>'+
     '<label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.84rem;font-weight:600;color:var(--gray-800);margin-top:10px"><input type="checkbox" '+(d.onlineAvailEnabled?'checked':'')+' onchange="docToggleOnlineAvail()" style="width:17px;height:17px;cursor:pointer">🕐 Allow Online Consultation Availability on public profile</label>'+
     '<label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.84rem;font-weight:600;color:var(--gray-800);margin-top:10px"><input type="checkbox" '+(d.physicalAvailEnabled?'checked':'')+' onchange="docTogglePhysicalAvail()" style="width:17px;height:17px;cursor:pointer">🏥 Allow Physical Appointment on public profile</label>'+
-    '<div class="prw-note" style="margin:8px 0 4px">These control the “Book Consultation”, “Online Consultation Availability” and “Physical Appointment” cards on <code>author-bio.html?doc='+escHtmlPub(d.init)+'</code>.</div>'+
+            '<div class="prw-note" style="margin:8px 0 4px">These control whether the “Book Consultation”, “Contact Author”, “Online Consultation Availability” and “Physical Appointment” cards appear on <code>author-bio.html?doc='+escHtmlPub(d.init)+'</code>. The card <em>content</em> auto-fills from the doctor\u2019s <strong>Online Availability &amp; Slots</strong> and <strong>Working Hours &amp; Slots</strong> settings.</div>'+
     '<div style="border-top:1.5px dashed var(--gray-200);margin:16px 0 12px"></div>'+
     '<div class="prw-note" style="margin-bottom:10px">'+(susp?'This account is <strong>suspended</strong> — the doctor cannot log in, publish, or take consultations, and their profile is hidden from the public directory.':'Suspending removes the doctor from the public directory and blocks login, publishing and consultations until reactivated.')+'</div>'+
     '<div class="btn-row" style="flex-wrap:wrap">'+
@@ -4801,6 +4520,878 @@ db.DISM=mk({
   ]
 });
 
+})();
+</script>
+
+<!-- ============================================================
+     DrInsight · Online Consultation Core (shared across
+     Patient, Doctor & Admin dashboards)
+     - Single consultation store synchronized via localStorage
+     - Status workflow: pending → upcoming → ongoing → completed / cancelled
+     - Shared notification feed + audit trail
+     ============================================================ -->
+<style id="oc-core-style">
+.oc-notif-card{border:1.5px solid var(--gray-200);border-radius:var(--radius);background:#fff;margin-bottom:18px;overflow:hidden}
+.oc-notif-hd{display:flex;align-items:center;gap:8px;padding:11px 16px;background:var(--gray-50);border-bottom:1px solid var(--gray-100);font-size:.82rem;font-weight:700;color:var(--gray-800)}
+.oc-notif-hd span.cnt{margin-left:auto;font-size:.68rem;font-weight:700;background:var(--blue-light);color:var(--blue);padding:2px 8px;border-radius:50px}
+.oc-notif-item{display:flex;gap:10px;align-items:flex-start;padding:9px 16px;border-bottom:1px solid var(--gray-100);font-size:.8rem;color:var(--gray-600);line-height:1.45}
+.oc-notif-item:last-child{border-bottom:none}
+.oc-notif-item .ic{flex-shrink:0;width:26px;height:26px;border-radius:8px;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:.8rem}
+.oc-notif-item .tm{display:block;font-size:.66rem;color:var(--gray-400);margin-top:2px}
+.oc-meet{display:flex;align-items:center;gap:8px;margin-top:10px;padding:9px 12px;border:1px dashed var(--blue-mid);background:var(--blue-light);border-radius:10px;font-size:.79rem;color:var(--blue-dark);font-weight:600;flex-wrap:wrap}
+.oc-meet code{font-family:monospace;font-size:.76rem;background:#fff;border:1px solid var(--gray-200);border-radius:6px;padding:2px 7px;color:var(--gray-800);word-break:break-all}
+.oc-flag{display:inline-block;font-size:.66rem;font-weight:700;padding:2px 8px;border-radius:50px;background:#f5f3ff;color:var(--purple);margin-left:6px}
+.oc-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+@media(max-width:560px){.oc-grid2{grid-template-columns:1fr}}
+.oc-field label{display:block;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:#5b7089;margin-bottom:5px}
+.oc-field input,.oc-field select{width:100%;border:1.5px solid #dbe6f2;border-radius:10px;padding:9px 11px;font-family:inherit;font-size:.86rem;color:#0f2b4c;box-sizing:border-box;background:#fff}
+.oc-field input:focus,.oc-field select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,160,.12)}
+.oc-empty{padding:34px 16px;text-align:center;color:var(--gray-400);font-size:.86rem}
+.oc-empty .big{font-size:1.9rem;display:block;margin-bottom:8px}
+.oc-att{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;font-weight:600;background:var(--gray-100);color:var(--gray-600);border-radius:50px;padding:3px 10px;margin:6px 6px 0 0}
+</style>
+<script id="oc-core-script">
+(function(){
+if(window.OC)return;
+var LS='drinsight_oc_consults_v1', LN='drinsight_oc_notifs_v1';
+var OC=window.OC={};
+function esc(s){return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+OC.esc=esc;
+function pad(n){return n<10?'0'+n:''+n;}
+function iso(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function disp(d){return d.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});}
+function shift(days){var d=new Date();d.setDate(d.getDate()+days);return d;}
+OC.todayISO=function(){return iso(new Date());};
+OC.stamp=function(){var d=new Date();return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+' · '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});};
+
+/* ---------- consultation type metadata (Video / Voice / Chat) ---------- */
+var TYPES={
+  Video:{ic:'📹',label:'Video Consultation',short:'Video Call',join:'📹 Join Video Call',start:'📹 Start Video Call',meetLbl:'Meeting Link'},
+  Voice:{ic:'📞',label:'Voice Consultation',short:'Voice Call',join:'📞 Join Voice Call',start:'📞 Start Voice Call',meetLbl:'Call Details'},
+  Chat:{ic:'💬',label:'Chat Consultation',short:'Chat',join:'💬 Open Chat',start:'💬 Start Chat',meetLbl:'Chat Room'}
+};
+OC.type=function(t){return TYPES[t]||TYPES.Video;};
+
+/* ---------- shared seed data (patient · doctor · admin views of the SAME records) ---------- */
+var DRS={
+  JK:{name:'Dr. Javed Kumbhar',init:'JK',bg:'linear-gradient(135deg,#0f3d7a,#1a56a0)',spec:'❤️ Cardiology · Board Certified',specialty:'Cardiology'},
+  JO:{name:'Dr. James Okafor',init:'JO',bg:'linear-gradient(135deg,#0891b2,#06b6d4)',spec:'🧠 Neurology · Board Certified',specialty:'Neurology'},
+  SM:{name:'Dr. Sarah Mitchell',init:'SM',bg:'linear-gradient(135deg,#7c3aed,#a78bfa)',spec:'❤️ Cardiology · Board Certified',specialty:'Cardiology'},
+  PS:{name:'Dr. Priya Sharma',init:'PS',bg:'linear-gradient(135deg,#059669,#10b981)',spec:'🦋 Endocrinology · FCPS',specialty:'Endocrinology'}
+};
+var PTS={
+  SJ:{name:'Sarah Johnson',init:'SJ',bg:'linear-gradient(135deg,#1a56a0,#4a90d9)',age:34},
+  AR:{name:'Ahmed Raza',init:'AR',bg:'linear-gradient(135deg,#7c3aed,#8b5cf6)',age:41},
+  FK:{name:'Fatima Khan',init:'FK',bg:'linear-gradient(135deg,#059669,#10b981)',age:52},
+  MH:{name:'Muhammad Hassan',init:'MH',bg:'linear-gradient(135deg,#d97706,#fbbf24)',age:47},
+  SA:{name:'Sara Malik',init:'SA',bg:'linear-gradient(135deg,#e11d48,#f43f5e)',age:29},
+  NB:{name:'Nadia Baig',init:'NB',bg:'linear-gradient(135deg,#be185d,#ec4899)',age:36}
+};
+OC.ME_PATIENT='Sarah Johnson'; OC.ME_DOCTOR='Dr. Javed Kumbhar';
+function meet(type,id){
+  if(type==='Video')return{link:'https://meet.drinsight.org/'+id.toLowerCase()};
+  if(type==='Voice')return{phone:'+92 21 111-374-674 · Bridge code '+id.slice(3)};
+  return{room:'Secure chat room #'+id.toLowerCase()+' (opens at the scheduled time)'};
+}
+function C(id,pt,dr,type,dO,time,dur,fee,status,reason,extra){
+  var c={id:id,apptId:'APT-'+id.slice(3)+'7',patient:PTS[pt],doctor:DRS[dr],specialty:DRS[dr].specialty,
+    type:type,dateISO:iso(dO),date:disp(dO),time:time,dur:dur,fee:fee,status:status,reason:reason,
+    meet:meet(type,id),notes:[],rxKey:null,attachments:[],rating:null,reschedReq:null,rejected:false,
+    cancelledBy:null,cancelReason:null,approvedAt:null,
+    audit:[{t:OC.stamp(),w:PTS[pt].name+' (Patient)',a:'Consultation request submitted from the public booking page'}]};
+  for(var k in (extra||{}))c[k]=extra[k];
+  return c;
+}
+function seed(){
+  var T=shift(0),TM=shift(1);
+  return [
+    C('OC-9001','SJ','JK','Video',shift(3),'10:00 AM','30 min','$120','pending','Palpitations follow-up — recent Holter monitor results to discuss.'),
+    C('OC-9002','AR','JK','Chat',shift(2),'Async · 24h','—','$60','pending','ECG report query — second opinion on sinus arrhythmia.'),
+    C('OC-9003','SJ','JO','Video',TM,'3:00 PM','30 min','$120','upcoming','Follow-up on recurring migraines. Bring your headache diary.',{approvedAt:'Jul 8, 2026'}),
+    C('OC-9004','SJ','SM','Voice',shift(6),'11:00 AM','20 min','$90','upcoming','ECG results review. Have recent lab reports at hand.',{approvedAt:'Jul 9, 2026'}),
+    C('OC-9005','FK','JK','Video',T,'5:30 PM','30 min','$120','upcoming','Hypertension review — home BP log discussion.',{approvedAt:'Jul 10, 2026'}),
+    C('OC-9006','MH','JK','Voice',T,'4:00 PM','20 min','$90','ongoing','Echo results discussion — EF trend review.',{approvedAt:'Jul 9, 2026'}),
+    C('OC-9007','SJ','PS','Chat',T,'Async · 24h','—','$60','ongoing','Thyroid panel discussion (chat in progress).',{approvedAt:'Jul 11, 2026'}),
+    C('OC-9008','SJ','PS','Chat',new Date('2026-05-28T12:00:00'),'2:45 PM','25 min','$60','completed','HbA1c review — pre-diabetes monitoring.',{rxKey:'METF',rating:5,approvedAt:'May 26, 2026',notes:[{t:'28 May 2026 · 03:10 PM',w:'Dr. Priya Sharma',text:"HbA1c slightly elevated at 6.2%. Continue current diet plan. Recheck in 3 months. Metformin 500mg BD initiated."}]}),
+    C('OC-9009','SJ','JO','Video',new Date('2026-05-14T12:00:00'),'4:00 PM','40 min','$120','completed','Migraine assessment.',{rxKey:'SUMA',approvedAt:'May 12, 2026',notes:[{t:'14 May 2026 · 04:45 PM',w:'Dr. James Okafor',text:'Migraines likely tension-type. Prescribed Sumatriptan 50mg PRN. Avoid known triggers.'}]}),
+    C('OC-9010','SA','JK','Video',new Date('2026-06-03T12:00:00'),'10:30 AM','30 min','$120','completed','BP review.',{approvedAt:'Jun 1, 2026',notes:[{t:'03 Jun 2026 · 11:05 AM',w:'Dr. Javed Kumbhar',text:'BP controlled, continue meds. Review in 8 weeks.'}]}),
+    C('OC-9011','SJ','SM','Voice',new Date('2026-04-20T12:00:00'),'9:00 AM','20 min','$90','cancelled','Lipid panel discussion.',{cancelledBy:'Patient',cancelReason:'Schedule conflict — will rebook.'}),
+    C('OC-9012','NB','JK','Chat',new Date('2026-06-30T12:00:00'),'Async · 24h','—','$60','cancelled','New — ECG review request.',{rejected:true,cancelledBy:'Doctor',cancelReason:'Slot unavailable this week — please rebook for next availability.'})
+  ];
+}
+
+/* ---------- persistence + cross-dashboard sync ---------- */
+var DB=null;
+function load(){
+  try{var raw=localStorage.getItem(LS);if(raw){DB=JSON.parse(raw);if(Array.isArray(DB)&&DB.length)return;}}catch(e){}
+  DB=seed();save(false);
+}
+function save(fire){
+  try{localStorage.setItem(LS,JSON.stringify(DB));}catch(e){}
+  if(fire!==false&&typeof window.OC_RERENDER==='function')window.OC_RERENDER();
+}
+load();
+OC.all=function(){return DB;};
+OC.get=function(id){for(var i=0;i<DB.length;i++)if(DB[i].id===id)return DB[i];return null;};
+OC.save=save;
+OC.reset=function(){DB=seed();save();notifs=[];try{localStorage.setItem(LN,JSON.stringify(notifs));}catch(e){}};
+
+/* ---------- shared notification feed ---------- */
+var notifs=[];
+try{notifs=JSON.parse(localStorage.getItem(LN)||'[]')||[];}catch(e){notifs=[];}
+if(!notifs.length){
+  notifs=[
+    {t:OC.stamp(),ic:'📥',text:'New Video consultation request OC-9001 — Sarah Johnson → Dr. Javed Kumbhar'},
+    {t:OC.stamp(),ic:'⏰',text:'Reminder: consultations scheduled today — check Upcoming / Today\u2019s list'},
+    {t:OC.stamp(),ic:'🟢',text:'Voice consultation OC-9006 started — status is now Ongoing on all dashboards'}
+  ];
+  try{localStorage.setItem(LN,JSON.stringify(notifs));}catch(e){}
+}
+OC.notify=function(ic,text){
+  notifs.unshift({t:OC.stamp(),ic:ic,text:text});
+  if(notifs.length>40)notifs.length=40;
+  try{localStorage.setItem(LN,JSON.stringify(notifs));}catch(e){}
+};
+OC.notifs=function(){return notifs;};
+OC.notifCard=function(n){
+  var list=notifs.slice(0,n||4).map(function(x){
+    return '<div class="oc-notif-item"><div class="ic">'+x.ic+'</div><div>'+esc(x.text)+'<span class="tm">'+esc(x.t)+'</span></div></div>';
+  }).join('')||'<div class="oc-notif-item">No notifications yet.</div>';
+  return '<div class="oc-notif-card"><div class="oc-notif-hd">🔔 Consultation Notifications <span style="font-weight:500;color:var(--gray-400)">— synced across Patient · Doctor · Admin</span><span class="cnt">'+notifs.length+'</span></div>'+list+'</div>';
+};
+
+/* cross-tab sync: another dashboard changed the store */
+window.addEventListener('storage',function(e){
+  if(e.key===LS||e.key===LN){
+    try{if(e.key===LS)DB=JSON.parse(e.newValue)||DB;else notifs=JSON.parse(e.newValue)||notifs;}catch(err){}
+    if(typeof window.OC_RERENDER==='function')window.OC_RERENDER();
+    if(typeof window.showToast==='function'&&e.key===LS)window.showToast('🔄 Consultation status updated on another dashboard');
+  }
+});
+
+/* ---------- status chips + card helpers (existing design system classes) ---------- */
+OC.chip=function(c){
+  if(c.status==='pending')return '<span class="cons-chip cc-pending">🕒 Pending Approval</span>';
+  if(c.status==='upcoming')return '<span class="cons-chip cc-up">📅 Upcoming</span>'+(c.reschedReq?'<span class="oc-flag">🗓️ Reschedule requested</span>':'');
+  if(c.status==='ongoing')return '<span class="cons-chip cc-live">🔴 Ongoing</span>';
+  if(c.status==='completed')return '<span class="cons-chip cc-done">✓ Completed</span>';
+  return '<span class="cons-chip cc-cancel">'+(c.rejected?'⛔ Rejected':'✕ Cancelled')+'</span>';
+};
+OC.cardClass=function(c){return {pending:'pending',upcoming:'upcoming',ongoing:'upcoming',completed:'completed',cancelled:'cancelled'}[c.status]||'';};
+OC.details=function(c){
+  var t=OC.type(c.type);
+  return '<div class="cons-details"><span>'+t.ic+' '+esc(t.label)+'</span><span>📅 '+esc(c.date)+'</span><span>⏰ '+esc(c.time)+'</span><span>⏱️ '+esc(c.dur)+'</span><span>💵 '+esc(c.fee)+'</span><span>🆔 '+esc(c.id)+'</span></div>';
+};
+OC.meetLine=function(c){
+  var t=OC.type(c.type);
+  var v=c.type==='Video'?('<code>'+esc(c.meet.link)+'</code>'):c.type==='Voice'?('<code>'+esc(c.meet.phone)+'</code>'):('<code>'+esc(c.meet.room)+'</code>');
+  return '<div class="oc-meet">'+t.ic+' <strong>'+t.meetLbl+':</strong> '+v+'</div>';
+};
+
+/* ---------- workflow transitions (each fires the interlinked notification) ---------- */
+function audit(c,who,what){c.audit.unshift({t:OC.stamp(),w:who,a:what});}
+OC.accept=function(id){var c=OC.get(id);if(!c)return;
+  c.status='upcoming';c.approvedAt=OC.stamp();c.rejected=false;
+  audit(c,c.doctor.name+' (Doctor)','Request accepted — consultation confirmed');
+  OC.notify('✅','Consultation '+c.id+' accepted by '+c.doctor.name+' — moved to Upcoming for Patient, Doctor & Admin');
+  save();};
+OC.reject=function(id,reason){var c=OC.get(id);if(!c)return;
+  c.status='cancelled';c.rejected=true;c.cancelledBy='Doctor';c.cancelReason=reason||'Not specified';
+  audit(c,c.doctor.name+' (Doctor)','Request rejected — '+(reason||'no reason given'));
+  OC.notify('⛔','Consultation '+c.id+' rejected by '+c.doctor.name+' — Patient & Admin notified');
+  save();};
+OC.reschedule=function(id,date,time,by){var c=OC.get(id);if(!c)return;
+  var d=date?new Date(date+'T00:00:00'):null;
+  if(d){c.dateISO=iso(d);c.date=disp(d);}
+  if(time)c.time=time;
+  c.status='upcoming';c.reschedReq=null;if(!c.approvedAt)c.approvedAt=OC.stamp();
+  audit(c,(by||'Doctor'),'Consultation rescheduled to '+c.date+' · '+c.time);
+  OC.notify('🗓️','Consultation '+c.id+' rescheduled to '+c.date+' '+c.time+' — Patient & Admin notified');
+  save();};
+OC.requestResched=function(id,pref){var c=OC.get(id);if(!c)return;
+  c.reschedReq=pref||'Patient requested a new time';
+  audit(c,c.patient.name+' (Patient)','Reschedule requested — '+c.reschedReq);
+  OC.notify('🙋','Patient requested rescheduling for '+c.id+' ('+c.reschedReq+') — Doctor & Admin notified');
+  save();};
+OC.start=function(id){var c=OC.get(id);if(!c)return;
+  c.status='ongoing';
+  audit(c,c.doctor.name+' (Doctor)',OC.type(c.type).label+' started');
+  OC.notify('🟢',OC.type(c.type).label+' '+c.id+' started — status is now Ongoing on all dashboards');
+  save();};
+OC.complete=function(id){var c=OC.get(id);if(!c)return;
+  c.status='completed';
+  audit(c,c.doctor.name+' (Doctor)','Consultation marked as Completed');
+  OC.notify('🏁','Consultation '+c.id+' completed — prescription & notes now visible to the Patient');
+  save();};
+OC.cancel=function(id,by,reason){var c=OC.get(id);if(!c)return;
+  c.status='cancelled';c.rejected=false;c.cancelledBy=by;c.cancelReason=reason||'Not specified';
+  audit(c,by,'Consultation cancelled — '+(reason||'no reason given'));
+  OC.notify('❌','Consultation '+c.id+' cancelled by '+by+' — all dashboards updated');
+  save();};
+OC.setStatus=function(id,status,by){var c=OC.get(id);if(!c)return;
+  if(status==='cancelled'){OC.cancel(id,by||'Admin','Status updated by admin');return;}
+  if(status==='completed'){c.status='completed';audit(c,by||'Admin','Status manually set to Completed');OC.notify('🏁','Consultation '+c.id+' marked Completed by '+(by||'Admin'));save();return;}
+  if(status==='upcoming'&&c.status==='pending'){OC.accept(id);return;}
+  c.status=status;if(status==='upcoming'&&!c.approvedAt)c.approvedAt=OC.stamp();
+  audit(c,by||'Admin','Status manually updated to '+status);
+  OC.notify('🛠️','Consultation '+c.id+' status set to '+status+' by '+(by||'Admin'));
+  save();};
+OC.addNote=function(id,who,text){var c=OC.get(id);if(!c||!text)return;
+  c.notes.unshift({t:OC.stamp(),w:who,text:text});
+  audit(c,who,'Consultation note added');
+  save();};
+OC.addAttachment=function(id,name){var c=OC.get(id);if(!c)return;
+  c.attachments.push(name);audit(c,c.doctor.name+' (Doctor)','Attachment uploaded — '+name);
+  OC.notify('📎','Attachment "'+name+'" added to consultation '+c.id);
+  save();};
+OC.attachRx=function(id,rxNo){var c=OC.get(id);if(!c)return;
+  c.rxKey=c.rxKey||'NEW';c.rxNo=rxNo||c.rxNo;
+  audit(c,c.doctor.name+' (Doctor)','e-Prescription '+(rxNo||'')+' issued for this consultation');
+  OC.notify('💊','e-Prescription uploaded for consultation '+c.id+' — Patient notified');
+  save();};
+
+/* ---------- filtered views ---------- */
+OC.forPatient=function(status){return DB.filter(function(c){return c.patient.name===OC.ME_PATIENT&&(status?c.status===status:true);});};
+OC.forDoctor=function(status){return DB.filter(function(c){return c.doctor.name===OC.ME_DOCTOR&&(status?c.status===status:true);});};
+OC.todayFor=function(list){var t=OC.todayISO();return list.filter(function(c){return c.dateISO===t&&(c.status==='upcoming'||c.status==='ongoing');});};
+
+/* ---------- audit timeline html ---------- */
+OC.auditHtml=function(c){
+  return '<div class="cons-note-list">'+c.audit.map(function(a){
+    return '<div class="cons-note-item">'+esc(a.a)+'<span class="cons-note-time">'+esc(a.t)+' — '+esc(a.w)+'</span></div>';
+  }).join('')+'</div>';
+};
+})();
+</script>
+
+<!-- ============================================================
+     DrInsight · Consultation Management (Admin) — Pending / Approved /
+     Upcoming / Ongoing / Completed / Cancelled / Reports
+     Reuses existing panels, tables, chips, modalMount & toast
+     ============================================================ -->
+<script id="oc-admin-script">
+(function(){
+if(window.OCA)return;
+var OCA=window.OCA={};
+var esc=OC.esc;
+
+/* track current page + rerender hook for cross-dashboard sync */
+window._admCur=window._admCur||'dashboard';
+(function(){var g=window.goto;window.goto=function(id){window._admCur=id;g(id);};})();
+window.OC_RERENDER=function(){
+  if(window._admCur&&window._admCur.indexOf('oc-')===0)window.goto(window._admCur);
+};
+
+/* page meta + router extensions (existing UI untouched) */
+pageMeta['oc-pending']=['Consultation Management · Pending','New online consultation requests awaiting doctor response'];
+pageMeta['oc-approved']=['Consultation Management · Approved','Requests accepted by doctors — with their live status'];
+pageMeta['oc-upcoming']=['Consultation Management · Upcoming','Accepted consultations scheduled ahead'];
+pageMeta['oc-ongoing']=['Consultation Management · Ongoing','Video, Voice & Chat sessions in progress right now'];
+pageMeta['oc-completed']=['Consultation Management · Completed','Finished consultations with notes & e-prescriptions'];
+pageMeta['oc-cancelled']=['Consultation Management · Cancelled','Cancelled or rejected consultations across the platform'];
+pageMeta['oc-reports']=['Consultation Reports','Volume, revenue & status analytics — export as CSV'];
+(function(){var rp=window.renderPage;window.renderPage=function(id){
+  if(id&&id.indexOf('oc-')===0)return id==='oc-reports'?pgOCReports():pgOC(id);
+  return rp(id);
+};})();
+
+/* ---------- filters ---------- */
+var F={doctor:'',patient:'',type:'',spec:'',from:'',to:'',q:''};
+OCA.setF=function(k,v){F[k]=v;window.goto(window._admCur);};
+function opts(list,sel){return '<option value="">All</option>'+list.map(function(v){return '<option'+(v===sel?' selected':'')+'>'+esc(v)+'</option>';}).join('');}
+function uniq(fn){var s={};OC.all().forEach(function(c){s[fn(c)]=1;});return Object.keys(s).sort();}
+function filterBar(){
+  return '<div class="panel"><div class="panel-hd"><h3>🔎 Filter Consultations</h3><div class="btn-row"><button class="btn" onclick="OCA.clearF()">Reset</button></div></div><div class="panel-bd">'+
+  '<div class="form-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px">'+
+    '<div class="fg-item"><label>Doctor</label><select onchange="OCA.setF(\'doctor\',this.value)">'+opts(uniq(function(c){return c.doctor.name;}),F.doctor)+'</select></div>'+
+    '<div class="fg-item"><label>Patient</label><select onchange="OCA.setF(\'patient\',this.value)">'+opts(uniq(function(c){return c.patient.name;}),F.patient)+'</select></div>'+
+    '<div class="fg-item"><label>Consultation Type</label><select onchange="OCA.setF(\'type\',this.value)">'+opts(['Video','Voice','Chat'],F.type)+'</select></div>'+
+    '<div class="fg-item"><label>Specialty</label><select onchange="OCA.setF(\'spec\',this.value)">'+opts(uniq(function(c){return c.specialty;}),F.spec)+'</select></div>'+
+    '<div class="fg-item"><label>From</label><input type="date" value="'+F.from+'" onchange="OCA.setF(\'from\',this.value)"></div>'+
+    '<div class="fg-item"><label>To</label><input type="date" value="'+F.to+'" onchange="OCA.setF(\'to\',this.value)"></div>'+
+  '</div></div></div>';
+}
+OCA.clearF=function(){F={doctor:'',patient:'',type:'',spec:'',from:'',to:'',q:''};window.goto(window._admCur);};
+function applyF(list){
+  return list.filter(function(c){
+    if(F.doctor&&c.doctor.name!==F.doctor)return false;
+    if(F.patient&&c.patient.name!==F.patient)return false;
+    if(F.type&&c.type!==F.type)return false;
+    if(F.spec&&c.specialty!==F.spec)return false;
+    if(F.from&&c.dateISO<F.from)return false;
+    if(F.to&&c.dateISO>F.to)return false;
+    return true;
+  });
+}
+
+/* ---------- status chips (admin chip classes) ---------- */
+function aChip(c){
+  if(c.status==='pending')return '<span class="chip ch-a">🕒 Pending</span>';
+  if(c.status==='upcoming')return '<span class="chip ch-b">📅 Upcoming</span>';
+  if(c.status==='ongoing')return '<span class="chip ch-g">🔴 Ongoing</span>';
+  if(c.status==='completed')return '<span class="chip ch-g">✓ Completed</span>';
+  return '<span class="chip '+(c.rejected?'ch-r':'ch-gray')+'">'+(c.rejected?'⛔ Rejected':'✕ Cancelled')+'</span>';
+}
+function typeChip(t){var m=OC.type(t);return '<span class="chip ch-b">'+m.ic+' '+t+'</span>';}
+function avat(p){return '<div style="display:flex;align-items:center;gap:8px"><div class="cell-av" style="background:'+p.bg+'">'+p.init+'</div><span>'+esc(p.name)+'</span></div>';}
+
+/* ---------- shared table ---------- */
+function statusSelect(c){
+  var sts=['pending','upcoming','ongoing','completed','cancelled'];
+  return '<select onchange="OCA.status(\''+c.id+'\',this.value)" style="font-family:inherit;font-size:.72rem;border:1px solid var(--gray-200);border-radius:8px;padding:4px 6px;background:#fff">'+
+    sts.map(function(s){return '<option value="'+s+'"'+(s===c.status?' selected':'')+'>'+s.charAt(0).toUpperCase()+s.slice(1)+'</option>';}).join('')+'</select>';
+}
+function ocTable(title,list,showStatusCol){
+  var rows=list.map(function(c){
+    return ['<strong>'+c.id+'</strong>',avat(c.patient),avat(c.doctor),esc(c.specialty),typeChip(c.type),
+      esc(c.date)+'<div style="font-size:.7rem;color:var(--gray-400)">'+esc(c.time)+'</div>',esc(c.fee),
+      aChip(c)+(c.reschedReq?'<div style="font-size:.66rem;color:var(--purple);font-weight:700;margin-top:3px">🙋 Resched. requested</div>':''),
+      '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><button class="tbl-btn" onclick="OCA.view(\''+c.id+'\')">👁 View</button>'+statusSelect(c)+'</div>'];
+  });
+  if(!rows.length)return '<div class="panel"><div class="panel-hd"><h3>'+title+'</h3></div><div class="panel-bd"><div class="oc-empty"><span class="big">🗂️</span>No consultations match the current filters.</div></div></div>';
+  return panelTable(title,'<button class="btn" onclick="OCA.exportCsv()">⬇ Export CSV</button>',
+    ['ID','Patient','Doctor','Specialty','Type','Date &amp; Time','Fee','Status','Actions'],rows,
+    'Showing '+rows.length+' consultation'+(rows.length===1?'':'s'));
+}
+
+/* ---------- pages ---------- */
+var TITLES={'oc-pending':'🕒 Pending Consultation Requests','oc-approved':'✅ Approved Consultations','oc-upcoming':'📅 Upcoming Consultations','oc-ongoing':'🟢 Ongoing Consultations','oc-completed':'🏁 Completed Consultations','oc-cancelled':'❌ Cancelled & Rejected Consultations'};
+window.pgOC=function(view){
+  var all=OC.all(),list;
+  if(view==='oc-pending')list=all.filter(function(c){return c.status==='pending';});
+  else if(view==='oc-approved')list=all.filter(function(c){return !!c.approvedAt;});
+  else if(view==='oc-cancelled')list=all.filter(function(c){return c.status==='cancelled';});
+  else list=all.filter(function(c){return c.status===view.replace('oc-','');});
+  list=applyF(list).slice().sort(function(a,b){return a.dateISO<b.dateISO?1:-1;});
+  var counts={pending:0,upcoming:0,ongoing:0,completed:0,cancelled:0};
+  all.forEach(function(c){counts[c.status]++;});
+  var stats=statCards([
+    {ic:'ic3',icon:'🕒',num:String(counts.pending),label:'Pending',tag:'awaiting doctor',tagClass:'tt-a'},
+    {ic:'ic1',icon:'📅',num:String(counts.upcoming),label:'Upcoming',tag:'confirmed',tagClass:'tt-b'},
+    {ic:'ic2',icon:'🟢',num:String(counts.ongoing),label:'Ongoing',tag:'live now',tagClass:'tt-g'},
+    {ic:'ic4',icon:'🏁',num:String(counts.completed),label:'Completed',tag:String(counts.cancelled)+' cancelled',tagClass:'tt-g'}
+  ]);
+  return OC.notifCard(3)+stats+filterBar()+ocTable(TITLES[view]||'Consultations',list);
+};
+
+/* ---------- details modal (existing modalMount pattern) ---------- */
+OCA.view=function(id){var c=OC.get(id);if(!c)return;var t=OC.type(c.type);
+  var meet=c.type==='Video'?c.meet.link:c.type==='Voice'?c.meet.phone:c.meet.room;
+  var html='<div class="modal"><div class="modal-hd"><h3>'+t.ic+' Consultation '+c.id+'</h3><button class="modal-close" onclick="closeModal()">✕</button></div>'+
+    '<div class="modal-bd">'+
+    '<div class="form-grid" style="grid-template-columns:1fr 1fr;gap:10px">'+
+      '<div class="fg-item"><label>Patient</label><input value="'+esc(c.patient.name)+'" readonly></div>'+
+      '<div class="fg-item"><label>Doctor</label><input value="'+esc(c.doctor.name)+'" readonly></div>'+
+      '<div class="fg-item"><label>Specialty</label><input value="'+esc(c.specialty)+'" readonly></div>'+
+      '<div class="fg-item"><label>Type</label><input value="'+esc(t.label)+'" readonly></div>'+
+      '<div class="fg-item"><label>Date &amp; Time</label><input value="'+esc(c.date)+' · '+esc(c.time)+'" readonly></div>'+
+      '<div class="fg-item"><label>Fee</label><input value="'+esc(c.fee)+'" readonly></div>'+
+      '<div class="fg-item full"><label>'+esc(t.meetLbl)+'</label><input value="'+esc(meet)+'" readonly></div>'+
+      '<div class="fg-item full"><label>Reason</label><input value="'+esc(c.reason)+'" readonly></div>'+
+    '</div>'+
+    (c.cancelReason?'<p style="font-size:.8rem;color:var(--red);margin-top:10px"><b>'+(c.rejected?'Rejected':'Cancelled by '+esc(c.cancelledBy||''))+':</b> '+esc(c.cancelReason)+'</p>':'')+
+    (c.notes.length?'<div style="margin-top:12px"><label style="font-size:.72rem;font-weight:700;color:var(--gray-500);text-transform:uppercase">Doctor Notes</label>'+c.notes.map(function(n){return '<div style="background:var(--gray-50);border-left:3px solid var(--blue);border-radius:8px;padding:8px 11px;font-size:.8rem;margin-top:6px">'+esc(n.text)+'<div style="font-size:.66rem;color:var(--gray-400);margin-top:3px">'+esc(n.t)+' — '+esc(n.w)+'</div></div>';}).join('')+'</div>':'')+
+    '<div style="margin-top:12px"><label style="font-size:.72rem;font-weight:700;color:var(--gray-500);text-transform:uppercase">Status Timeline (Audit Log)</label>'+
+      c.audit.map(function(a){return '<div style="background:var(--gray-50);border-left:3px solid var(--gray-200);border-radius:8px;padding:7px 11px;font-size:.78rem;margin-top:6px">'+esc(a.a)+'<div style="font-size:.66rem;color:var(--gray-400);margin-top:2px">'+esc(a.t)+' — '+esc(a.w)+'</div></div>';}).join('')+
+    '</div></div>'+
+    '<div class="modal-ft">'+
+      (c.status==='pending'?'<button class="btn green" onclick="OC.accept(\''+c.id+'\');closeModal();showToast(\'✅ Approved — moved to Upcoming on all dashboards\')">✓ Approve</button>':'')+
+      (c.status!=='cancelled'&&c.status!=='completed'?'<button class="btn danger" onclick="OC.cancel(\''+c.id+'\',\'Admin\',\'Cancelled by admin\');closeModal();showToast(\'❌ Cancelled — all users notified\')">✕ Cancel</button>':'')+
+      '<button class="btn" onclick="closeModal()">Close</button>'+
+    '</div></div>';
+  var mount=document.getElementById('modalMount');
+  mount.innerHTML=html;mount.classList.remove('hidden');
+};
+OCA.status=function(id,st){
+  OC.setStatus(id,st,'Admin');
+  showToast('🛠️ '+id+' status updated to '+st+' — synced to Patient & Doctor dashboards');
+};
+
+/* ---------- CSV export ---------- */
+OCA.exportCsv=function(){
+  var head=['ID','Patient','Doctor','Specialty','Type','Date','Time','Duration','Fee','Status','Rejected','Cancelled By','Reason'];
+  var lines=[head.join(',')].concat(OC.all().map(function(c){
+    return [c.id,c.patient.name,c.doctor.name,c.specialty,c.type,c.date,c.time,c.dur,c.fee,c.status,c.rejected?'yes':'no',c.cancelledBy||'',(c.reason||'').replace(/,/g,';')]
+      .map(function(v){return '"'+String(v).replace(/"/g,'""')+'"';}).join(',');
+  }));
+  var blob=new Blob([lines.join('\n')],{type:'text/csv'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='drinsight-consultation-report.csv';document.body.appendChild(a);a.click();a.remove();
+  showToast('⬇ Consultation report exported (CSV)');
+};
+
+/* ---------- reports page ---------- */
+window.pgOCReports=function(){
+  var all=OC.all(),n=all.length;
+  var done=all.filter(function(c){return c.status==='completed';}).length;
+  var canc=all.filter(function(c){return c.status==='cancelled';}).length;
+  var rev=all.filter(function(c){return c.status==='completed';}).reduce(function(s,c){return s+(parseInt(String(c.fee).replace(/[^0-9]/g,''),10)||0);},0);
+  var stats=statCards([
+    {ic:'ic1',icon:'📅',num:String(n),label:'Total Consultations',tag:'all types',tagClass:'tt-b'},
+    {ic:'ic2',icon:'🏁',num:String(done),label:'Completed',tag:Math.round(done/n*100)+'% completion',tagClass:'tt-g'},
+    {ic:'ic3',icon:'❌',num:String(canc),label:'Cancelled / Rejected',tag:Math.round(canc/n*100)+'% rate',tagClass:'tt-a'},
+    {ic:'ic4',icon:'💰',num:'$'+rev,label:'Completed Revenue',tag:'online consultations',tagClass:'tt-g'}
+  ]);
+  var byType={Video:0,Voice:0,Chat:0};all.forEach(function(c){byType[c.type]=(byType[c.type]||0)+1;});
+  var mx=Math.max(byType.Video,byType.Voice,byType.Chat,1);
+  var chart='<div class="panel"><div class="panel-hd"><h3>📊 Consultations by Type</h3></div><div class="panel-bd"><div class="chart-bars">'+
+    ['Video','Voice','Chat'].map(function(k){var t=OC.type(k);
+      return '<div class="cb-wrap"><div class="cb-val">'+byType[k]+'</div><div class="cb-bar" style="height:'+Math.round(byType[k]/mx*100)+'%"></div><div class="cb-label">'+t.ic+' '+k+'</div></div>';
+    }).join('')+'</div></div></div>';
+  var byDr={};all.forEach(function(c){var k=c.doctor.name;byDr[k]=byDr[k]||{n:0,done:0,canc:0};byDr[k].n++;if(c.status==='completed')byDr[k].done++;if(c.status==='cancelled')byDr[k].canc++;});
+  var drRows=Object.keys(byDr).map(function(k){var d=byDr[k];
+    return ['<strong>'+esc(k)+'</strong>',String(d.n),String(d.done),String(d.canc),'<span class="chip ch-g">'+Math.round(d.done/d.n*100)+'%</span>'];
+  });
+  var drTable=panelTable('👨‍⚕️ Consultations by Doctor','<button class="btn primary" onclick="OCA.exportCsv()">⬇ Export Full Report (CSV)</button>',
+    ['Doctor','Total','Completed','Cancelled','Completion Rate'],drRows);
+  var trail=all.slice(0,6).map(function(c){return c.audit[0]?'<div class="oc-notif-item"><div class="ic">📜</div><div>'+esc(c.id)+' — '+esc(c.audit[0].a)+'<span class="tm">'+esc(c.audit[0].t)+' · '+esc(c.audit[0].w)+'</span></div></div>':'';}).join('');
+  var audit='<div class="oc-notif-card"><div class="oc-notif-hd">🛡️ Recent Consultation Audit Trail</div>'+trail+'</div>';
+  return OC.notifCard(3)+stats+chart+drTable+audit;
+};
+})();
+</script>
+
+<!-- ============================================================
+     DrInsight · Patient Q&A Core (shared across Patient, Doctor
+     & Admin dashboards). Workflow: patient submits → Admin reviews
+     (approve/reject) → doctor answers approved questions → answer
+     instantly visible to patient. Synced via localStorage.
+     ============================================================ -->
+<script id="qa-core-script">
+(function(){
+if(window.QA)return;
+var QA=window.QA={};
+var LS='drinsight_qa_v1';
+var esc=function(s){return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');};
+QA.esc=esc;
+function stamp(){var d=new Date();return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+' · '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});}
+QA.stamp=stamp;
+function pad(n){return n<10?'0'+n:''+n;}
+function iso(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function disp(d){return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+
+/* ---------- departments & doctor directory (Ask Question wizard) ---------- */
+QA.DEPTS=[
+  {name:'Cardiology',ic:'❤️',desc:'Heart & vascular conditions'},
+  {name:'Neurology',ic:'🧠',desc:'Brain, nerves & headaches'},
+  {name:'Endocrinology',ic:'🦋',desc:'Diabetes, thyroid & hormones'},
+  {name:'General Medicine',ic:'🩺',desc:'Everyday health concerns'}
+];
+QA.DRS=[
+  {name:'Dr. Javed Kumbhar',init:'JK',bg:'linear-gradient(135deg,#0f3d7a,#1a56a0)',dept:'Cardiology',spec:'Interventional Cardiology',qual:'MBBS, FCPS (Cardiology)',exp:'15+ years',avail:'🟢 Available today'},
+  {name:'Dr. Sarah Mitchell',init:'SM',bg:'linear-gradient(135deg,#7c3aed,#a78bfa)',dept:'Cardiology',spec:'Clinical Cardiology',qual:'MBBS, MD (Cardiology)',exp:'12+ years',avail:'🟢 Available Mon–Fri'},
+  {name:'Dr. James Okafor',init:'JO',bg:'linear-gradient(135deg,#0891b2,#06b6d4)',dept:'Neurology',spec:'Neurology & Headache Medicine',qual:'MBBS, FRCP (Neurology)',exp:'18+ years',avail:'🟡 Next slot: tomorrow'},
+  {name:'Dr. Priya Sharma',init:'PS',bg:'linear-gradient(135deg,#059669,#10b981)',dept:'Endocrinology',spec:'Diabetes & Thyroid',qual:'MBBS, FCPS (Endocrinology)',exp:'10+ years',avail:'🟢 Available today'},
+  {name:'Dr. Hina Qureshi',init:'HQ',bg:'linear-gradient(135deg,#d97706,#fbbf24)',dept:'General Medicine',spec:'Family Medicine',qual:'MBBS, MRCGP',exp:'9+ years',avail:'🔴 On leave this week'}
+];
+QA.deptIc=function(d){var x=QA.DEPTS.find(function(v){return v.name===d;});return x?x.ic:'🩺';};
+QA.dr=function(name){return QA.DRS.find(function(v){return v.name===name;});};
+QA.ME_PATIENT='Sarah Johnson'; QA.ME_DOCTOR='Dr. Javed Kumbhar';
+var PT={SJ:{name:'Sarah Johnson',init:'SJ',bg:'linear-gradient(135deg,#1a56a0,#4a90d9)'},
+        AR:{name:'Ahmed Raza',init:'AR',bg:'linear-gradient(135deg,#7c3aed,#8b5cf6)'},
+        NB:{name:'Nadia Baig',init:'NB',bg:'linear-gradient(135deg,#be185d,#ec4899)'}};
+
+/* ---------- seed data (one question in every workflow state) ---------- */
+function Q(id,pt,drName,title,details,dO,status,extra){
+  var d=QA.dr(drName);
+  var q={id:id,patient:PT[pt],dept:d.dept,doctor:{name:d.name,init:d.init,bg:d.bg,spec:d.spec},
+    title:title,details:details,attachments:[],date:disp(dO),dateISO:iso(dO),
+    status:status,answer:null,answerDraft:'',rejectReason:'',
+    audit:[{t:stamp(),w:PT[pt].name+' (Patient)',a:'Question submitted — awaiting Admin review'}]};
+  for(var k in (extra||{}))q[k]=extra[k];
+  return q;
+}
+function shift(n){var d=new Date();d.setDate(d.getDate()+n);return d;}
+function seed(){
+  return [
+    Q('QA-3001','SJ','Dr. Javed Kumbhar','Is a resting heart rate of 55 normal?','My smartwatch shows a resting heart rate of 55 bpm most mornings. I exercise 3x a week. Should I be concerned?',shift(0),'pending'),
+    Q('QA-3002','SJ','Dr. Javed Kumbhar','Can I exercise with mild mitral regurgitation?','My last echo mentioned "trace-to-mild mitral regurgitation". Is it safe to continue running and light weight training?',shift(-1),'approved',
+      {attachments:['echo-report-may2026.pdf'],audit:[
+        {t:stamp(),w:'Admin',a:'Question approved — assigned to Dr. Javed Kumbhar and now visible on the doctor dashboard'},
+        {t:stamp(),w:'Sarah Johnson (Patient)',a:'Question submitted — awaiting Admin review'}]}),
+    Q('QA-3003','AR','Dr. Javed Kumbhar','Aspirin 75mg together with Clopidogrel?','I take Clopidogrel 75mg after stenting. My GP suggested adding Aspirin 75mg. Is dual therapy safe long-term for me?',shift(-2),'approved',
+      {answerDraft:'Dual antiplatelet therapy is standard for 6–12 months post-stent, after which...',audit:[
+        {t:stamp(),w:'Dr. Javed Kumbhar (Doctor)',a:'Answer draft saved (not yet submitted)'},
+        {t:stamp(),w:'Admin',a:'Question approved — assigned to Dr. Javed Kumbhar'},
+        {t:stamp(),w:'Ahmed Raza (Patient)',a:'Question submitted — awaiting Admin review'}]}),
+    Q('QA-3004','SJ','Dr. Priya Sharma','What HbA1c target should I aim for?','I am 34, pre-diabetic (HbA1c 6.2%) on Metformin 500mg BD. What target should I aim for at my next test?',shift(-14),'answered',
+      {answer:{text:'For your age and profile, aim for an HbA1c below 5.7% (ideally 5.4–5.6%) over the next 6 months. Continue Metformin 500mg BD, keep 150 min/week of moderate exercise, and recheck in 3 months. If the next reading stays above 6.0% we will revisit the dose.',t:stamp(),w:'Dr. Priya Sharma'},
+       audit:[{t:stamp(),w:'Dr. Priya Sharma (Doctor)',a:'Answer submitted — instantly visible to the patient'},
+              {t:stamp(),w:'Admin',a:'Question approved — assigned to Dr. Priya Sharma'},
+              {t:stamp(),w:'Sarah Johnson (Patient)',a:'Question submitted — awaiting Admin review'}]}),
+    Q('QA-3005','SJ','Dr. James Okafor','Headache medication question','Which is better for my migraines, drug A or drug B?',shift(-5),'rejected',
+      {rejectReason:'Duplicate of your earlier question QA-2210. Please add details (frequency, triggers, current meds) and resubmit.',
+       audit:[{t:stamp(),w:'Admin',a:'Question rejected — Duplicate of QA-2210; more details requested'},
+              {t:stamp(),w:'Sarah Johnson (Patient)',a:'Question submitted — awaiting Admin review'}]}),
+    Q('QA-3006','NB','Dr. Sarah Mitchell','Palpitations at night — Holter says rare PVCs','My Holter monitor report says "rare PVCs". I feel skipped beats at night. Is this dangerous?',shift(0),'pending')
+  ];
+}
+
+/* ---------- persistence + cross-dashboard sync ---------- */
+var DB=null;
+function load(){try{var r=localStorage.getItem(LS);if(r){DB=JSON.parse(r);if(Array.isArray(DB))return;}}catch(e){}DB=seed();save(false);}
+function save(fire){try{localStorage.setItem(LS,JSON.stringify(DB));}catch(e){}
+  if(fire!==false&&typeof window.QA_RERENDER==='function')window.QA_RERENDER();}
+load();
+QA.all=function(){return DB;};
+QA.get=function(id){return DB.find(function(q){return q.id===id;});};
+QA.save=save;
+QA.nextId=function(){return 'QA-'+(3000+DB.length+1);};
+function audit(q,w,a){q.audit.unshift({t:stamp(),w:w,a:a});}
+function notify(ic,text){if(window.OC&&OC.notify)OC.notify(ic,text);}
+
+/* ---------- workflow transitions ---------- */
+QA.submit=function(q){
+  DB.push(q);
+  notify('💬','New question '+q.id+' submitted by '+q.patient.name+' ('+q.dept+') — awaiting Admin review');
+  save();
+};
+QA.update=function(id,title,details){var q=QA.get(id);if(!q||q.status!=='pending')return false;
+  q.title=title;q.details=details;audit(q,q.patient.name+' (Patient)','Question edited before Admin approval');
+  save();return true;};
+QA.remove=function(id){var i=DB.findIndex(function(q){return q.id===id;});
+  if(i>-1&&(DB[i].status==='pending'||DB[i].status==='rejected')){DB.splice(i,1);save();return true;}return false;};
+QA.approve=function(id){var q=QA.get(id);if(!q)return;
+  q.status='approved';q.rejectReason='';
+  audit(q,'Admin','Question approved — assigned to '+q.doctor.name+' and now visible on the doctor dashboard');
+  notify('✅','Question '+q.id+' approved by Admin — new question assigned to '+q.doctor.name);
+  save();};
+QA.reject=function(id,reason){var q=QA.get(id);if(!q)return;
+  q.status='rejected';q.rejectReason=reason||'Not specified';
+  audit(q,'Admin','Question rejected — '+(reason||'no reason given'));
+  notify('⛔','Question '+q.id+' rejected by Admin — '+q.patient.name+' notified');
+  save();};
+QA.reassign=function(id,drName){var q=QA.get(id);var d=QA.dr(drName);if(!q||!d)return;
+  q.doctor={name:d.name,init:d.init,bg:d.bg,spec:d.spec};q.dept=d.dept;
+  audit(q,'Admin','Question reassigned to '+d.name+' ('+d.dept+')');
+  notify('🔁','Question '+q.id+' reassigned to '+d.name);
+  save();};
+QA.saveDraft=function(id,text){var q=QA.get(id);if(!q)return;
+  q.answerDraft=text;audit(q,q.doctor.name+' (Doctor)','Answer draft saved (not yet submitted)');
+  save();};
+QA.answer=function(id,text){var q=QA.get(id);if(!q||!text)return;
+  q.status='answered';q.answer={text:text,t:stamp(),w:q.doctor.name};q.answerDraft='';
+  audit(q,q.doctor.name+' (Doctor)','Answer submitted — instantly visible to the patient');
+  notify('💬',q.doctor.name+' answered question '+q.id+' — answer now available to '+q.patient.name);
+  save();};
+
+/* ---------- filtered views (role-based access) ---------- */
+QA.forPatient=function(status){return DB.filter(function(q){return q.patient.name===QA.ME_PATIENT&&(!status||q.status===status);});};
+/* doctors only ever see Admin-approved (or answered) questions in full */
+QA.forDoctor=function(view){
+  var mine=DB.filter(function(q){return q.doctor.name===QA.ME_DOCTOR;});
+  if(view==='new')return mine.filter(function(q){return q.status==='approved'&&!q.answerDraft;});
+  if(view==='drafts')return mine.filter(function(q){return q.status==='approved'&&!!q.answerDraft;});
+  if(view==='answered')return mine.filter(function(q){return q.status==='answered';});
+  if(view==='rejected')return mine.filter(function(q){return q.status==='rejected';});
+  return mine.filter(function(q){return q.status==='approved'||q.status==='answered';});
+};
+
+/* ---------- ui helpers ---------- */
+QA.chip=function(q){
+  if(q.status==='pending')return '<span class="cons-chip cc-pending">🕒 Pending Admin Approval</span>';
+  if(q.status==='approved')return '<span class="cons-chip cc-up">✅ Approved — awaiting answer</span>';
+  if(q.status==='answered')return '<span class="cons-chip cc-done">💬 Answered</span>';
+  return '<span class="cons-chip cc-cancel">⛔ Rejected</span>';
+};
+QA.attHtml=function(q){return q.attachments.length?'<div>'+q.attachments.map(function(a){return '<span class="oc-att">📎 '+esc(a)+'</span>';}).join('')+'</div>':'';};
+QA.auditHtml=function(q){return '<div class="cons-note-list">'+q.audit.map(function(a){return '<div class="cons-note-item">'+esc(a.a)+'<span class="cons-note-time">'+esc(a.t)+' — '+esc(a.w)+'</span></div>';}).join('')+'</div>';};
+
+/* cross-tab sync */
+window.addEventListener('storage',function(e){
+  if(e.key===LS){try{DB=JSON.parse(e.newValue)||DB;}catch(err){}
+    if(typeof window.QA_RERENDER==='function')window.QA_RERENDER();}
+});
+})();
+</script>
+
+<!-- ============================================================
+     DrInsight · Patient Q&A (Admin) — Pending / Approved /
+     Rejected / Answered / Reports. Review gate: doctors only see
+     questions after Admin approval. Filters, search, reassignment
+     and CSV export included.
+     ============================================================ -->
+<script id="qa-admin-script">
+(function(){
+if(window.QAA)return;
+var QAA=window.QAA={};
+var esc=QA.esc;
+
+pageMeta['qa-pending']=['Patient Q&A · Pending Questions','New patient questions awaiting review — doctors cannot see these yet'];
+pageMeta['qa-approved']=['Patient Q&A · Approved Questions','Approved and assigned — visible on the doctor dashboard'];
+pageMeta['qa-rejected']=['Patient Q&A · Rejected Questions','Questions returned to patients with a reason'];
+pageMeta['qa-answered']=['Patient Q&A · Answered','Doctor answers — instantly visible to patients'];
+pageMeta['qa-reports']=['Patient Q&A · Reports','Volume, response & department analytics — export as CSV'];
+(function(){var rp=window.renderPage;window.renderPage=function(id){
+  if(id&&id.indexOf('qa-')===0)return id==='qa-reports'?pgQAReports():pgQA(id);
+  return rp(id);
+};})();
+(function(){var prev=window.OC_RERENDER;window.QA_RERENDER=function(){
+  if(window._admCur&&window._admCur.indexOf('qa-')===0)window.goto(window._admCur);};
+  window.OC_RERENDER=window.OC_RERENDER||prev;
+})();
+
+/* ---------- filters + search ---------- */
+var F={doctor:'',patient:'',dept:'',from:'',to:'',q:''};
+QAA.setF=function(k,v){F[k]=v;window.goto(window._admCur);};
+QAA.clearF=function(){F={doctor:'',patient:'',dept:'',from:'',to:'',q:''};window.goto(window._admCur);};
+function opts(list,sel){return '<option value="">All</option>'+list.map(function(v){return '<option'+(v===sel?' selected':'')+'>'+esc(v)+'</option>';}).join('');}
+function uniq(fn){var s={};QA.all().forEach(function(q){s[fn(q)]=1;});return Object.keys(s).sort();}
+function filterBar(){
+  return '<div class="panel"><div class="panel-hd"><h3>🔎 Filter &amp; Search Questions</h3><div class="btn-row"><button class="btn" onclick="QAA.clearF()">Reset</button></div></div><div class="panel-bd">'+
+  '<div class="form-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px">'+
+    '<div class="fg-item"><label>Search</label><input type="text" value="'+esc(F.q)+'" placeholder="ID, title, keywords..." onchange="QAA.setF(\'q\',this.value)"></div>'+
+    '<div class="fg-item"><label>Doctor</label><select onchange="QAA.setF(\'doctor\',this.value)">'+opts(uniq(function(q){return q.doctor.name;}),F.doctor)+'</select></div>'+
+    '<div class="fg-item"><label>Patient</label><select onchange="QAA.setF(\'patient\',this.value)">'+opts(uniq(function(q){return q.patient.name;}),F.patient)+'</select></div>'+
+    '<div class="fg-item"><label>Department</label><select onchange="QAA.setF(\'dept\',this.value)">'+opts(uniq(function(q){return q.dept;}),F.dept)+'</select></div>'+
+    '<div class="fg-item"><label>From</label><input type="date" value="'+F.from+'" onchange="QAA.setF(\'from\',this.value)"></div>'+
+    '<div class="fg-item"><label>To</label><input type="date" value="'+F.to+'" onchange="QAA.setF(\'to\',this.value)"></div>'+
+  '</div></div></div>';
+}
+function applyF(list){
+  var s=F.q.toLowerCase();
+  return list.filter(function(q){
+    if(F.doctor&&q.doctor.name!==F.doctor)return false;
+    if(F.patient&&q.patient.name!==F.patient)return false;
+    if(F.dept&&q.dept!==F.dept)return false;
+    if(F.from&&q.dateISO<F.from)return false;
+    if(F.to&&q.dateISO>F.to)return false;
+    if(s&&(q.id+' '+q.title+' '+q.details).toLowerCase().indexOf(s)===-1)return false;
+    return true;
+  });
+}
+function aChip(q){
+  if(q.status==='pending')return '<span class="chip ch-a">🕒 Pending</span>';
+  if(q.status==='approved')return '<span class="chip ch-b">✅ Approved</span>';
+  if(q.status==='answered')return '<span class="chip ch-g">💬 Answered</span>';
+  return '<span class="chip ch-r">⛔ Rejected</span>';
+}
+function avat(p){return '<div style="display:flex;align-items:center;gap:8px"><div class="cell-av" style="background:'+p.bg+'">'+p.init+'</div><span>'+esc(p.name)+'</span></div>';}
+
+/* ---------- list pages ---------- */
+var TITLES={'qa-pending':'🕒 Pending Questions — review gate','qa-approved':'✅ Approved Questions','qa-rejected':'⛔ Rejected Questions','qa-answered':'💬 Answered Questions'};
+window.pgQA=function(view){
+  var status=view.replace('qa-','');
+  var list=applyF(QA.all().filter(function(q){return q.status===status;})).slice().sort(function(a,b){return a.dateISO<b.dateISO?1:-1;});
+  var c={pending:0,approved:0,answered:0,rejected:0};
+  QA.all().forEach(function(q){c[q.status]++;});
+  var stats=statCards([
+    {ic:'ic3',icon:'🕒',num:String(c.pending),label:'Pending Review',tag:'hidden from doctors',tagClass:'tt-a'},
+    {ic:'ic1',icon:'✅',num:String(c.approved),label:'Approved',tag:'with doctors',tagClass:'tt-b'},
+    {ic:'ic2',icon:'💬',num:String(c.answered),label:'Answered',tag:'visible to patients',tagClass:'tt-g'},
+    {ic:'ic4',icon:'⛔',num:String(c.rejected),label:'Rejected',tag:'returned',tagClass:'tt-a'}
+  ]);
+  var rows=list.map(function(q){
+    var quick=q.status==='pending'
+      ?'<button class="tbl-btn view" onclick="QA.approve(\''+q.id+'\');showToast(\'✅ '+q.id+' approved — now visible to '+esc(q.doctor.name)+'\')">✓ Approve</button><button class="tbl-btn" onclick="QAA.reject(\''+q.id+'\')">⛔ Reject</button>'
+      :'';
+    return ['<strong>'+q.id+'</strong>',avat(q.patient),
+      '<div style="max-width:230px"><b style="font-size:.8rem">'+esc(q.title)+'</b>'+(q.attachments.length?'<div style="font-size:.66rem;color:var(--gray-400)">📎 '+q.attachments.length+' attachment'+(q.attachments.length>1?'s':'')+'</div>':'')+'</div>',
+      QA.deptIc(q.dept)+' '+esc(q.dept),avat(q.doctor),esc(q.date),aChip(q),
+      '<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="tbl-btn" onclick="QAA.view(\''+q.id+'\')">👁 View</button>'+quick+'</div>'];
+  });
+  var table=rows.length
+    ?panelTable(TITLES[view]||'Questions','<button class="btn" onclick="QAA.exportCsv()">⬇ Export CSV</button>',
+      ['ID','Patient','Question','Department','Assigned Doctor','Submitted','Status','Actions'],rows,
+      'Showing '+rows.length+' question'+(rows.length===1?'':'s'))
+    :'<div class="panel"><div class="panel-hd"><h3>'+(TITLES[view]||'Questions')+'</h3></div><div class="panel-bd"><div class="oc-empty"><span class="big">💬</span>No questions match the current filters.</div></div></div>';
+  return (window.OC?OC.notifCard(3):'')+stats+filterBar()+table;
+};
+
+/* ---------- review modal (approve / reject / reassign) ---------- */
+QAA.view=function(id){var q=QA.get(id);if(!q)return;
+  var drOpts=QA.DRS.map(function(d){return '<option'+(d.name===q.doctor.name?' selected':'')+'>'+esc(d.name)+'</option>';}).join('');
+  var html='<div class="modal"><div class="modal-hd"><h3>💬 '+q.id+' — Review</h3><button class="modal-close" onclick="closeModal()">✕</button></div>'+
+  '<div class="modal-bd">'+
+  '<div class="form-grid" style="grid-template-columns:1fr 1fr;gap:10px">'+
+    '<div class="fg-item"><label>Patient</label><input value="'+esc(q.patient.name)+'" readonly></div>'+
+    '<div class="fg-item"><label>Department</label><input value="'+esc(q.dept)+'" readonly></div>'+
+    '<div class="fg-item"><label>Submitted</label><input value="'+esc(q.date)+'" readonly></div>'+
+    '<div class="fg-item"><label>Status</label><input value="'+q.status+'" readonly></div>'+
+    '<div class="fg-item full"><label>Title</label><input value="'+esc(q.title)+'" readonly></div>'+
+  '</div>'+
+  '<div style="margin-top:12px;background:var(--gray-50);border-left:3px solid var(--blue);border-radius:8px;padding:10px 13px;font-size:.82rem">'+esc(q.details)+'</div>'+
+  (q.attachments.length?'<div style="margin-top:8px">'+q.attachments.map(function(a){return '<span class="oc-att">📎 '+esc(a)+'</span>';}).join('')+'</div>':'')+
+  (q.answer?'<div style="margin-top:12px;background:#f0fdf4;border-left:3px solid #16a34a;border-radius:8px;padding:10px 13px;font-size:.82rem"><b>💬 Answer by '+esc(q.answer.w)+':</b> '+esc(q.answer.text)+'<div style="font-size:.66rem;color:var(--gray-400);margin-top:4px">'+esc(q.answer.t)+'</div></div>':'')+
+  (q.rejectReason?'<p style="font-size:.8rem;color:var(--red);margin-top:10px"><b>⛔ Rejection reason:</b> '+esc(q.rejectReason)+'</p>':'')+
+  '<div class="form-grid" style="grid-template-columns:1fr auto;gap:10px;margin-top:14px;align-items:end">'+
+    '<div class="fg-item"><label>Assign / Reassign Doctor</label><select id="qaa-reassign">'+drOpts+'</select></div>'+
+    '<button class="btn" onclick="QAA.doReassign(\''+q.id+'\')">🔁 Reassign</button></div>'+
+  '<div style="margin-top:12px"><label style="font-size:.72rem;font-weight:700;color:var(--gray-500);text-transform:uppercase">Audit Log</label>'+
+    q.audit.map(function(a){return '<div style="background:var(--gray-50);border-left:3px solid var(--gray-200);border-radius:8px;padding:7px 11px;font-size:.78rem;margin-top:6px">'+esc(a.a)+'<div style="font-size:.66rem;color:var(--gray-400);margin-top:2px">'+esc(a.t)+' — '+esc(a.w)+'</div></div>';}).join('')+'</div>'+
+  '</div><div class="modal-ft">'+
+    (q.status==='pending'?'<button class="btn green" onclick="QA.approve(\''+q.id+'\');closeModal();showToast(\'✅ Approved — now visible to the doctor\')">✓ Approve</button><button class="btn danger" onclick="closeModal();QAA.reject(\''+q.id+'\')">⛔ Reject</button>':'')+
+    '<button class="btn" onclick="closeModal()">Close</button></div></div>';
+  var m=document.getElementById('modalMount');m.innerHTML=html;m.classList.remove('hidden');
+};
+QAA.doReassign=function(id){
+  var v=(document.getElementById('qaa-reassign')||{}).value;
+  QA.reassign(id,v);closeModal();showToast('🔁 '+id+' reassigned to '+v);
+};
+QAA.reject=function(id){var q=QA.get(id);if(!q)return;
+  var html='<div class="modal"><div class="modal-hd"><h3>⛔ Reject '+q.id+'</h3><button class="modal-close" onclick="closeModal()">✕</button></div>'+
+  '<div class="modal-bd"><p style="font-size:.84rem">Reject “'+esc(q.title)+'” from <b>'+esc(q.patient.name)+'</b>? The patient is notified with your reason.</p>'+
+  '<div class="fg-item" style="margin-top:10px"><label>Reason</label><input type="text" id="qaa-rej-why" placeholder="e.g. Needs more detail — please resubmit"></div></div>'+
+  '<div class="modal-ft"><button class="btn" onclick="closeModal()">Back</button><button class="btn danger" onclick="QA.reject(\''+q.id+'\',(document.getElementById(\'qaa-rej-why\')||{}).value);closeModal();showToast(\'⛔ '+q.id+' rejected — patient notified\')">⛔ Reject Question</button></div></div>';
+  var m=document.getElementById('modalMount');m.innerHTML=html;m.classList.remove('hidden');
+};
+
+/* ---------- export + reports ---------- */
+QAA.exportCsv=function(){
+  var head=['ID','Patient','Doctor','Department','Title','Submitted','Status','Attachments','Answered By','Answer','Rejection Reason'];
+  var lines=[head.join(',')].concat(QA.all().map(function(q){
+    return [q.id,q.patient.name,q.doctor.name,q.dept,q.title,q.date,q.status,q.attachments.join('; '),(q.answer?q.answer.w:''),(q.answer?q.answer.text:''),q.rejectReason]
+      .map(function(v){return '"'+String(v).replace(/"/g,'""')+'"';}).join(',');
+  }));
+  var blob=new Blob([lines.join('\n')],{type:'text/csv'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='drinsight-patient-qa-report.csv';document.body.appendChild(a);a.click();a.remove();
+  showToast('⬇ Patient Q&A report exported (CSV)');
+};
+window.pgQAReports=function(){
+  var all=QA.all(),n=all.length;
+  var c={pending:0,approved:0,answered:0,rejected:0};
+  all.forEach(function(q){c[q.status]++;});
+  var stats=statCards([
+    {ic:'ic1',icon:'💬',num:String(n),label:'Total Questions',tag:'all departments',tagClass:'tt-b'},
+    {ic:'ic2',icon:'✅',num:String(c.answered),label:'Answered',tag:Math.round(c.answered/n*100)+'% answer rate',tagClass:'tt-g'},
+    {ic:'ic3',icon:'🕒',num:String(c.pending+c.approved),label:'In Progress',tag:c.pending+' pending review',tagClass:'tt-a'},
+    {ic:'ic4',icon:'⛔',num:String(c.rejected),label:'Rejected',tag:Math.round(c.rejected/n*100)+'% rate',tagClass:'tt-a'}
+  ]);
+  var byDept={};all.forEach(function(q){byDept[q.dept]=(byDept[q.dept]||0)+1;});
+  var keys=Object.keys(byDept),mx=Math.max.apply(null,keys.map(function(k){return byDept[k];}).concat([1]));
+  var chart='<div class="panel"><div class="panel-hd"><h3>📊 Questions by Department</h3></div><div class="panel-bd"><div class="chart-bars">'+
+    keys.map(function(k){return '<div class="cb-wrap"><div class="cb-val">'+byDept[k]+'</div><div class="cb-bar" style="height:'+Math.round(byDept[k]/mx*100)+'%"></div><div class="cb-label">'+QA.deptIc(k)+' '+esc(k)+'</div></div>';}).join('')+'</div></div></div>';
+  var byDr={};all.forEach(function(q){var k=q.doctor.name;byDr[k]=byDr[k]||{n:0,ans:0};byDr[k].n++;if(q.status==='answered')byDr[k].ans++;});
+  var rows=Object.keys(byDr).map(function(k){var d=byDr[k];
+    return ['<strong>'+esc(k)+'</strong>',esc((QA.dr(k)||{}).dept||''),String(d.n),String(d.ans),'<span class="chip ch-g">'+Math.round(d.ans/d.n*100)+'%</span>'];});
+  var tbl=panelTable('👨‍⚕️ Questions by Doctor','<button class="btn primary" onclick="QAA.exportCsv()">⬇ Export Full Report (CSV)</button>',
+    ['Doctor','Department','Assigned','Answered','Answer Rate'],rows);
+  return (window.OC?OC.notifCard(3):'')+stats+chart+tbl;
+};
+})();
+</script>
+
+<!-- ============================================================
+     DrInsight · Cross-Panel Interlink Bridge (Admin)
+     1. Manual Appointments page — reads the SAME store the doctor
+        writes (drinsight_manual_appts_v1); admin status updates sync
+        back to the Doctor & Patient dashboards instantly.
+     2. Existing physical-request decisions (physDecide) now emit into
+        the shared notification feed seen on all three panels.
+     Original functions untouched — wrappers only.
+     ============================================================ -->
+<script id="ma-admin-script">
+(function(){
+if(window.MAA)return;
+var MAA=window.MAA={};
+var LS='drinsight_manual_appts_v1';
+var esc=function(s){return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');};
+function stamp(){var d=new Date();return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+' · '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});}
+function db(){try{return JSON.parse(localStorage.getItem(LS)||'[]')||[];}catch(e){return [];}}
+function put(arr){try{localStorage.setItem(LS,JSON.stringify(arr));}catch(e){}}
+
+/* ---------- routing (additive) ---------- */
+pageMeta['ma-admin']=['Manual Appointments','Clinic-created (walk-in / phone / emergency) appointments — synced live with the Doctor & Patient dashboards'];
+(function(){var rp=window.renderPage;window.renderPage=function(id){
+  if(id==='ma-admin')return pgManualAdmin();
+  return rp(id);
+};})();
+
+/* ---------- page ---------- */
+function chip(a){
+  if(a.status==='confirmed')return '<span class="chip ch-b">✅ Confirmed</span>';
+  if(a.status==='completed')return '<span class="chip ch-g">✓ Completed</span>';
+  return '<span class="chip ch-r">✕ Cancelled</span>';
+}
+function statusSelect(a){
+  return '<select onchange="MAA.status(\''+a.id+'\',this.value)" style="font-family:inherit;font-size:.72rem;border:1px solid var(--gray-200);border-radius:8px;padding:4px 6px;background:#fff">'+
+    ['confirmed','completed','cancelled'].map(function(s){return '<option value="'+s+'"'+(s===a.status?' selected':'')+'>'+s.charAt(0).toUpperCase()+s.slice(1)+'</option>';}).join('')+'</select>';
+}
+window.pgManualAdmin=function(){
+  var all=db();
+  var c={confirmed:0,completed:0,cancelled:0,reg:0};
+  all.forEach(function(a){c[a.status]=(c[a.status]||0)+1;if(a.registered)c.reg++;});
+  var stats=statCards([
+    {ic:'ic1',icon:'📝',num:String(all.length),label:'Manual Appointments',tag:'walk-in · phone · emergency',tagClass:'tt-b'},
+    {ic:'ic2',icon:'✅',num:String(c.confirmed),label:'Confirmed',tag:'auto-approved',tagClass:'tt-g'},
+    {ic:'ic3',icon:'🏁',num:String(c.completed),label:'Completed',tag:String(c.cancelled)+' cancelled',tagClass:'tt-g'},
+    {ic:'ic4',icon:'👤',num:String(c.reg),label:'Registered Patients',tag:'synced to patient dashboard',tagClass:'tt-b'}
+  ]);
+  var rows=all.slice().sort(function(a,b){return a.dateISO<b.dateISO?1:-1;}).map(function(a){
+    return ['<strong>'+a.id+'</strong><div style="font-size:.66rem;color:var(--gray-400)">'+esc(a.source)+'</div>',
+      '<strong>'+esc(a.name)+'</strong> '+(a.registered?'<span class="chip ch-g" style="font-size:.6rem">✓ Registered</span>':'<span class="chip ch-gray" style="font-size:.6rem">No account</span>')+'<div style="font-size:.66rem;color:var(--gray-400)">'+esc(a.gender)+' · '+a.age+' yrs</div>',
+      'Dr. Javed Kumbhar',esc(a.mobile),
+      esc(a.date)+'<div style="font-size:.66rem;color:var(--gray-400)">'+esc(a.time)+'</div>',
+      '<div style="max-width:200px;font-size:.76rem">'+esc(a.reason)+'</div>',
+      chip(a),
+      '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><button class="tbl-btn" onclick="MAA.view(\''+a.id+'\')">👁 View</button>'+statusSelect(a)+'</div>'];
+  });
+  var table=rows.length
+    ?panelTable('📝 Manual Appointments — created by the doctor at the clinic','<button class="btn" onclick="MAA.exportCsv()">⬇ Export CSV</button>',
+      ['ID','Patient','Doctor','Mobile','Date &amp; Time','Reason','Status','Actions'],rows,
+      'Showing '+rows.length+' — status changes here sync instantly to the Doctor & Patient dashboards')
+    :'<div class="panel"><div class="panel-hd"><h3>📝 Manual Appointments</h3></div><div class="panel-bd"><div class="oc-empty"><span class="big">📝</span>No manual appointments yet — the doctor creates them under Physical Appointments → Manual Appointments.</div></div></div>';
+  return (window.OC?OC.notifCard(3):'')+stats+table;
+};
+
+MAA.view=function(id){
+  var a=db().find(function(x){return x.id===id;});if(!a)return;
+  var html='<div class="modal"><div class="modal-hd"><h3>📝 Manual Appointment — '+a.id+'</h3><button class="modal-close" onclick="closeModal()">✕</button></div>'+
+  '<div class="modal-bd"><div class="form-grid" style="grid-template-columns:1fr 1fr;gap:10px">'+
+    '<div class="fg-item"><label>Patient</label><input value="'+esc(a.name)+(a.registered?' (registered)':' (no account)')+'" readonly></div>'+
+    '<div class="fg-item"><label>Doctor</label><input value="Dr. Javed Kumbhar" readonly></div>'+
+    '<div class="fg-item"><label>Gender / Age</label><input value="'+esc(a.gender)+' · '+a.age+' yrs" readonly></div>'+
+    '<div class="fg-item"><label>Mobile</label><input value="'+esc(a.mobile)+'" readonly></div>'+
+    '<div class="fg-item"><label>Date &amp; Time</label><input value="'+esc(a.date)+' · '+esc(a.time)+'" readonly></div>'+
+    '<div class="fg-item"><label>Source / Status</label><input value="'+esc(a.source)+' · '+a.status+'" readonly></div>'+
+    (a.cnic?'<div class="fg-item"><label>CNIC / ID</label><input value="'+esc(a.cnic)+'" readonly></div>':'')+
+    (a.address?'<div class="fg-item"><label>Address</label><input value="'+esc(a.address)+'" readonly></div>':'')+
+    '<div class="fg-item full"><label>Reason</label><input value="'+esc(a.reason)+'" readonly></div>'+
+    (a.notes?'<div class="fg-item full"><label>Notes</label><input value="'+esc(a.notes)+'" readonly></div>':'')+
+  '</div>'+
+  '<div style="margin-top:12px"><label style="font-size:.72rem;font-weight:700;color:var(--gray-500);text-transform:uppercase">Audit Log</label>'+
+    (a.audit||[]).map(function(x){return '<div style="background:var(--gray-50);border-left:3px solid var(--gray-200);border-radius:8px;padding:7px 11px;font-size:.78rem;margin-top:6px">'+esc(x.a)+'<div style="font-size:.66rem;color:var(--gray-400);margin-top:2px">'+esc(x.t)+' — '+esc(x.w)+'</div></div>';}).join('')+
+  '</div></div><div class="modal-ft"><button class="btn" onclick="closeModal()">Close</button></div></div>';
+  var m=document.getElementById('modalMount');m.innerHTML=html;m.classList.remove('hidden');
+};
+MAA.status=function(id,st){
+  var arr=db(),a=arr.find(function(x){return x.id===id;});if(!a)return;
+  a.status=st;
+  if(st==='cancelled'&&!a.cancelReason)a.cancelReason='Status updated by admin';
+  (a.audit=a.audit||[]).unshift({t:stamp(),w:'Admin',a:'Status set to '+st+' by Admin — synced to Doctor & Patient dashboards'});
+  put(arr);
+  if(window.OC&&OC.notify)OC.notify('🛠️','Manual appointment '+id+' set to '+st+' by Admin'+(a.registered?' — '+a.name+' notified':''));
+  window.goto('ma-admin');
+  showToast('🛠️ '+id+' → '+st+' — Doctor & Patient dashboards updated');
+};
+MAA.exportCsv=function(){
+  var head=['ID','Patient','Registered','Gender','Age','Mobile','Doctor','Date','Time','Source','Reason','Notes','Status'];
+  var lines=[head.join(',')].concat(db().map(function(a){
+    return [a.id,a.name,a.registered?'yes':'no',a.gender,a.age,a.mobile,'Dr. Javed Kumbhar',a.date,a.time,a.source,a.reason,a.notes||'',a.status]
+      .map(function(v){return '"'+String(v).replace(/"/g,'""')+'"';}).join(',');
+  }));
+  var blob=new Blob([lines.join('\n')],{type:'text/csv'});
+  var el=document.createElement('a');el.href=URL.createObjectURL(blob);
+  el.download='drinsight-manual-appointments.csv';document.body.appendChild(el);el.click();el.remove();
+  showToast('⬇ Manual appointments exported (CSV)');
+};
+
+/* live sync: doctor creates/edits a manual appointment in another tab */
+window.addEventListener('storage',function(e){
+  if(e.key===LS&&window._admCur==='ma-admin')window.goto('ma-admin');
+});
+
+/* ---------- notification bridge: existing physical-request decisions
+     now emit into the shared cross-panel feed (function untouched) ---------- */
+(function(){
+  var _pd=window.physDecide;
+  if(typeof _pd!=='function')return;
+  window.physDecide=function(id,newStatus){
+    _pd(id,newStatus);
+    if(window.OC&&OC.notify)OC.notify('🏥','Physical consultation request '+id+' '+String(newStatus).toLowerCase()+' by Admin — Patient & Doctor notified');
+  };
+})();
 })();
 </script>
 

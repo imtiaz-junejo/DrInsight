@@ -1,0 +1,1278 @@
+.medical-review-page {
+  --blue: #1a56a0;
+  --blue-dark: #0f3d7a;
+  --blue-light: #e8f0fb;
+  --teal: #0891b2;
+  --green: #059669;
+  --red: #dc2626;
+  --amber: #d97706;
+  --purple: #7c3aed;
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-400: #94a3b8;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1e293b;
+  --gray-900: #0f172a;
+  --font-display: var(--font-playfair), "Playfair Display", Georgia, serif;
+  --font-body: var(--font-dm-sans), "DM Sans", system-ui, sans-serif;
+  --r: 12px;
+  --rl: 20px;
+  --t: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--gray-800);
+}
+
+.medical-review-page a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.medical-review-page ul {
+  list-style: none;
+}
+
+.medical-review-page .hero {
+  background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue) 55%, var(--teal) 100%);
+  color: #fff;
+  padding: 52px 18px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.medical-review-page .hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.medical-review-page .hero-in {
+  max-width: 720px;
+  margin: auto;
+  position: relative;
+}
+
+.medical-review-page .hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.medical-review-page .hero p {
+  font-size: 0.92rem;
+  opacity: 0.88;
+  line-height: 1.8;
+  max-width: 600px;
+  margin: auto auto 16px;
+}
+
+.medical-review-page .hero-meta {
+  font-size: 0.74rem;
+  opacity: 0.75;
+  margin-bottom: 16px;
+}
+
+.medical-review-page .trust-pills {
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.medical-review-page .tp {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 50px;
+  padding: 5px 13px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.medical-review-page .mission {
+  background: linear-gradient(135deg, var(--blue-dark), var(--blue));
+  color: #fff;
+  padding: 32px 18px;
+  text-align: center;
+}
+
+.medical-review-page .mission-in {
+  max-width: 820px;
+  margin: auto;
+}
+
+.medical-review-page .mission-in h2 {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+}
+
+.medical-review-page .mission-in p {
+  font-size: 0.9rem;
+  line-height: 1.85;
+  opacity: 0.92;
+}
+
+.medical-review-page .main-wrap {
+  max-width: 1200px;
+  margin: 32px auto 56px;
+  padding: 0 18px;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.medical-review-page .toc-side {
+  position: sticky;
+  top: 72px;
+  background: #fff;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--rl);
+  overflow: hidden;
+  max-height: calc(100vh - 90px);
+  overflow-y: auto;
+}
+
+.medical-review-page .toc-hd {
+  background: var(--blue-dark);
+  color: #fff;
+  padding: 11px 14px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  position: sticky;
+  top: 0;
+}
+
+.medical-review-page .toc-list {
+  padding: 7px 0;
+}
+
+.medical-review-page .ti {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  font-size: 0.7rem;
+  color: var(--gray-600);
+  cursor: pointer;
+  transition: var(--t);
+  border-left: 3px solid transparent;
+  background: none;
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+  width: 100%;
+  text-align: left;
+  font-family: var(--font-body);
+}
+
+.medical-review-page .ti:hover,
+.medical-review-page .ti.active {
+  background: var(--blue-light);
+  color: var(--blue);
+  border-left-color: var(--blue);
+}
+
+.medical-review-page .tn {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--blue);
+  background: var(--blue-light);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.medical-review-page .ti.active .tn {
+  background: var(--blue);
+  color: #fff;
+}
+
+.medical-review-page .sec {
+  margin-bottom: 40px;
+  scroll-margin-top: 72px;
+}
+
+.medical-review-page .stitle {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--blue-light);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.medical-review-page .snum {
+  background: var(--blue);
+  color: #fff;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.medical-review-page .snum.g { background: var(--green); }
+.medical-review-page .snum.r { background: var(--red); }
+.medical-review-page .snum.a { background: var(--amber); }
+.medical-review-page .snum.p { background: var(--purple); }
+.medical-review-page .snum.t { background: var(--teal); }
+
+.medical-review-page .prose p {
+  font-size: 0.86rem;
+  color: var(--gray-700);
+  line-height: 1.8;
+  margin-bottom: 10px;
+}
+
+.medical-review-page .box {
+  border-radius: var(--r);
+  padding: 13px 16px;
+  margin: 13px 0;
+  border-left: 4px solid;
+}
+
+.medical-review-page .box-b { background: var(--blue-light); border-color: var(--blue); }
+.medical-review-page .box-b .bh { color: var(--blue); }
+.medical-review-page .box-b p,
+.medical-review-page .box-b li { font-size: 0.82rem; color: var(--blue-dark); line-height: 1.65; }
+
+.medical-review-page .box-g { background: #ecfdf5; border-color: var(--green); }
+.medical-review-page .box-g .bh { color: var(--green); }
+.medical-review-page .box-g p,
+.medical-review-page .box-g li { font-size: 0.82rem; color: #065f46; line-height: 1.65; }
+
+.medical-review-page .box-r { background: #fef2f2; border-color: var(--red); }
+.medical-review-page .box-r .bh { color: var(--red); }
+.medical-review-page .box-r p,
+.medical-review-page .box-r li { font-size: 0.82rem; color: #7f1d1d; line-height: 1.65; }
+
+.medical-review-page .box-a { background: #fffbeb; border-color: var(--amber); }
+.medical-review-page .box-a .bh { color: var(--amber); }
+.medical-review-page .box-a p,
+.medical-review-page .box-a li { font-size: 0.82rem; color: #78350f; line-height: 1.65; }
+
+.medical-review-page .box-p { background: #f3f0ff; border-color: var(--purple); }
+.medical-review-page .box-p .bh { color: var(--purple); }
+.medical-review-page .box-p p,
+.medical-review-page .box-p li { font-size: 0.82rem; color: #4c1d95; line-height: 1.65; }
+
+.medical-review-page .box-gray { background: var(--gray-50); border-color: var(--gray-400); }
+.medical-review-page .box-gray .bh { color: var(--gray-600); }
+.medical-review-page .box-gray p,
+.medical-review-page .box-gray li { font-size: 0.82rem; color: var(--gray-700); line-height: 1.65; }
+
+.medical-review-page .bh {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.medical-review-page .box ul {
+  margin-left: 14px;
+  list-style: disc;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.medical-review-page .phil-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 11px;
+  margin: 14px 0;
+}
+
+.medical-review-page .phil-card {
+  background: #fff;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--r);
+  padding: 14px;
+  transition: var(--t);
+}
+
+.medical-review-page .phil-card:hover {
+  border-color: var(--blue);
+  box-shadow: 0 4px 14px rgba(26, 86, 160, 0.1);
+  transform: translateY(-2px);
+}
+
+.medical-review-page .ph-ico {
+  font-size: 1.4rem;
+  margin-bottom: 7px;
+}
+
+.medical-review-page .phil-card h4 {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 3px;
+}
+
+.medical-review-page .phil-card p {
+  font-size: 0.72rem;
+  color: var(--gray-600);
+  line-height: 1.5;
+}
+
+.medical-review-page .tier-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 14px 0;
+}
+
+.medical-review-page .tier-card {
+  border-radius: var(--rl);
+  padding: 22px;
+  border: 1.5px solid var(--gray-200);
+  transition: var(--t);
+}
+
+.medical-review-page .tier-card:hover {
+  box-shadow: 0 6px 20px rgba(26, 86, 160, 0.1);
+  transform: translateY(-3px);
+}
+
+.medical-review-page .tc-t1 { background: linear-gradient(135deg, #fffbeb, #fef9c3); border-color: #fde68a; }
+.medical-review-page .tc-t2 { background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border-color: #bae6fd; }
+.medical-review-page .tc-t3 { background: linear-gradient(135deg, #f0fdf4, #dcfce7); border-color: #a7f3d0; }
+
+.medical-review-page .tier-ico {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.medical-review-page .tier-card h3 {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.medical-review-page .tc-t1 h3 { color: #92400e; }
+.medical-review-page .tc-t2 h3 { color: #0369a1; }
+.medical-review-page .tc-t3 h3 { color: #065f46; }
+
+.medical-review-page .tier-card ul {
+  margin-left: 14px;
+  list-style: disc;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.medical-review-page .tier-card li {
+  font-size: 0.76rem;
+  line-height: 1.55;
+}
+
+.medical-review-page .tc-t1 li { color: #78350f; }
+.medical-review-page .tc-t2 li { color: #0c4a6e; }
+.medical-review-page .tc-t3 li { color: #064e3b; }
+
+.medical-review-page .geo-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 12px 0;
+}
+
+.medical-review-page .gp {
+  padding: 5px 13px;
+  border-radius: 50px;
+  background: var(--blue-light);
+  color: var(--blue);
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.medical-review-page .phase-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  margin: 20px 0;
+  position: relative;
+}
+
+.medical-review-page .phase-grid::before {
+  content: "";
+  position: absolute;
+  top: 20px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gray-200);
+  z-index: 0;
+}
+
+.medical-review-page .phase {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  padding: 0 8px;
+}
+
+.medical-review-page .phase-dot {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: #fff;
+  margin-bottom: 8px;
+  border: 3px solid #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.medical-review-page .ph-blue { background: linear-gradient(135deg, var(--blue-dark), var(--blue)); }
+.medical-review-page .ph-green { background: linear-gradient(135deg, var(--green), var(--teal)); }
+.medical-review-page .ph-amber { background: linear-gradient(135deg, var(--amber), #f59e0b); }
+.medical-review-page .ph-purple { background: linear-gradient(135deg, var(--purple), #8b5cf6); }
+
+.medical-review-page .phase h4 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 4px;
+}
+
+.medical-review-page .phase p {
+  font-size: 0.7rem;
+  color: var(--gray-500);
+  line-height: 1.4;
+}
+
+.medical-review-page .phase-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.medical-review-page .ps {
+  border-radius: var(--r);
+  padding: 14px 16px;
+  border: 1.5px solid var(--gray-200);
+  transition: var(--t);
+}
+
+.medical-review-page .ps:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.medical-review-page .ps-hd {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.medical-review-page .ps-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.medical-review-page .ps-blue { background: var(--blue); }
+.medical-review-page .ps-green { background: var(--green); }
+.medical-review-page .ps-amber { background: var(--amber); }
+.medical-review-page .ps-purple { background: var(--purple); }
+
+.medical-review-page .ps h4 {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.medical-review-page .ps .ps-body {
+  font-size: 0.8rem;
+  color: var(--gray-600);
+  line-height: 1.65;
+}
+
+.medical-review-page .ps .ps-body ul {
+  margin-left: 12px;
+  list-style: disc;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 6px;
+}
+
+.medical-review-page .check-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: var(--r);
+  overflow: hidden;
+  margin: 13px 0;
+  font-size: 0.8rem;
+}
+
+.medical-review-page .check-table th {
+  background: var(--blue-dark);
+  color: #fff;
+  padding: 9px 14px;
+  text-align: left;
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.medical-review-page .check-table td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--gray-100);
+  color: var(--gray-700);
+}
+
+.medical-review-page .check-table tr:last-child td {
+  border-bottom: none;
+}
+
+.medical-review-page .check-table tr:nth-child(even) {
+  background: var(--gray-50);
+}
+
+.medical-review-page .check-table tr:hover td {
+  background: var(--blue-light);
+}
+
+.medical-review-page .acc {
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--r);
+  margin-bottom: 8px;
+  overflow: hidden;
+  transition: var(--t);
+}
+
+.medical-review-page .acc.open {
+  border-color: var(--blue);
+}
+
+.medical-review-page .acc-h {
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  gap: 10px;
+  background: #fff;
+  width: 100%;
+  border: none;
+  text-align: left;
+  font-family: var(--font-body);
+}
+
+.medical-review-page .acc-h h4 {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.medical-review-page .acc-chev {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--gray-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.66rem;
+  transition: var(--t);
+  flex-shrink: 0;
+}
+
+.medical-review-page .acc.open .acc-chev {
+  background: var(--blue-light);
+  color: var(--blue);
+  transform: rotate(180deg);
+}
+
+.medical-review-page .acc-b {
+  display: none;
+  padding: 0 14px 13px;
+  border-top: 1px solid var(--gray-100);
+}
+
+.medical-review-page .acc.open .acc-b {
+  display: block;
+  padding-top: 11px;
+}
+
+.medical-review-page .acc-b ul {
+  margin-left: 14px;
+  list-style: disc;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.medical-review-page .acc-b li {
+  font-size: 0.8rem;
+  color: var(--gray-700);
+  line-height: 1.6;
+}
+
+.medical-review-page .pyramid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 14px 0;
+  max-width: 500px;
+}
+
+.medical-review-page .pyr-tier {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: 6px;
+  padding: 11px 16px;
+  margin-bottom: 3px;
+  transition: var(--t);
+}
+
+.medical-review-page .pyr-tier:hover {
+  transform: scaleX(1.02);
+}
+
+.medical-review-page .pt1 { background: linear-gradient(135deg, #ecfdf5, #d1fae5); border: 1.5px solid #6ee7b7; clip-path: polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%); }
+.medical-review-page .pt2 { background: linear-gradient(135deg, var(--blue-light), #dbeafe); border: 1.5px solid #93c5fd; }
+.medical-review-page .pt3 { background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 1.5px solid #fde68a; }
+.medical-review-page .pt4 { background: linear-gradient(135deg, #f3f0ff, #ede9fe); border: 1.5px solid #c4b5fd; }
+.medical-review-page .pt5 { background: linear-gradient(135deg, #fef2f2, #fee2e2); border: 1.5px solid #fca5a5; }
+
+.medical-review-page .pyr-tier h4 {
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.medical-review-page .pt1 h4 { color: #065f46; }
+.medical-review-page .pt2 h4 { color: var(--blue-dark); }
+.medical-review-page .pt3 h4 { color: #92400e; }
+.medical-review-page .pt4 h4 { color: #4c1d95; }
+.medical-review-page .pt5 h4 { color: #991b1b; }
+
+.medical-review-page .pyr-tier span {
+  font-size: 0.7rem;
+}
+
+.medical-review-page .pt1 span { color: #047857; }
+.medical-review-page .pt2 span { color: var(--blue); }
+.medical-review-page .pt3 span { color: #d97706; }
+.medical-review-page .pt4 span { color: var(--purple); }
+.medical-review-page .pt5 span { color: var(--red); }
+
+.medical-review-page .decision-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 13px 0;
+}
+
+.medical-review-page .dec-card {
+  border-radius: var(--r);
+  padding: 16px;
+  border: 1.5px solid;
+}
+
+.medical-review-page .dc-g { background: #ecfdf5; border-color: #6ee7b7; }
+.medical-review-page .dc-g h4 { color: var(--green); }
+.medical-review-page .dc-g li { color: #065f46; }
+
+.medical-review-page .dc-a { background: #fffbeb; border-color: #fde68a; }
+.medical-review-page .dc-a h4 { color: var(--amber); }
+.medical-review-page .dc-a li { color: #78350f; }
+
+.medical-review-page .dc-r { background: #fef2f2; border-color: #fca5a5; }
+.medical-review-page .dc-r h4 { color: var(--red); }
+.medical-review-page .dc-r li { color: #7f1d1d; }
+
+.medical-review-page .dec-card h4 {
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.medical-review-page .dec-card ul {
+  margin-left: 12px;
+  list-style: disc;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.medical-review-page .dec-card li {
+  font-size: 0.74rem;
+  line-height: 1.6;
+}
+
+.medical-review-page .badge-showcase {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 14px;
+  margin: 14px 0;
+}
+
+.medical-review-page .rbadge {
+  border-radius: var(--r);
+  padding: 16px;
+  border: 1.5px solid var(--gray-200);
+  transition: var(--t);
+  font-size: 0.78rem;
+}
+
+.medical-review-page .rbadge:hover {
+  border-color: var(--blue);
+  box-shadow: 0 4px 14px rgba(26, 86, 160, 0.1);
+}
+
+.medical-review-page .rb-hd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.86rem;
+  margin-bottom: 8px;
+}
+
+.medical-review-page .rb-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.medical-review-page .rb-row:last-child {
+  border-bottom: none;
+}
+
+.medical-review-page .rb-row span:first-child {
+  color: var(--gray-500);
+  font-size: 0.72rem;
+}
+
+.medical-review-page .rb-row span:last-child {
+  color: var(--gray-800);
+  font-weight: 600;
+  font-size: 0.72rem;
+}
+
+.medical-review-page .rb-g { background: #f0fdf4; border-color: #a7f3d0; }
+.medical-review-page .rb-a { background: #fffbeb; border-color: #fde68a; }
+.medical-review-page .rb-y { background: #fef9c3; border-color: #fde047; }
+.medical-review-page .rb-p { background: #f3f0ff; border-color: #c4b5fd; }
+.medical-review-page .rb-c { background: #fef2f2; border-color: #fca5a5; }
+
+.medical-review-page .rev-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: var(--r);
+  overflow: hidden;
+  font-size: 0.78rem;
+  margin: 13px 0;
+}
+
+.medical-review-page .rev-table th {
+  background: var(--blue-dark);
+  color: #fff;
+  padding: 9px 12px;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.medical-review-page .rev-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--gray-100);
+  color: var(--gray-700);
+}
+
+.medical-review-page .rev-table tr:last-child td {
+  border-bottom: none;
+}
+
+.medical-review-page .rev-table tr:nth-child(even) {
+  background: var(--gray-50);
+}
+
+.medical-review-page .fail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin: 14px 0;
+}
+
+.medical-review-page .fail-card {
+  border-radius: var(--r);
+  padding: 16px;
+  border: 1.5px solid;
+}
+
+.medical-review-page .fa { background: #fffbeb; border-color: #fde68a; }
+.medical-review-page .fa .fh { color: var(--amber); }
+.medical-review-page .fa li { color: #78350f; }
+
+.medical-review-page .fb_ { background: #fef2f2; border-color: #fca5a5; }
+.medical-review-page .fb_ .fh { color: var(--red); }
+.medical-review-page .fb_ li { color: #7f1d1d; }
+
+.medical-review-page .fc_ { background: #fff1f2; border-color: #fda4af; }
+.medical-review-page .fc_ .fh { color: #be123c; }
+.medical-review-page .fc_ li { color: #881337; }
+
+.medical-review-page .fail-card .fh {
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.medical-review-page .fail-card ul {
+  margin-left: 12px;
+  list-style: disc;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.medical-review-page .fail-card li {
+  font-size: 0.76rem;
+  line-height: 1.6;
+}
+
+.medical-review-page .rv-filter {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.medical-review-page .rf {
+  padding: 5px 13px;
+  border-radius: 50px;
+  border: 1.5px solid var(--gray-200);
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: #fff;
+  color: var(--gray-600);
+  transition: var(--t);
+  font-family: var(--font-body);
+}
+
+.medical-review-page .rf.on {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+}
+
+.medical-review-page .rf:hover:not(.on) {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+.medical-review-page .rv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.medical-review-page .rv-card {
+  background: #fff;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--rl);
+  overflow: hidden;
+  transition: var(--t);
+}
+
+.medical-review-page .rv-card:hover {
+  border-color: var(--blue);
+  box-shadow: 0 8px 24px rgba(26, 86, 160, 0.12);
+  transform: translateY(-3px);
+}
+
+.medical-review-page .rv-av {
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #fff;
+  font-family: var(--font-display);
+}
+
+.medical-review-page .rv-body {
+  padding: 14px;
+}
+
+.medical-review-page .rv-name {
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 2px;
+}
+
+.medical-review-page .rv-cred {
+  font-size: 0.7rem;
+  color: var(--blue);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.medical-review-page .rv-inst {
+  font-size: 0.72rem;
+  color: var(--gray-600);
+  margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.medical-review-page .rv-spec {
+  font-size: 0.7rem;
+  color: var(--gray-500);
+  margin-bottom: 8px;
+}
+
+.medical-review-page .rv-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 10px 0;
+  border-top: 1px solid var(--gray-100);
+}
+
+.medical-review-page .rv-stat strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--blue);
+}
+
+.medical-review-page .rv-stat span {
+  font-size: 0.64rem;
+  color: var(--gray-400);
+}
+
+.medical-review-page .rv-btn {
+  display: block;
+  width: 100%;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  padding: 8px;
+  border-radius: 9px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: var(--t);
+  margin-top: 10px;
+  text-align: center;
+}
+
+.medical-review-page .rv-btn:hover {
+  background: var(--blue-dark);
+}
+
+.medical-review-page .apply-card {
+  background: linear-gradient(135deg, var(--purple), #6d28d9);
+  color: #fff;
+  border-radius: var(--rl);
+  padding: 32px;
+  margin: 14px 0;
+}
+
+.medical-review-page .apply-card h3 {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.medical-review-page .apply-card p {
+  font-size: 0.88rem;
+  opacity: 0.9;
+  margin-bottom: 16px;
+  line-height: 1.7;
+}
+
+.medical-review-page .apply-benefits {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.medical-review-page .ab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.78rem;
+  opacity: 0.9;
+}
+
+.medical-review-page .apply-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 18px;
+}
+
+.medical-review-page .as-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.8rem;
+  opacity: 0.9;
+}
+
+.medical-review-page .as-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.medical-review-page .apply-btns {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.medical-review-page .app-btn-w {
+  background: #fff;
+  color: var(--purple);
+  border: none;
+  padding: 11px 22px;
+  border-radius: 10px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: var(--t);
+}
+
+.medical-review-page .app-btn-w:hover {
+  background: var(--gray-100);
+}
+
+.medical-review-page .app-btn-o {
+  background: transparent;
+  color: #fff;
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  padding: 11px 22px;
+  border-radius: 10px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: var(--t);
+}
+
+.medical-review-page .app-btn-o:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.medical-review-page .contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.medical-review-page .cc {
+  background: var(--gray-50);
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--r);
+  padding: 13px 14px;
+}
+
+.medical-review-page .cc h4 {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 3px;
+}
+
+.medical-review-page .cc a {
+  font-size: 0.74rem;
+  color: var(--blue);
+  font-weight: 500;
+}
+
+.medical-review-page .cc p {
+  font-size: 0.7rem;
+  color: var(--gray-500);
+  margin-top: 3px;
+}
+
+.medical-review-page .cc.urgent {
+  background: #fef2f2;
+  border-color: #fca5a5;
+}
+
+.medical-review-page .cc.urgent h4 {
+  color: var(--red);
+}
+
+.medical-review-page .cc.urgent a {
+  color: var(--red);
+}
+
+.medical-review-page .inline-link {
+  color: var(--blue);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.medical-review-page .pfoot {
+  background: var(--gray-50);
+  border-top: 1px solid var(--gray-200);
+  padding: 20px 18px;
+}
+
+.medical-review-page .pf-in {
+  max-width: 1200px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.medical-review-page .pill-links {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.medical-review-page .plink {
+  background: var(--blue-light);
+  color: var(--blue);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: var(--t);
+  border: none;
+  font-family: var(--font-body);
+}
+
+.medical-review-page .plink:hover {
+  background: var(--blue);
+  color: #fff;
+}
+
+.medical-review-page .table-scroll {
+  overflow-x: auto;
+}
+
+@media (max-width: 960px) {
+  .medical-review-page .main-wrap {
+    grid-template-columns: 1fr;
+  }
+
+  .medical-review-page .toc-side {
+    position: static;
+    margin-bottom: 18px;
+    max-height: none;
+  }
+
+  .medical-review-page .tier-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .medical-review-page .decision-grid,
+  .medical-review-page .fail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .medical-review-page .phase-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .medical-review-page .trust-pills {
+    justify-content: flex-start;
+  }
+
+  .medical-review-page .badge-showcase {
+    grid-template-columns: 1fr;
+  }
+
+  .medical-review-page .tier-grid,
+  .medical-review-page .decision-grid,
+  .medical-review-page .fail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .medical-review-page .apply-benefits {
+    grid-template-columns: 1fr;
+  }
+
+  .medical-review-page .phase-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .medical-review-page .rv-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

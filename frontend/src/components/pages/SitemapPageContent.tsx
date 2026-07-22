@@ -277,7 +277,7 @@ export function SitemapPageContent() {
 
   const editorialItems: SmItemData[] = [
     { href: "/editorial-policy", priority: "high", dotColor: "var(--green)", title: "📜 Editorial Policy", url: "/editorial-policy", tags: [{ type: "done", label: "✓ Live" }] },
-    { href: "/editorial-policy", priority: "high", dotColor: "var(--green)", title: "🔬 Medical Review Process", url: "/editorial-policy", tags: [{ type: "done", label: "✓ Live" }] },
+    { href: "/medical-review-process", priority: "high", dotColor: "var(--green)", title: "🔬 Medical Review Process", url: "/medical-review-process", tags: [{ type: "done", label: "✓ Live" }] },
     { href: "/author-guidelines", priority: "high", dotColor: "var(--green)", title: "✍️ Author Guidelines", url: "/author-guidelines", tags: [{ type: "done", label: "✓ Live" }] },
   ];
 

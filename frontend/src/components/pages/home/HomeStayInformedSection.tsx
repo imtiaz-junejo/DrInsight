@@ -1,30 +1,17 @@
 "use client";
 
-import { useState } from "react";
 import { formatStatCount } from "@/lib/data-mappers";
-import { useNewsletterSubscribe, usePlatformStats } from "@/services/api-hooks";
+import { NewsletterSubscribeMessage } from "@/components/newsletter/NewsletterSubscribeMessage";
+import { useNewsletterForm } from "@/hooks/use-newsletter-form";
+import { usePlatformStats } from "@/services/api-hooks";
 
 export function HomeStayInformedSection() {
   const { data: stats } = usePlatformStats();
-  const newsletter = useNewsletterSubscribe();
-  const [newsletterEmail, setNewsletterEmail] = useState("");
-  const [newsletterMsg, setNewsletterMsg] = useState("");
+  const newsletterForm = useNewsletterForm("home-stay-informed");
 
   const readerCount = stats
     ? formatStatCount(stats.newsletterCount ?? stats.patientCount)
     : "50,000+";
-
-  const handleNewsletter = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newsletterEmail.trim()) return;
-    try {
-      await newsletter.mutateAsync(newsletterEmail.trim());
-      setNewsletterMsg("Subscribed successfully!");
-      setNewsletterEmail("");
-    } catch {
-      setNewsletterMsg("Subscription failed. Please try again.");
-    }
-  };
 
   return (
     <section className="home-section bg-[#F9FAFB] px-6 py-[72px] min-[901px]:py-[88px]">
@@ -42,30 +29,30 @@ export function HomeStayInformedSection() {
 
         <form
           className="home-stay-informed-form mx-auto mt-9 flex max-w-[520px] items-stretch justify-center gap-3"
-          onSubmit={handleNewsletter}
+          onSubmit={newsletterForm.handleSubmit}
         >
           <input
             type="email"
             placeholder="Enter your email address"
-            value={newsletterEmail}
-            onChange={(e) => setNewsletterEmail(e.target.value)}
+            value={newsletterForm.email}
+            onChange={(e) => newsletterForm.setEmail(e.target.value)}
             className="h-[46px] min-w-0 flex-1 rounded-lg border border-[#D1D5DB] bg-white px-4 text-[.9rem] text-gray-900 placeholder:text-[#9CA3AF] focus:border-blue focus:outline-none focus:ring-[3px] focus:ring-blue/10"
             required
           />
           <button
             type="submit"
-            disabled={newsletter.isPending}
+            disabled={newsletterForm.isPending}
             className="h-[46px] shrink-0 rounded-lg bg-[#215899] px-6 text-[.9rem] font-semibold text-white transition hover:bg-[#1a4a82] disabled:opacity-60"
           >
-            {newsletter.isPending ? "..." : "Subscribe Free"}
+            {newsletterForm.isPending ? "..." : "Subscribe Free"}
           </button>
         </form>
 
-        {newsletterMsg && (
-          <p className="mt-3 text-[.8rem] text-[#4B5563]" role="status">
-            {newsletterMsg}
-          </p>
-        )}
+        <NewsletterSubscribeMessage
+          message={newsletterForm.message}
+          tone={newsletterForm.messageTone}
+          className="mt-3 text-[.8rem]"
+        />
 
         <p className="mt-4 text-[.78rem] leading-relaxed text-[#4B5563]">
           <span aria-hidden="true">🔒 </span>

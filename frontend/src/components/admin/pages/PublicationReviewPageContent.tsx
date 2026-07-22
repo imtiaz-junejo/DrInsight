@@ -20,7 +20,7 @@ import {
   StatCardRow,
   StatusChip,
 } from "@/components/admin/ui/AdminPrimitives";
-import { adminUserProfileHref } from "@/lib/admin-routes";
+import { adminDoctorProfileHref } from "@/lib/admin-routes";
 import { formatNumber } from "@/lib/admin-utils";
 import { formatDate, formatRelativeTime } from "@/lib/data-mappers";
 import {
@@ -255,8 +255,8 @@ export function PublicationReviewPageContent() {
 
   const tableRows = queueItems.map((pub) => [
     <strong key={`${pub.id}-title`}>{pub.title}</strong>,
-    pub.doctor?.user?.id ? (
-      <Link key={`${pub.id}-doc`} href={adminUserProfileHref(pub.doctor.user.id)} className="cell-user-link">
+    pub.doctor?.id ? (
+      <Link key={`${pub.id}-doc`} href={adminDoctorProfileHref(pub.doctor.id)} className="cell-user-link">
         {doctorName(pub)}
       </Link>
     ) : (
@@ -325,8 +325,8 @@ export function PublicationReviewPageContent() {
 
   const recentRows = (recentQuery.data?.data ?? []).map((pub) => [
     pub.title,
-    pub.doctor?.user?.id ? (
-      <Link key={`${pub.id}-doc`} href={adminUserProfileHref(pub.doctor.user.id)} className="cell-user-link">
+    pub.doctor?.id ? (
+      <Link key={`${pub.id}-doc`} href={adminDoctorProfileHref(pub.doctor.id)} className="cell-user-link">
         {doctorName(pub)}
       </Link>
     ) : (

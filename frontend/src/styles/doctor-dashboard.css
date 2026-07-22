@@ -674,7 +674,7 @@
 .doctor-root .toast{position:fixed;bottom:24px;right:24px;background:var(--gray-900);color:#fff;padding:13px 22px;border-radius:12px;font-size:.85rem;font-weight:500;z-index:999;opacity:0;transform:translateY(10px);transition:all .3s ease;pointer-events:none;max-width:320px}
 .doctor-root .toast.show{opacity:1;transform:translateY(0)}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
-.doctor-root footer{background:#01112e;color:#94a3b8;font-size:.85rem;margin-top:auto}
+.doctor-root footer{background:#0f172a;color:#94a3b8;font-size:.85rem;margin-top:auto}
 .doctor-root .footer-main{max-width:1240px;margin:auto;padding:64px 24px 0}
 .doctor-root .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1.5fr 1.5fr;gap:48px;padding-bottom:48px}
 .doctor-root .footer-brand p{line-height:1.7;margin-bottom:18px;font-size:.84rem}

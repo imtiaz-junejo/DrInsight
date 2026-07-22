@@ -100,14 +100,15 @@ export function whrToolFromKey(key: string): WhrToolType {
   return TOOL_API[key] ?? "PREGNANCY";
 }
 
-export function useMyWhrSubscriptions() {
+export function useMyWhrSubscriptions(enabled = true) {
   return useQuery({
     queryKey: ["my-whr-subscriptions"],
+    enabled,
     queryFn: async () => {
       const { data } = await api.get<WhrUserSubscription[]>("/me/womens-health-reminders");
       return data;
     },
-    refetchInterval: 30_000,
+    refetchInterval: enabled ? 30_000 : false,
   });
 }
 

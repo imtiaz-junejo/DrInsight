@@ -131,8 +131,10 @@ export interface DoctorProfile {
   country?: string | null;
   profileSlug?: string | null;
   seoFocusKeyword?: string | null;
+  seoSecondaryKeywords?: string | null;
   seoMetaTitle?: string | null;
   seoMetaDescription?: string | null;
+  seoSchemaJson?: unknown;
   gender?: string | null;
   address?: string | null;
   coverImageUrl?: string | null;
@@ -147,6 +149,7 @@ export interface DoctorProfile {
   instagramUrl?: string | null;
   authorType?: string | null;
   bookingEnabled?: boolean;
+  contactEnabled?: boolean;
   onlineAvailEnabled?: boolean;
   physicalAvailEnabled?: boolean;
   researchGrantsTotal?: string | null;
@@ -157,6 +160,8 @@ export interface DoctorProfile {
   editorialBoard?: boolean;
   medicalReviewerFor?: string | null;
   conflictOfInterest?: string | null;
+  coiUpdatedAt?: string | null;
+  authorSince?: string | null;
   credentialsVerifiedAt?: string | null;
   createdAt?: string;
   updatedAt?: string;

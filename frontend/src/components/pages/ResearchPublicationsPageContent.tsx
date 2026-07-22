@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import "@/styles/research-publications.css";
 import { formatDate } from "@/lib/data-mappers";
@@ -11,18 +10,9 @@ import {
   type PublicationType,
   PUBLICATION_TYPE_LABELS,
   publicationAuthorsLine,
-  publicationCoverUrl,
-  publicationPdfUrl,
   useFeaturedPublications,
-  useLatestPublications,
-  usePopularPublications,
   usePublicPublicationStats,
-  usePublicPublications,
-  useTogglePublicationBookmark,
-  useTrackPublicationDownload,
-  useTrackPublicationShare,
 } from "@/services/publications-api-hooks";
-import { useAuthStore } from "@/store/auth.store";
 
 const TOC = [
   { id: "s1", num: "1", label: "Research Overview" },
@@ -53,6 +43,10 @@ const FOCUS_AREAS = [
 ];
 
 const TYPE_TAG_CLASS: Partial<Record<PublicationType, string>> = {
+  EVIDENCE_REVIEW: "tag-review",
+  CLINICAL_EXPLAINER: "tag-clin",
+  META_SUMMARY: "tag-meta",
+  PRACTICE_GUIDE: "tag-guide",
   JOURNAL_ARTICLE: "tag-review",
   RESEARCH_PAPER: "tag-meta",
   CASE_STUDY: "tag-clin",
@@ -63,18 +57,40 @@ const TYPE_TAG_CLASS: Partial<Record<PublicationType, string>> = {
   THESIS: "tag-default",
 };
 
-const SORT_OPTIONS = [
-  { value: "newest", label: "Newest" },
-  { value: "oldest", label: "Oldest" },
-  { value: "views", label: "Most Viewed" },
-  { value: "downloads", label: "Most Downloaded" },
-  { value: "citations", label: "Most Cited" },
+const FEATURED_FILTERS = [
+  { id: "all", label: "All" },
+  { id: "clin", label: "Clinical Explainers" },
+  { id: "review", label: "Evidence Reviews" },
+  { id: "meta", label: "Meta-Summaries" },
+  { id: "guide", label: "Practice Guides" },
 ] as const;
 
-function doctorLine(pub: Publication): string {
-  const user = pub.doctor?.user;
-  if (user) return `Dr. ${user.firstName} ${user.lastName}`;
-  return publicationAuthorsLine(pub);
+type FeaturedFilterId = (typeof FEATURED_FILTERS)[number]["id"];
+
+function publicationFilterCategory(type: PublicationType): Exclude<FeaturedFilterId, "all"> {
+  switch (type) {
+    case "CLINICAL_EXPLAINER":
+    case "CASE_STUDY":
+    case "BOOK_CHAPTER":
+      return "clin";
+    case "META_SUMMARY":
+    case "RESEARCH_PAPER":
+    case "CLINICAL_TRIAL":
+      return "meta";
+    case "PRACTICE_GUIDE":
+    case "CONFERENCE_PAPER":
+      return "guide";
+    default:
+      return "review";
+  }
+}
+
+function readLinkLabel(type: PublicationType): string {
+  const category = publicationFilterCategory(type);
+  if (category === "clin") return "Read full explainer →";
+  if (category === "meta") return "Read full summary →";
+  if (category === "guide") return "Read full guide →";
+  return "Read full review →";
 }
 
 function pubDate(pub: Publication): string {
@@ -104,204 +120,51 @@ function Accordion({
   );
 }
 
-function PublicationCard({
-  pub,
-  compact,
-  isLoggedIn,
-  onBookmark,
-}: {
-  pub: Publication;
-  compact?: boolean;
-  isLoggedIn: boolean;
-  onBookmark: (pub: Publication) => void;
-}) {
-  const router = useRouter();
-  const cover = publicationCoverUrl(pub);
-  const pdf = publicationPdfUrl(pub);
-  const doiLink = pub.doiUrl ?? (pub.doi ? `https://doi.org/${pub.doi}` : null);
-  const trackDownload = useTrackPublicationDownload();
-  const trackShare = useTrackPublicationShare();
+function FeaturedPublicationCard({ pub }: { pub: Publication }) {
   const detailHref = `/research-publications/${pub.slug}`;
 
-  const handleRead = () => {
-    router.push(detailHref);
-  };
-
-  const handleDownload = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!pdf) return;
-    window.open(pdf, "_blank", "noopener,noreferrer");
-    trackDownload.mutate(pub.slug);
-  };
-
-  const handleShare = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const url = `${window.location.origin}${detailHref}`;
-    trackShare.mutate(pub.slug);
-    if (navigator.share) {
-      await navigator.share({ title: pub.title, text: pub.abstract.slice(0, 120), url });
-    } else {
-      await navigator.clipboard.writeText(url);
-      alert("Link copied to clipboard");
-    }
-  };
-
   return (
-    <article className={`pub-card${compact ? " compact" : ""}`} id={pub.slug}>
-      {!compact ? (
-        <Link href={detailHref} className="pub-cover-link">
-          {cover ? (
-            <img src={cover} alt="" className="pub-cover" />
-          ) : (
-            <div className="pub-cover-placeholder">📄</div>
-          )}
+    <article className="pub-card featured-pub-card" data-cat={publicationFilterCategory(pub.publicationType)}>
+      <div className="pub-top">
+        <span className={`pub-tag ${TYPE_TAG_CLASS[pub.publicationType] ?? "tag-default"}`}>
+          {PUBLICATION_TYPE_LABELS[pub.publicationType]}
+        </span>
+        {pub.physicianReviewed ? <span className="reviewed-badge">✔ Physician-Reviewed</span> : null}
+        <span className="pub-date">{pubDate(pub)}</span>
+      </div>
+      <h4>{pub.title}</h4>
+      <div className="pub-authors">
+        <em>{publicationAuthorsLine(pub)}</em>
+        {pub.reviewingPhysician ? ` · Reviewed by ${pub.reviewingPhysician}` : null}
+      </div>
+      <p className="pub-abstract">{pub.abstract}</p>
+      <div className="pub-foot">
+        {pub.referenceCount ? <span className="pf-stat">📚 {pub.referenceCount} references</span> : null}
+        <span className="pf-stat">⏱️ {pub.readTimeMinutes} min read</span>
+        {pub.openAccess ? <span className="pf-stat">🔓 Open access</span> : null}
+        <Link href={detailHref} className="pf-link">
+          {readLinkLabel(pub.publicationType)}
         </Link>
-      ) : null}
-      <div>
-        <div className="pub-top">
-          <span className={`pub-tag ${TYPE_TAG_CLASS[pub.publicationType] ?? "tag-default"}`}>
-            {PUBLICATION_TYPE_LABELS[pub.publicationType]}
-          </span>
-          {pub.physicianReviewed ? <span className="reviewed-badge">✔ Physician-Reviewed</span> : null}
-          <span className="pub-date">{pubDate(pub)}</span>
-        </div>
-        <h4>
-          <Link href={detailHref}>{pub.title}</Link>
-        </h4>
-        <div className="pub-authors">
-          <em>{publicationAuthorsLine(pub)}</em>
-          {pub.reviewingPhysician ? ` · Reviewed by ${pub.reviewingPhysician}` : null}
-        </div>
-        <div className="pub-meta-row">
-          {pub.medicalSpecialty ? <span>🏥 {pub.medicalSpecialty}</span> : null}
-          {pub.journalName ? <span>📰 {pub.journalName}</span> : null}
-          {pub.doi ? <span>🔗 DOI: {pub.doi}</span> : null}
-        </div>
-        <p className="pub-abstract">{pub.abstract}</p>
-        {pub.keywords?.length ? (
-          <div className="pub-keywords">
-            {pub.keywords.map((kw) => (
-              <span key={kw.id ?? kw.keyword} className="pub-kw">
-                {kw.keyword}
-              </span>
-            ))}
-          </div>
-        ) : null}
-        <div className="pub-foot">
-          {pub.referenceCount ? <span className="pf-stat">📚 {pub.referenceCount} references</span> : null}
-          <span className="pf-stat">⏱️ {pub.readTimeMinutes} min read</span>
-          <span className="pf-stat">👁 {formatNumber(pub.viewCount)} views</span>
-          <span className="pf-stat">⬇ {formatNumber(pub.downloadCount)} downloads</span>
-          <span className="pf-stat">📎 {formatNumber(pub.citationCount)} citations</span>
-          {pub.openAccess ? <span className="pf-stat">🔓 Open access</span> : null}
-        </div>
-        <div className="pub-actions">
-          <button type="button" className="pub-btn primary" onClick={handleRead}>
-            Read Publication
-          </button>
-          {pdf ? (
-            <button type="button" className="pub-btn" onClick={handleDownload}>
-              Download PDF
-            </button>
-          ) : null}
-          {doiLink ? (
-            <a
-              href={doiLink}
-              className="pub-btn"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-            >
-              View DOI
-            </a>
-          ) : null}
-          <button type="button" className="pub-btn" onClick={handleShare}>
-            Share
-          </button>
-          {isLoggedIn ? (
-            <button
-              type="button"
-              className={`pub-btn${pub.bookmarked ? " bookmarked" : ""}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                onBookmark(pub);
-              }}
-            >
-              {pub.bookmarked ? "★ Bookmarked" : "☆ Bookmark"}
-            </button>
-          ) : null}
-        </div>
       </div>
     </article>
   );
 }
 
 export function ResearchPublicationsPageContent() {
-  const isLoggedIn = useAuthStore((s) => s.isAuthenticated);
   const [activeSection, setActiveSection] = useState("s1");
   const [accordions, setAccordions] = useState<Record<string, boolean>>({ "pub-type-0": true });
-  const [search, setSearch] = useState("");
-  const [specialty, setSpecialty] = useState("");
-  const [pubType, setPubType] = useState("");
-  const [year, setYear] = useState("");
-  const [journal, setJournal] = useState("");
-  const [doctorId, setDoctorId] = useState("");
-  const [sort, setSort] = useState<(typeof SORT_OPTIONS)[number]["value"]>("newest");
-  const [page, setPage] = useState(1);
-  const [allItems, setAllItems] = useState<Publication[]>([]);
+  const [featuredFilter, setFeaturedFilter] = useState<FeaturedFilterId>("all");
 
   const statsQuery = usePublicPublicationStats();
   const featuredQuery = useFeaturedPublications(5);
-  const latestQuery = useLatestPublications(5);
-  const popularQuery = usePopularPublications(5);
-  const bookmarkMutation = useTogglePublicationBookmark();
-
-  const browseQuery = usePublicPublications({
-    page,
-    limit: 12,
-    search: search.trim() || undefined,
-    specialty: specialty || undefined,
-    publicationType: (pubType as PublicationType) || undefined,
-    year: year ? Number(year) : undefined,
-    journal: journal || undefined,
-    doctorId: doctorId || undefined,
-    sort,
-  });
 
   const stats = statsQuery.data;
-  const browseMeta = browseQuery.data?.meta;
 
-  useEffect(() => {
-    if (!browseQuery.data) return;
-    const data = browseQuery.data.data ?? [];
-    setAllItems((prev) => (page === 1 ? data : [...prev, ...data]));
-  }, [browseQuery.data, page]);
-
-  const filterOptions = useMemo(() => {
-    const pubs = [...(featuredQuery.data ?? []), ...(latestQuery.data ?? []), ...allItems];
-    const specialties = [...new Set(pubs.map((p) => p.medicalSpecialty).filter(Boolean))] as string[];
-    const journals = [...new Set(pubs.map((p) => p.journalName).filter(Boolean))] as string[];
-    const years = [
-      ...new Set(
-        pubs
-          .map((p) => {
-            const d = p.publicationDate ?? p.publishedAt;
-            return d ? new Date(d).getFullYear() : null;
-          })
-          .filter((y): y is number => y !== null),
-      ),
-    ].sort((a, b) => b - a);
-    const doctors = pubs
-      .filter((p) => p.doctor?.id)
-      .map((p) => ({
-        id: p.doctor!.id,
-        name: doctorLine(p),
-      }));
-    const uniqueDoctors = [...new Map(doctors.map((d) => [d.id, d])).values()];
-    return { specialties, journals, years, doctors: uniqueDoctors };
-  }, [featuredQuery.data, latestQuery.data, allItems]);
+  const filteredFeatured = useMemo(() => {
+    const items = featuredQuery.data ?? [];
+    if (featuredFilter === "all") return items;
+    return items.filter((pub) => publicationFilterCategory(pub.publicationType) === featuredFilter);
+  }, [featuredQuery.data, featuredFilter]);
 
   const sectionIds = TOC.map((t) => t.id);
 
@@ -323,36 +186,10 @@ export function ResearchPublicationsPageContent() {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
-  const resetFilters = () => {
-    setSearch("");
-    setSpecialty("");
-    setPubType("");
-    setYear("");
-    setJournal("");
-    setDoctorId("");
-    setSort("newest");
-    setPage(1);
-  };
-
-  const applyFilters = () => {
-    setPage(1);
-    setAllItems([]);
-  };
-
-  const handleBookmark = async (pub: Publication) => {
-    try {
-      await bookmarkMutation.mutateAsync(pub.slug);
-    } catch {
-      alert("Failed to update bookmark");
-    }
-  };
-
   const copyCite = async (text: string) => {
     await navigator.clipboard.writeText(text);
     alert("Citation copied");
   };
-
-  const hasMore = browseMeta ? page < browseMeta.totalPages : false;
 
   return (
     <div className="research-pub-page">
@@ -453,7 +290,15 @@ export function ResearchPublicationsPageContent() {
               <p>
                 Our editorial research program exists to answer one question for every article:{" "}
                 <strong>&quot;What does the best current evidence actually say?&quot;</strong> We systematically monitor
-                peer-reviewed medical literature, clinical practice guidelines, and authoritative public-health sources.
+                peer-reviewed medical literature, clinical practice guidelines, and authoritative public-health sources,
+                then synthesise them into accurate, plain-language content.
+              </p>
+              <p>
+                We publish four things: <strong>evidence reviews</strong> that summarise the state of knowledge on a
+                condition, <strong>clinical explainers</strong> that translate guidelines for patients,{" "}
+                <strong>meta-summaries</strong> that pool findings across multiple studies, and{" "}
+                <strong>practice guides</strong> for everyday health decisions. Everything is version-controlled, dated,
+                and revisited on a fixed review cycle.
               </p>
             </div>
             <div className="box box-b">
@@ -462,6 +307,7 @@ export function ResearchPublicationsPageContent() {
                 <li>Every clinical claim is traceable to a cited, peer-reviewed source.</li>
                 <li>All content is signed off by a licensed physician before publication.</li>
                 <li>We disclose funding, conflicts of interest, and AI assistance openly.</li>
+                <li>Superseded content is corrected or retracted, never quietly deleted.</li>
               </ul>
             </div>
           </section>
@@ -486,132 +332,50 @@ export function ResearchPublicationsPageContent() {
               <div className="sn p">3</div>Featured Publications
             </div>
             <div className="prose">
-              <p>Browse featured, latest, and popular publications. Use filters to search the full library.</p>
+              <p>
+                A selection of recent evidence reviews and clinical summaries. Use the filters to narrow by type. All are
+                open access and free to read.
+              </p>
             </div>
 
-            <div className="pub-section-label">⭐ Featured</div>
-            <div className="pub-list">
+            <div className="pub-controls" id="pubFilters">
+              {FEATURED_FILTERS.map((filter) => (
+                <button
+                  key={filter.id}
+                  type="button"
+                  className={`pub-filter${featuredFilter === filter.id ? " active" : ""}`}
+                  data-f={filter.id}
+                  onClick={() => setFeaturedFilter(filter.id)}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="pub-list" id="pubList">
               {featuredQuery.isLoading ? (
                 <div className="empty-pubs">Loading featured publications...</div>
-              ) : (featuredQuery.data ?? []).length === 0 ? (
+              ) : filteredFeatured.length === 0 ? (
                 <div className="empty-pubs">No featured publications yet.</div>
               ) : (
-                (featuredQuery.data ?? []).map((pub) => (
-                  <PublicationCard key={pub.id} pub={pub} isLoggedIn={isLoggedIn} onBookmark={handleBookmark} />
-                ))
+                filteredFeatured.map((pub) => <FeaturedPublicationCard key={pub.id} pub={pub} />)
               )}
             </div>
 
-            <div className="pub-section-label">🆕 Latest</div>
-            <div className="pub-list">
-              {(latestQuery.data ?? []).map((pub) => (
-                <PublicationCard key={pub.id} pub={pub} compact isLoggedIn={isLoggedIn} onBookmark={handleBookmark} />
-              ))}
+            <div className="box box-a" style={{ marginTop: 14 }}>
+              <div className="bh">📖 Looking for everything?</div>
+              <p>
+                This is a curated selection. Browse the full, searchable library on our{" "}
+                <Link href="/blog" style={{ color: "var(--blue)", fontWeight: 600 }}>
+                  Blog
+                </Link>{" "}
+                or explore by specialty in the{" "}
+                <Link href="/sitemap" style={{ color: "var(--blue)", fontWeight: 600 }}>
+                  Sitemap
+                </Link>
+                .
+              </p>
             </div>
-
-            <div className="pub-section-label">🔥 Popular</div>
-            <div className="pub-list">
-              {(popularQuery.data ?? []).map((pub) => (
-                <PublicationCard key={pub.id} pub={pub} compact isLoggedIn={isLoggedIn} onBookmark={handleBookmark} />
-              ))}
-            </div>
-
-            <div className="pub-section-label">🔍 Search Library</div>
-            <div className="pub-search-bar">
-              <input
-                type="search"
-                placeholder="Search title, abstract, DOI, keywords..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && applyFilters()}
-              />
-              <select value={specialty} onChange={(e) => setSpecialty(e.target.value)}>
-                <option value="">All specialties</option>
-                {filterOptions.specialties.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
-              <select value={pubType} onChange={(e) => setPubType(e.target.value)}>
-                <option value="">All types</option>
-                {Object.entries(PUBLICATION_TYPE_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-              <select value={year} onChange={(e) => setYear(e.target.value)}>
-                <option value="">All years</option>
-                {filterOptions.years.map((y) => (
-                  <option key={y} value={y}>
-                    {y}
-                  </option>
-                ))}
-              </select>
-              <select value={journal} onChange={(e) => setJournal(e.target.value)}>
-                <option value="">All journals</option>
-                {filterOptions.journals.map((j) => (
-                  <option key={j} value={j}>
-                    {j}
-                  </option>
-                ))}
-              </select>
-              <select value={doctorId} onChange={(e) => setDoctorId(e.target.value)}>
-                <option value="">All doctors</option>
-                {filterOptions.doctors.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="pub-controls">
-              {SORT_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  className={`pub-filter${sort === opt.value ? " active" : ""}`}
-                  onClick={() => {
-                    setSort(opt.value);
-                    setPage(1);
-                    setAllItems([]);
-                  }}
-                >
-                  {opt.label}
-                </button>
-              ))}
-              <button type="button" className="pub-filter" onClick={applyFilters}>
-                Apply Filters
-              </button>
-              <button type="button" className="pub-filter" onClick={resetFilters}>
-                Reset
-              </button>
-            </div>
-
-            <div className="pub-list">
-              {browseQuery.isLoading && page === 1 ? (
-                <div className="empty-pubs">Loading publications...</div>
-              ) : allItems.length === 0 ? (
-                <div className="empty-pubs">No publications match your filters.</div>
-              ) : (
-                allItems.map((pub) => (
-                  <PublicationCard key={pub.id} pub={pub} isLoggedIn={isLoggedIn} onBookmark={handleBookmark} />
-                ))
-              )}
-            </div>
-            {hasMore ? (
-              <div className="load-more-wrap">
-                <button
-                  type="button"
-                  className="load-more-btn"
-                  disabled={browseQuery.isFetching}
-                  onClick={() => setPage((p) => p + 1)}
-                >
-                  {browseQuery.isFetching ? "Loading..." : "Load More"}
-                </button>
-              </div>
-            ) : null}
           </section>
 
           <section className="section" id="s4">
@@ -702,12 +466,19 @@ export function ResearchPublicationsPageContent() {
                 <li>
                   <strong>Corrections:</strong> errors are corrected transparently with a visible correction notice.
                 </li>
+                <li>
+                  <strong>Attribution:</strong> all sources are credited; plagiarism is not tolerated.
+                </li>
+                <li>
+                  <strong>AI transparency:</strong> any AI assistance in drafting is disclosed and always physician-verified.
+                </li>
               </ul>
             </div>
             <div className="box box-b">
               <div className="bh">🔗 Read the full policies</div>
               <p>
-                Our <Link href="/editorial-policy">Editorial Policy</Link> and{" "}
+                Our <Link href="/editorial-policy">Editorial Policy</Link>,{" "}
+                <Link href="/medical-review-process">Medical Review Process</Link> and{" "}
                 <Link href="/author-guidelines">Author Guidelines</Link> describe every step in detail.
               </p>
             </div>
@@ -717,36 +488,74 @@ export function ResearchPublicationsPageContent() {
             <div className="sec-title">
               <div className="sn a">7</div>Publication Types Explained
             </div>
+            <div className="prose">
+              <p>Tap each type to see what it means and how much evidence sits behind it.</p>
+            </div>
             {[
               {
                 id: "pub-type-0",
-                title: "📘 Journal Article / Evidence Review",
+                title: "📘 Evidence Review",
                 body: (
                   <>
-                    <p>A structured synthesis of the current best evidence on a single condition or question.</p>
+                    <p>
+                      A structured synthesis of the current best evidence on a single condition or question. These draw
+                      on multiple high-tier sources and are our most rigorous format.
+                    </p>
                     <ul>
                       <li>Typically 30–60 cited references.</li>
                       <li>Reviewed by a specialist in the relevant field.</li>
+                      <li>Re-examined at least every 18 months.</li>
                     </ul>
                   </>
                 ),
               },
               {
                 id: "pub-type-1",
-                title: "🩺 Clinical Explainer / Case Study",
+                title: "🩺 Clinical Explainer",
                 body: (
-                  <p>Translates a clinical guideline or diagnosis into plain language for patients and caregivers.</p>
+                  <>
+                    <p>
+                      Translates a clinical guideline or diagnosis into plain language for patients and caregivers,
+                      without oversimplifying the science.
+                    </p>
+                    <ul>
+                      <li>Anchored to current practice guidelines.</li>
+                      <li>Focused on &quot;what this means for you&quot;.</li>
+                    </ul>
+                  </>
                 ),
               },
               {
                 id: "pub-type-2",
-                title: "📊 Research Paper / Meta-Summary",
-                body: <p>Pools and plainly summarises findings across several studies on the same topic.</p>,
+                title: "📊 Meta-Summary",
+                body: (
+                  <>
+                    <p>
+                      Pools and plainly summarises findings across several studies on the same topic, reporting where
+                      evidence agrees, disagrees, and remains uncertain.
+                    </p>
+                    <ul>
+                      <li>States effect sizes and limitations honestly.</li>
+                      <li>Never presents preliminary data as settled fact.</li>
+                    </ul>
+                  </>
+                ),
               },
               {
                 id: "pub-type-3",
                 title: "🧭 Practice Guide",
-                body: <p>Actionable, everyday guidance for common health decisions grounded in guideline recommendations.</p>,
+                body: (
+                  <>
+                    <p>
+                      Actionable, everyday guidance for common health decisions — screening, prevention, when to see a
+                      doctor — grounded in guideline recommendations.
+                    </p>
+                    <ul>
+                      <li>Checklists and clear next steps.</li>
+                      <li>Always includes a &quot;seek medical advice&quot; pathway.</li>
+                    </ul>
+                  </>
+                ),
               },
             ].map((item) => (
               <Accordion
@@ -764,6 +573,9 @@ export function ResearchPublicationsPageContent() {
             <div className="sec-title">
               <div className="sn t">8</div>Data &amp; Transparency
             </div>
+            <div className="prose">
+              <p>Each publication carries a transparency footer so readers can judge its reliability at a glance.</p>
+            </div>
             <div className="table-scroll">
               <table className="sched-table">
                 <thead>
@@ -779,6 +591,8 @@ export function ResearchPublicationsPageContent() {
                     ["Reviewing physician", "Review badge & footer", "Per review"],
                     ["Full reference list", "End of article", "Every revision"],
                     ["Conflict-of-interest statement", "Article footer", "Annually / on change"],
+                    ["Last review & next-review date", "Article header", "Each review cycle"],
+                    ["Correction history", "Correction notice", "When corrected"],
                   ].map(([a, b, c]) => (
                     <tr key={a}>
                       <td>{a}</td>
@@ -795,29 +609,63 @@ export function ResearchPublicationsPageContent() {
             <div className="sec-title">
               <div className="sn">9</div>How to Cite Our Work
             </div>
+            <div className="prose">
+              <p>
+                You are welcome to reference DrInsight content. Please cite the specific article, its author, and the
+                date you accessed it. Example formats:
+              </p>
+            </div>
             <p style={{ fontSize: "0.74rem", fontWeight: 700, color: "var(--gray-600)", margin: "12px 0 4px" }}>
               APA (7th edition)
             </p>
-            <div className="cite-block">
+            <div className="cite-block" id="citeApa">
               <button
                 type="button"
                 className="cite-copy"
                 onClick={() =>
                   copyCite(
-                    "DrInsight Editorial Team. (2026). Blood pressure targets in adults: A plain-language review of current guidelines. DrInsight. Retrieved from https://www.drinsight.org/research-publications",
+                    "DrInsight Editorial Team. (2026). Blood pressure targets in adults: A plain-language review of current guidelines. DrInsight. Retrieved July 8, 2026, from https://www.drinsight.org/article.html",
                   )
                 }
               >
                 Copy
               </button>
               DrInsight Editorial Team. (2026). <em>Blood pressure targets in adults: A plain-language review of current guidelines.</em>{" "}
-              DrInsight. Retrieved from https://www.drinsight.org/research-publications
+              DrInsight. Retrieved July 8, 2026, from https://www.drinsight.org/article.html
+            </div>
+            <p style={{ fontSize: "0.74rem", fontWeight: 700, color: "var(--gray-600)", margin: "12px 0 4px" }}>
+              Vancouver
+            </p>
+            <div className="cite-block" id="citeVan">
+              <button
+                type="button"
+                className="cite-copy"
+                onClick={() =>
+                  copyCite(
+                    "DrInsight Editorial Team. Blood pressure targets in adults: a plain-language review of current guidelines. DrInsight. 2026. Available from: https://www.drinsight.org/article.html [Accessed 8 July 2026].",
+                  )
+                }
+              >
+                Copy
+              </button>
+              DrInsight Editorial Team. Blood pressure targets in adults: a plain-language review of current guidelines. DrInsight. 2026.
+              Available from: https://www.drinsight.org/article.html [Accessed 8 July 2026].
+            </div>
+            <div className="box box-a">
+              <div className="bh">⚠️ Important</div>
+              <p>
+                Our content is educational and does not replace professional medical advice. It should be cited as a
+                health-information source, not as primary clinical research.
+              </p>
             </div>
           </section>
 
           <section className="section g" id="s10">
             <div className="sec-title">
               <div className="sn g">10</div>Partners &amp; Collaborators
+            </div>
+            <div className="prose">
+              <p>We work with practising clinicians and reputable health bodies to keep our content current and accurate.</p>
             </div>
             <div className="contrib-grid">
               {[
@@ -833,11 +681,27 @@ export function ResearchPublicationsPageContent() {
                 </div>
               ))}
             </div>
+            <div className="box box-b">
+              <div className="bh">🤝 Become a contributor</div>
+              <p>
+                Qualified clinicians can apply to author or review content — see the{" "}
+                <Link href="/author-guidelines" style={{ color: "var(--blue)", fontWeight: 600 }}>
+                  Author Guidelines
+                </Link>
+                .
+              </p>
+            </div>
           </section>
 
           <section className="section p" id="s11">
             <div className="sec-title">
               <div className="sn p">11</div>Submit or Collaborate
+            </div>
+            <div className="prose">
+              <p>
+                Whether you&apos;re a clinician who wants to contribute, a researcher proposing a collaboration, or a
+                reader flagging an error — we want to hear from you.
+              </p>
             </div>
             <div className="cta-box">
               <h3>🔬 Work With Our Research Team</h3>
@@ -857,11 +721,17 @@ export function ResearchPublicationsPageContent() {
             <div className="sec-title">
               <div className="sn a">12</div>Research &amp; Editorial Team
             </div>
+            <div className="prose">
+              <p>The people who oversee evidence review, authoring and physician sign-off.</p>
+            </div>
             <div className="team-grid">
               {[
                 ["JK", "Dr. Javed Kumbhar", "Founder", "MBBS, RMP", "linear-gradient(135deg,#1a56a0,#0891b2)"],
                 ["AR", "Dr. A. Rehman", "Lead Author", "Cardiology", "linear-gradient(135deg,#7c3aed,#1a56a0)"],
                 ["SF", "Dr. S. Fatima", "Reviewer", "Endocrinology", "linear-gradient(135deg,#059669,#0891b2)"],
+                ["MI", "Dr. M. Iqbal", "Reviewer", "Psychiatry", "linear-gradient(135deg,#d97706,#dc2626)"],
+                ["HS", "Dr. H. Shaikh", "Author", "Neurology", "linear-gradient(135deg,#0891b2,#1a56a0)"],
+                ["NA", "Dr. N. Ali", "Author", "Pediatrics", "linear-gradient(135deg,#1a56a0,#7c3aed)"],
               ].map(([initials, name, role, sub, bg]) => (
                 <div key={name} className="team-card">
                   <div className="team-av" style={{ background: bg }}>
@@ -876,7 +746,7 @@ export function ResearchPublicationsPageContent() {
             <div className="box box-b">
               <div className="bh">👥 Meet everyone</div>
               <p>
-                See full profiles on the <Link href="/our-doctors">Our Doctors</Link> page.
+                See full profiles and credentials on the <Link href="/our-doctors">Our Doctors</Link> page.
               </p>
             </div>
           </section>
@@ -892,7 +762,7 @@ export function ResearchPublicationsPageContent() {
                 ["📞 Editorial Desk", "tel:+923353545545", "Mon–Fri, 8AM–8PM"],
                 ["💬 General Contact", "/contact", "Everything else"],
               ].map(([title, href, note]) => (
-                <div key={title} className="contact-card">
+                <div key={title} className="contact-card bg-gray-50">
                   <h4>{title}</h4>
                   {href.startsWith("/") ? (
                     <Link href={href}>Contact form</Link>
@@ -902,7 +772,7 @@ export function ResearchPublicationsPageContent() {
                   <p>{note}</p>
                 </div>
               ))}
-              <div className="contact-card">
+              <div className="contact-card bg-gray-50">
                 <h4>📍 Mailing Address</h4>
                 <p>
                   DrInsight
@@ -921,17 +791,15 @@ export function ResearchPublicationsPageContent() {
             <Link href="/editorial-policy" className="pill-link">
               Editorial Policy
             </Link>
+            <Link href="/medical-review-process" className="pill-link">
+              Review Process
+            </Link>
             <Link href="/author-guidelines" className="pill-link">
               Author Guidelines
             </Link>
             <Link href="/disclaimer" className="pill-link">
               Medical Disclaimer
             </Link>
-          </div>
-          <div className="pf-btns">
-            <button type="button" className="pf-btn g" onClick={() => scrollTo("s11")}>
-              🤝 Collaborate
-            </button>
           </div>
         </div>
       </div>

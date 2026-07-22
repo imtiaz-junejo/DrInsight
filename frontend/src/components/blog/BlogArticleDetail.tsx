@@ -53,12 +53,13 @@ import {
   getInitials,
   gradientForId,
 } from "@/lib/data-mappers";
+import { NewsletterSubscribeMessage } from "@/components/newsletter/NewsletterSubscribeMessage";
+import { useNewsletterForm } from "@/hooks/use-newsletter-form";
 import {
   useBlogPost,
   useBlogPostComment,
   useBlogPostFeedback,
   useBlogPostShare,
-  useNewsletterSubscribe,
   type BlogAuthorProfile,
   type BlogGlossaryTerm,
   type BlogPostDetail,
@@ -122,7 +123,7 @@ export function BlogArticleDetail({ slug }: Props) {
   const commentMutation = useBlogPostComment(slug);
   const feedbackMutation = useBlogPostFeedback(slug);
   const shareMutation = useBlogPostShare(slug);
-  const newsletterMutation = useNewsletterSubscribe();
+  const newsletterForm = useNewsletterForm("blog-article");
 
   const post = postQuery.data as BlogPostDetail | undefined;
 
@@ -138,8 +139,6 @@ export function BlogArticleDetail({ slug }: Props) {
   const [ratingText, setRatingText] = useState("");
   const [activeReactions, setActiveReactions] = useState<Set<string>>(new Set());
   const [commentSubmitted, setCommentSubmitted] = useState(false);
-  const [newsletterEmail, setNewsletterEmail] = useState("");
-  const [newsletterMsg, setNewsletterMsg] = useState("");
   const [linkCopied, setLinkCopied] = useState(false);
   const [isListening, setIsListening] = useState(false);
 
@@ -333,21 +332,6 @@ export function BlogArticleDetail({ slug }: Props) {
     [commentMutation],
   );
 
-  const handleNewsletter = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!newsletterEmail.trim()) return;
-      try {
-        await newsletterMutation.mutateAsync(newsletterEmail.trim());
-        setNewsletterMsg("Subscribed successfully!");
-        setNewsletterEmail("");
-      } catch {
-        setNewsletterMsg("Could not subscribe. Please try again.");
-      }
-    },
-    [newsletterEmail, newsletterMutation],
-  );
-
   if (postQuery.isLoading) {
     return <div className="px-6 py-20 text-center text-gray-500">Loading article...</div>;
   }
@@ -525,11 +509,18 @@ export function BlogArticleDetail({ slug }: Props) {
             </div>
           )}
         </div>
-        <Link href="/editorial-policy" className="ad-editorial-link">
+        <div className="ad-editorial-link">
           <AdIconLabel icon={ClipboardList} size={14}>
-            How we ensure accuracy — Read our Editorial Guidelines & Medical Review Process
+            How we ensure accuracy — Read our{" "}
+            <Link href="/editorial-policy" style={{ color: "inherit", textDecoration: "underline" }}>
+              Editorial Guidelines
+            </Link>{" "}
+            &{" "}
+            <Link href="/medical-review-process" style={{ color: "inherit", textDecoration: "underline" }}>
+              Medical Review Process
+            </Link>
           </AdIconLabel>
-        </Link>
+        </div>
       </div>
 
       <div className="ad-controls">
@@ -921,20 +912,25 @@ export function BlogArticleDetail({ slug }: Props) {
             <p style={{ fontSize: ".76rem", opacity: 0.88, marginBottom: 12, lineHeight: 1.6 }}>
               Get the best medical articles from our doctors every Monday — free.
             </p>
-            <form onSubmit={handleNewsletter}>
+            <form onSubmit={newsletterForm.handleSubmit}>
               <input
                 type="email"
                 placeholder="Your email address"
-                value={newsletterEmail}
-                onChange={(e) => setNewsletterEmail(e.target.value)}
+                value={newsletterForm.email}
+                onChange={(e) => newsletterForm.setEmail(e.target.value)}
                 required
                 style={{ background: "rgba(255,255,255,.15)", borderColor: "rgba(255,255,255,.25)", color: "#fff" }}
               />
-              <button type="submit" style={{ background: "#fff", color: "#0f3d7a", border: "none" }} disabled={newsletterMutation.isPending}>
+              <button type="submit" style={{ background: "#fff", color: "#0f3d7a", border: "none" }} disabled={newsletterForm.isPending}>
                 Subscribe Free →
               </button>
             </form>
-            {newsletterMsg && <p style={{ fontSize: ".68rem", opacity: 0.9, marginTop: 7 }}>{newsletterMsg}</p>}
+            <NewsletterSubscribeMessage
+              message={newsletterForm.message}
+              tone={newsletterForm.messageTone}
+              onDark
+              className="text-[.68rem] mt-[7px]"
+            />
             <p className="ad-newsletter-privacy">
               <AdIconLabel icon={Lock} size={12}>
                 No spam. Unsubscribe anytime.

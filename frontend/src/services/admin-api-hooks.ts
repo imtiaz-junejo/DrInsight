@@ -213,15 +213,119 @@ export function useUpdateDoctorSeo() {
       doctorId: string;
       profileSlug?: string;
       seoFocusKeyword?: string;
+      seoSecondaryKeywords?: string;
       seoMetaTitle?: string;
       seoMetaDescription?: string;
       seoSchemaJson?: unknown;
+      bookingEnabled?: boolean;
+      contactEnabled?: boolean;
+      onlineAvailEnabled?: boolean;
+      physicalAvailEnabled?: boolean;
     }) => {
       const { data } = await api.patch(`/doctors/${doctorId}/seo`, body);
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["admin-doctors"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-doctor-manage"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-doctor-detail", variables.doctorId] });
+    },
+  });
+}
+
+export interface AdminDoctorListItem extends DoctorProfile {
+  user?: DoctorProfile["user"] & { lastSeenAt?: string | null };
+}
+
+export interface AdminDoctorContentItem {
+  id: string;
+  title: string;
+  slug?: string;
+  category?: string;
+  type?: string;
+  venue?: string;
+  date?: string;
+  views?: number;
+  status: string;
+  statusLabel: string;
+}
+
+export function useAdminDoctorManage(params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  specialty?: string;
+  city?: string;
+  gender?: string;
+  accountStatus?: string;
+  verificationStatus?: string;
+  sort?: string;
+  order?: "asc" | "desc";
+}) {
+  return useQuery({
+    queryKey: ["admin-doctor-manage", params],
+    queryFn: async () => {
+      const { data } = await api.get<{
+        data: AdminDoctorListItem[];
+        meta: { total: number; page: number; limit: number; totalPages: number };
+        stats?: { customSeoCount: number };
+      }>("/doctors/manage", { params });
+      return data;
+    },
+  });
+}
+
+export function useAdminDoctorDetail(doctorId: string | null) {
+  return useQuery({
+    queryKey: ["admin-doctor-detail", doctorId],
+    enabled: Boolean(doctorId),
+    queryFn: async () => {
+      const { data } = await api.get<DoctorProfile>(`/doctors/manage/${doctorId}`);
+      return data;
+    },
+  });
+}
+
+export function useAdminDoctorContent(doctorId: string | null) {
+  return useQuery({
+    queryKey: ["admin-doctor-content", doctorId],
+    enabled: Boolean(doctorId),
+    queryFn: async () => {
+      const { data } = await api.get<{
+        articles: AdminDoctorContentItem[];
+        publications: AdminDoctorContentItem[];
+      }>(`/doctors/manage/${doctorId}/content`);
+      return data;
+    },
+  });
+}
+
+export function useUpdateAdminDoctorProfile() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ doctorId, ...body }: { doctorId: string } & Record<string, unknown>) => {
+      const { data } = await api.patch(`/doctors/${doctorId}/admin`, body);
+      return data;
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-doctor-manage"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-doctor-detail", variables.doctorId] });
+      queryClient.invalidateQueries({ queryKey: ["admin-doctors"] });
+      queryClient.invalidateQueries({ queryKey: ["doctors"] });
+    },
+  });
+}
+
+export function useResetAdminDoctorSeo() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (doctorId: string) => {
+      const { data } = await api.patch(`/doctors/${doctorId}/admin/reset-seo`);
+      return data;
+    },
+    onSuccess: (_data, doctorId) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-doctor-manage"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-doctor-detail", doctorId] });
     },
   });
 }
@@ -247,6 +351,9 @@ export function useUpdateUserStatus() {
       queryClient.invalidateQueries({ queryKey: ["admin-pending-users"] });
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
       queryClient.invalidateQueries({ queryKey: ["doctors"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-doctors"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-doctor-manage"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-doctor-detail"] });
       queryClient.invalidateQueries({ queryKey: ["platform-stats"] });
       queryClient.invalidateQueries({ queryKey: ["admin-user-profile"] });
     },

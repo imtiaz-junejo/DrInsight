@@ -22,16 +22,19 @@ export function CalculatorCard({
   description,
   children,
   className,
-  tall,
 }: CalculatorCardProps) {
   return (
-    <article className={cn("calc-card bg-gray-200", tall && "calc-card--tall", className)} id={id}>
-      <div className={cn("calc-card-icon", `calc-card-icon--${iconClass}`)} aria-hidden>
-        {icon}
+    <article className={cn("tool-panel", className)} id={id}>
+      <div className="tool-header">
+        <div className={cn("tool-ico", iconClass)} aria-hidden>
+          {icon}
+        </div>
+        <div className="tool-header-text">
+          <h3>{title}</h3>
+          <p>{description}</p>
+        </div>
       </div>
-      <h3 className="calc-card-title">{title}</h3>
-      <p className="calc-card-desc">{description}</p>
-      <div className="calc-card-body">{children}</div>
+      <div className="tool-body">{children}</div>
     </article>
   );
 }

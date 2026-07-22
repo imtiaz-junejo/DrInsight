@@ -171,6 +171,7 @@ model DoctorProfile {
   instagramUrl          String?
   authorType            AuthorType            @default(DOCTOR)
   bookingEnabled        Boolean               @default(true)
+  contactEnabled        Boolean               @default(true)
   onlineAvailEnabled    Boolean               @default(true)
   physicalAvailEnabled  Boolean               @default(true)
   researchGrantsTotal   String?
@@ -180,9 +181,12 @@ model DoctorProfile {
   editorialBoard        Boolean               @default(false)
   medicalReviewerFor    String?
   conflictOfInterest    String?
+  coiUpdatedAt          DateTime?
+  authorSince           String?
   credentialsVerifiedAt DateTime?
   profileSlug           String?               @unique
   seoFocusKeyword       String?
+  seoSecondaryKeywords  String?
   seoMetaTitle          String?
   seoMetaDescription    String?
   seoSchemaJson         Json?

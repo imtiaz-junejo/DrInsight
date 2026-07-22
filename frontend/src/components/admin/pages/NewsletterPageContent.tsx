@@ -304,7 +304,7 @@ export function NewsletterPageContent() {
         headers={["Email", "Source", "Subscribed", "Status", "Actions"]}
         rows={subRows}
         loading={subsQuery.isLoading}
-        emptyMessage="No subscribers yet. Signups from the website footer appear here automatically."
+        emptyMessage="No subscribers yet. Signups from the website footer, blog, home page, and contact form appear here automatically."
         pagerInfo={
           subMeta ? `Showing ${subscribers.length} of ${subMeta.total} subscribers` : undefined
         }

@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import "@/styles/blog-page.css";
-import { AllSpecialtiesSection } from "@/components/blog/AllSpecialtiesSection";
+import { HomeResearchPublicationsSection } from "@/components/pages/home/HomeResearchPublicationsSection";
+import { NewsletterSubscribeMessage } from "@/components/newsletter/NewsletterSubscribeMessage";
+import { useNewsletterForm } from "@/hooks/use-newsletter-form";
 import { BlogArticleCard, BlogArticleGridSkeleton } from "@/components/blog/BlogArticleCard";
 import { CategoryIcon } from "@/components/blog/CategoryIcon";
 import { FeaturedArticleCard } from "@/components/blog/FeaturedArticleCard";
@@ -30,7 +32,6 @@ import {
 import {
   useBlogCategories,
   useBlogPosts,
-  useNewsletterSubscribe,
   usePlatformStats,
   usePopularBlogPosts,
   useTopBlogAuthors,
@@ -43,11 +44,13 @@ function BlogPageContent() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchMode, setIsSearchMode] = useState(false);
-  const [newsletterEmail, setNewsletterEmail] = useState("");
-  const [newsletterMsg, setNewsletterMsg] = useState("");
+  const [ctaSubscribeOpen, setCtaSubscribeOpen] = useState(false);
   const [limit, setLimit] = useState(12);
   const mainWrapRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const ctaEmailInputRef = useRef<HTMLInputElement>(null);
+  const sidebarNewsletter = useNewsletterForm("blog-sidebar");
+  const ctaNewsletter = useNewsletterForm("blog-cta", { hideSuccessMessage: true, clearEmailOnSuccess: true });
 
   const activeFilter = isSearchMode ? "all" : categoryParam ?? "all";
 
@@ -85,7 +88,6 @@ function BlogPageContent() {
   });
   const { data: popularPosts, isLoading: popularLoading } = usePopularBlogPosts(5);
   const { data: topAuthors } = useTopBlogAuthors(5);
-  const newsletter = useNewsletterSubscribe();
 
   const heroPost = useMemo(
     () => resolveCardiologyHeroPost(cardioData?.data, fallbackHeroData?.data?.[0]),
@@ -165,17 +167,11 @@ function BlogPageContent() {
     mainWrapRef.current?.scrollIntoView({ behavior: "smooth" });
   }
 
-  async function handleNewsletter(e: React.FormEvent) {
-    e.preventDefault();
-    if (!newsletterEmail.trim()) return;
-    try {
-      await newsletter.mutateAsync(newsletterEmail.trim());
-      setNewsletterMsg("Subscribed successfully!");
-      setNewsletterEmail("");
-    } catch {
-      setNewsletterMsg("Subscription failed. Please try again.");
+  useEffect(() => {
+    if (ctaSubscribeOpen) {
+      ctaEmailInputRef.current?.focus();
     }
-  }
+  }, [ctaSubscribeOpen]);
 
   const sectionTitle =
     isSearchMode && searchQuery.trim()
@@ -290,21 +286,25 @@ function BlogPageContent() {
           </div>
 
           <aside aria-label="Blog sidebar">
-            <form className="subscribe-card" onSubmit={handleNewsletter}>
+            <form className="subscribe-card" onSubmit={sidebarNewsletter.handleSubmit}>
               <h4>📬 Weekly Health Digest</h4>
               <p>Get the week&apos;s best medical articles delivered every Monday.</p>
               <input
                 type="email"
                 className="border-gray-300"
                 placeholder="Your email address"
-                value={newsletterEmail}
-                onChange={(e) => setNewsletterEmail(e.target.value)}
+                value={sidebarNewsletter.email}
+                onChange={(e) => sidebarNewsletter.setEmail(e.target.value)}
                 required
               />
-              <button type="submit" disabled={newsletter.isPending}>
-                {newsletter.isPending ? "Subscribing..." : "Subscribe Free →"}
+              <button type="submit" disabled={sidebarNewsletter.isPending}>
+                {sidebarNewsletter.isPending ? "Subscribing..." : "Subscribe Free →"}
               </button>
-              {newsletterMsg && <p className="subscribe-note">{newsletterMsg}</p>}
+              <NewsletterSubscribeMessage
+                message={sidebarNewsletter.message}
+                tone={sidebarNewsletter.messageTone}
+                className="subscribe-note"
+              />
               <p className="subscribe-note">🔒 No spam. Unsubscribe anytime.</p>
             </form>
 
@@ -385,12 +385,7 @@ function BlogPageContent() {
         </div>
       </div>
 
-      <AllSpecialtiesSection
-        categories={categories}
-        activeCategorySlug={!isSearchMode ? categoryParam : null}
-        onSelectCategory={filterPosts}
-        isLoading={categoriesLoading}
-      />
+      <HomeResearchPublicationsSection />
 
       <div className="cta-band">
         <SectionHeading
@@ -401,14 +396,41 @@ function BlogPageContent() {
           inverse
           lightEyebrow
         />
+        {ctaNewsletter.message ? (
+          <NewsletterSubscribeMessage
+            message={ctaNewsletter.message}
+            tone={ctaNewsletter.messageTone}
+            onDark
+            className="cta-subscribe-msg"
+          />
+        ) : null}
         <div className="cta-btns">
-          <button
-            type="button"
-            className="btn-white"
-            onClick={() => mainWrapRef.current?.scrollIntoView({ behavior: "smooth" })}
-          >
-            📬 Subscribe Free
-          </button>
+          {ctaSubscribeOpen ? (
+            ctaNewsletter.completed ? (
+              <button type="button" className="cta-subscribe-btn" disabled>
+                Subscribed
+              </button>
+            ) : (
+              <form className="cta-subscribe-form" onSubmit={ctaNewsletter.handleSubmit}>
+                <input
+                  ref={ctaEmailInputRef}
+                  type="email"
+                  placeholder="Your email address"
+                  aria-label="Email address"
+                  value={ctaNewsletter.email}
+                  onChange={(e) => ctaNewsletter.setEmail(e.target.value)}
+                  required
+                />
+                <button type="submit" className="cta-subscribe-btn" disabled={ctaNewsletter.isPending}>
+                  {ctaNewsletter.isPending ? "Subscribing..." : "Subscribe Free"}
+                </button>
+              </form>
+            )
+          ) : (
+            <button type="button" className="btn-white" onClick={() => setCtaSubscribeOpen(true)}>
+              📬 Subscribe Free
+            </button>
+          )}
           <Link href="/book-consultation" className="btn-ghost">
             📅 Book a Consultation
           </Link>

@@ -731,22 +731,22 @@ export default function PrivacyPolicyPageClient() {
               <div className="sec-num">14</div>Contact Us
             </div>
             <div className="contact-grid">
-              <div className="contact-card">
+              <div className="contact-card bg-gray-50">
                 <h4>🛡️ Data Protection Officer</h4>
                 <a href="mailto:privacy@drinsight.org">privacy@drinsight.org</a>
                 <p>All privacy & data requests</p>
               </div>
-              <div className="contact-card">
+              <div className="contact-card bg-gray-50">
                 <h4>✉️ General Inquiries</h4>
                 <a href="mailto:contact@drinsight.org">contact@drinsight.org</a>
                 <p>All general enquiries</p>
               </div>
-              <div className="contact-card">
+              <div className="contact-card bg-gray-50">
                 <h4>⚖️ Legal Department</h4>
                 <a href="mailto:legal@drinsight.org">legal@drinsight.org</a>
                 <p>Legal and compliance matters</p>
               </div>
-              <div className="contact-card">
+              <div className="contact-card bg-gray-50">
                 <h4>📍 Mailing Address</h4>
                 <p>
                   DrInsight Inc.

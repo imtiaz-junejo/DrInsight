@@ -254,6 +254,8 @@ export function RegisterForm() {
       setAccountType("patient");
     } else if (params.get("from") === "booking" || params.get("account") === "patient") {
       setAccountType("patient");
+    } else if (params.get("account") === "physician") {
+      setAccountType("physician");
     }
   }, []);
 

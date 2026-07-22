@@ -1303,17 +1303,17 @@ export function CookiePolicyPageClient() {
               <div className="sec-num">13</div>Contact Us
             </div>
             <div className="contact-grid">
-              <div className="contact-card">
+              <div className="contact-card bg-gray-50">
                 <h4>🍪 Cookie Enquiries</h4>
                 <a href="mailto:privacy@drinsight.org">privacy@drinsight.org</a>
                 <p>For cookie questions or to request active cookie list</p>
               </div>
-              <div className="contact-card">
+              <div className="contact-card bg-gray-50">
                 <h4>🛡️ Data Protection Officer</h4>
                 <a href="mailto:dpo@drinsight.org">dpo@drinsight.org</a>
                 <p>For GDPR-related data concerns</p>
               </div>
-              <div className="contact-card">
+              <div className="contact-card bg-gray-50">
                 <h4>📍 Mailing Address</h4>
                 <p>
                   DrInsight Inc.
@@ -1323,7 +1323,7 @@ export function CookiePolicyPageClient() {
                   Pakistan
                 </p>
               </div>
-              <div className="contact-card">
+              <div className="contact-card bg-gray-50">
                 <h4>🇪🇺 EU Supervisory Authority</h4>
                 <p>
                   EU-based users may complain to their local Data Protection Authority (DPA) if unhappy with our cookie

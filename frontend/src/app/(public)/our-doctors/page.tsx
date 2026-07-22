@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "@/styles/doctors-page.css";
 import { formatCurrency, formatStatCount, mapDoctorProfile, specialtyEmoji } from "@/lib/data-mappers";
 import { authorProfileHref } from "@/lib/author-profile-url";
@@ -230,8 +230,6 @@ export default function DoctorsPage() {
   });
   const [onlineNow, setOnlineNow] = useState(false);
   const [rating4Plus, setRating4Plus] = useState(false);
-  const [toast, setToast] = useState("");
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { data: doctorsData, isLoading } = useDoctors({ limit: 100 });
   const { data: specialties } = useDoctorSpecialties();
@@ -276,12 +274,6 @@ export default function DoctorsPage() {
     ],
     [stats, specialties],
   );
-
-  const showToast = useCallback((msg: string) => {
-    setToast(msg);
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(""), 2400);
-  }, []);
 
   const setFilter = (group: FilterGroup, val: string) => {
     setActiveFilters((prev) => ({ ...prev, [group]: val }));
@@ -409,17 +401,15 @@ export default function DoctorsPage() {
             offer consultations, and reach patients every month.
           </p>
           <div className="join-btns">
-            <button type="button" className="btn-join-w" onClick={() => showToast("Opening application form...")}>
+            <Link href="/register?account=physician" className="btn-join-w">
               Apply to Join →
-            </button>
+            </Link>
             <Link href="/author-guidelines" className="btn-join-o">
               📋 View Author Guidelines
             </Link>
           </div>
         </div>
       </div>
-
-      <div className={`toast${toast ? " show" : ""}`}>{toast}</div>
     </div>
   );
 }

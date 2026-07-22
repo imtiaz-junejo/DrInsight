@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 type CategorySectionProps = {
   tabIndex: number;
@@ -9,23 +10,9 @@ type CategorySectionProps = {
   emoji: string;
   title: string;
   subtitle: string;
+  spaced?: boolean;
   children: ReactNode;
 };
-
-function CategoryDivider({ emoji, title, subtitle }: { emoji: string; title: string; subtitle: string }) {
-  return (
-    <>
-      <div className="category-divider">
-        <div className="category-divider-line" aria-hidden />
-        <h2 className="category-divider-text">
-          {emoji} {title}
-        </h2>
-        <div className="category-divider-line" aria-hidden />
-      </div>
-      <p className="category-divider-sub">{subtitle}</p>
-    </>
-  );
-}
 
 export function CategorySection({
   tabIndex,
@@ -34,6 +21,7 @@ export function CategorySection({
   emoji,
   title,
   subtitle,
+  spaced,
   children,
 }: CategorySectionProps) {
   const isAllTools = activeTab === 0;
@@ -47,7 +35,10 @@ export function CategorySection({
       key={isAllTools ? `all-${tabIndex}` : `${tabIndex}-${animationKey}`}
       data-category={tabIndex}
     >
-      <CategoryDivider emoji={emoji} title={title} subtitle={subtitle} />
+      <h2 className={cn("category-title", spaced && "spaced")}>
+        {emoji} {title}
+      </h2>
+      <p className="category-subtitle">{subtitle}</p>
       <div className="tools-grid">{children}</div>
     </div>
   );

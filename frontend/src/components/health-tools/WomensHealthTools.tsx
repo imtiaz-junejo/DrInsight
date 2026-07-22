@@ -3,10 +3,15 @@
 import { useState } from "react";
 import { CalculatorCard } from "@/components/health-tools/CalculatorCard";
 import { CalcButton } from "@/components/health-tools/CalcButton";
-import { buildOvulationModal, buildPeriodTrackerModal, buildPregnancyModal } from "@/components/health-tools/build-tool-result";
 import { formChecked, formNum, formStr } from "@/components/health-tools/form-fields";
+import {
+  OvulationInlineResult,
+  PeriodTrackerInlineResult,
+  PregnancyInlineResult,
+} from "@/components/health-tools/InlineToolResults";
+import { RelatedTags, ResultBox, ToolDisclaimer } from "@/components/health-tools/tool-shared";
 import { WomensHealthReminderBox, type WhrPrediction } from "@/components/health-tools/WomensHealthReminderBox";
-import type { HealthToolModalData } from "@/components/health-tools/types";
+import { useTrackHealthTool } from "@/hooks/use-track-health-tool";
 import {
   calcPeriodTracker,
   calcPlanner,
@@ -14,30 +19,12 @@ import {
   ovulationWhrPrediction,
   periodWhrPrediction,
   pregnancyWhrPrediction,
+  type OvulationResult,
+  type PeriodTrackerResult,
   type PregnancyInput,
   type PregnancyMethod,
+  type PregnancyResult,
 } from "@/app/(public)/health-tools/calculators";
-
-type WomensHealthToolsProps = {
-  openResult: (toolId: string, build: () => HealthToolModalData | null) => void;
-  loadingId: string | null;
-};
-
-function ToolDisclaimer({ children }: { children: React.ReactNode }) {
-  return <div className="disclaimer">{children}</div>;
-}
-
-function RelatedTags({ tags }: { tags: string[] }) {
-  return (
-    <div className="related-tags">
-      {tags.map((tag) => (
-        <span key={tag} className="related-tag">
-          {tag}
-        </span>
-      ))}
-    </div>
-  );
-}
 
 function readPregnancyForm(method: PregnancyMethod, form: HTMLFormElement): PregnancyInput {
   if (method === "lmp") {
@@ -58,11 +45,24 @@ function readPregnancyForm(method: PregnancyMethod, form: HTMLFormElement): Preg
   };
 }
 
-export function WomensHealthTools({ openResult, loadingId }: WomensHealthToolsProps) {
+export function WomensHealthTools() {
+  const track = useTrackHealthTool();
   const [pregMethod, setPregMethod] = useState<PregnancyMethod>("lmp");
   const [pregPrediction, setPregPrediction] = useState<WhrPrediction | null>(null);
   const [ovPrediction, setOvPrediction] = useState<WhrPrediction | null>(null);
   const [periodPrediction, setPeriodPrediction] = useState<WhrPrediction | null>(null);
+  const [pregResult, setPregResult] = useState<PregnancyResult | null>(null);
+  const [ovResult, setOvResult] = useState<OvulationResult | null>(null);
+  const [periodResult, setPeriodResult] = useState<PeriodTrackerResult | null>(null);
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+
+  const runCalc = async (id: string, fn: () => void) => {
+    setLoadingId(id);
+    await new Promise((r) => setTimeout(r, 200));
+    fn();
+    track(id);
+    setLoadingId(null);
+  };
 
   return (
     <>
@@ -78,10 +78,9 @@ export function WomensHealthTools({ openResult, loadingId }: WomensHealthToolsPr
             e.preventDefault();
             const form = e.currentTarget;
             const input = readPregnancyForm(pregMethod, form);
-            setPregPrediction(pregnancyWhrPrediction(input));
-            void openResult("pregnancy", () => {
-              const result = calcPregnancy(input);
-              return result ? buildPregnancyModal(result) : null;
+            void runCalc("pregnancy", () => {
+              setPregPrediction(pregnancyWhrPrediction(input));
+              setPregResult(calcPregnancy(input));
             });
           }}
         >
@@ -112,15 +111,7 @@ export function WomensHealthTools({ openResult, loadingId }: WomensHealthToolsPr
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="preg-cycle">Cycle Length (days)</label>
-                  <input
-                    type="number"
-                    id="preg-cycle"
-                    name="preg-cycle"
-                    placeholder="28"
-                    min={21}
-                    max={45}
-                    defaultValue={28}
-                  />
+                  <input type="number" id="preg-cycle" name="preg-cycle" placeholder="28" min={21} max={45} defaultValue={28} />
                 </div>
               </div>
             </>
@@ -152,13 +143,16 @@ export function WomensHealthTools({ openResult, loadingId }: WomensHealthToolsPr
           )}
 
           <CalcButton loading={loadingId === "pregnancy"}>Calculate Due Date</CalcButton>
-          <ToolDisclaimer>
-            ⚠️ EDD is an estimate — only ~5% of babies are born on their due date. Ultrasound dating is the most
-            accurate method.
-          </ToolDisclaimer>
-          <WomensHealthReminderBox toolKey="pregnancy" prediction={pregPrediction} />
-          <RelatedTags tags={["Prenatal Care", "Pregnancy Nutrition", "Birth Plan"]} />
         </form>
+        <ResultBox show={Boolean(pregResult)} title="Estimated Due Date (EDD)" toolTitle="Pregnancy Due Date Calculator">
+          {pregResult ? <PregnancyInlineResult result={pregResult} /> : null}
+        </ResultBox>
+        <ToolDisclaimer>
+          ⚠️ EDD is an estimate — only ~5% of babies are born on their due date. Ultrasound dating is the most accurate
+          method.
+        </ToolDisclaimer>
+        <WomensHealthReminderBox toolKey="pregnancy" prediction={pregPrediction} />
+        <RelatedTags tags={["Prenatal Care", "Pregnancy Nutrition", "Birth Plan"]} />
       </CalculatorCard>
 
       <CalculatorCard
@@ -175,10 +169,9 @@ export function WomensHealthTools({ openResult, loadingId }: WomensHealthToolsPr
             const lmp = formStr("pp-lmp", form);
             const cycle = formNum("pp-cycle", form, 28);
             const period = formNum("pp-period", form, 5);
-            setOvPrediction(ovulationWhrPrediction(lmp, cycle));
-            void openResult("ovulation", () => {
-              const result = calcPlanner(lmp, cycle, period, formChecked("pp-irregular", form));
-              return result ? buildOvulationModal(result) : null;
+            void runCalc("ovulation", () => {
+              setOvPrediction(ovulationWhrPrediction(lmp, cycle));
+              setOvResult(calcPlanner(lmp, cycle, period, formChecked("pp-irregular", form)));
             });
           }}
         >
@@ -205,13 +198,16 @@ export function WomensHealthTools({ openResult, loadingId }: WomensHealthToolsPr
             </div>
           </div>
           <CalcButton loading={loadingId === "ovulation"}>Find My Fertile Days</CalcButton>
-          <ToolDisclaimer>
-            📌 Fertile window usually spans 5 days before ovulation and 1 day after. Irregular cycles or medical
-            conditions may affect accuracy.
-          </ToolDisclaimer>
-          <WomensHealthReminderBox toolKey="ovulation" prediction={ovPrediction} />
-          <RelatedTags tags={["Ovulation Tracking", "Conception Tips", "Fertility"]} />
         </form>
+        <ResultBox show={Boolean(ovResult)} title="Your Fertility Insights" toolTitle="Pregnancy Planner">
+          {ovResult ? <OvulationInlineResult result={ovResult} /> : null}
+        </ResultBox>
+        <ToolDisclaimer>
+          📌 Fertile window usually spans 5 days before ovulation and 1 day after. Irregular cycles or medical conditions
+          may affect accuracy.
+        </ToolDisclaimer>
+        <WomensHealthReminderBox toolKey="ovulation" prediction={ovPrediction} />
+        <RelatedTags tags={["Ovulation Tracking", "Conception Tips", "Fertility"]} />
       </CalculatorCard>
 
       <CalculatorCard
@@ -228,10 +224,9 @@ export function WomensHealthTools({ openResult, loadingId }: WomensHealthToolsPr
             const lmp = formStr("mt-lmp", form);
             const cycle = formNum("mt-cycle", form, 28);
             const period = formNum("mt-period", form, 5);
-            setPeriodPrediction(periodWhrPrediction(lmp, cycle));
-            void openResult("period-tracker", () => {
-              const result = calcPeriodTracker(lmp, cycle, period);
-              return result ? buildPeriodTrackerModal(result) : null;
+            void runCalc("period-tracker", () => {
+              setPeriodPrediction(periodWhrPrediction(lmp, cycle));
+              setPeriodResult(calcPeriodTracker(lmp, cycle, period));
             });
           }}
         >
@@ -252,13 +247,16 @@ export function WomensHealthTools({ openResult, loadingId }: WomensHealthToolsPr
             </div>
           </div>
           <CalcButton loading={loadingId === "period-tracker"}>Track My Period</CalcButton>
-          <ToolDisclaimer>
-            ⚠️ Results are estimates based on a regular cycle. Actual dates may vary due to stress, hormones or health
-            conditions.
-          </ToolDisclaimer>
-          <WomensHealthReminderBox toolKey="period" prediction={periodPrediction} />
-          <RelatedTags tags={["Cycle Tracking", "PMS", "Fertility"]} />
         </form>
+        <ResultBox show={Boolean(periodResult)} title="Cycle Overview" toolTitle="Menstrual Period Tracker">
+          {periodResult ? <PeriodTrackerInlineResult result={periodResult} /> : null}
+        </ResultBox>
+        <ToolDisclaimer>
+          ⚠️ Results are estimates based on a regular cycle. Actual dates may vary due to stress, hormones or health
+          conditions.
+        </ToolDisclaimer>
+        <WomensHealthReminderBox toolKey="period" prediction={periodPrediction} />
+        <RelatedTags tags={["Cycle Tracking", "PMS", "Fertility"]} />
       </CalculatorCard>
     </>
   );

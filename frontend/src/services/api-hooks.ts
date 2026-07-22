@@ -516,11 +516,23 @@ export function useContactSubmit() {
   });
 }
 
+export interface NewsletterSubscribeResult {
+  subscriber: {
+    id: string;
+    email: string;
+    source?: string | null;
+    isActive: boolean;
+    createdAt: string;
+  };
+  alreadySubscribed: boolean;
+  message: string;
+}
+
 export function useNewsletterSubscribe() {
   return useMutation({
     mutationFn: async (payload: string | { email: string; source?: string }) => {
       const body = typeof payload === "string" ? { email: payload } : payload;
-      const { data } = await api.post("/contact/newsletter", body);
+      const { data } = await api.post<NewsletterSubscribeResult>("/contact/newsletter", body);
       return data;
     },
   });

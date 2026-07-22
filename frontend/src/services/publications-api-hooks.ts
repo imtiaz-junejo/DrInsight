@@ -322,8 +322,28 @@ export const PUBLICATION_STATUS_LABELS: Record<PublicationStatus, string> = {
   NEEDS_REVISION: "Needs Revision",
 };
 
+export const PUBLICATION_COVER_FALLBACKS = [
+  "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&q=80",
+  "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&q=80",
+  "https://images.unsplash.com/photo-1584515933487-779824d29309?w=800&q=80",
+  "https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=800&q=80",
+  "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&q=80",
+  "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&q=80",
+] as const;
+
+function publicationCoverIndex(id: string, length: number): number {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = (hash + id.charCodeAt(i)) % length;
+  return hash;
+}
+
+export function publicationCoverFallbackUrl(pub: Pick<Publication, "id">): string {
+  return PUBLICATION_COVER_FALLBACKS[publicationCoverIndex(pub.id, PUBLICATION_COVER_FALLBACKS.length)]!;
+}
+
 export function publicationCoverUrl(pub: Publication): string | null {
-  return pub.attachments?.find((a) => a.type === "COVER_IMAGE")?.fileUrl ?? null;
+  const url = pub.attachments?.find((a) => a.type === "COVER_IMAGE")?.fileUrl?.trim();
+  return url || null;
 }
 
 export function publicationPdfUrl(pub: Publication): string | null {

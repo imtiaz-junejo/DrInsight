@@ -1969,3 +1969,35 @@
   border-color: var(--gray-300);
 }
 
+.admin-root .prw-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 18px;
+  align-items: start;
+}
+
+.admin-root .prw-controls {
+  position: sticky;
+  top: 16px;
+}
+
+.admin-root .prw-note {
+  font-size: 0.72rem;
+  color: var(--gray-500);
+  background: var(--blue-light);
+  border-radius: 8px;
+  padding: 8px 11px;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+@media (max-width: 1024px) {
+  .admin-root .prw-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-root .prw-controls {
+    position: static;
+  }
+}
+

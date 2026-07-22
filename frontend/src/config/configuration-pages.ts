@@ -7,6 +7,7 @@ export const CONFIG_PAGE_OPTIONS = [
   { id: "ask-the-doctor", label: "Ask a Doctor", path: "/ask-doctor" },
   { id: "our-doctors", label: "Our Doctors", path: "/our-doctors" },
   { id: "editorial-policy", label: "Editorial Policy", path: "/editorial-policy" },
+  { id: "medical-review-process", label: "Medical Review Process", path: "/medical-review-process" },
   { id: "author-guidelines", label: "Author Guidelines", path: "/author-guidelines" },
   { id: "contact", label: "Contact", path: "/contact" },
   { id: "faq", label: "FAQ", path: "/faq" },

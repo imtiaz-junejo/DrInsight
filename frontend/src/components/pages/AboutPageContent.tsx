@@ -358,7 +358,9 @@ export function AboutPageContent() {
 
       <div className="accred-section">
         <div style={{ maxWidth: 1240, margin: "auto" }}>
-          <SectionTitle inverse>Accreditations & Compliance</SectionTitle>
+          <SectionTitle inverse>
+            Accreditations & Compliance
+          </SectionTitle>
           <SectionDescription inverse>
             Recognized by leading health organizations and compliant with all major medical data privacy regulations worldwide.
           </SectionDescription>
@@ -375,9 +377,9 @@ export function AboutPageContent() {
       </div>
 
       <div className="about-cta">
-        <SectionEyebrow className="eyebrow" light>
+        <div className="eyebrow" style={{ color: "#93c5fd" }}>
           Get Started Today
-        </SectionEyebrow>
+        </div>
         <SectionTitle inverse>Ready to Take Control of Your Health?</SectionTitle>
         <SectionDescription inverse>
           Join {stats ? formatStatCount(stats.patientsServed ?? stats.patientCount) : "—"} patients who trust DrInsight for accurate medical information and expert consultations.

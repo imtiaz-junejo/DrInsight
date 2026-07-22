@@ -354,10 +354,10 @@ export const SEED_PUBLICATION_TEMPLATES: SeedPublicationTemplate[] = [
 ];
 
 export const COVER_IMAGES = [
-  'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=800&q=80',
+  'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&q=80',
   'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&q=80',
   'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&q=80',
-  'https://images.unsplash.com/photo-1530497615205-8416fa94cf39?w=800&q=80',
+  'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&q=80',
   'https://images.unsplash.com/photo-1584515933487-779824d29309?w=800&q=80',
   'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=800&q=80',
 ];

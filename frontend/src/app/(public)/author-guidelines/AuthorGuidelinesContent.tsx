@@ -702,9 +702,9 @@ export function AuthorGuidelinesContent() {
               <div className="callout-head">📖 Related Resources</div>
               <ul>
                 <li><Link href="/editorial-policy" className="link-blue">📋 Full Editorial Policy →</Link></li>
-                <li><Link href="/contact" className="link-blue">🔬 Medical Review Process →</Link></li>
-                <li><Link href="/contact" className="link-blue">👨‍⚕️ Medical Reviewer Guidelines →</Link></li>
-                <li><Link href="/contact" className="link-blue">💛 Safe Messaging Guidelines →</Link></li>
+                <li><Link href="/medical-review-process" className="link-blue">🔬 Medical Review Process →</Link></li>
+                <li><Link href="/medical-review-process" className="link-blue">👨‍⚕️ Medical Reviewer Guidelines →</Link></li>
+                <li><Link href="/editorial-policy#s14" className="link-blue">💛 Safe Messaging Guidelines →</Link></li>
               </ul>
             </div>
           </section>
@@ -715,13 +715,13 @@ export function AuthorGuidelinesContent() {
             </div>
             <div className="contact-grid">
               {CONTACTS.map((c) => (
-                <div key={c.title} className="contact-card">
+                <div key={c.title} className="contact-card bg-gray-50">
                   <h4>{c.title}</h4>
                   <a href={`mailto:${c.email}`}>{c.email}</a>
                   <p>{c.note}</p>
                 </div>
               ))}
-              <div className="contact-card">
+              <div className="contact-card bg-gray-50">
                 <h4>📍 Mailing Address</h4>
                 <p style={{ color: "var(--gray-700)", fontSize: ".84rem", lineHeight: 1.6, marginTop: 0 }}>
                   DrInsight Inc.
@@ -750,16 +750,13 @@ export function AuthorGuidelinesContent() {
         <div className="pf-bar-inner">
           <div className="pf-pills">
             <Link href="/editorial-policy" className="pf-pill">Editorial Policy</Link>
-            <Link href="/contact" className="pf-pill">Medical Review Process</Link>
+            <Link href="/medical-review-process" className="pf-pill">Medical Review Process</Link>
             <Link href="/privacy-policy" className="pf-pill">Privacy Policy</Link>
             <Link href="/terms-conditions" className="pf-pill">Terms & Conditions</Link>
             <Link href="/disclaimer" className="pf-pill">Disclaimer</Link>
-          </div>
-          <div className="pf-actions">
-            <span style={{ fontSize: ".76rem", color: "var(--gray-400)" }}>Last updated: June 1, 2026 · v2.1</span>
-            <button type="button" className="pf-btn green" onClick={() => scrollTo("s10")}>
-              ✍️ Apply to Write
-            </button>
+            <span style={{ fontSize: ".76rem", color: "var(--gray-400)", marginLeft: "auto" }}>
+              Last updated: June 1, 2026 · v2.1
+            </span>
           </div>
         </div>
       </div>

@@ -9,7 +9,7 @@ import {
   StatusChip,
   UserCell,
 } from "@/components/admin/ui/AdminPrimitives";
-import { adminUserProfileHref } from "@/lib/admin-routes";
+import { adminUserProfileHref, adminDoctorProfileHref } from "@/lib/admin-routes";
 import {
   appointmentStatusChip,
   consultationTypeIcon,
@@ -189,8 +189,8 @@ export function AppointmentDetailPageContent({ appointmentId }: { appointmentId:
                 firstName={appointment.doctor.user.firstName}
                 lastName={appointment.doctor.user.lastName}
                 sub={appointment.doctor.specialty}
-                userId={appointment.doctor.user.id}
-                seed={appointment.doctor.user.id}
+                doctorProfileId={appointment.doctor.id}
+                seed={appointment.doctor.id}
               />
               <dl className="detail-list" style={{ marginTop: 12 }}>
                 <div className="detail-row">
@@ -202,7 +202,7 @@ export function AppointmentDetailPageContent({ appointmentId }: { appointmentId:
                   <dd>{appointment.doctor.user.phone ?? "—"}</dd>
                 </div>
               </dl>
-              <Link href={adminUserProfileHref(appointment.doctor.user.id)} className="btn" style={{ marginTop: 10 }}>
+              <Link href={adminDoctorProfileHref(appointment.doctor.id)} className="btn" style={{ marginTop: 10 }}>
                 View profile
               </Link>
             </>

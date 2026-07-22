@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { AuthorType, BlogCommentStatus, BlogStatus, DoctorAvailability, Prisma } from '@prisma/client';
+import { AuthorType, BlogCommentStatus, BlogStatus, DoctorAvailability, Prisma, PublicationStatus, UserStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import type { AdminDoctorListQueryDto, AdminUpdateDoctorDto } from './dto/admin-doctor.dto';
 const publicUserSelect = {
   id: true,
   firstName: true,
@@ -35,7 +37,10 @@ const relatedDoctorSelect = {
 
 @Injectable()
 export class DoctorsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notifications: NotificationsService,
+  ) {}
 
   async findAll(query: {
     page?: number;
@@ -516,10 +521,12 @@ export class DoctorsService {
     data: Partial<{
       profileSlug: string;
       seoFocusKeyword: string;
+      seoSecondaryKeywords: string;
       seoMetaTitle: string;
       seoMetaDescription: string;
       seoSchemaJson: Prisma.InputJsonValue;
       bookingEnabled: boolean;
+      contactEnabled: boolean;
       onlineAvailEnabled: boolean;
       physicalAvailEnabled: boolean;
       authorType: AuthorType;
@@ -533,6 +540,287 @@ export class DoctorsService {
       data,
       include: {
         user: { select: { id: true, firstName: true, lastName: true, email: true, status: true } },
+      },
+    });
+  }
+
+  async findAllAdmin(query: AdminDoctorListQueryDto) {
+    const page = query.page || 1;
+    const limit = query.limit || 20;
+    const skip = (page - 1) * limit;
+    const order = query.order === 'asc' ? 'asc' : 'desc';
+
+    const userStatusFilter =
+      query.accountStatus && query.accountStatus !== 'INACTIVE'
+        ? (query.accountStatus as UserStatus)
+        : undefined;
+
+    const where: Prisma.DoctorProfileWhereInput = {
+      ...(query.specialty && { specialty: { contains: query.specialty, mode: 'insensitive' } }),
+      ...(query.city && { city: { contains: query.city, mode: 'insensitive' } }),
+      ...(query.gender && { gender: { equals: query.gender, mode: 'insensitive' } }),
+      ...(userStatusFilter && { user: { status: userStatusFilter } }),
+      ...(query.verificationStatus === 'pending' && { user: { status: UserStatus.PENDING } }),
+      ...(query.verificationStatus === 'suspended' && { user: { status: UserStatus.SUSPENDED } }),
+      ...(query.verificationStatus === 'verified' && { user: { status: UserStatus.ACTIVE } }),
+      ...(query.search && {
+        OR: [
+          { specialty: { contains: query.search, mode: 'insensitive' } },
+          { hospital: { contains: query.search, mode: 'insensitive' } },
+          { licenseNumber: { contains: query.search, mode: 'insensitive' } },
+          { city: { contains: query.search, mode: 'insensitive' } },
+          { user: { firstName: { contains: query.search, mode: 'insensitive' } } },
+          { user: { lastName: { contains: query.search, mode: 'insensitive' } } },
+          { user: { email: { contains: query.search, mode: 'insensitive' } } },
+          { user: { phone: { contains: query.search, mode: 'insensitive' } } },
+        ],
+      }),
+    };
+
+    const orderBy: Prisma.DoctorProfileOrderByWithRelationInput = (() => {
+      switch (query.sort) {
+        case 'name':
+          return { user: { firstName: order } };
+        case 'experience':
+          return { experienceYears: order };
+        case 'fee':
+          return { consultationFee: order };
+        case 'rating':
+          return { rating: order };
+        case 'status':
+          return { user: { status: order } };
+        case 'lastActive':
+          return { user: { lastSeenAt: order } };
+        case 'createdAt':
+        default:
+          return { createdAt: order };
+      }
+    })();
+
+    const [data, total, customSeoCount] = await Promise.all([
+      this.prisma.doctorProfile.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy,
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              avatarUrl: true,
+              email: true,
+              phone: true,
+              status: true,
+              isOnline: true,
+              createdAt: true,
+              lastSeenAt: true,
+            },
+          },
+        },
+      }),
+      this.prisma.doctorProfile.count({ where }),
+      this.prisma.doctorProfile.count({
+        where: {
+          OR: [{ seoMetaTitle: { not: null } }, { profileSlug: { not: null } }],
+        },
+      }),
+    ]);
+
+    return {
+      data,
+      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+      stats: { customSeoCount },
+    };
+  }
+
+  async findAdminDetail(doctorId: string) {
+    return this.findById(doctorId);
+  }
+
+  async getAdminContent(doctorId: string) {
+    const doctor = await this.prisma.doctorProfile.findUnique({
+      where: { id: doctorId },
+      select: { id: true, userId: true },
+    });
+    if (!doctor) throw new NotFoundException('Doctor profile not found');
+
+    const [articles, publications] = await Promise.all([
+      this.prisma.blogPost.findMany({
+        where: { authorId: doctor.userId },
+        orderBy: { updatedAt: 'desc' },
+        take: 50,
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          status: true,
+          publishedAt: true,
+          createdAt: true,
+          viewCount: true,
+          category: { select: { name: true } },
+        },
+      }),
+      this.prisma.publication.findMany({
+        where: { doctorId: doctor.id },
+        orderBy: { updatedAt: 'desc' },
+        take: 50,
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          status: true,
+          publicationType: true,
+          journalName: true,
+          publishedAt: true,
+          createdAt: true,
+        },
+      }),
+    ]);
+
+    return {
+      articles: articles.map((article) => ({
+        id: article.id,
+        title: article.title,
+        slug: article.slug,
+        category: article.category?.name ?? 'Uncategorized',
+        date: article.publishedAt ?? article.createdAt,
+        views: article.viewCount,
+        status: article.status,
+        statusLabel: this.blogStatusLabel(article.status),
+      })),
+      publications: publications.map((pub) => ({
+        id: pub.id,
+        title: pub.title,
+        slug: pub.slug,
+        type: pub.publicationType,
+        venue: pub.journalName ?? '',
+        status: pub.status,
+        statusLabel: this.publicationStatusLabel(pub.status),
+        date: pub.publishedAt ?? pub.createdAt,
+      })),
+    };
+  }
+
+  private blogStatusLabel(status: BlogStatus) {
+    switch (status) {
+      case BlogStatus.PUBLISHED:
+        return 'Live';
+      case BlogStatus.DRAFT:
+        return 'Draft';
+      case BlogStatus.ARCHIVED:
+        return 'Archived';
+      default:
+        return status.replace(/_/g, ' ');
+    }
+  }
+
+  private publicationStatusLabel(status: PublicationStatus) {
+    switch (status) {
+      case PublicationStatus.APPROVED:
+        return 'Published';
+      case PublicationStatus.SUBMITTED:
+        return 'In Review';
+      case PublicationStatus.UNDER_REVIEW:
+        return 'In Review';
+      case PublicationStatus.REJECTED:
+        return 'Rejected';
+      case PublicationStatus.NEEDS_REVISION:
+        return 'Needs Revision';
+      default:
+        return status.replace(/_/g, ' ');
+    }
+  }
+
+  async updateAdminDoctor(doctorId: string, body: AdminUpdateDoctorDto, actorUserId?: string) {
+    const doctor = await this.prisma.doctorProfile.findUnique({
+      where: { id: doctorId },
+      include: { user: { select: { id: true, firstName: true, lastName: true } } },
+    });
+    if (!doctor) throw new NotFoundException('Doctor profile not found');
+
+    const {
+      firstName,
+      lastName,
+      phone,
+      avatarUrl,
+      dateOfBirth,
+      coiUpdatedAt,
+      educationHistory,
+      certifications,
+      awards,
+      speakingEngagements,
+      seoSchemaJson,
+      ...profileFields
+    } = body;
+
+    const userUpdate =
+      firstName !== undefined || lastName !== undefined || phone !== undefined || avatarUrl !== undefined
+        ? {
+            ...(firstName !== undefined && { firstName }),
+            ...(lastName !== undefined && { lastName }),
+            ...(phone !== undefined && { phone }),
+            ...(avatarUrl !== undefined && { avatarUrl }),
+          }
+        : null;
+
+    const updated = await this.prisma.$transaction(async (tx) => {
+      if (userUpdate) {
+        await tx.user.update({ where: { id: doctor.userId }, data: userUpdate });
+      }
+
+      return tx.doctorProfile.update({
+        where: { id: doctorId },
+        data: {
+          ...profileFields,
+          ...(dateOfBirth !== undefined && {
+            dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+          }),
+          ...(coiUpdatedAt !== undefined && {
+            coiUpdatedAt: coiUpdatedAt ? new Date(coiUpdatedAt) : null,
+          }),
+          ...(educationHistory !== undefined && { educationHistory: educationHistory as Prisma.InputJsonValue }),
+          ...(certifications !== undefined && { certifications: certifications as Prisma.InputJsonValue }),
+          ...(awards !== undefined && { awards: awards as Prisma.InputJsonValue }),
+          ...(speakingEngagements !== undefined && {
+            speakingEngagements: speakingEngagements as Prisma.InputJsonValue,
+          }),
+          ...(seoSchemaJson !== undefined && { seoSchemaJson: seoSchemaJson as Prisma.InputJsonValue }),
+        },
+        include: {
+          user: { select: publicUserSelect },
+        },
+      });
+    });
+
+    if (actorUserId && doctor.userId !== actorUserId) {
+      await this.notifications.create(doctor.userId, {
+        type: 'SYSTEM',
+        title: 'Profile updated',
+        body: 'Your DrInsight profile was updated by an administrator.',
+      });
+    }
+
+    return updated;
+  }
+
+  async resetAdminSeo(doctorId: string) {
+    const doctor = await this.prisma.doctorProfile.findUnique({ where: { id: doctorId } });
+    if (!doctor) throw new NotFoundException('Doctor profile not found');
+
+    return this.prisma.doctorProfile.update({
+      where: { id: doctorId },
+      data: {
+        profileSlug: null,
+        seoFocusKeyword: null,
+        seoSecondaryKeywords: null,
+        seoMetaTitle: null,
+        seoMetaDescription: null,
+        seoSchemaJson: Prisma.DbNull,
+      },
+      include: {
+        user: { select: publicUserSelect },
       },
     });
   }

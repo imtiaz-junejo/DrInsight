@@ -270,8 +270,9 @@ export default function AskDoctorPage() {
                 onKeyDown={(e) => e.key === "Enter" && selectSpecialtyFilter(s.name)}
               >
                 <div className="spec-ico">{specialtyEmoji(s.name)}</div>
-                <span>
-                  {s.name} ({s.count})
+                <span className="spec-label">
+                  <span className="spec-name">{s.name}</span>
+                  <span className="spec-count"> ({s.count})</span>
                 </span>
               </div>
             ))}

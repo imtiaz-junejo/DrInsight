@@ -10,7 +10,7 @@ import {
   StatusChip,
   UserCell,
 } from "@/components/admin/ui/AdminPrimitives";
-import { adminDoctorArticlesHref, adminUserProfileHref } from "@/lib/admin-routes";
+import { adminDoctorArticlesHref, adminDoctorProfileHref } from "@/lib/admin-routes";
 import { formatNumber, formatSignedChange } from "@/lib/admin-utils";
 import { useAdminUiStore } from "@/store/admin-ui.store";
 import {
@@ -56,7 +56,7 @@ export function DoctorsPageContent() {
         lastName={user?.lastName}
         sub={`${doctor.specialty} · ${doctor.experienceYears} yrs`}
         seed={doctor.id}
-        userId={user?.id}
+        doctorProfileId={doctor.id}
       />,
       doctor.specialty,
       doctor.hospital ?? "—",
@@ -65,7 +65,7 @@ export function DoctorsPageContent() {
       <StatusChip key={`${doctor.id}-s`} label={isPending ? "Pending Verification" : "Verified"} className={isPending ? "ch-a" : "ch-g"} />,
       <div key={`${doctor.id}-a`} className="btn-row">
         {user?.id ? (
-          <Link href={adminUserProfileHref(user.id)} className="btn">
+          <Link href={adminDoctorProfileHref(doctor.id)} className="btn">
             View
           </Link>
         ) : null}

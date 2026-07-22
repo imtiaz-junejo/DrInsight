@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import {
   AdminButton,
   AdminPanel,
@@ -9,11 +11,7 @@ import {
   StatusChip,
   UserAvatar,
 } from "@/components/admin/ui/AdminPrimitives";
-import {
-  adminAppointmentDetailHref,
-  adminBlogArticleHref,
-  adminDoctorArticlesHref,
-} from "@/lib/admin-routes";
+import { adminAppointmentDetailHref, adminBlogArticleHref, adminDoctorProfileHref } from "@/lib/admin-routes";
 import {
   appointmentStatusChip,
   formatDateTime,
@@ -22,10 +20,7 @@ import {
   userRoleChip,
   userStatusChip,
 } from "@/lib/admin-utils";
-import {
-  useAdminUserProfile,
-  useUpdateUserStatus,
-} from "@/services/admin-api-hooks";
+import { useAdminUserProfile, useUpdateUserStatus } from "@/services/admin-api-hooks";
 import { useAdminUiStore } from "@/store/admin-ui.store";
 
 function detailValue(value: unknown): string {
@@ -36,13 +31,23 @@ function detailValue(value: unknown): string {
 }
 
 export function AdminUserProfilePageContent({ userId }: { userId: string }) {
+  const router = useRouter();
   const showToast = useAdminUiStore((s) => s.showToast);
   const profileQuery = useAdminUserProfile(userId);
   const updateStatus = useUpdateUserStatus();
   const profile = profileQuery.data;
 
-  if (profileQuery.isLoading) {
-    return <AdminPanel title="Loading profile...">Fetching user data from database...</AdminPanel>;
+  const doctor = profile?.doctorProfile as { id?: string } | null | undefined;
+  const isDoctor = profile?.role === "DOCTOR" && doctor?.id;
+
+  useEffect(() => {
+    if (isDoctor && doctor?.id) {
+      router.replace(adminDoctorProfileHref(doctor.id));
+    }
+  }, [isDoctor, doctor?.id, router]);
+
+  if (profileQuery.isLoading || isDoctor) {
+    return <AdminPanel title="Loading profile...">Opening doctor profile preview...</AdminPanel>;
   }
 
   if (profileQuery.isError || !profile) {
@@ -58,43 +63,19 @@ export function AdminUserProfilePageContent({ userId }: { userId: string }) {
 
   const role = userRoleChip(profile.role, profile.status);
   const status = userStatusChip(profile.status);
-  const doctor = profile.doctorProfile as Record<string, unknown> | null | undefined;
   const patient = profile.patientProfile as Record<string, unknown> | null | undefined;
-  const isDoctor = profile.role === "DOCTOR" && doctor;
 
   const appointmentRows = (profile.recentAppointments as Array<Record<string, unknown>>).map((apt) => {
     const aptStatus = appointmentStatusChip(String(apt.status ?? ""));
-    const isDoctorView = Boolean(isDoctor);
-    const otherParty = isDoctorView
-      ? (apt.patient as { user?: { firstName?: string; lastName?: string } })?.user
-      : (apt.doctor as { user?: { firstName?: string; lastName?: string } })?.user;
-    const otherLabel = otherParty
-      ? `${otherParty.firstName ?? ""} ${otherParty.lastName ?? ""}`.trim()
-      : "—";
+    const otherParty = (apt.doctor as { user?: { firstName?: string; lastName?: string } })?.user;
+    const otherLabel = otherParty ? `${otherParty.firstName ?? ""} ${otherParty.lastName ?? ""}`.trim() : "—";
     return [
       `#APT-${String(apt.id).slice(-4)}`,
-      isDoctorView ? otherLabel : `Dr. ${otherLabel}`,
+      `Dr. ${otherLabel}`,
       formatDateTime(String(apt.scheduledAt)),
       <StatusChip key={`${apt.id}-st`} label={aptStatus.label} className={aptStatus.className} />,
       <Link key={`${apt.id}-lnk`} href={adminAppointmentDetailHref(String(apt.id))} className="btn">
         Details
-      </Link>,
-    ];
-  });
-
-  const blogRows = (profile.recentBlogPosts as Array<Record<string, unknown>>).map((post) => {
-    const postStatus = String(post.status ?? "DRAFT");
-    return [
-      String(post.title),
-      (post.category as { name?: string })?.name ?? "—",
-      <StatusChip
-        key={`${post.id}-s`}
-        label={postStatus}
-        className={postStatus === "PUBLISHED" ? "ch-g" : "ch-a"}
-      />,
-      post.publishedAt ? formatDateTime(String(post.publishedAt)) : "—",
-      <Link key={`${post.id}-v`} href={adminBlogArticleHref(String(post.slug))} className="btn">
-        View
       </Link>,
     ];
   });
@@ -113,7 +94,7 @@ export function AdminUserProfilePageContent({ userId }: { userId: string }) {
   return (
     <>
       <Link
-        href={profile.role === "DOCTOR" ? "/admin/doctors" : profile.role === "PATIENT" ? "/admin/patients" : "/admin/users"}
+        href={profile.role === "PATIENT" ? "/admin/patients" : "/admin/users"}
         className="detail-back"
       >
         ← Back
@@ -133,11 +114,6 @@ export function AdminUserProfilePageContent({ userId }: { userId: string }) {
             {profile.emailVerified ? <StatusChip label="Email verified" className="ch-g" /> : null}
           </div>
           <div className="btn-row" style={{ marginTop: 14 }}>
-            {isDoctor ? (
-              <Link href={adminDoctorArticlesHref(profile.id)} className="btn btn-primary">
-                Articles
-              </Link>
-            ) : null}
             {profile.status === "SUSPENDED" ? (
               <AdminButton
                 variant="green"
@@ -192,27 +168,10 @@ export function AdminUserProfilePageContent({ userId }: { userId: string }) {
           <strong>{formatNumber(profile.stats.upcomingAppointments)}</strong>
           <span>Upcoming</span>
         </div>
-        {isDoctor ? (
-          <>
-            <div className="kv-card">
-              <strong>{formatNumber(profile.stats.blogPostCount)}</strong>
-              <span>Articles</span>
-            </div>
-            <div className="kv-card">
-              <strong>{formatNumber(profile.stats.publicationCount)}</strong>
-              <span>Publications</span>
-            </div>
-            <div className="kv-card">
-              <strong>{typeof doctor?.rating === "number" ? Number(doctor.rating).toFixed(1) : "—"}</strong>
-              <span>Avg. Rating</span>
-            </div>
-          </>
-        ) : (
-          <div className="kv-card">
-            <strong>{formatNumber(profile.stats.publicationBookmarkCount)}</strong>
-            <span>Saved Articles</span>
-          </div>
-        )}
+        <div className="kv-card">
+          <strong>{formatNumber(profile.stats.publicationBookmarkCount)}</strong>
+          <span>Saved Articles</span>
+        </div>
       </div>
 
       <GridTwo>
@@ -237,43 +196,14 @@ export function AdminUserProfilePageContent({ userId }: { userId: string }) {
           </dl>
         </AdminPanel>
 
-        <AdminPanel title={isDoctor ? "Doctor Profile" : patient ? "Patient Profile" : "Profile"}>
+        <AdminPanel title={patient ? "Patient Profile" : "Profile"}>
           <dl className="detail-list">
-            {isDoctor ? (
-              <>
-                <div className="detail-row">
-                  <dt>Specialty</dt>
-                  <dd>{detailValue(doctor?.specialty)}</dd>
-                </div>
-                <div className="detail-row">
-                  <dt>Hospital</dt>
-                  <dd>{detailValue(doctor?.hospital)}</dd>
-                </div>
-                <div className="detail-row">
-                  <dt>License</dt>
-                  <dd>{detailValue(doctor?.licenseNumber)}</dd>
-                </div>
-                <div className="detail-row">
-                  <dt>Experience</dt>
-                  <dd>{detailValue(doctor?.experienceYears)} years</dd>
-                </div>
-                <div className="detail-row">
-                  <dt>Consultation fee</dt>
-                  <dd>${detailValue(doctor?.consultationFee)}</dd>
-                </div>
-                <div className="detail-row">
-                  <dt>Bio</dt>
-                  <dd>{detailValue(doctor?.bio)}</dd>
-                </div>
-              </>
-            ) : patient ? (
+            {patient ? (
               <>
                 <div className="detail-row">
                   <dt>Date of birth</dt>
                   <dd>
-                    {patient.dateOfBirth
-                      ? formatDateTime(String(patient.dateOfBirth))
-                      : "—"}
+                    {patient.dateOfBirth ? formatDateTime(String(patient.dateOfBirth)) : "—"}
                   </dd>
                 </div>
                 <div className="detail-row">
@@ -306,23 +236,9 @@ export function AdminUserProfilePageContent({ userId }: { userId: string }) {
       {appointmentRows.length > 0 ? (
         <PanelTable
           title="Recent Appointments"
-          headers={["ID", isDoctor ? "Patient" : "Doctor", "Scheduled", "Status", "Actions"]}
+          headers={["ID", "Doctor", "Scheduled", "Status", "Actions"]}
           rows={appointmentRows}
           emptyMessage="No appointments"
-        />
-      ) : null}
-
-      {isDoctor && blogRows.length > 0 ? (
-        <PanelTable
-          title="Recent Articles"
-          actions={
-            <Link href={adminDoctorArticlesHref(profile.id)} className="btn">
-              All articles →
-            </Link>
-          }
-          headers={["Title", "Category", "Status", "Published", "Actions"]}
-          rows={blogRows}
-          emptyMessage="No articles"
         />
       ) : null}
 

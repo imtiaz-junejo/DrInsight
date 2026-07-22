@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import "@/styles/site-footer.css";
+import { NewsletterSubscribeMessage } from "@/components/newsletter/NewsletterSubscribeMessage";
+import { useNewsletterForm } from "@/hooks/use-newsletter-form";
 import { phoneHref, whatsappHref } from "@/lib/contact-utils";
 import { CONTACT_ADDRESS, CONTACT_EMAIL, CONTACT_HOURS, CONTACT_PHONE_DISPLAY } from "@/lib/site-contact";
 import { BRAND_LOGO_ALT, FOOTER_LOGO_SRC } from "@/config/brand-logos";
@@ -12,7 +13,6 @@ import {
   AdXIcon,
   AdYouTubeIcon,
 } from "@/components/blog/ArticleDetailIcons";
-import { useNewsletterSubscribe } from "@/services/api-hooks";
 import { usePublicSiteConfig } from "@/services/configuration-api-hooks";
 
 const QUICK_LINKS = [
@@ -22,7 +22,7 @@ const QUICK_LINKS = [
   { href: "/blog", label: "Blog" },
   { href: "/research-publications", label: "Research & Publications" },
   { href: "/author-guidelines", label: "Author Guidelines" },
-  { href: "/editorial-policy#s6", label: "Medical Review Process" },
+  { href: "/medical-review-process", label: "Medical Review Process" },
   { href: "/editorial-policy", label: "Editorial Policy" },
 ] as const;
 
@@ -46,8 +46,6 @@ const BOTTOM_LINKS = [
   { href: "/sitemap", label: "Sitemap" },
   { href: "/faq", label: "FAQ" },
 ] as const;
-
-const SOCIAL_LINKS = ["𝕏", "f", "in", "▶", "📸"] as const;
 
 const FOOTER_SOCIAL_ORDER = [
   { key: "facebook", label: "Facebook", icon: "facebook" as const },
@@ -122,10 +120,8 @@ function ClockIcon() {
 }
 
 export function Footer() {
-  const newsletter = useNewsletterSubscribe();
   const siteConfig = usePublicSiteConfig();
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
+  const newsletterForm = useNewsletterForm("footer");
 
   const phone = CONTACT_PHONE_DISPLAY;
   const emailAddr = CONTACT_EMAIL;
@@ -137,30 +133,11 @@ export function Footer() {
     siteConfig.data?.tagline ||
     "Your trusted platform for evidence-based medical information, expert doctor consultations, and health tools — reviewed and approved by licensed physicians.";
   const social = siteConfig.data?.socialLinks;
-  const socialItems = [
-    { key: "twitter", label: "𝕏", href: social?.twitter },
-    { key: "facebook", label: "f", href: social?.facebook },
-    { key: "linkedin", label: "in", href: social?.linkedin },
-    { key: "youtube", label: "▶", href: social?.youtube },
-    { key: "instagram", label: "📸", href: social?.instagram },
-  ].filter((s) => s.href);
 
   const footerSocialItems = FOOTER_SOCIAL_ORDER.map((item) => ({
     ...item,
     href: social?.[item.key as keyof NonNullable<typeof social>] ?? "#",
   }));
-
-  const handleSubscribe = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim()) return;
-    try {
-      await newsletter.mutateAsync(email.trim());
-      setMessage("Subscribed successfully!");
-      setEmail("");
-    } catch {
-      setMessage("Subscription failed. Please try again.");
-    }
-  };
 
   return (
     <footer className="site-footer">
@@ -171,7 +148,7 @@ export function Footer() {
               src={footerLogo}
               alt={BRAND_LOGO_ALT}
               style={{
-                maxWidth: 220,
+                maxWidth: 260,
                 width: "100%",
                 height: "auto",
                 objectFit: "contain",
@@ -184,22 +161,6 @@ export function Footer() {
             <div className="footer-compliance-badges">
               <div className="hipaa-badge">🛡️ HIPAA Compliant</div>
               <div className="hipaa-badge">🇪🇺 GDPR Compliant</div>
-            </div>
-            <div className="footer-social">
-            {(socialItems.length ? socialItems : SOCIAL_LINKS.map((icon) => ({ key: icon, label: icon, href: "#" }))).map(
-              (item) => (
-                <a
-                  key={item.key}
-                  href={item.href || "#"}
-                  className="social-btn"
-                  aria-label="Social link"
-                  target={item.href && item.href !== "#" ? "_blank" : undefined}
-                  rel={item.href && item.href !== "#" ? "noopener noreferrer" : undefined}
-                >
-                  {item.label}
-                </a>
-              ),
-            )}
             </div>
           </div>
         </div>
@@ -258,19 +219,23 @@ export function Footer() {
           <p className="footer-insights-desc">
             Get our latest physician-written medical tips and health updates
           </p>
-          <form className="footer-subscribe" onSubmit={handleSubscribe}>
+          <form className="footer-subscribe" onSubmit={newsletterForm.handleSubmit}>
             <input
               type="email"
               placeholder="Your email address"
               aria-label="Email address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={newsletterForm.email}
+              onChange={(e) => newsletterForm.setEmail(e.target.value)}
               required
             />
-            <button type="submit" disabled={newsletter.isPending}>
-              {newsletter.isPending ? "Subscribing..." : "Subscribe Free →"}
+            <button type="submit" disabled={newsletterForm.isPending}>
+              {newsletterForm.isPending ? "Subscribing..." : "Subscribe Free →"}
             </button>
-            {message && <p className="footer-subscribe-msg">{message}</p>}
+            <NewsletterSubscribeMessage
+              message={newsletterForm.message}
+              tone={newsletterForm.messageTone}
+              className="footer-subscribe-msg"
+            />
             <p className="footer-insights-legal">
               By continuing, you agree to DrInsight{" "}
               <Link href="/terms-conditions">Terms of Use</Link> and{" "}

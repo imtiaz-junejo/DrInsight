@@ -8,6 +8,7 @@ const DEFAULT_LINKS: PolicyLink[] = [
   { label: "Cookie Policy", href: "/cookie-policy" },
   { label: "Disclaimer", href: "/disclaimer" },
   { label: "Editorial Policy", href: "/editorial-policy" },
+  { label: "Medical Review Process", href: "/medical-review-process" },
 ];
 
 type Props = {

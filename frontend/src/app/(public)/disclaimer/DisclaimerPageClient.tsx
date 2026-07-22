@@ -775,22 +775,22 @@ export default function DisclaimerPageClient() {
               </p>
             </div>
             <div className="contact-grid">
-              <div className="contact-card">
+              <div className="contact-card bg-gray-50">
                 <h4>📝 Corrections & Inaccuracies</h4>
                 <a href="mailto:corrections@drinsight.org">corrections@drinsight.org</a>
                 <p>Reviewed within 5 business days</p>
               </div>
-              <div className="contact-card">
+              <div className="contact-card bg-gray-50">
                 <h4>✍️ General Editorial</h4>
                 <a href="mailto:editorial@drinsight.org">editorial@drinsight.org</a>
                 <p>All editorial enquiries</p>
               </div>
-              <div className="contact-card">
+              <div className="contact-card bg-gray-50">
                 <h4>🧠 Safe Messaging Concerns</h4>
                 <a href="mailto:safemessaging@drinsight.org">safemessaging@drinsight.org</a>
                 <p>Mental health content issues</p>
               </div>
-              <div className="contact-card">
+              <div className="contact-card bg-gray-50">
                 <h4>📍 Mailing Address</h4>
                 <p>
                   DrInsight Inc.

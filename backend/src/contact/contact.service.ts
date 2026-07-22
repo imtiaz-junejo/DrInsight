@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ContactInquiryStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -28,11 +28,33 @@ export class ContactService {
 
   async subscribeNewsletter(email: string, source = 'website') {
     const normalized = email.trim().toLowerCase();
-    return this.prisma.newsletterSubscriber.upsert({
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
+      throw new BadRequestException('Invalid email address');
+    }
+
+    const existing = await this.prisma.newsletterSubscriber.findUnique({
+      where: { email: normalized },
+    });
+
+    if (existing?.isActive) {
+      return {
+        subscriber: existing,
+        alreadySubscribed: true,
+        message: 'Email already exist',
+      };
+    }
+
+    const subscriber = await this.prisma.newsletterSubscriber.upsert({
       where: { email: normalized },
       update: { isActive: true, source },
       create: { email: normalized, source, isActive: true },
     });
+
+    return {
+      subscriber,
+      alreadySubscribed: false,
+      message: 'Subscribed successfully',
+    };
   }
 
   async findSubmissions(query?: {

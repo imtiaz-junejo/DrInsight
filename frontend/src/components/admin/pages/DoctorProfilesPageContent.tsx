@@ -1,38 +1,61 @@
 "use client";
 
-import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   AdminButton,
+  AdminPagination,
   AdminPanel,
-  PanelTable,
+  AdminTable,
+  FilterPills,
   StatCardRow,
   StatusChip,
   UserCell,
 } from "@/components/admin/ui/AdminPrimitives";
-import { adminUserProfileHref } from "@/lib/admin-routes";
+import { AdminDoctorProfileWorkspace } from "@/components/admin/doctor-profiles/AdminDoctorProfileWorkspace";
 import { formatNumber } from "@/lib/admin-utils";
 import { useAdminUiStore } from "@/store/admin-ui.store";
-import { useAdminDoctors, useUpdateDoctorSeo, useUpdateUserStatus } from "@/services/admin-api-hooks";
+import { useAdminDoctorManage } from "@/services/admin-api-hooks";
+
+const STATUS_FILTERS = ["All", "Verified", "Pending", "Suspended"] as const;
+const SORT_FILTERS = ["Registration Date", "Name", "Experience", "Rating", "Last Active"] as const;
+const SORT_MAP: Record<(typeof SORT_FILTERS)[number], string> = {
+  "Registration Date": "createdAt",
+  Name: "name",
+  Experience: "experience",
+  Rating: "rating",
+  "Last Active": "lastActive",
+};
 
 export function DoctorProfilesPageContent() {
   const showToast = useAdminUiStore((s) => s.showToast);
   const [page, setPage] = useState(1);
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
+  const [statusIndex, setStatusIndex] = useState(0);
+  const [sortIndex, setSortIndex] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [seoForm, setSeoForm] = useState({
-    profileSlug: "",
-    seoFocusKeyword: "",
-    seoMetaTitle: "",
-    seoMetaDescription: "",
-  });
+  const [editMode, setEditMode] = useState(false);
 
-  const doctorsQuery = useAdminDoctors({ page, limit: 20 });
-  const updateSeo = useUpdateDoctorSeo();
-  const updateStatus = useUpdateUserStatus();
+  useEffect(() => {
+    const timer = window.setTimeout(() => setSearch(searchInput.trim()), 300);
+    return () => window.clearTimeout(timer);
+  }, [searchInput]);
+
+  const verificationStatus =
+    statusIndex === 1 ? "verified" : statusIndex === 2 ? "pending" : statusIndex === 3 ? "suspended" : undefined;
+
+  const doctorsQuery = useAdminDoctorManage({
+    page,
+    limit: 20,
+    search: search || undefined,
+    verificationStatus,
+    sort: SORT_MAP[SORT_FILTERS[sortIndex]],
+    order: "desc",
+  });
 
   const doctors = doctorsQuery.data?.data ?? [];
   const meta = doctorsQuery.data?.meta;
-  const customSeoCount = doctors.filter((d) => d.seoMetaTitle || d.profileSlug).length;
+  const customSeoCount = doctorsQuery.data?.stats?.customSeoCount ?? 0;
 
   const statCards = useMemo(
     () => [
@@ -72,19 +95,12 @@ export function DoctorProfilesPageContent() {
     [meta?.total, doctors.length, customSeoCount],
   );
 
-  const selected = doctors.find((d) => d.id === selectedId);
-
-  const openSeo = (doctorId: string) => {
-    const doctor = doctors.find((d) => d.id === doctorId);
-    if (!doctor) return;
+  const openDoctor = (doctorId: string, withEdit = false) => {
     setSelectedId(doctorId);
-    const user = doctor.user;
-    const name = user ? `Dr. ${user.firstName} ${user.lastName}` : "Doctor";
-    setSeoForm({
-      profileSlug: doctor.profileSlug ?? "",
-      seoFocusKeyword: doctor.seoFocusKeyword ?? doctor.specialty ?? "",
-      seoMetaTitle: doctor.seoMetaTitle ?? `${name} — ${doctor.specialty} | DrInsight`,
-      seoMetaDescription: doctor.seoMetaDescription ?? doctor.bio?.slice(0, 160) ?? "",
+    setEditMode(withEdit);
+    showToast("Loaded doctor into the editor");
+    requestAnimationFrame(() => {
+      document.getElementById("doctor-workspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   };
 
@@ -99,14 +115,14 @@ export function DoctorProfilesPageContent() {
         lastName={user?.lastName}
         sub={doctor.credentials ?? doctor.professionalTitle ?? undefined}
         seed={doctor.id}
-        userId={user?.id}
+        doctorProfileId={doctor.id}
       />,
       doctor.specialty,
       doctor.hospital ?? "—",
       <StatusChip
         key={`${doctor.id}-acct`}
-        label={isSuspended ? "Suspended" : "Active"}
-        className={isSuspended ? "ch-r" : "ch-g"}
+        label={isSuspended ? "Suspended" : user?.status === "PENDING" ? "Pending" : "Active"}
+        className={isSuspended ? "ch-r" : user?.status === "PENDING" ? "ch-a" : "ch-g"}
       />,
       <StatusChip
         key={`${doctor.id}-seo`}
@@ -114,31 +130,10 @@ export function DoctorProfilesPageContent() {
         className={hasSeo ? "ch-g" : "ch-gray"}
       />,
       <div key={`${doctor.id}-a`} className="btn-row">
-        {user?.id ? (
-          <Link href={adminUserProfileHref(user.id)} className="btn">
-            Open
-          </Link>
-        ) : null}
-        <AdminButton onClick={() => openSeo(doctor.id)}>Edit SEO</AdminButton>
-        {user?.id && !isSuspended ? (
-          <AdminButton
-            variant="danger"
-            onClick={() => {
-              updateStatus.mutate({ id: user.id, status: "SUSPENDED" }, { onSuccess: () => showToast("Doctor suspended") });
-            }}
-          >
-            Suspend
-          </AdminButton>
-        ) : user?.id ? (
-          <AdminButton
-            variant="green"
-            onClick={() => {
-              updateStatus.mutate({ id: user.id, status: "ACTIVE" }, { onSuccess: () => showToast("Doctor reactivated") });
-            }}
-          >
-            Reactivate
-          </AdminButton>
-        ) : null}
+        <AdminButton onClick={() => openDoctor(doctor.id, false)}>Open</AdminButton>
+        <AdminButton variant="green" onClick={() => openDoctor(doctor.id, true)}>
+          Edit SEO
+        </AdminButton>
       </div>,
     ];
   });
@@ -146,64 +141,64 @@ export function DoctorProfilesPageContent() {
   return (
     <>
       <StatCardRow items={statCards} />
-      <PanelTable
-        title="👨‍⚕️ Doctor Profiles"
-        headers={["Doctor", "Specialty", "Institution", "Account", "SEO Status", "Actions"]}
-        rows={rows}
-        loading={doctorsQuery.isLoading}
-        pagerInfo={`Showing ${doctors.length} of ${meta?.total ?? 0} doctors`}
-        emptyMessage="No doctor profiles found"
-      />
-      {selected ? (
-        <AdminPanel title={`📇 SEO — ${selected.user?.firstName ?? ""} ${selected.user?.lastName ?? ""}`}>
-          <div className="form-grid">
-            <div className="fg-item">
-              <label>Profile URL Slug</label>
-              <input
-                value={seoForm.profileSlug}
-                onChange={(e) => setSeoForm((f) => ({ ...f, profileSlug: e.target.value }))}
-                placeholder="dr-javed-kumbhar"
-              />
-            </div>
-            <div className="fg-item">
-              <label>Focus Keyword</label>
-              <input
-                value={seoForm.seoFocusKeyword}
-                onChange={(e) => setSeoForm((f) => ({ ...f, seoFocusKeyword: e.target.value }))}
-              />
-            </div>
-            <div className="fg-item full">
-              <label>Meta Title</label>
-              <input
-                value={seoForm.seoMetaTitle}
-                onChange={(e) => setSeoForm((f) => ({ ...f, seoMetaTitle: e.target.value }))}
-              />
-            </div>
-            <div className="fg-item full">
-              <label>Meta Description</label>
-              <textarea
-                rows={3}
-                value={seoForm.seoMetaDescription}
-                onChange={(e) => setSeoForm((f) => ({ ...f, seoMetaDescription: e.target.value }))}
-              />
-            </div>
+
+      <AdminPanel title="👨‍⚕️ Doctor Profiles">
+        <div style={{ display: "grid", gap: 12, marginBottom: 14 }}>
+          <input
+            value={searchInput}
+            onChange={(event) => {
+              setSearchInput(event.target.value);
+              setPage(1);
+            }}
+            placeholder="Search by name, email, phone, PMDC, specialty, hospital, city..."
+            style={{ width: "100%" }}
+          />
+          <FilterPills
+            filters={[...STATUS_FILTERS]}
+            activeIndex={statusIndex}
+            onChange={(index) => {
+              setStatusIndex(index);
+              setPage(1);
+            }}
+          />
+          <FilterPills
+            filters={[...SORT_FILTERS]}
+            activeIndex={sortIndex}
+            onChange={(index) => {
+              setSortIndex(index);
+              setPage(1);
+            }}
+          />
+        </div>
+        <AdminTable
+          headers={["Doctor", "Specialty", "Institution", "Account", "SEO Status", "Actions"]}
+          rows={rows}
+          loading={doctorsQuery.isLoading}
+          emptyMessage="No doctor profiles found"
+        />
+        {meta && meta.totalPages > 1 ? (
+          <AdminPagination
+            info={`Showing ${doctors.length} of ${meta.total} doctors`}
+            page={meta.page}
+            totalPages={meta.totalPages}
+            onPageChange={setPage}
+          />
+        ) : (
+          <div style={{ fontSize: ".74rem", color: "var(--gray-400)", marginTop: 10 }}>
+            Showing {doctors.length} of {meta?.total ?? 0} doctors
           </div>
-          <div className="btn-row" style={{ marginTop: 14 }}>
-            <AdminButton
-              variant="primary"
-              onClick={() => {
-                updateSeo.mutate(
-                  { doctorId: selected.id, ...seoForm },
-                  { onSuccess: () => showToast("✅ SEO saved") },
-                );
-              }}
-            >
-              💾 Save SEO
-            </AdminButton>
-            <AdminButton onClick={() => setSelectedId(null)}>Close</AdminButton>
-          </div>
-        </AdminPanel>
-      ) : null}
+        )}
+      </AdminPanel>
+
+      <div id="doctor-workspace">
+        {selectedId ? (
+          <AdminDoctorProfileWorkspace
+            doctorId={selectedId}
+            editMode={editMode}
+            onToggleEdit={() => setEditMode((value) => !value)}
+          />
+        ) : null}
+      </div>
     </>
   );
 }

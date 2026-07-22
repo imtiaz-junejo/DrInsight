@@ -513,7 +513,7 @@
 
 .about-page .stat-item p {
   font-size: 0.74rem;
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.68);
   margin-top: 3px;
 }
 
@@ -933,6 +933,7 @@
 
 .about-page .accred-section h2 {
   margin-bottom: 8px;
+  font-size: 1.55rem;
 }
 
 .about-page .accred-section > div > p {
@@ -985,6 +986,10 @@
   color: #fff;
   text-align: center;
   padding: 64px 20px;
+}
+
+.about-page .about-cta .eyebrow {
+  color: #93c5fd;
 }
 
 .about-page .about-cta h2 {

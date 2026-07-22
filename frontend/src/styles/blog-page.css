@@ -899,6 +899,67 @@
   gap: 12px;
   justify-content: center;
   flex-wrap: wrap;
+  align-items: center;
+}
+
+.blog-page .cta-subscribe-form {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.blog-page .cta-subscribe-form input {
+  width: min(260px, 72vw);
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--gray-900);
+  font-size: 0.86rem;
+  font-family: inherit;
+  outline: none;
+  transition: var(--transition);
+}
+
+.blog-page .cta-subscribe-form input::placeholder {
+  color: var(--gray-400);
+}
+
+.blog-page .cta-subscribe-form input:focus {
+  border-color: #fff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+}
+
+.blog-page .cta-subscribe-btn {
+  background: #fff;
+  color: var(--blue-dark);
+  border: none;
+  padding: 11px 18px;
+  border-radius: 9px;
+  font-weight: 700;
+  font-size: 0.86rem;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.blog-page .cta-subscribe-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.blog-page .cta-subscribe-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.blog-page .cta-subscribe-msg {
+  margin: 0 auto 12px;
+  max-width: 440px;
+  font-size: 0.82rem;
+  opacity: 0.92;
 }
 
 .blog-page .btn-white {
