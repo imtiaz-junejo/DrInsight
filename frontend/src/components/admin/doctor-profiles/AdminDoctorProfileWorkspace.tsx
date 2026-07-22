@@ -74,8 +74,31 @@ export function AdminDoctorProfileWorkspace({ doctorId, editMode, onToggleEdit }
       rating: doctor.rating,
       reviewCount: doctor.reviewCount,
     });
-    form.setValue("schema", schema, { shouldDirty: false });
-  }, [values, doctor, schemaManual, form]);
+    if (form.getValues("schema") !== schema) {
+      form.setValue("schema", schema, { shouldDirty: false });
+    }
+  }, [
+    values.fullName,
+    values.specialty,
+    values.bioShort,
+    values.metaTitle,
+    values.metaDesc,
+    values.expertise,
+    values.languages,
+    values.institution,
+    values.education,
+    values.seoFocus,
+    values.seoSecondary,
+    values.seoUrl,
+    values.facebook,
+    values.twitter,
+    values.youtube,
+    values.instagram,
+    values.linkedin,
+    doctor,
+    schemaManual,
+    form,
+  ]);
 
   const handleAvatarChange = useCallback(
     async (file: File) => {
@@ -128,8 +151,18 @@ export function AdminDoctorProfileWorkspace({ doctorId, editMode, onToggleEdit }
     }
   };
 
-  if (detailQuery.isLoading || !doctor) {
+  if (detailQuery.isLoading) {
     return <AdminPanel title="Loading doctor workspace...">Fetching profile from database...</AdminPanel>;
+  }
+
+  if (detailQuery.isError || !doctor) {
+    return (
+      <AdminPanel title="Profile unavailable">
+        <p style={{ fontSize: "0.84rem", color: "var(--gray-700)" }}>
+          Could not load this doctor profile. Please go back and try again.
+        </p>
+      </AdminPanel>
+    );
   }
 
   const suspended = doctor.user?.status === "SUSPENDED";

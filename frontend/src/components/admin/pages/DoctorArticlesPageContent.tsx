@@ -105,8 +105,8 @@ export function DoctorArticlesPageContent({ userId }: { userId: string }) {
   if (!profile || profile.role !== "DOCTOR") {
     return (
       <>
-        <Link href="/admin/doctors" className="detail-back">
-          ← Back to Doctors
+        <Link href="/admin/doctor-profiles" className="detail-back">
+          ← Back to Doctor Profiles
         </Link>
         <p>This user is not a doctor or was not found.</p>
       </>

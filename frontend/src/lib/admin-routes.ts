@@ -6,6 +6,10 @@ export function adminDoctorProfileHref(doctorProfileId: string) {
   return `/admin/doctor-profiles/${doctorProfileId}`;
 }
 
+export function adminPatientProfileHref(patientProfileId: string) {
+  return `/admin/patient-profiles/${patientProfileId}`;
+}
+
 export function adminDoctorArticlesHref(userId: string) {
   return `/admin/users/${userId}/articles`;
 }

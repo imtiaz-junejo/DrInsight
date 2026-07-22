@@ -160,9 +160,9 @@ export function AuthorsPageContent() {
 
         actions={
 
-          <Link href="/admin/doctors" className="btn">
+          <Link href="/admin/doctor-profiles" className="btn">
 
-            Manage Doctor Accounts →
+            Manage Doctor Profiles →
 
           </Link>
 

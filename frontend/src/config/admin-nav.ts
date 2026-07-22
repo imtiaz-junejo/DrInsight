@@ -24,9 +24,8 @@ export const adminNav: AdminNavGroup[] = [
     lbl: "User Management",
     items: [
       { id: "users", name: "Users", badgeKey: "users", href: "/admin/users" },
-      { id: "doctors", name: "Doctors", href: "/admin/doctors" },
       { id: "doctor-seo", name: "Doctor Profiles", href: "/admin/doctor-profiles" },
-      { id: "patients", name: "Patients", href: "/admin/patients" },
+      { id: "patient-profiles", name: "Patient Profiles", href: "/admin/patient-profiles" },
       { id: "roles", name: "Roles & Permissions", href: "/admin/roles" },
     ],
   },
@@ -142,9 +141,8 @@ export const adminPageMeta: Record<string, [string, string]> = {
   dashboard: ["Dashboard Overview", "Welcome back — here's what's happening today"],
   "audit-log": ["Audit & Activity Log", "Every sensitive action on the platform — who did what, when, and from where"],
   users: ["Users", "Manage all platform users — patients, doctors, and admins"],
-  doctors: ["Doctors", "Manage doctor accounts, verification, and specialties"],
   "doctor-seo": ["Doctor Profiles", "Review & edit each doctor-filled profile, set its SEO, and suspend or reactivate the account"],
-  patients: ["Patients", "View and manage patient accounts and health profiles"],
+  "patient-profiles": ["Patient Profiles", "View and manage patient accounts, health profiles, and activity history"],
   roles: ["Roles & Permissions", "Configure access levels for Admin, Doctor, and Patient roles"],
   "qa-pending": ["Patient Q&A · Pending Questions", "New patient questions awaiting review — doctors cannot see these yet"],
   "qa-approved": ["Patient Q&A · Approved Questions", "Approved and assigned — visible on the doctor dashboard"],
@@ -212,6 +210,7 @@ export function adminRouteId(pathname: string): string {
   if (segments[0] === "physical" && segments[1]) return `phys-${segments[1]}`;
   if (segments[0] === "womens-health-reminders") return "whr";
   if (segments[0] === "doctor-profiles") return "doctor-seo";
+  if (segments[0] === "patient-profiles") return "patient-profiles";
   if (segments[0] === "trusted-partners") return "about-partners";
   if (segments[0] === "founders-message") return "about-founder";
 
@@ -241,6 +240,9 @@ export function getAdminPageMeta(pathname: string): [string, string] {
   }
   if (segments[0] === "doctor-profiles") {
     return adminPageMeta["doctor-seo"];
+  }
+  if (segments[0] === "patient-profiles") {
+    return adminPageMeta["patient-profiles"];
   }
 
   if (segments[0] === "users" && segments.length >= 2) {

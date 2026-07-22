@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { avatarGradient, hashString, getInitials } from "@/lib/admin-utils";
-import { adminDoctorProfileHref, adminUserProfileHref } from "@/lib/admin-routes";
+import { adminDoctorProfileHref, adminPatientProfileHref, adminUserProfileHref } from "@/lib/admin-routes";
 import { resolveDashboardIcon } from "@/components/doctor/icons/resolveEmojiIcon";
 
 export function UserAvatar({
@@ -39,6 +39,7 @@ export function UserCell({
   seed,
   userId,
   doctorProfileId,
+  patientProfileId,
 }: {
   firstName?: string | null;
   lastName?: string | null;
@@ -46,6 +47,7 @@ export function UserCell({
   seed?: string;
   userId?: string;
   doctorProfileId?: string;
+  patientProfileId?: string;
 }) {
   const content = (
     <div className="cell-user">
@@ -61,9 +63,11 @@ export function UserCell({
 
   const href = doctorProfileId
     ? adminDoctorProfileHref(doctorProfileId)
-    : userId
-      ? adminUserProfileHref(userId)
-      : null;
+    : patientProfileId
+      ? adminPatientProfileHref(patientProfileId)
+      : userId
+        ? adminUserProfileHref(userId)
+        : null;
 
   if (href) {
     return (
@@ -108,17 +112,19 @@ export function AdminPanel({
   children,
   bodyClassName,
 }: {
-  title: string;
+  title?: string;
   actions?: ReactNode;
   children: ReactNode;
   bodyClassName?: string;
 }) {
   return (
     <div className="panel">
-      <div className="panel-hd">
-        <h3>{title}</h3>
-        {actions ? <div className="btn-row">{actions}</div> : null}
-      </div>
+      {title || actions ? (
+        <div className="panel-hd">
+          {title ? <h3>{title}</h3> : <span />}
+          {actions ? <div className="btn-row">{actions}</div> : null}
+        </div>
+      ) : null}
       {bodyClassName ? <div className={bodyClassName}>{children}</div> : children}
     </div>
   );

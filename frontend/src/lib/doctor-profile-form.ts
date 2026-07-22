@@ -350,4 +350,17 @@ export function parseLineList(value?: string): string[] {
     .filter(Boolean);
 }
 
+export function doctorAboutParagraphs(
+  shortBio?: string | null,
+  fullBio?: string | null,
+  fallback?: string,
+): string[] {
+  const source = fullBio?.trim() || shortBio?.trim() || fallback?.trim() || "";
+  if (!source) return [];
+  return source
+    .split(/\n\n+/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+}
+
 export { formatDobDisplay };

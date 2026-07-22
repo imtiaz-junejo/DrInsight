@@ -1,24 +1,24 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { adminPageMeta } from "@/config/admin-nav";
-import { AdminDoctorProfileDetailPageContent } from "@/components/admin/pages/AdminDoctorProfileDetailPageContent";
+import { AdminPatientProfileDetailPageContent } from "@/components/admin/pages/AdminPatientProfileDetailPageContent";
 
-const routeId = "doctor-seo" as const;
+const routeId = "patient-profiles" as const;
 
 export const metadata: Metadata = {
   title: `${adminPageMeta[routeId][0]} — DrInsight Admin`,
   description: adminPageMeta[routeId][1],
 };
 
-export default async function AdminDoctorProfileDetailPage({
+export default async function AdminPatientProfileDetailPage({
   params,
 }: {
-  params: Promise<{ doctorId: string }>;
+  params: Promise<{ patientId: string }>;
 }) {
-  const { doctorId } = await params;
+  const { patientId } = await params;
   return (
     <Suspense fallback={<div style={{ padding: 16 }}>Loading profile...</div>}>
-      <AdminDoctorProfileDetailPageContent doctorId={doctorId} />
+      <AdminPatientProfileDetailPageContent patientId={patientId} />
     </Suspense>
   );
 }

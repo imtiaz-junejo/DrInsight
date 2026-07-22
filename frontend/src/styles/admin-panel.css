@@ -2001,3 +2001,445 @@
   }
 }
 
+/* Admin profile view (patient / doctor detail) */
+.admin-root .admin-profile-page {
+  display: grid;
+  gap: 0;
+}
+
+.admin-root .admin-profile-stats.kv-grid {
+  grid-template-columns: repeat(4, 1fr);
+  margin-bottom: 18px;
+}
+
+.admin-root .admin-profile-stat-card {
+  background: #fff;
+  border-color: #c7d9f0;
+  box-shadow: 0 2px 8px rgba(26, 86, 160, 0.06);
+}
+
+.admin-root .admin-profile-stat-card strong {
+  color: #0f2744;
+  font-size: 1.5rem;
+}
+
+.admin-root .admin-profile-stat-card span {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.admin-root .admin-profile-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px 24px;
+  margin-bottom: 18px;
+  border-radius: 16px;
+  border: 1.5px solid #b8cfe8;
+  background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 45%, #f8fbff 100%);
+  box-shadow: 0 4px 14px rgba(26, 86, 160, 0.1);
+}
+
+.admin-root .admin-profile-banner--doctor {
+  border-color: #a8c4e8;
+  background: linear-gradient(135deg, #d4e4f7 0%, #edf4fc 50%, #f8fbff 100%);
+}
+
+.admin-root .admin-profile-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+  flex: 1;
+}
+
+.admin-root .admin-profile-banner-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.admin-root .admin-profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.admin-root .admin-profile-card {
+  background: #fff;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
+}
+
+.admin-root .admin-profile-card--blue {
+  border-color: #c7d9f0;
+}
+
+.admin-root .admin-profile-card--teal {
+  border-color: #a8d8e8;
+}
+
+.admin-root .admin-profile-card-hd {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.admin-root .admin-profile-card--blue .admin-profile-card-hd {
+  background: linear-gradient(90deg, #e8f0fb 0%, #f8fbff 100%);
+  border-bottom-color: #c7d9f0;
+}
+
+.admin-root .admin-profile-card--teal .admin-profile-card-hd {
+  background: linear-gradient(90deg, #e0f4f8 0%, #f4fbfd 100%);
+  border-bottom-color: #a8d8e8;
+}
+
+.admin-root .admin-profile-card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.admin-root .admin-profile-card--blue .admin-profile-card-icon {
+  background: #1a56a0;
+  box-shadow: 0 2px 6px rgba(26, 86, 160, 0.25);
+}
+
+.admin-root .admin-profile-card--teal .admin-profile-card-icon {
+  background: #0891b2;
+  box-shadow: 0 2px 6px rgba(8, 145, 178, 0.25);
+}
+
+.admin-root .admin-profile-card-hd h3 {
+  margin: 0;
+  font-family: var(--font-d);
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: #0f2744;
+}
+
+.admin-root .admin-profile-card--blue .admin-profile-card-hd h3 {
+  color: #1a56a0;
+}
+
+.admin-root .admin-profile-card--teal .admin-profile-card-hd h3 {
+  color: #0e7490;
+}
+
+.admin-root .admin-profile-card-bd {
+  padding: 6px 20px 14px;
+  background: #fff;
+}
+
+.admin-root .admin-profile-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 12px 10px;
+  margin: 0 -10px;
+  border-bottom: 1px solid #e8edf3;
+  border-radius: 8px;
+}
+
+.admin-root .admin-profile-row:nth-child(odd) {
+  background: #f8fafc;
+}
+
+.admin-root .admin-profile-row:last-child {
+  border-bottom: none;
+}
+
+.admin-root .admin-profile-label {
+  flex: 0 0 42%;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569;
+  line-height: 1.45;
+}
+
+.admin-root .admin-profile-value {
+  flex: 1;
+  text-align: right;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #0f2744;
+  line-height: 1.45;
+}
+
+.admin-root .admin-profile-hero-text {
+  min-width: 0;
+}
+
+.admin-root .admin-profile-hero-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 10px rgba(26, 86, 160, 0.2);
+  flex-shrink: 0;
+}
+
+.admin-root .admin-profile-banner .cell-av {
+  width: 72px;
+  height: 72px;
+  font-size: 1.2rem;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 10px rgba(26, 86, 160, 0.2);
+  flex-shrink: 0;
+}
+
+.admin-root .admin-profile-hero-emoji {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.9rem;
+  background: #fff;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 10px rgba(26, 86, 160, 0.2);
+  flex-shrink: 0;
+}
+
+.admin-root .admin-profile-hero-name {
+  font-family: var(--font-d);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #0f2744;
+  line-height: 1.25;
+}
+
+.admin-root .admin-profile-hero-creds {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #475569;
+}
+
+.admin-root .admin-profile-hero-sub {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.admin-root .admin-profile-id-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 50px;
+  background: #1a56a0;
+  color: #fff;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 900px) {
+  .admin-root .admin-profile-stats.kv-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin-root .admin-profile-banner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-root .admin-profile-banner-actions {
+    justify-content: flex-start;
+  }
+
+  .admin-root .admin-profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-root .admin-profile-row {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .admin-root .admin-profile-value {
+    text-align: left;
+  }
+}
+
+/* Admin patient profile records */
+.admin-root .admin-profile-records {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.admin-root .admin-profile-record-panel {
+  border-color: #c7d9f0;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+}
+
+.admin-root .admin-profile-record-panel .panel-hd h3 {
+  color: #0f2744;
+}
+
+.admin-root .admin-profile-record-bd {
+  padding-top: 4px;
+}
+
+.admin-root .admin-profile-record-empty {
+  margin: 0;
+  padding: 8px 0;
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.admin-root .admin-profile-question-list,
+.admin-root .admin-profile-bookmark-list {
+  display: grid;
+}
+
+.admin-root .admin-profile-question-item,
+.admin-root .admin-profile-bookmark-item {
+  padding: 11px 0;
+  border-bottom: 1px solid #e8edf3;
+}
+
+.admin-root .admin-profile-question-item:last-child,
+.admin-root .admin-profile-bookmark-item:last-child {
+  border-bottom: none;
+}
+
+.admin-root .admin-profile-question-title,
+.admin-root .admin-profile-bookmark-title {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #0f2744;
+  line-height: 1.45;
+}
+
+.admin-root .admin-profile-question-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 5px;
+}
+
+.admin-root .admin-profile-question-meta span,
+.admin-root .admin-profile-bookmark-category,
+.admin-root .admin-profile-bookmark-date {
+  font-size: 0.72rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.admin-root .admin-profile-bookmark-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-root .admin-profile-bookmark-date {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.admin-root .admin-profile-record-panel .tbl-wrap th {
+  color: #64748b;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.admin-root .admin-profile-record-panel .tbl-wrap td {
+  color: #334155;
+  font-size: 0.84rem;
+}
+
+.admin-root .admin-profile-record-panel .tbl-wrap td strong {
+  color: #0f2744;
+}
+
+/* Medical summary card */
+.admin-root .admin-med-summary-card .admin-med-summary-bd {
+  padding-top: 2px;
+}
+
+.admin-root .admin-med-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid #e8edf3;
+}
+
+.admin-root .admin-med-summary-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.admin-root .admin-med-summary-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #0f2744;
+  text-align: right;
+}
+
+.admin-root .admin-med-summary-chip-group {
+  padding: 12px 0 4px;
+}
+
+.admin-root .admin-med-summary-chip-group + .admin-med-summary-chip-group {
+  padding-top: 8px;
+}
+
+.admin-root .admin-med-summary-chip-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.admin-root .admin-med-summary-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.admin-root .admin-med-summary-chips .chip {
+  margin: 0;
+}
+
+.admin-root .admin-med-summary-empty {
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.admin-root .admin-med-summary-value .chip {
+  margin-left: 4px;
+}
+

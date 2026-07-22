@@ -267,6 +267,21 @@
   border-bottom: 2px solid var(--blue-light);
 }
 
+.admin-root .abio .bio-text {
+  font-size: 0.92rem;
+  color: var(--gray-600);
+  line-height: 1.85;
+  font-family: var(--font-body);
+}
+
+.admin-root .abio .bio-text p {
+  margin-bottom: 14px;
+}
+
+.admin-root .abio .bio-text p:last-child {
+  margin-bottom: 0;
+}
+
 .admin-root .abio .callout-box {
   background: var(--blue-light);
   border: 1px solid #bfdbfe;

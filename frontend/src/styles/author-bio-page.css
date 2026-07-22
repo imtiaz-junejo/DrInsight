@@ -116,12 +116,11 @@
 .author-bio-page .callout-box {background:var(--blue-light);border:1px solid #bfdbfe;border-radius:var(--radius);padding:14px 16px;margin-bottom:18px}
 .author-bio-page .callout-box p {font-size:.84rem;color:var(--blue-dark);line-height:1.6}
 .author-bio-page .callout-box strong {font-weight:700}
-.author-bio-page .bio-short {font-size:.92rem;color:var(--gray-700);line-height:1.85;margin-bottom:10px}
-.author-bio-page .bio-full {display:none;font-size:.9rem;color:var(--gray-700);line-height:1.85}
-.author-bio-page .bio-full.open {display:block}
-.author-bio-page .bio-full p {margin-bottom:14px}
-.author-bio-page .bio-full p:last-child {margin-bottom:0}
-.author-bio-page .bio-toggle {font-size:.78rem;font-weight:700;color:var(--blue);cursor:pointer;display:inline-flex;align-items:center;gap:4px;margin-top:8px;background:var(--blue-light);padding:5px 12px;border-radius:50px}
+.author-bio-page .bio-text {font-size:.92rem;color:var(--gray-600);line-height:1.85;font-family:var(--font-b)}
+.author-bio-page .bio-text p {margin-bottom:14px}
+.author-bio-page .bio-text p:last-child {margin-bottom:0}
+.author-bio-page .bio-short {font-size:.92rem;color:var(--gray-600);line-height:1.85;margin-bottom:10px}
+.author-bio-page .bio-full {font-size:.92rem;color:var(--gray-600);line-height:1.85}
 .author-bio-page .exp-tags {display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
 .author-bio-page .exp-tag {padding:6px 14px;border-radius:50px;font-size:.78rem;font-weight:600;background:var(--blue-light);color:var(--blue);border:1px solid #bfdbfe;cursor:default;transition:var(--transition)}
 .author-bio-page .exp-tag:hover {background:var(--blue);color:#fff}
@@ -253,6 +252,8 @@
 .author-bio-page .avail-dot {width:7px;height:7px;border-radius:50%;margin-right:4px;display:inline-block}
 .author-bio-page .dot-g {background:var(--green)}
 .author-bio-page .dot-r {background:var(--gray-300)}
+.author-bio-page .avail-footer {margin-top:10px;font-size:.74rem;color:var(--gray-400);text-align:center;line-height:1.55}
+.author-bio-page .avail-footer div + div {margin-top:2px}
 .author-bio-page .fact-row {display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid var(--gray-100);font-size:.8rem}
 .author-bio-page .fact-row:last-child {border-bottom:none}
 .author-bio-page .fact-ico {font-size:.88rem;flex-shrink:0;margin-top:1px}

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  doctorAboutParagraphs,
   resolveDoctorEducationHistory,
   textToAwards,
   textToCerts,
@@ -104,6 +105,13 @@ export function AdminDoctorBioPreview({ values, doctor, suspended }: Props) {
     headlineTitle && values.institution
       ? `${headlineTitle} — ${values.institution}`
       : headlineTitle || values.institution || "";
+  const aboutParagraphs = doctorAboutParagraphs(
+    values.bioShort,
+    values.bioFull,
+    values.fullName
+      ? `${values.fullName} is a ${values.specialty?.toLowerCase() || "medical"} specialist.`
+      : undefined,
+  );
   return (
     <div className="abio">
       <div className="hero-banner">
@@ -186,14 +194,11 @@ export function AdminDoctorBioPreview({ values, doctor, suspended }: Props) {
 
         <div className="s-card">
           <SectionTitle icon="👤" label={`About ${values.fullName || "the doctor"}`} />
-          {values.bioShort ? (
-            <p style={{ fontSize: ".86rem", color: "var(--gray-700)", lineHeight: 1.7, marginBottom: 8 }}>
-              {values.bioShort}
-            </p>
-          ) : null}
-          {values.bioFull ? (
-            <p style={{ fontSize: ".84rem", color: "var(--gray-500)", lineHeight: 1.7 }}>{values.bioFull}</p>
-          ) : null}
+          <div className="bio-text">
+            {aboutParagraphs.map((para, index) => (
+              <p key={`${index}-${para.slice(0, 24)}`}>{para}</p>
+            ))}
+          </div>
         </div>
 
         {expertise.length ? (

@@ -27,8 +27,8 @@ export function doctorToAdminForm(doctor: DoctorProfile): AdminDoctorProfileForm
 
   return {
     ...base,
-    specLabel: `${specialtyEmoji(doctor.specialty)} ${doctor.specialty}`,
-    photoIcon: specialtyEmoji(doctor.specialty),
+    specLabel: `${specialtyEmoji(doctor.specialty ?? "")} ${doctor.specialty ?? ""}`.trim(),
+    photoIcon: specialtyEmoji(doctor.specialty ?? ""),
     location,
     coiDeclaration: doctor.conflictOfInterest ?? "",
     coiUpdated: doctor.coiUpdatedAt

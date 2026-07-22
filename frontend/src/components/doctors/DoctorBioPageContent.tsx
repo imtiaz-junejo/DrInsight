@@ -7,10 +7,13 @@ import {
   SectionTitle,
 } from "@/components/public/section-heading";
 import {
-  buildAvailabilityRows,
   buildConsultationTypes,
+  DEFAULT_CLINIC_SCHEDULE,
+  DEFAULT_ONLINE_SCHEDULE,
+  mergeScheduleConfig,
   type DayScheduleConfig,
 } from "@/lib/author-schedule";
+import { AuthorAvailabilitySidebarCard } from "@/components/doctors/AuthorAvailabilitySidebarCard";
 import { authorProfileHref } from "@/lib/author-profile-url";
 import {
   doctorFullName,
@@ -22,7 +25,7 @@ import {
   specialtyEmoji,
   starsDisplay,
 } from "@/lib/data-mappers";
-import { resolveDoctorEducationHistory } from "@/lib/doctor-profile-form";
+import { doctorAboutParagraphs, resolveDoctorEducationHistory } from "@/lib/doctor-profile-form";
 import type {
   DoctorArticleSummary,
   DoctorProfile,
@@ -300,7 +303,6 @@ export function AuthorBioPageContent({
   const profileFeedback = useSubmitAuthorProfileFeedback();
   const { data: approvedPublications = [] } = useDoctorPublicationsByDoctor(doctor?.id ?? "", 20);
   const [tab, setTab] = useState<TabKey>("about");
-  const [bioOpen, setBioOpen] = useState(false);
   const [articlesVisible, setArticlesVisible] = useState(6);
   const [reviewsVisible, setReviewsVisible] = useState(5);
   const [toast, setToast] = useState("");
@@ -330,10 +332,14 @@ export function AuthorBioPageContent({
     () => asArray<NonNullable<DoctorProfile["speakingEngagements"]>[number]>(doctor?.speakingEngagements),
     [doctor?.speakingEngagements],
   );
-  const onlineSchedule = doctor?.onlineSchedule as DayScheduleConfig | null | undefined;
-  const clinicSchedule = doctor?.clinicSchedule as DayScheduleConfig | null | undefined;
-  const onlineAvailability = useMemo(() => buildAvailabilityRows(onlineSchedule), [onlineSchedule]);
-  const physicalAvailability = useMemo(() => buildAvailabilityRows(clinicSchedule), [clinicSchedule]);
+  const onlineSchedule = useMemo(
+    () => mergeScheduleConfig(DEFAULT_ONLINE_SCHEDULE, doctor?.onlineSchedule as DayScheduleConfig | null | undefined),
+    [doctor?.onlineSchedule],
+  );
+  const clinicSchedule = useMemo(
+    () => mergeScheduleConfig(DEFAULT_CLINIC_SCHEDULE, doctor?.clinicSchedule as DayScheduleConfig | null | undefined),
+    [doctor?.clinicSchedule],
+  );
   const consultationTypes = useMemo(
     () => buildConsultationTypes(onlineSchedule, Number(doctor?.consultationFee ?? 0)),
     [onlineSchedule, doctor?.consultationFee],
@@ -355,6 +361,16 @@ export function AuthorBioPageContent({
     }
     return Array.from(map.values());
   }, [articles]);
+
+  const aboutParagraphs = useMemo(() => {
+    if (!doctor) return [];
+    const displayName = doctorFullName(doctor.user);
+    return doctorAboutParagraphs(
+      doctor.bio,
+      doctor.bioFull,
+      `${displayName} is a ${doctor.specialty.toLowerCase()} specialist with ${doctor.experienceYears} years of experience.`,
+    );
+  }, [doctor]);
 
   const ratingDistribution = doctor?.ratingDistribution ?? { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
   const totalRated = Object.values(ratingDistribution).reduce((s, n) => s + n, 0) || doctor?.reviewCount || 1;
@@ -619,22 +635,11 @@ export function AuthorBioPageContent({
 
               <div className="s-card">
                 <div className="s-title">👤 About {name}</div>
-                <p className="bio-short">
-                  {doctor.bio ??
-                    `${name} is a ${doctor.specialty.toLowerCase()} specialist with ${doctor.experienceYears} years of experience.`}
-                </p>
-                {doctor.bioFull && (
-                  <>
-                    <div className={`bio-full${bioOpen ? " open" : ""}`}>
-                      {doctor.bioFull.split(/\n\n+/).map((para) => (
-                        <p key={para.slice(0, 24)}>{para}</p>
-                      ))}
-                    </div>
-                    <button type="button" className="bio-toggle" onClick={() => setBioOpen((v) => !v)}>
-                      {bioOpen ? "▾ Show Less Biography" : "▸ Read Full Biography"}
-                    </button>
-                  </>
-                )}
+                <div className="bio-text">
+                  {aboutParagraphs.map((para) => (
+                    <p key={para.slice(0, 32)}>{para}</p>
+                  ))}
+                </div>
               </div>
 
               {expertise.length > 0 && (
@@ -1053,44 +1058,22 @@ export function AuthorBioPageContent({
             </div>
           )}
 
-          {onlineAvailEnabled && onlineAvailability.length > 0 && (
-            <div className="sidebar-card" id="card-online-avail">
-              <div className="sb-title">🕐 Online Consultation Availability</div>
-              {onlineAvailability.map((day) => (
-                <div key={day.day} className="avail-row">
-                  <span className="avail-day">
-                    <span className={`avail-dot ${day.available ? "dot-g" : "dot-r"}`} />
-                    {day.day}
-                  </span>
-                  <span className={`avail-time${day.available ? "" : " closed"}`}>{day.time}</span>
-                </div>
-              ))}
-              {doctor.responseTime && (
-                <div style={{ marginTop: 10, fontSize: ".74rem", color: "var(--gray-400)", textAlign: "center" }}>
-                  📅 Next available: {doctor.responseTime}
-                </div>
-              )}
-            </div>
+          {onlineAvailEnabled && (
+            <AuthorAvailabilitySidebarCard
+              id="card-online-avail"
+              title="🕐 Online Consultation Availability"
+              config={onlineSchedule}
+              syncNote="📅 Synced from the doctor's Online Availability & Slots settings"
+            />
           )}
 
-          {physicalAvailEnabled && physicalAvailability.length > 0 && (
-            <div className="sidebar-card" id="card-physical-avail">
-              <div className="sb-title">🏥 Physical Appointment</div>
-              {physicalAvailability.map((day) => (
-                <div key={day.day} className="avail-row">
-                  <span className="avail-day">
-                    <span className={`avail-dot ${day.available ? "dot-g" : "dot-r"}`} />
-                    {day.day}
-                  </span>
-                  <span className={`avail-time${day.available ? "" : " closed"}`}>{day.time}</span>
-                </div>
-              ))}
-              {doctor.hospital && (
-                <div style={{ marginTop: 10, fontSize: ".74rem", color: "var(--gray-400)", textAlign: "center" }}>
-                  🏥 In-person visits at {doctor.hospital}
-                </div>
-              )}
-            </div>
+          {physicalAvailEnabled && (
+            <AuthorAvailabilitySidebarCard
+              id="card-physical-avail"
+              title="🏥 Physical Appointment"
+              config={clinicSchedule}
+              syncNote="🏥 In-person visits · Synced from the clinic's Working Hours & Slots"
+            />
           )}
 
           <div className="sidebar-card">

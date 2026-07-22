@@ -11,7 +11,7 @@ import {
   StatusChip,
   UserAvatar,
 } from "@/components/admin/ui/AdminPrimitives";
-import { adminAppointmentDetailHref, adminBlogArticleHref, adminDoctorProfileHref } from "@/lib/admin-routes";
+import { adminAppointmentDetailHref, adminBlogArticleHref, adminDoctorProfileHref, adminPatientProfileHref } from "@/lib/admin-routes";
 import {
   appointmentStatusChip,
   formatDateTime,
@@ -38,16 +38,22 @@ export function AdminUserProfilePageContent({ userId }: { userId: string }) {
   const profile = profileQuery.data;
 
   const doctor = profile?.doctorProfile as { id?: string } | null | undefined;
+  const patient = profile?.patientProfile as { id?: string } | null | undefined;
   const isDoctor = profile?.role === "DOCTOR" && doctor?.id;
+  const isPatient = profile?.role === "PATIENT" && patient?.id;
 
   useEffect(() => {
     if (isDoctor && doctor?.id) {
       router.replace(adminDoctorProfileHref(doctor.id));
+      return;
     }
-  }, [isDoctor, doctor?.id, router]);
+    if (isPatient && patient?.id) {
+      router.replace(adminPatientProfileHref(patient.id));
+    }
+  }, [isDoctor, doctor?.id, isPatient, patient?.id, router]);
 
-  if (profileQuery.isLoading || isDoctor) {
-    return <AdminPanel title="Loading profile...">Opening doctor profile preview...</AdminPanel>;
+  if (profileQuery.isLoading || isDoctor || isPatient) {
+    return <AdminPanel title="Loading profile...">Opening profile workspace...</AdminPanel>;
   }
 
   if (profileQuery.isError || !profile) {
@@ -63,7 +69,7 @@ export function AdminUserProfilePageContent({ userId }: { userId: string }) {
 
   const role = userRoleChip(profile.role, profile.status);
   const status = userStatusChip(profile.status);
-  const patient = profile.patientProfile as Record<string, unknown> | null | undefined;
+  const patientProfile = profile.patientProfile as Record<string, unknown> | null | undefined;
 
   const appointmentRows = (profile.recentAppointments as Array<Record<string, unknown>>).map((apt) => {
     const aptStatus = appointmentStatusChip(String(apt.status ?? ""));
@@ -94,7 +100,7 @@ export function AdminUserProfilePageContent({ userId }: { userId: string }) {
   return (
     <>
       <Link
-        href={profile.role === "PATIENT" ? "/admin/patients" : "/admin/users"}
+        href={profile.role === "PATIENT" ? "/admin/patient-profiles" : "/admin/users"}
         className="detail-back"
       >
         ← Back
@@ -196,31 +202,31 @@ export function AdminUserProfilePageContent({ userId }: { userId: string }) {
           </dl>
         </AdminPanel>
 
-        <AdminPanel title={patient ? "Patient Profile" : "Profile"}>
+        <AdminPanel title={patientProfile ? "Patient Profile" : "Profile"}>
           <dl className="detail-list">
-            {patient ? (
+            {patientProfile ? (
               <>
                 <div className="detail-row">
                   <dt>Date of birth</dt>
                   <dd>
-                    {patient.dateOfBirth ? formatDateTime(String(patient.dateOfBirth)) : "—"}
+                    {patientProfile.dateOfBirth ? formatDateTime(String(patientProfile.dateOfBirth)) : "—"}
                   </dd>
                 </div>
                 <div className="detail-row">
                   <dt>Gender</dt>
-                  <dd>{detailValue(patient.gender)}</dd>
+                  <dd>{detailValue(patientProfile.gender)}</dd>
                 </div>
                 <div className="detail-row">
                   <dt>Blood group</dt>
-                  <dd>{detailValue(patient.bloodGroup)}</dd>
+                  <dd>{detailValue(patientProfile.bloodGroup)}</dd>
                 </div>
                 <div className="detail-row">
                   <dt>Allergies</dt>
-                  <dd>{detailValue(patient.allergies)}</dd>
+                  <dd>{detailValue(patientProfile.allergies)}</dd>
                 </div>
                 <div className="detail-row">
                   <dt>Medical history</dt>
-                  <dd>{detailValue(patient.medicalHistory)}</dd>
+                  <dd>{detailValue(patientProfile.medicalHistory)}</dd>
                 </div>
               </>
             ) : (

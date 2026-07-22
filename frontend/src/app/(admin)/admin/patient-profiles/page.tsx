@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { adminPageMeta } from "@/config/admin-nav";
-import { DoctorsPageContent } from "@/components/admin/pages/DoctorsPageContent";
+import { PatientProfilesPageContent } from "@/components/admin/pages/PatientProfilesPageContent";
 
-const routeId = "doctors" as const;
+const routeId = "patient-profiles" as const;
 
 export const metadata: Metadata = {
   title: `${adminPageMeta[routeId][0]} — DrInsight Admin`,
   description: adminPageMeta[routeId][1],
 };
 
-export default function AdminPage() {
-  return <DoctorsPageContent />;
+export default function AdminPatientProfilesPage() {
+  return <PatientProfilesPageContent />;
 }

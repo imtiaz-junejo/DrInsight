@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
   AdminButton,
@@ -11,9 +12,8 @@ import {
   StatusChip,
   UserCell,
 } from "@/components/admin/ui/AdminPrimitives";
-import { AdminDoctorProfileWorkspace } from "@/components/admin/doctor-profiles/AdminDoctorProfileWorkspace";
+import { adminDoctorProfileHref } from "@/lib/admin-routes";
 import { formatNumber } from "@/lib/admin-utils";
-import { useAdminUiStore } from "@/store/admin-ui.store";
 import { useAdminDoctorManage } from "@/services/admin-api-hooks";
 
 const STATUS_FILTERS = ["All", "Verified", "Pending", "Suspended"] as const;
@@ -27,14 +27,12 @@ const SORT_MAP: Record<(typeof SORT_FILTERS)[number], string> = {
 };
 
 export function DoctorProfilesPageContent() {
-  const showToast = useAdminUiStore((s) => s.showToast);
+  const router = useRouter();
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [statusIndex, setStatusIndex] = useState(0);
   const [sortIndex, setSortIndex] = useState(0);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setSearch(searchInput.trim()), 300);
@@ -95,13 +93,9 @@ export function DoctorProfilesPageContent() {
     [meta?.total, doctors.length, customSeoCount],
   );
 
-  const openDoctor = (doctorId: string, withEdit = false) => {
-    setSelectedId(doctorId);
-    setEditMode(withEdit);
-    showToast("Loaded doctor into the editor");
-    requestAnimationFrame(() => {
-      document.getElementById("doctor-workspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
+  const viewDoctor = (doctorId: string, withEdit = false) => {
+    const href = withEdit ? `${adminDoctorProfileHref(doctorId)}?edit=1` : adminDoctorProfileHref(doctorId);
+    router.push(href);
   };
 
   const rows = doctors.map((doctor) => {
@@ -130,8 +124,8 @@ export function DoctorProfilesPageContent() {
         className={hasSeo ? "ch-g" : "ch-gray"}
       />,
       <div key={`${doctor.id}-a`} className="btn-row">
-        <AdminButton onClick={() => openDoctor(doctor.id, false)}>Open</AdminButton>
-        <AdminButton variant="green" onClick={() => openDoctor(doctor.id, true)}>
+        <AdminButton onClick={() => viewDoctor(doctor.id, false)}>View</AdminButton>
+        <AdminButton variant="green" onClick={() => viewDoctor(doctor.id, true)}>
           Edit SEO
         </AdminButton>
       </div>,
@@ -189,16 +183,6 @@ export function DoctorProfilesPageContent() {
           </div>
         )}
       </AdminPanel>
-
-      <div id="doctor-workspace">
-        {selectedId ? (
-          <AdminDoctorProfileWorkspace
-            doctorId={selectedId}
-            editMode={editMode}
-            onToggleEdit={() => setEditMode((value) => !value)}
-          />
-        ) : null}
-      </div>
     </>
   );
 }

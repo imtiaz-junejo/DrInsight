@@ -330,6 +330,150 @@ export function useResetAdminDoctorSeo() {
   });
 }
 
+export interface AdminPatientUser {
+  id: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl?: string | null;
+  email: string;
+  phone?: string | null;
+  status: string;
+  isOnline?: boolean;
+  createdAt: string;
+  lastSeenAt?: string | null;
+}
+
+export interface AdminPatientProfile {
+  id: string;
+  userId: string;
+  patientNumber?: string | null;
+  dateOfBirth?: string | null;
+  gender?: string | null;
+  bloodGroup?: string | null;
+  allergies?: string[];
+  medicalHistory?: string | null;
+  emergencyContact?: string | null;
+  city?: string | null;
+  province?: string | null;
+  country?: string | null;
+  address?: string | null;
+  postalCode?: string | null;
+  healthInterests?: string[];
+  languagePreference?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  user?: AdminPatientUser;
+  medicalSummary?: {
+    height?: string | null;
+    weight?: string | null;
+    bmi?: string | null;
+    bmiTag?: string | null;
+    chronicConditions?: string[];
+  };
+  stats?: {
+    appointmentCount: number;
+    prescriptionCount: number;
+    questionCount: number;
+    bookmarkCount: number;
+  };
+}
+
+export interface AdminPatientListItem extends AdminPatientProfile {}
+
+export function useAdminPatientManage(params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  accountStatus?: string;
+  sort?: string;
+  order?: "asc" | "desc";
+}) {
+  return useQuery({
+    queryKey: ["admin-patient-manage", params],
+    queryFn: async () => {
+      const { data } = await api.get<{
+        data: AdminPatientListItem[];
+        meta: { total: number; page: number; limit: number; totalPages: number };
+      }>("/patients/manage", { params });
+      return data;
+    },
+  });
+}
+
+export function useAdminPatientDetail(patientId: string | null) {
+  return useQuery({
+    queryKey: ["admin-patient-detail", patientId],
+    enabled: Boolean(patientId),
+    queryFn: async () => {
+      const { data } = await api.get<AdminPatientProfile>(`/patients/manage/${patientId}`);
+      return data;
+    },
+  });
+}
+
+export function useAdminPatientContent(patientId: string | null) {
+  return useQuery({
+    queryKey: ["admin-patient-content", patientId],
+    enabled: Boolean(patientId),
+    queryFn: async () => {
+      const { data } = await api.get<{
+        appointments: Array<{
+          id: string;
+          scheduledAt: string;
+          status: string;
+          consultationType: string;
+          reason?: string | null;
+          doctorName?: string | null;
+          doctorSpecialty?: string | null;
+        }>;
+        prescriptions: Array<{
+          id: string;
+          prescriptionNumber?: string | null;
+          diagnosis?: string | null;
+          medication?: string | null;
+          dosage?: string | null;
+          status: string;
+          date?: string;
+          doctorName?: string | null;
+        }>;
+        questions: Array<{
+          id: string;
+          title: string;
+          status: string;
+          category?: string | null;
+          date: string;
+          doctorName?: string | null;
+        }>;
+        bookmarks: Array<{
+          id: string;
+          type: "article" | "publication";
+          title: string;
+          slug?: string;
+          category?: string | null;
+          status: string;
+          date: string;
+        }>;
+      }>(`/patients/manage/${patientId}/content`);
+      return data;
+    },
+  });
+}
+
+export function useUpdateAdminPatientProfile() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ patientId, ...body }: { patientId: string } & Record<string, unknown>) => {
+      const { data } = await api.patch(`/patients/${patientId}/admin`, body);
+      return data;
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-patient-manage"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-patient-detail", variables.patientId] });
+      queryClient.invalidateQueries({ queryKey: ["admin-user-profile"] });
+    },
+  });
+}
+
 export function usePendingUsers() {
   return useQuery({
     queryKey: ["admin-pending-users"],
@@ -373,16 +517,6 @@ export function useUpdateAppointmentStatus() {
       queryClient.invalidateQueries({ queryKey: ["admin-appointment", variables.id] });
       queryClient.invalidateQueries({ queryKey: ["admin-user-profile"] });
       queryClient.invalidateQueries({ queryKey: ["admin-nav-badges"] });
-    },
-  });
-}
-
-export function useAdminDoctors(params?: { page?: number; limit?: number; search?: string; specialty?: string }) {
-  return useQuery({
-    queryKey: ["admin-doctors", params],
-    queryFn: async () => {
-      const { data } = await api.get<Paginated<DoctorProfile>>("/doctors", { params });
-      return data;
     },
   });
 }

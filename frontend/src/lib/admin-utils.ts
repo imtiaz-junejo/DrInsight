@@ -103,6 +103,34 @@ export function appointmentStatusChip(status: string): { label: string; classNam
   return { label: status, className: "ch-gray" };
 }
 
+export function prescriptionStatusChip(status: string): { label: string; className: string } {
+  if (status === "ISSUED") return { label: "Active", className: "ch-g" };
+  if (status === "PENDING_REVIEW") return { label: "Refill Due", className: "ch-a" };
+  if (status === "DRAFT") return { label: "Draft", className: "ch-gray" };
+  return { label: status.replace(/_/g, " "), className: "ch-gray" };
+}
+
+export function questionStatusChip(status: string): { label: string; className: string } {
+  if (status === "ANSWERED" || status === "APPROVED") return { label: "Answered", className: "ch-g" };
+  if (status === "PENDING") return { label: "Pending", className: "ch-a" };
+  if (status === "REJECTED") return { label: "Rejected", className: "ch-r" };
+  return { label: status, className: "ch-gray" };
+}
+
+export function formatAdminAppointmentDateTime(date: string | Date): string {
+  const target = typeof date === "string" ? new Date(date) : date;
+  const datePart = target.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  const timePart = target.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+  return `${datePart} · ${timePart}`;
+}
+
 export function blogStatusChip(status: string): { label: string; className: string } {
   if (status === "PUBLISHED") return { label: "Published", className: "ch-g" };
   if (status === "DRAFT") return { label: "Draft", className: "ch-gray" };
