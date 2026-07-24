@@ -92,8 +92,8 @@ export function AdminDoctorBioPreview({ values, doctor, suspended }: Props) {
 
   const bookingEnabled = doctor?.bookingEnabled !== false;
   const contactEnabled = doctor?.contactEnabled !== false;
-  const specLabel = values.specLabel || `${specialtyEmoji(values.specialty)} ${values.specialty}`;
-  const photoIcon = values.photoIcon || specialtyEmoji(values.specialty) || "👨‍⚕️";
+  const specLabel = values.specLabel || `${specialtyEmoji(values.specialty ?? "")} ${values.specialty ?? ""}`.trim();
+  const photoIcon = values.photoIcon || specialtyEmoji(values.specialty ?? "") || "👨‍⚕️";
   const locationParts = values.location?.split(",").map((part) => part.trim()).filter(Boolean) ?? [];
   const locationLabel =
     [doctor?.city, doctor?.country].filter(Boolean).join(", ") ||

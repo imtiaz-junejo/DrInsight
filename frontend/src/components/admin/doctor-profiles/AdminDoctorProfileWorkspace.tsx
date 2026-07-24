@@ -35,19 +35,23 @@ export function AdminDoctorProfileWorkspace({ doctorId, editMode, onToggleEdit }
 
   const doctor = detailQuery.data;
   const defaultValues = useMemo(() => (doctor ? doctorToAdminForm(doctor) : undefined), [doctor]);
+  const [hydratedDoctorId, setHydratedDoctorId] = useState<string | null>(null);
 
   const form = useForm<AdminDoctorProfileFormValues>({
     resolver: zodResolver(adminDoctorProfileSchema),
-    defaultValues,
+    defaultValues: defaultValues ?? { fullName: "", specialty: "" },
     mode: "onChange",
   });
 
   useEffect(() => {
-    if (defaultValues) {
-      form.reset(defaultValues);
-      setSchemaManual(false);
+    if (!doctor || !defaultValues) {
+      setHydratedDoctorId(null);
+      return;
     }
-  }, [defaultValues, form]);
+    form.reset(defaultValues);
+    setSchemaManual(false);
+    setHydratedDoctorId(doctor.id);
+  }, [doctor, defaultValues, form]);
 
   const values = form.watch();
 
@@ -151,11 +155,7 @@ export function AdminDoctorProfileWorkspace({ doctorId, editMode, onToggleEdit }
     }
   };
 
-  if (detailQuery.isLoading) {
-    return <AdminPanel title="Loading doctor workspace...">Fetching profile from database...</AdminPanel>;
-  }
-
-  if (detailQuery.isError || !doctor) {
+  if (detailQuery.isError) {
     return (
       <AdminPanel title="Profile unavailable">
         <p style={{ fontSize: "0.84rem", color: "var(--gray-700)" }}>
@@ -163,6 +163,10 @@ export function AdminDoctorProfileWorkspace({ doctorId, editMode, onToggleEdit }
         </p>
       </AdminPanel>
     );
+  }
+
+  if (detailQuery.isLoading || !doctor || hydratedDoctorId !== doctor.id) {
+    return <AdminPanel title="Loading doctor workspace...">Fetching profile from database...</AdminPanel>;
   }
 
   const suspended = doctor.user?.status === "SUSPENDED";

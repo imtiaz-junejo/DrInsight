@@ -51,9 +51,11 @@ export function gradientForId(id: string): string {
   return GRADIENTS[hash];
 }
 
-export function specialtyEmoji(specialty: string): string {
+export function specialtyEmoji(specialty?: string | null): string {
+  const normalized = specialty?.trim() ?? "";
+  if (!normalized) return "🩺";
   for (const [key, emoji] of Object.entries(SPECIALTY_EMOJI)) {
-    if (specialty.toLowerCase().includes(key.toLowerCase())) return emoji;
+    if (normalized.toLowerCase().includes(key.toLowerCase())) return emoji;
   }
   return "🩺";
 }

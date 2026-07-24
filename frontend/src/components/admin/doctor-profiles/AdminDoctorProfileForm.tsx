@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useCallback, useRef, type ReactNode } from "react";
 import { useFormContext } from "react-hook-form";
 import {
   AWARD_ICONS,
@@ -8,29 +8,53 @@ import {
   LECTURE_TYPES,
 } from "@/components/doctor/pages/ProfileTextPickers";
 import { charCountLabel } from "@/components/admin/site-management/seo-settings-utils";
+import { ArticleRichTextField } from "@/components/editor/ArticleRichTextField";
 import { serpPreview } from "@/lib/admin-doctor-seo";
 import type { AdminDoctorProfileFormValues } from "@/lib/admin-doctor-profile-schema";
 import type { DoctorProfile } from "@/services/api-hooks";
 
-function insertAtCursor(
-  textarea: HTMLTextAreaElement | null,
-  current: string,
-  onChange: (value: string) => void,
-  text: string,
-) {
-  if (!textarea) {
-    onChange(`${current}${current && !current.endsWith("\n") ? "\n" : ""}${text}`);
-    return;
-  }
-  const start = textarea.selectionStart ?? current.length;
-  const end = textarea.selectionEnd ?? current.length;
-  const next = `${current.slice(0, start)}${text}${current.slice(end)}`;
-  onChange(next);
-  requestAnimationFrame(() => {
-    textarea.focus();
-    const pos = start + text.length;
-    textarea.setSelectionRange(pos, pos);
-  });
+function AdminPipeTextArea({
+  value,
+  onChange,
+  rows = 4,
+  picker,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  rows?: number;
+  picker: (insertAtCursor: (text: string) => void) => ReactNode;
+}) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const insertAtCursor = useCallback(
+    (text: string) => {
+      const textarea = textareaRef.current;
+      if (!textarea) {
+        onChange(`${value}${text}`);
+        return;
+      }
+
+      const start = textarea.selectionStart ?? value.length;
+      const end = textarea.selectionEnd ?? value.length;
+      const next = `${value.slice(0, start)}${text}${value.slice(end)}`;
+      const cursor = start + text.length;
+
+      onChange(next);
+
+      requestAnimationFrame(() => {
+        textarea.focus();
+        textarea.setSelectionRange(cursor, cursor);
+      });
+    },
+    [onChange, value],
+  );
+
+  return (
+    <>
+      {picker(insertAtCursor)}
+      <textarea ref={textareaRef} rows={rows} value={value} onChange={(event) => onChange(event.target.value)} />
+    </>
+  );
 }
 
 function IconPicker({
@@ -61,6 +85,7 @@ function IconPicker({
         <button
           key={icon}
           type="button"
+          onMouseDown={(event) => event.preventDefault()}
           onClick={() => onPick(icon)}
           title={`Start a new line with ${icon}`}
           style={{
@@ -104,6 +129,7 @@ function TypePicker({ onPick }: { onPick: (line: string) => void }) {
         <button
           key={type}
           type="button"
+          onMouseDown={(event) => event.preventDefault()}
           onClick={() => onPick(`Talk Title|Venue|${type}|2026`)}
           style={{
             padding: "5px 12px",
@@ -140,11 +166,9 @@ export function AdminDoctorProfileForm({
     formState: { errors },
   } = useFormContext<AdminDoctorProfileFormValues>();
 
-  const boardRef = useRef<HTMLTextAreaElement>(null);
-  const awardsRef = useRef<HTMLTextAreaElement>(null);
-  const lecturesRef = useRef<HTMLTextAreaElement>(null);
-
   const values = watch();
+  const setField = (name: keyof AdminDoctorProfileFormValues, value: string) =>
+    setValue(name, value, { shouldDirty: true });
   const metaTitleCount = charCountLabel(values.metaTitle ?? "", 60);
   const metaDescCount = charCountLabel(values.metaDesc ?? "", 160);
   const serp = serpPreview(values.metaTitle ?? "", values.metaDesc ?? "", values.seoUrl ?? "");
@@ -264,7 +288,6 @@ export function AdminDoctorProfileForm({
 
       {[
         ["bioShort", "Short Bio", 3],
-        ["bioFull", "Full Biography", 4],
         ["education", "Education & Training", 4],
       ].map(([name, label, rows]) => (
         <div className="fg-item" style={{ gridColumn: "1 / -1" }} key={name}>
@@ -278,6 +301,15 @@ export function AdminDoctorProfileForm({
         </div>
       ))}
 
+      <div className="fg-item art-content-card" style={{ gridColumn: "1 / -1" }}>
+        <label>Full Biography</label>
+        <ArticleRichTextField
+          value={values.bioFull ?? ""}
+          onChange={(html) => setValue("bioFull", html)}
+          placeholder="Write the doctor's full professional biography here..."
+        />
+      </div>
+
       <div className="fg-item" style={{ gridColumn: "1 / -1", marginTop: 8, borderTop: "1.5px dashed var(--gray-200)", paddingTop: 16 }}>
         <label style={{ fontFamily: "var(--font-d)", fontSize: ".95rem", color: "var(--gray-800)" }}>
           🏅 Board Certifications, Awards & Speaking
@@ -288,52 +320,53 @@ export function AdminDoctorProfileForm({
       </div>
 
       <div className="fg-item" style={{ gridColumn: "1 / -1" }}>
-        <IconPicker
-          icons={BOARD_CERT_ICONS}
-          hint="Title|Detail"
-          onPick={(icon) =>
-            insertAtCursor(boardRef.current, values.boardCerts ?? "", (value) => setValue("boardCerts", value), `${icon}|`)
-          }
-        />
-      </div>
-      <div className="fg-item" style={{ gridColumn: "1 / -1" }}>
         <label>
           Board Certifications & Professional Memberships{" "}
           <span style={{ fontWeight: 400, color: "var(--gray-400)" }}>(one per line — icon|Title|Detail)</span>
         </label>
-        <textarea rows={4} {...register("boardCerts")} ref={boardRef} />
-      </div>
-
-      <div className="fg-item" style={{ gridColumn: "1 / -1" }}>
-        <IconPicker
-          icons={AWARD_ICONS}
-          hint="Title|Organization|Year"
-          onPick={(icon) =>
-            insertAtCursor(awardsRef.current, values.awards ?? "", (value) => setValue("awards", value), `${icon}|`)
-          }
+        <AdminPipeTextArea
+          value={values.boardCerts ?? ""}
+          onChange={(value) => setField("boardCerts", value)}
+          picker={(insertAtCursor) => (
+            <IconPicker
+              icons={BOARD_CERT_ICONS}
+              hint="Title|Detail"
+              onPick={(icon) => insertAtCursor(`${icon}|`)}
+            />
+          )}
         />
       </div>
+
       <div className="fg-item" style={{ gridColumn: "1 / -1" }}>
         <label>
           Awards & Honors{" "}
           <span style={{ fontWeight: 400, color: "var(--gray-400)" }}>(one per line — icon|Title|Organization|Year)</span>
         </label>
-        <textarea rows={4} {...register("awards")} ref={awardsRef} />
-      </div>
-
-      <div className="fg-item" style={{ gridColumn: "1 / -1" }}>
-        <TypePicker
-          onPick={(line) =>
-            insertAtCursor(lecturesRef.current, values.lectures ?? "", (value) => setValue("lectures", value), `${line}\n`)
-          }
+        <AdminPipeTextArea
+          value={values.awards ?? ""}
+          onChange={(value) => setField("awards", value)}
+          picker={(insertAtCursor) => (
+            <IconPicker
+              icons={AWARD_ICONS}
+              hint="Title|Organization|Year"
+              onPick={(icon) => insertAtCursor(`${icon}|`)}
+            />
+          )}
         />
       </div>
+
       <div className="fg-item" style={{ gridColumn: "1 / -1" }}>
         <label>
           Lectures, Conferences & Teaching{" "}
           <span style={{ fontWeight: 400, color: "var(--gray-400)" }}>(one per line — Title|Venue|Type|Year)</span>
         </label>
-        <textarea rows={4} {...register("lectures")} ref={lecturesRef} />
+        <AdminPipeTextArea
+          value={values.lectures ?? ""}
+          onChange={(value) => setField("lectures", value)}
+          picker={(insertAtCursor) => (
+            <TypePicker onPick={(line) => insertAtCursor(`${line}\n`)} />
+          )}
+        />
       </div>
 
       <div className="fg-item" style={{ gridColumn: "1 / -1", marginTop: 8, borderTop: "1.5px dashed var(--gray-200)", paddingTop: 16 }}>

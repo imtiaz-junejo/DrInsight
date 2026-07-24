@@ -29,6 +29,7 @@ import {
   GridTwo,
   ProfileRow,
 } from "@/components/doctor/ui/DoctorPrimitives";
+import { ArticleRichTextField } from "@/components/editor/ArticleRichTextField";
 import {
   displayDob,
   emptyDoctorProfileForm,
@@ -667,7 +668,11 @@ export function ProfilePageContent() {
             <TextArea value={form.bioShort} onChange={(v) => patchForm("bioShort", v)} rows={3} />
           </FormField>
           <FormField label="Full Biography" full>
-            <TextArea value={form.bioFull} onChange={(v) => patchForm("bioFull", v)} rows={4} />
+            <ArticleRichTextField
+              value={form.bioFull}
+              onChange={(v) => patchForm("bioFull", v)}
+              placeholder="Write your full professional biography here..."
+            />
           </FormField>
           <FormField label="Areas of Expertise" hint="(comma-separated)" full>
             <TextArea value={form.expertise} onChange={(v) => patchForm("expertise", v)} rows={2} />

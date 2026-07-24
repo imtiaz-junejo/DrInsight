@@ -498,7 +498,7 @@ export function DoctorArticleSubmitForm() {
             <label>
               📝 Article Content <span style={{ fontWeight: 400, color: "var(--gray-400)" }}>(Full article body — required)</span>
             </label>
-            <ArticleRichTextEditor ref={editorRef} onChange={refreshPreview} />
+            <ArticleRichTextEditor ref={editorRef} onChange={() => refreshPreview()} />
           </div>
 
           <div className="form-group">

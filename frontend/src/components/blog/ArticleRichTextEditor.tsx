@@ -1,6 +1,12 @@
 "use client";
 
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import {
+  attachImageInteractions,
+  createImageWrap,
+  wrapBareImages,
+} from "@/lib/article-rte-image";
+import { uploadFile, validateImageFile } from "@/lib/upload";
 
 const TABLE_GRID_SIZE = 10;
 
@@ -75,26 +81,62 @@ export type ArticleRichTextEditorHandle = {
 };
 
 type ArticleRichTextEditorProps = {
-  onChange?: () => void;
+  value?: string;
+  onChange?: (html: string) => void;
+  placeholder?: string;
 };
 
 export const ArticleRichTextEditor = forwardRef<ArticleRichTextEditorHandle, ArticleRichTextEditorProps>(
-  function ArticleRichTextEditor({ onChange }, ref) {
+  function ArticleRichTextEditor({ value, onChange, placeholder }, ref) {
     const editorRef = useRef<HTMLDivElement>(null);
     const tablePickerRef = useRef<HTMLDivElement>(null);
+    const linkPickerRef = useRef<HTMLDivElement>(null);
+    const linkInputRef = useRef<HTMLInputElement>(null);
+    const imageInputRef = useRef<HTMLInputElement>(null);
+    const savedRangeRef = useRef<Range | null>(null);
     const colorInputRef = useRef<HTMLInputElement>(null);
     const [wordCount, setWordCount] = useState(0);
     const [charCount, setCharCount] = useState(0);
     const [fontColor, setFontColor] = useState("#334155");
     const [tablePickerOpen, setTablePickerOpen] = useState(false);
     const [tableHover, setTableHover] = useState({ rows: 0, cols: 0 });
+    const [linkPickerOpen, setLinkPickerOpen] = useState(false);
+    const [linkUrl, setLinkUrl] = useState("");
+    const [imageUploading, setImageUploading] = useState(false);
+    const [imageError, setImageError] = useState<string | null>(null);
 
     const updateWordCount = useCallback(() => {
       const text = editorRef.current?.innerText ?? "";
       setWordCount(text.trim().split(/\s+/).filter(Boolean).length);
       setCharCount(text.length);
-      onChange?.();
+      onChange?.(editorRef.current?.innerHTML.trim() ?? "");
     }, [onChange]);
+
+    const syncEditorHtml = useCallback(
+      (html: string) => {
+        if (!editorRef.current) return;
+        editorRef.current.innerHTML = html;
+        wrapBareImages(editorRef.current);
+        const text = editorRef.current.innerText ?? "";
+        setWordCount(text.trim().split(/\s+/).filter(Boolean).length);
+        setCharCount(text.length);
+      },
+      [],
+    );
+
+    useEffect(() => {
+      if (value === undefined || !editorRef.current) return;
+      const current = editorRef.current.innerHTML.trim();
+      if (current !== value.trim()) {
+        syncEditorHtml(value);
+      }
+    }, [value, syncEditorHtml]);
+
+    useEffect(() => {
+      const editor = editorRef.current;
+      if (!editor) return;
+      return attachImageInteractions(editor, updateWordCount);
+    }, [updateWordCount]);
 
     const execFmt = useCallback(
       (cmd: string, val?: string) => {
@@ -109,15 +151,99 @@ export const ArticleRichTextEditor = forwardRef<ArticleRichTextEditorHandle, Art
       (html: string) => {
         editorRef.current?.focus();
         document.execCommand("insertHTML", false, html);
+        if (editorRef.current) wrapBareImages(editorRef.current);
         updateWordCount();
       },
       [updateWordCount],
     );
 
-    const insertLink = () => {
-      const url = window.prompt("Enter URL:", "https://");
-      if (url) execFmt("createLink", url);
-    };
+    const saveSelection = useCallback(() => {
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        savedRangeRef.current = selection.getRangeAt(0).cloneRange();
+      }
+    }, []);
+
+    const restoreSelection = useCallback(() => {
+      const selection = window.getSelection();
+      if (!selection || !savedRangeRef.current) return;
+      selection.removeAllRanges();
+      selection.addRange(savedRangeRef.current);
+    }, []);
+
+    const applyLink = useCallback(() => {
+      const raw = linkUrl.trim();
+      if (!raw) return;
+      const url = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+      editorRef.current?.focus();
+      restoreSelection();
+      document.execCommand("createLink", false, url);
+      updateWordCount();
+      setLinkPickerOpen(false);
+      setLinkUrl("");
+    }, [linkUrl, restoreSelection, updateWordCount]);
+
+    const toggleLinkPicker = useCallback(() => {
+      setLinkPickerOpen((open) => {
+        if (!open) {
+          saveSelection();
+          setLinkUrl("");
+          setTablePickerOpen(false);
+        }
+        return !open;
+      });
+    }, [saveSelection]);
+
+    const insertImageAtCursor = useCallback(
+      (url: string) => {
+        const editor = editorRef.current;
+        if (!editor) return;
+
+        editor.focus();
+        const wrap = createImageWrap(url);
+        const trailing = createTrailingParagraph();
+        const selection = window.getSelection();
+
+        if (selection && selection.rangeCount > 0) {
+          const range = selection.getRangeAt(0);
+          range.collapse(false);
+          range.insertNode(wrap);
+          wrap.insertAdjacentElement("afterend", trailing);
+        } else {
+          editor.appendChild(wrap);
+          editor.appendChild(trailing);
+        }
+
+        wrap.classList.add("selected");
+        placeCaretIn(trailing);
+        updateWordCount();
+      },
+      [updateWordCount],
+    );
+
+    const handleImageFile = useCallback(
+      async (file: File | undefined) => {
+        if (!file) return;
+        const validationError = validateImageFile(file);
+        if (validationError) {
+          setImageError(validationError);
+          return;
+        }
+
+        setImageError(null);
+        setImageUploading(true);
+        try {
+          const url = await uploadFile(file, "drinsight/editor");
+          insertImageAtCursor(url);
+        } catch {
+          setImageError("Image upload failed. Please try again.");
+        } finally {
+          setImageUploading(false);
+          if (imageInputRef.current) imageInputRef.current.value = "";
+        }
+      },
+      [insertImageAtCursor],
+    );
 
     const insertTableWithSize = useCallback(
       (rows: number, cols: number) => {
@@ -141,6 +267,24 @@ export const ArticleRichTextEditor = forwardRef<ArticleRichTextEditorHandle, Art
       document.addEventListener("mousedown", onDocumentMouseDown);
       return () => document.removeEventListener("mousedown", onDocumentMouseDown);
     }, [tablePickerOpen]);
+
+    useEffect(() => {
+      if (!linkPickerOpen) return;
+
+      const timer = window.setTimeout(() => linkInputRef.current?.focus(), 0);
+
+      const onDocumentMouseDown = (event: MouseEvent) => {
+        if (linkPickerRef.current?.contains(event.target as Node)) return;
+        setLinkPickerOpen(false);
+        setLinkUrl("");
+      };
+
+      document.addEventListener("mousedown", onDocumentMouseDown);
+      return () => {
+        window.clearTimeout(timer);
+        document.removeEventListener("mousedown", onDocumentMouseDown);
+      };
+    }, [linkPickerOpen]);
 
     const insertQuote = () => {
       insertHtml("<blockquote>Your clinical quote or key finding here</blockquote><p></p>");
@@ -186,6 +330,17 @@ export const ArticleRichTextEditor = forwardRef<ArticleRichTextEditorHandle, Art
         return;
       }
 
+      if (e.key === "Delete" || e.key === "Backspace") {
+        const editor = editorRef.current;
+        const selected = editor?.querySelector(".rte-image-wrap.selected");
+        if (selected) {
+          e.preventDefault();
+          selected.remove();
+          updateWordCount();
+          return;
+        }
+      }
+
       if (e.key !== "Enter" || e.shiftKey) return;
 
       const editor = editorRef.current;
@@ -218,10 +373,8 @@ export const ArticleRichTextEditor = forwardRef<ArticleRichTextEditorHandle, Art
     useImperativeHandle(ref, () => ({
       getHtml: () => editorRef.current?.innerHTML.trim() ?? "",
       setHtml: (html: string) => {
-        if (editorRef.current) {
-          editorRef.current.innerHTML = html;
-          updateWordCount();
-        }
+        syncEditorHtml(html);
+        onChange?.(editorRef.current?.innerHTML.trim() ?? "");
       },
       focus: () => editorRef.current?.focus(),
     }));
@@ -313,9 +466,60 @@ export const ArticleRichTextEditor = forwardRef<ArticleRichTextEditorHandle, Art
             </button>
           </div>
           <div className="rte-tb-group">
-            <button type="button" className="rte-btn" title="Insert Link" onClick={insertLink}>
-              🔗 Link
+            <div className="rte-link-picker-wrap" ref={linkPickerRef}>
+              <button
+                type="button"
+                className={`rte-btn${linkPickerOpen ? " active" : ""}`}
+                title="Insert Link"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={toggleLinkPicker}
+              >
+                🔗 Link
+              </button>
+              {linkPickerOpen ? (
+                <div className="rte-link-picker">
+                  <input
+                    ref={linkInputRef}
+                    type="url"
+                    className="rte-link-input"
+                    value={linkUrl}
+                    onChange={(e) => setLinkUrl(e.target.value)}
+                    placeholder="Paste or type a link..."
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        applyLink();
+                      }
+                      if (e.key === "Escape") {
+                        e.preventDefault();
+                        setLinkPickerOpen(false);
+                        setLinkUrl("");
+                      }
+                    }}
+                  />
+                  <button type="button" className="rte-link-apply" onClick={applyLink}>
+                    Add
+                  </button>
+                </div>
+              ) : null}
+            </div>
+            <button
+              type="button"
+              className={`rte-btn${imageUploading ? " active" : ""}`}
+              title="Insert Image"
+              disabled={imageUploading}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => imageInputRef.current?.click()}
+            >
+              {imageUploading ? "⏳ Image" : "🖼 Image"}
             </button>
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              style={{ display: "none" }}
+              onChange={(e) => void handleImageFile(e.target.files?.[0])}
+            />
             <div className="rte-table-picker-wrap" ref={tablePickerRef}>
               <button
                 type="button"
@@ -324,6 +528,7 @@ export const ArticleRichTextEditor = forwardRef<ArticleRichTextEditorHandle, Art
                 onClick={() => {
                   setTablePickerOpen((open) => !open);
                   setTableHover({ rows: 0, cols: 0 });
+                  setLinkPickerOpen(false);
                 }}
               >
                 ⊞ Table
@@ -425,11 +630,20 @@ export const ArticleRichTextEditor = forwardRef<ArticleRichTextEditorHandle, Art
           suppressContentEditableWarning
           onInput={updateWordCount}
           onKeyDown={handleKeyDown}
-          data-placeholder="Start writing your full article here. Use the toolbar above to format headings, bold text, bullet lists, and more..."
+          data-placeholder={
+            placeholder ??
+            "Start writing your full article here. Use the toolbar above to format headings, bold text, bullet lists, and more..."
+          }
         />
         <div className="rte-footer">
           <span style={{ fontSize: ".72rem", color: "var(--gray-400)" }}>
-            💡 Tip: Press Enter at the end of a callout to exit it. New callout cards are always added below the current one.
+            {imageError ? (
+              <span style={{ color: "var(--red)" }}>{imageError}</span>
+            ) : (
+              <>
+                💡 Tip: Click an image to select it, then drag the handles to resize. Press Delete to remove a selected image.
+              </>
+            )}
           </span>
           <span style={{ fontSize: ".72rem", color: "var(--gray-400)" }}>{charCount} characters</span>
         </div>

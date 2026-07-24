@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
+import { ArticleRichTextField } from "@/components/editor/ArticleRichTextField";
 import type { DoctorIconComponent } from "@/components/doctor/icons/DoctorIcons";
 import {
   AlertTriangle,
@@ -480,13 +481,12 @@ export function SubmitResearchForm({
           ["abstractConclusions", "Conclusions *"],
         ] as const
       ).map(([field, label]) => (
-        <div key={field} className="form-group">
+        <div key={field} className="form-group art-content-card">
           <label htmlFor={field}>{label}</label>
-          <textarea
-            id={field}
-            rows={2}
+          <ArticleRichTextField
             value={state[field]}
-            onChange={(e) => onChange({ [field]: e.target.value })}
+            onChange={(html) => onChange({ [field]: html })}
+            placeholder={`Enter ${label.replace(" *", "").toLowerCase()}...`}
           />
         </div>
       ))}
@@ -508,16 +508,36 @@ export function SubmitResearchForm({
           ["introduction", "Introduction *", 3],
           ["objectives", "Objectives (one per line)", 3],
           ["methodsContent", "Methods *", 3],
-          ["methodsTable", 'Methods Table (one row per line, columns separated by " | "; first row = headers)', 5],
           ["results", "Results *", 3],
           ["figureData", "Figure Data (Label | value per line)", 4],
-          ["figureCaption", "Figure Caption (optional)", 1, "input"],
           ["resultSummary", "Result Summary (green highlight box under the figure)", 2],
           ["discussion", "Discussion *", 3],
           ["practiceImplications", "Practice Implications (one per line)", 3],
           ["limitations", "Limitations (one per line)", 3],
           ["conclusion", "Conclusion *", 2],
           ["keyFindings", "Key Findings (Icon | Title | short description per line)", 4],
+        ] as const
+      ).map(([field, label]) => (
+        <div key={field} className="form-group art-content-card">
+          <label htmlFor={field}>
+            {label.split(" (")[0]}{" "}
+            {label.includes("(") ? (
+              <span style={{ fontWeight: 400, color: "var(--gray-400)" }}>
+                ({label.split("(")[1]}
+              </span>
+            ) : null}
+          </label>
+          <ArticleRichTextField
+            value={state[field]}
+            onChange={(html) => onChange({ [field]: html })}
+            placeholder={`Enter ${label.split(" (")[0].replace(" *", "").toLowerCase()}...`}
+          />
+        </div>
+      ))}
+      {(
+        [
+          ["methodsTable", 'Methods Table (one row per line, columns separated by " | "; first row = headers)', 5],
+          ["figureCaption", "Figure Caption (optional)", 1, "input"],
         ] as const
       ).map((item) => {
         const [field, label, rows] = item;
